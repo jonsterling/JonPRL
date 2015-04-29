@@ -72,23 +72,19 @@ struct
 
   local
     open E EOp Lang
-    infix $
+    infix $ \
   in
     fun extract (ev : E.t) : Syn.t =
       case out ev of
            UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
          | PROD_INTRO $ #[D,E] => Syn.$$ (PAIR, #[extract D, extract E])
-         | IMP_INTRO $ #[xE] =>
-             let
-               val (x, E) = unbind xE
-             in
-               Syn.$$ (LAM, #[Syn.\\ (x, extract E)])
-             end
+         | IMP_INTRO $ #[xE] => Syn.$$ (LAM, #[extract xE])
          | AX_INTRO $ _ => Syn.$$ (AX, #[])
          | PAIR_INTRO $ _ => Syn.$$ (AX, #[])
          | LAM_INTRO $ _ => Syn.$$ (AX, #[])
          | MEM_INTRO $ _ => Syn.$$ (AX, #[])
          | ` x => Syn.`` x
+         | x \ E => Syn.\\ (x, extract E)
          | _ => raise MalformedEvidence ev
   end
 
