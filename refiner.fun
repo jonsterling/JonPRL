@@ -1,4 +1,4 @@
-functor Theorem (Syn : ABTUTIL where Operator = Lang and Variable = Variable) :
+functor Refiner (Syn : ABTUTIL where Operator = Lang and Variable = Variable) :
 sig
   type ctx = Syn.t Context.context
   type goal = ctx * Syn.t
@@ -60,7 +60,12 @@ struct
       | to_string MEM_INTRO = "∈*-I"
   end
 
-  structure Evidence = AbtUtil(Abt(structure Operator=EOp and Variable = Variable))
+  structure Evidence =
+    AbtUtil
+      (Abt
+        (structure Operator = EOp
+         and Variable = Syn.Variable))
+
   structure E = Evidence
 
   type validation = Evidence.t list -> Evidence.t
@@ -212,14 +217,10 @@ structure Test =
 struct
 
   structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Variable))
-  structure Theorem = Theorem(Syn)
+  structure Refiner = Refiner(Syn)
   structure Ctx = Context
-  open Lang
-  open Syn
-  infix $$ \\
-
-  open Theorem
-  infix THEN ORELSE
+  open Lang Syn Refiner
+  infix $$ \\ THEN ORELSE
 
   exception RemainingSubgoals of goal list
 

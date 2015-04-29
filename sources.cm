@@ -11,5 +11,5 @@ group is
 
   lang.sml
   whnf.fun
-  theorem.fun
+  refiner.fun
 
