@@ -19,6 +19,10 @@ struct
            (case out (whnf M) of
                  PAIR $ #[M1, M2] => whnf M2
                | _ => raise WhnfStuck)
+       | AP $ #[M,N] =>
+           (case out (whnf M) of
+                 LAM $ #[xE] => whnf (subst1 xE N)
+               | _ => raise WhnfStuck)
        | _ => x
 
 
