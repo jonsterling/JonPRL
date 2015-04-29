@@ -1,0 +1,25 @@
+Library
+  signature VARIABLE
+  signature OPERATOR
+  signature ABT
+  signature ABTUTIL
+  signature VECTORUTIL
+
+  functor Abt
+  functor AbtUtil
+  structure VectorUtil
+  structure Variable
+is
+  variable.sig
+  operator.sig
+  abt.sig
+  abtutil.sig
+  vectorutil.sig
+  abt.fun
+  abtutil.fun
+  vectorutil.sml
+  variable.sml
+
+  $/basis.cm
+  $/smlnj-lib.cm
+
