@@ -3,6 +3,9 @@ group is
   $/smlnj-lib.cm
   abt-lib/abt-lib.cm
 
+
+  list_util.sml
+
   context.sig
   context.sml
 
