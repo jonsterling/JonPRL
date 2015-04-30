@@ -282,7 +282,12 @@ struct
 
   fun pair m n = PAIR $$ #[m,n]
   fun fst m = FST $$ #[m]
-  fun lam e = LAM $$ #[e]
+  fun lam e =
+    let
+      val x = Variable.new ()
+    in
+      LAM $$ #[x \\ e x]
+    end
 
   fun ~> (a, b) = IMP $$ #[a,b]
   infix ~>
@@ -300,11 +305,10 @@ struct
           (UnitIntro ORELSE
             (ProdIntro THEN UnitIntro)))
 
-  val x = Variable.named "x"
   val _ =
      check
        (unit ~> (unit & unit))
-       (ImpIntro x THEN (ProdIntro THEN Assumption))
+       (ImpIntro (Variable.new()) THEN (ProdIntro THEN Assumption))
 
   val _ =
       check
@@ -313,12 +317,12 @@ struct
 
   val _ =
       check
-        (lam (x \\ `` x) mem (unit ~> unit))
+        (lam (fn x => `` x) mem (unit ~> unit))
         (MemAuto THEN MemAuto)
 
   val _ =
       check
         (unit ~> (unit & unit))
-        (Witness (lam (x \\ pair (`` x) (`` x))) THEN MemAuto THEN MemAuto THEN MemAuto)
+        (Witness (lam (fn x => pair (`` x) (`` x))) THEN MemAuto THEN MemAuto THEN MemAuto)
 
 end
