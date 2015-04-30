@@ -9,6 +9,7 @@ Library
   functor AbtUtil
   structure VectorUtil
   structure Variable
+  structure PrintMode
 is
   variable.sig
   operator.sig
@@ -18,6 +19,7 @@ is
   abt.fun
   abtutil.fun
   vectorutil.sml
+  print_mode.sml
   variable.sml
 
   $/basis.cm

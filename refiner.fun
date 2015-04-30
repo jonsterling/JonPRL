@@ -1,4 +1,6 @@
-functor Refiner (Syn : ABTUTIL where Operator = Lang and Variable = Variable) :
+functor Refiner
+  (structure Syn : ABTUTIL where Operator = Lang and Variable = Variable
+   val print_mode : PrintMode.t) :
 sig
   type ctx = Syn.t Context.context
   type goal = ctx * Syn.t
@@ -73,7 +75,7 @@ struct
       | to_string PAIR_INTRO = "pair-I"
       | to_string LAM_INTRO = "lam-I"
       | to_string MEM_INTRO = "∈*-I"
-      | to_string (WITNESS m) = "witness{" ^ Syn.to_string m ^ "}"
+      | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
       | to_string HYP_MEM = "hyp-∈"
   end
 
@@ -251,23 +253,25 @@ end
 
 structure Test =
 struct
+  val print_mode = PrintMode.User
 
   structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Variable))
-  structure Refiner = Refiner(Syn)
+  structure Refiner = Refiner(structure Syn = Syn val print_mode = print_mode)
   structure Ctx = Context
   open Lang Syn Refiner
   infix $$ \\ THEN ORELSE
 
   exception RemainingSubgoals of goal list
 
+
   fun check P (tac : tactic) =
   let
     val (subgoals, validate) = tac (Context.empty, P)
     val result = if null subgoals then validate [] else raise RemainingSubgoals subgoals
   in
-    (print ("Theorem: " ^ Syn.to_string P ^ "\n");
-     print ("Evidence: " ^ Evidence.to_string result ^ "\n");
-     print ("Extract: " ^ Syn.to_string (extract result) ^ "\n\n"))
+    (print ("Theorem: " ^ Syn.to_string print_mode P ^ "\n");
+     print ("Evidence: " ^ Evidence.to_string print_mode result ^ "\n");
+     print ("Extract: " ^ Syn.to_string print_mode (extract result) ^ "\n\n"))
   end
 
   val ax = AX $$ #[]

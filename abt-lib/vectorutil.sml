@@ -18,8 +18,8 @@ struct
     foldl (fn (x,b) => b andalso f x) true (zip v1 v2)
 
   fun to_string f v =
-    "["
+    "("
       ^ foldri (fn (i, s1, s2) => if i = (Vector.length v - 1) then s1 else s1 ^ "; " ^ s2) "" (map f v)
-      ^ "]"
+      ^ ")"
 
 end

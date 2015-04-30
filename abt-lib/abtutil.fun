@@ -18,14 +18,14 @@ struct
     | v' \ e'' => v' \\ subst e v e''
     | p $ es => p $$ Vector.map (subst e v) es
 
-  fun to_string e =
+  fun to_string mode e =
     case out e of
-      ` v => Variable.to_string v
-    | v \ e => Variable.to_string v ^ "." ^ (to_string e)
+      ` v => Variable.to_string mode v
+    | v \ e => Variable.to_string mode v ^ "." ^ (to_string mode e)
     | p $ es =>
         Operator.to_string p ^
           (if Vector.length es = 0 then ""
-             else VectorUtil.to_string to_string es)
+             else VectorUtil.to_string (to_string mode) es)
 
   exception ExpectedBinding of t
 

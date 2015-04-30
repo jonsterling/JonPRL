@@ -9,6 +9,7 @@ sig
   val eq : t -> t -> bool
   val compare : t * t -> order
 
-  val to_string : t -> string
+  val name : t -> string option
+  val to_string : PrintMode.t -> t -> string
 end
 

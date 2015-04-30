@@ -8,7 +8,7 @@ sig
   val $$ : Operator.t * t vector -> t
 
   val subst : t -> Variable.t -> t -> t
-  val to_string : t -> string
+  val to_string : PrintMode.t -> t -> string
 
   val unbind : t -> Variable.t * t
 

@@ -14,7 +14,7 @@ struct
   datatype t =
     FREE of Variable.t
   | BOUND of int
-  | ABS of t
+  | ABS of Variable.t * t
   | APP of Operator.t * t vector
 
   datatype 'a view =
@@ -28,12 +28,12 @@ struct
 
   fun shiftvar v n (FREE v') = if Variable.eq v v' then BOUND n else (FREE v')
     | shiftvar v n (BOUND m) = BOUND m
-    | shiftvar v n (ABS e') = ABS (shiftvar v (n + 1) e')
+    | shiftvar v n (ABS (x, e')) = ABS (x, shiftvar v (n + 1) e')
     | shiftvar v n (APP (p, es)) = APP (p, Vector.map (shiftvar v n) es)
 
   fun match_arity (0, ABS _) = false
     | match_arity (0, _) = true
-    | match_arity (n, ABS e') = match_arity (n - 1, e')
+    | match_arity (n, ABS (_, e')) = match_arity (n - 1, e')
     | match_arity (n, _) = false
 
   exception Malformed of string
@@ -44,21 +44,24 @@ struct
     else raise Malformed "Bad arity"
 
   fun into (` v) = FREE v
-    | into (v \ e') = ABS (shiftvar v 0 e')
+    | into (v \ e') = ABS (v, shiftvar v 0 e')
     | into (p $ es) = doapp (p, es)
 
   fun addvar v n (FREE v') = FREE v'
     | addvar v n (BOUND m) = if m = n then FREE v else BOUND m
-    | addvar v n (ABS e) = ABS (addvar v (n + 1) e)
+    | addvar v n (ABS (x, e)) = ABS (x, addvar v (n + 1) e)
     | addvar v n (APP (p, es)) = APP (p, Vector.map (addvar v n) es)
 
   fun out e =
     case e of
       FREE v => ` v
     | BOUND n => raise Malformed "bound variable occured in out"
-    | ABS e' =>
+    | ABS (x, e') =>
       let
-        val v = Variable.new ()
+        val v =
+          case Variable.name x of
+               SOME str => Variable.named str
+             | NONE => Variable.new ()
       in
         v \ addvar v 0 e'
       end
@@ -66,7 +69,7 @@ struct
 
   fun eq (FREE v1, FREE v2) = Variable.eq v1 v2
     | eq (BOUND m, BOUND n) = m = n
-    | eq (ABS e1, ABS e2) = eq (e1, e2)
+    | eq (ABS (_, e1), ABS (_, e2)) = eq (e1, e2)
     | eq (APP (p1, es1), APP (p2, es2)) = Operator.eq p1 p2 andalso VectorUtil.pair_all_eq eq es1 es2
     | eq (_, _) = false
 
