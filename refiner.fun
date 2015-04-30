@@ -1,34 +1,80 @@
+signature REFINER_TYPES =
+sig
+  type goal
+  type evidence
+
+  type validation = evidence list -> evidence
+  type tactic = goal -> (goal list * validation)
+end
+
+signature REFINER_TACTICS =
+sig
+  type tactic
+  val THEN : tactic * tactic -> tactic
+  val ORELSE : tactic * tactic -> tactic
+end
+
+functor RefinerTactics (R : REFINER_TYPES) :
+sig
+  include REFINER_TACTICS where type tactic = R.tactic
+end =
+struct
+  type tactic = R.tactic
+
+  fun THEN (tac1, tac2) (g : R.goal) =
+    let
+      val (subgoals1, validation1) = tac1 g
+      val (subgoals2, validations2) = ListPair.unzip (List.map tac2 subgoals1)
+    in
+      (List.foldl (op @) [] subgoals2,
+       fn Ds =>
+         let
+           val lengths = List.map List.length subgoals2
+           val derivations = ListUtil.multisplit lengths Ds
+         in
+           validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
+         end)
+    end
+
+  fun ORELSE (tac1, tac2) : R.tactic = fn g =>
+    tac1 g handle _ => tac2 g
+end
+
 functor Refiner
   (structure Syn : ABTUTIL where Operator = Lang and Variable = Variable
-   val print_mode : PrintMode.t) :
+   val print_mode : PrintMode.t) :>
 sig
-  type ctx = Syn.t Context.context
-  type goal = ctx * Syn.t
 
   structure Evidence : ABTUTIL
   exception MalformedEvidence of Evidence.t
   val extract : Evidence.t -> Syn.t
 
-  type validation = Evidence.t list -> Evidence.t
-  type tactic = goal -> (goal list * validation)
+  type ctx = Syn.t Context.context
+  include REFINER_TYPES
+    where type goal = ctx * Syn.t
+    and type evidence = Evidence.t
 
-  val THEN : tactic * tactic -> tactic
-  val ORELSE : tactic * tactic -> tactic
+  structure CoreTactics : REFINER_TACTICS where type tactic = tactic
+  structure InferenceRules :
+  sig
+    val UnitIntro : tactic
+    val ProdIntro : tactic
+    val ImpIntro : Context.name -> tactic
+    val AxIntro : tactic
+    val PairIntro : tactic
+    val LamIntro : tactic
+    val MemIntro : tactic
+    val Witness : Syn.t -> tactic
+    val Assumption : tactic
+    val Hypothesis : Context.name -> tactic
+    val HypMem : tactic
+  end
 
-  val UnitIntro : tactic
-  val ProdIntro : tactic
-  val ImpIntro : Context.name -> tactic
-  val AxIntro : tactic
-  val PairIntro : tactic
-  val LamIntro : tactic
-  val MemIntro : tactic
-  val CanMemAuto : tactic
-  val MemAuto : tactic
-  val Witness : Syn.t -> tactic
-
-  val Assumption : tactic
-  val Hypothesis : Context.name -> tactic
-  val HypMem : tactic
+  structure DerivedTactics :
+  sig
+    val CanMemAuto : tactic
+    val MemAuto : tactic
+  end
 end =
 struct
   type ctx = Syn.t Context.context
@@ -87,10 +133,15 @@ struct
 
   structure E = Evidence
 
-  type validation = Evidence.t list -> Evidence.t
-  type tactic = goal -> (goal list * validation)
+  structure RefinerTypes : REFINER_TYPES =
+  struct
+    type goal = goal
+    type evidence = E.t
+    type validation = evidence list -> evidence
+    type tactic = goal -> (goal list * validation)
+  end
 
-  exception Hole
+  open RefinerTypes
 
   exception MalformedEvidence of E.t
 
@@ -129,126 +180,117 @@ struct
 
   structure Whnf = Whnf(Syn)
 
-  val UnitIntro : tactic = fn (G, P) =>
-    case out P of
-         UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
-       | _ => raise Fail "UnitIntro"
+  structure CoreTactics = RefinerTactics(RefinerTypes)
 
-  val AxIntro : tactic = fn (G, P) =>
-    case out P of
-         CAN_MEM $ #[ax, unit] =>
-           (case (out ax, out unit) of
-                (AX $ #[], UNIT $ #[]) =>
-                  ([], fn args => AX_INTRO %$$ Vector.fromList args)
-              | _ => raise Fail "AxIntro")
-       | _ => raise Fail "AxIntro"
+  structure InferenceRules =
+  struct
+    val UnitIntro : tactic = fn (G, P) =>
+      case out P of
+           UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
+         | _ => raise Fail "UnitIntro"
 
-  val PairIntro : tactic = fn (G, P) =>
-    case out P of
-         CAN_MEM $ #[pair, prod] =>
-           (case (out pair, out prod) of
-                 (PAIR $ #[M,N], PROD $ #[A,B]) =>
-                   ([(G, MEM $$ #[M,A]), (G, MEM $$ #[N,B])],
-                    fn args => PAIR_INTRO %$$ Vector.fromList args)
-               | _ => raise Fail "PairIntro")
-       | _ => raise Fail "PairIntro"
+    val AxIntro : tactic = fn (G, P) =>
+      case out P of
+           CAN_MEM $ #[ax, unit] =>
+             (case (out ax, out unit) of
+                  (AX $ #[], UNIT $ #[]) =>
+                    ([], fn args => AX_INTRO %$$ Vector.fromList args)
+                | _ => raise Fail "AxIntro")
+         | _ => raise Fail "AxIntro"
 
-  val LamIntro : tactic = fn (G, P) =>
-    case out P of
-         CAN_MEM $ #[lam, imp] =>
-           (case (out lam, out imp) of
-                 (LAM $ #[zE], IMP $ #[A,B]) =>
-                 let
-                   val (z, E) = unbind zE
-                 in
-                   ([(Context.insert G z A, MEM $$ #[E, B])],
-                    fn [D] => LAM_INTRO %$$ #[z %\\ D]
-                       | _ => raise Fail "ImpIntro")
-                 end
-               | _ => raise Fail "LamIntro")
-       | _ => raise Fail "LamIntro"
+    val PairIntro : tactic = fn (G, P) =>
+      case out P of
+           CAN_MEM $ #[pair, prod] =>
+             (case (out pair, out prod) of
+                   (PAIR $ #[M,N], PROD $ #[A,B]) =>
+                     ([(G, MEM $$ #[M,A]), (G, MEM $$ #[N,B])],
+                      fn args => PAIR_INTRO %$$ Vector.fromList args)
+                 | _ => raise Fail "PairIntro")
+         | _ => raise Fail "PairIntro"
 
-  val MemIntro : tactic = fn (G, P) =>
-    case out P of
-         MEM $ #[M, A] =>
-         let
-           val M0 = Whnf.whnf M
-           val A0 = Whnf.whnf A
-         in
-           ([(G, CAN_MEM $$ #[M0, A0])], fn args => MEM_INTRO %$$ Vector.fromList args)
-         end
-       | _ => raise Fail "MemIntro"
+    val LamIntro : tactic = fn (G, P) =>
+      case out P of
+           CAN_MEM $ #[lam, imp] =>
+             (case (out lam, out imp) of
+                   (LAM $ #[zE], IMP $ #[A,B]) =>
+                   let
+                     val (z, E) = unbind zE
+                   in
+                     ([(Context.insert G z A, MEM $$ #[E, B])],
+                      fn [D] => LAM_INTRO %$$ #[z %\\ D]
+                         | _ => raise Fail "ImpIntro")
+                   end
+                 | _ => raise Fail "LamIntro")
+         | _ => raise Fail "LamIntro"
 
-  fun Witness M : tactic = fn (G, P) =>
-    ([(G, MEM $$ #[M, P])],
-     fn [D] => WITNESS M %$$ #[D]
-       | _ => raise Fail "Witness")
+    val MemIntro : tactic = fn (G, P) =>
+      case out P of
+           MEM $ #[M, A] =>
+           let
+             val M0 = Whnf.whnf M
+             val A0 = Whnf.whnf A
+           in
+             ([(G, CAN_MEM $$ #[M0, A0])], fn args => MEM_INTRO %$$ Vector.fromList args)
+           end
+         | _ => raise Fail "MemIntro"
 
-  val HypMem : tactic = fn (G, P) =>
-    case out P of
-         MEM $ #[M,A] =>
-         (case out M of
-               ` x =>
-                 (case Context.lookup G x of
-                       SOME Q =>
-                         if Syn.eq (A, Q)
-                         then ([], fn _ => HYP_MEM %$$ #[%`` x])
-                         else raise Fail "HypMem"
-                     | NONE => raise Fail "HypMem")
-             | _ => raise Fail "HypMem")
-       | _ => raise Fail "HypMem"
+    fun Witness M : tactic = fn (G, P) =>
+      ([(G, MEM $$ #[M, P])],
+       fn [D] => WITNESS M %$$ #[D]
+         | _ => raise Fail "Witness")
 
-  val ProdIntro : tactic = fn (G, P) =>
-    case out P of
-         PROD $ #[P1, P2] =>
-           ([(G, P1), (G, P2)],
-            fn args => PROD_INTRO %$$ Vector.fromList args)
-       | _ => raise Fail "ProdIntro"
+    val HypMem : tactic = fn (G, P) =>
+      case out P of
+           MEM $ #[M,A] =>
+           (case out M of
+                 ` x =>
+                   (case Context.lookup G x of
+                         SOME Q =>
+                           if Syn.eq (A, Q)
+                           then ([], fn _ => HYP_MEM %$$ #[%`` x])
+                           else raise Fail "HypMem"
+                       | NONE => raise Fail "HypMem")
+               | _ => raise Fail "HypMem")
+         | _ => raise Fail "HypMem"
 
-  fun ImpIntro x : tactic = fn (G, P) =>
-    case out P of
-         IMP $ #[P1, P2] =>
-           ([(Context.insert G x P1, P2)],
-            fn [D] => IMP_INTRO %$$ #[x %\\ D]
-              | _ => raise Fail "ImpIntro")
-       | _ => raise Fail "ImpIntro"
+    val ProdIntro : tactic = fn (G, P) =>
+      case out P of
+           PROD $ #[P1, P2] =>
+             ([(G, P1), (G, P2)],
+              fn args => PROD_INTRO %$$ Vector.fromList args)
+         | _ => raise Fail "ProdIntro"
 
-  fun Hypothesis x : tactic = fn (G, P) =>
-    (case Context.lookup G x of
-          SOME P' =>
-            if Syn.eq (P, P')
-            then ([], fn _ => %`` x)
-            else raise Fail "Hypothesis does not match"
-        | NONE => raise Fail "No such hypothesis")
+    fun ImpIntro x : tactic = fn (G, P) =>
+      case out P of
+           IMP $ #[P1, P2] =>
+             ([(Context.insert G x P1, P2)],
+              fn [D] => IMP_INTRO %$$ #[x %\\ D]
+                | _ => raise Fail "ImpIntro")
+         | _ => raise Fail "ImpIntro"
 
-  val Assumption : tactic = fn (G, P) =>
-    (case Context.search G (fn x => Syn.eq (P, x)) of
-         SOME (x, _) => ([], fn _ => %`` x)
-       | NONE => raise Fail "No matching assumption")
+    fun Hypothesis x : tactic = fn (G, P) =>
+      (case Context.lookup G x of
+            SOME P' =>
+              if Syn.eq (P, P')
+              then ([], fn _ => %`` x)
+              else raise Fail "Hypothesis does not match"
+          | NONE => raise Fail "No such hypothesis")
 
-  fun THEN (tac1 : tactic, tac2 : tactic) (g : goal) =
-    let
-      val (subgoals1, validation1) = tac1 g
-      val (subgoals2, validations2) = ListPair.unzip (List.map tac2 subgoals1)
-    in
-      (List.foldl (op @) [] subgoals2,
-       fn Ds =>
-         let
-           val lengths = List.map List.length subgoals2
-           val derivations : Evidence.t list list = ListUtil.multisplit lengths Ds
-         in
-           validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
-         end)
-    end
+    val Assumption : tactic = fn (G, P) =>
+      (case Context.search G (fn x => Syn.eq (P, x)) of
+           SOME (x, _) => ([], fn _ => %`` x)
+         | NONE => raise Fail "No matching assumption")
+  end
 
-  fun ORELSE (tac1 : tactic, tac2 : tactic) : tactic = fn g =>
-    tac1 g handle _ => tac2 g
 
-  infix ORELSE
-  infix THEN
+  structure DerivedTactics =
+  struct
+    open CoreTactics InferenceRules
+    infix ORELSE THEN
 
-  val CanMemAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
-  val MemAuto = (MemIntro THEN CanMemAuto) ORELSE HypMem
+    val CanMemAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
+    val MemAuto = (MemIntro THEN CanMemAuto) ORELSE HypMem
+  end
 end
 
 structure Test =
@@ -259,6 +301,7 @@ struct
   structure Refiner = Refiner(structure Syn = Syn val print_mode = print_mode)
   structure Ctx = Context
   open Lang Syn Refiner
+  open CoreTactics DerivedTactics InferenceRules
   infix $$ \\ THEN ORELSE
 
   exception RemainingSubgoals of goal list
@@ -303,12 +346,15 @@ struct
         (unit & (unit & unit))
         (ProdIntro THEN
           (UnitIntro ORELSE
-            (ProdIntro THEN UnitIntro)))
+            ProdIntro THEN
+              UnitIntro))
 
   val _ =
      check
        (unit ~> (unit & unit))
-       (ImpIntro (Variable.new()) THEN (ProdIntro THEN Assumption))
+       (ImpIntro (Variable.new()) THEN
+         ProdIntro THEN
+           Assumption)
 
   val _ =
       check
@@ -323,6 +369,9 @@ struct
   val _ =
       check
         (unit ~> (unit & unit))
-        (Witness (lam (fn x => pair (`` x) (`` x))) THEN MemAuto THEN MemAuto THEN MemAuto)
+        (Witness (lam (fn x => pair (`` x) (`` x))) THEN
+          MemAuto THEN
+            MemAuto THEN
+              MemAuto)
 
 end
