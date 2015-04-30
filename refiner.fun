@@ -24,11 +24,14 @@ sig
     val UnitIntro : tactic
     val ProdIntro : tactic
     val ImpIntro : Context.name -> tactic
+    val MemIntro : tactic
+    val Witness : Syn.t -> tactic
+    val VoidElim : tactic
+
     val AxIntro : tactic
     val PairIntro : tactic
     val LamIntro : tactic
-    val MemIntro : tactic
-    val Witness : Syn.t -> tactic
+
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
     val HypMem : tactic
@@ -57,6 +60,7 @@ struct
       | MEM_INTRO
       | WITNESS of Syn.t
       | HYP_MEM
+      | VOID_ELIM
 
     fun eq UNIT_INTRO UNIT_INTRO = true
       | eq PROD_INTRO PROD_INTRO = true
@@ -67,6 +71,7 @@ struct
       | eq MEM_INTRO MEM_INTRO = true
       | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
       | eq HYP_MEM HYP_MEM = true
+      | eq VOID_ELIM VOID_ELIM = true
       | eq _ _ = false
 
     fun arity UNIT_INTRO = #[]
@@ -78,6 +83,7 @@ struct
       | arity MEM_INTRO = #[0]
       | arity (WITNESS _) = #[0]
       | arity HYP_MEM = #[0]
+      | arity VOID_ELIM = #[0]
 
     fun to_string UNIT_INTRO = "unit-I"
       | to_string PROD_INTRO = "prod-I"
@@ -88,6 +94,7 @@ struct
       | to_string MEM_INTRO = "∈*-I"
       | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
       | to_string HYP_MEM = "hyp-∈"
+      | to_string VOID_ELIM = "void-E"
   end
 
   structure Evidence =
@@ -123,6 +130,7 @@ struct
          | PAIR_INTRO $ _ => Syn.$$ (AX, #[])
          | LAM_INTRO $ _ => Syn.$$ (AX, #[])
          | MEM_INTRO $ _ => Syn.$$ (AX, #[])
+         | VOID_ELIM $ _ => Syn.$$ (AX, #[])
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
          | x \ E => Syn.\\ (x, extract E)
@@ -153,6 +161,9 @@ struct
       case out P of
            UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
          | _ => raise Fail "UnitIntro"
+
+    val VoidElim : tactic = fn (G, P) =>
+      ([(G, VOID $$ #[])], fn args => VOID_ELIM %$$ Vector.fromList args)
 
     val AxIntro : tactic = fn (G, P) =>
       case out P of

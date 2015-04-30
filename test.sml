@@ -27,8 +27,9 @@ struct
      print ("Extract: " ^ Syn.to_string print_mode (extract result) ^ "\n\n"))
   end
 
-  val ax = AX $$ #[]
+  val void = VOID $$ #[]
   val unit = UNIT $$ #[]
+  val ax = AX $$ #[]
 
   fun & (a, b) = PROD $$ #[a,b]
   infix &
@@ -75,6 +76,16 @@ struct
       check
         (lam (fn x => `` x) mem (unit ~> unit))
         (MemAuto THEN MemAuto)
+
+  val _ =
+      check
+        (lam (fn x => pair ax ax) mem (void ~> void))
+        (MemAuto THEN VoidElim THEN Assumption)
+
+  val _ =
+      check
+        (void ~> (unit & unit))
+        (ImpIntro (Var.new()) THEN VoidElim THEN Assumption)
 
   val _ =
       check
