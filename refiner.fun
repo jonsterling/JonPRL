@@ -18,13 +18,15 @@ sig
   val ImpIntro : Context.name -> tactic
   val AxIntro : tactic
   val PairIntro : tactic
-  val LamIntro : Context.name -> tactic
+  val LamIntro : tactic
   val MemIntro : tactic
   val CanMemAuto : tactic
   val MemAuto : tactic
+  val Witness : Syn.t -> tactic
 
   val Assumption : tactic
   val Hypothesis : Context.name -> tactic
+  val HypMem : tactic
 end =
 struct
   type ctx = Syn.t Context.context
@@ -40,8 +42,19 @@ struct
       | PAIR_INTRO
       | LAM_INTRO
       | MEM_INTRO
+      | WITNESS of Syn.t
+      | HYP_MEM
 
-    fun eq (x : t) y = x = y
+    fun eq UNIT_INTRO UNIT_INTRO = true
+      | eq PROD_INTRO PROD_INTRO = true
+      | eq IMP_INTRO IMP_INTRO = true
+      | eq AX_INTRO AX_INTRO = true
+      | eq PAIR_INTRO PAIR_INTRO = true
+      | eq LAM_INTRO LAM_INTRO = true
+      | eq MEM_INTRO MEM_INTRO = true
+      | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
+      | eq HYP_MEM HYP_MEM = true
+      | eq _ _ = false
 
     fun arity UNIT_INTRO = #[]
       | arity PROD_INTRO = #[0,0]
@@ -50,6 +63,8 @@ struct
       | arity PAIR_INTRO = #[0,0]
       | arity LAM_INTRO = #[1]
       | arity MEM_INTRO = #[0]
+      | arity (WITNESS _) = #[0]
+      | arity HYP_MEM = #[0]
 
     fun to_string UNIT_INTRO = "unit-I"
       | to_string PROD_INTRO = "prod-I"
@@ -58,6 +73,8 @@ struct
       | to_string PAIR_INTRO = "pair-I"
       | to_string LAM_INTRO = "lam-I"
       | to_string MEM_INTRO = "∈*-I"
+      | to_string (WITNESS m) = "witness{" ^ Syn.to_string m ^ "}"
+      | to_string HYP_MEM = "hyp-∈"
   end
 
   structure Evidence =
@@ -88,6 +105,7 @@ struct
          | PAIR_INTRO $ _ => Syn.$$ (AX, #[])
          | LAM_INTRO $ _ => Syn.$$ (AX, #[])
          | MEM_INTRO $ _ => Syn.$$ (AX, #[])
+         | WITNESS m $ _ => m
          | ` x => Syn.`` x
          | x \ E => Syn.\\ (x, extract E)
          | _ => raise MalformedEvidence ev
@@ -133,17 +151,16 @@ struct
                | _ => raise Fail "PairIntro")
        | _ => raise Fail "PairIntro"
 
-  fun LamIntro d : tactic = fn (G, P) =>
+  val LamIntro : tactic = fn (G, P) =>
     case out P of
          CAN_MEM $ #[lam, imp] =>
            (case (out lam, out imp) of
                  (LAM $ #[zE], IMP $ #[A,B]) =>
                  let
                    val (z, E) = unbind zE
-                   val G' = Context.insert G d (MEM $$ #[``z, A])
                  in
-                   ([(G', MEM $$ #[E, B])],
-                    fn [D] => LAM_INTRO %$$ #[d %\\ D]
+                   ([(Context.insert G z A, MEM $$ #[E, B])],
+                    fn [D] => LAM_INTRO %$$ #[z %\\ D]
                        | _ => raise Fail "ImpIntro")
                  end
                | _ => raise Fail "LamIntro")
@@ -159,6 +176,25 @@ struct
            ([(G, CAN_MEM $$ #[M0, A0])], fn args => MEM_INTRO %$$ Vector.fromList args)
          end
        | _ => raise Fail "MemIntro"
+
+  fun Witness M : tactic = fn (G, P) =>
+    ([(G, MEM $$ #[M, P])],
+     fn [D] => WITNESS M %$$ #[D]
+       | _ => raise Fail "Witness")
+
+  val HypMem : tactic = fn (G, P) =>
+    case out P of
+         MEM $ #[M,A] =>
+         (case out M of
+               ` x =>
+                 (case Context.lookup G x of
+                       SOME Q =>
+                         if Syn.eq (A, Q)
+                         then ([], fn _ => HYP_MEM %$$ #[%`` x])
+                         else raise Fail "HypMem"
+                     | NONE => raise Fail "HypMem")
+             | _ => raise Fail "HypMem")
+       | _ => raise Fail "HypMem"
 
   val ProdIntro : tactic = fn (G, P) =>
     case out P of
@@ -209,8 +245,8 @@ struct
   infix ORELSE
   infix THEN
 
-  val CanMemAuto = AxIntro ORELSE PairIntro ORELSE (LamIntro (Variable.new ()))
-  val MemAuto = MemIntro THEN CanMemAuto
+  val CanMemAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
+  val MemAuto = (MemIntro THEN CanMemAuto) ORELSE HypMem
 end
 
 structure Test =
@@ -274,5 +310,11 @@ struct
   val _ =
       check
         (lam (x \\ `` x) mem (unit ~> unit))
-        (MemAuto THEN Assumption)
+        (MemAuto THEN MemAuto)
+
+  val _ =
+      check
+        (unit ~> (unit & unit))
+        (Witness (lam (x \\ pair (`` x) (`` x))) THEN MemAuto THEN MemAuto THEN MemAuto)
+
 end
