@@ -7,8 +7,8 @@ Library
 
   functor Abt
   functor AbtUtil
+  functor Variable
   structure VectorUtil
-  structure Variable
   structure PrintMode
 is
   variable.sig
@@ -20,7 +20,7 @@ is
   abtutil.fun
   vectorutil.sml
   print_mode.sml
-  variable.sml
+  variable.fun
 
   $/basis.cm
   $/smlnj-lib.cm

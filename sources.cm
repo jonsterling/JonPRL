@@ -7,7 +7,7 @@ group is
   list_util.sml
 
   context.sig
-  context.sml
+  context.fun
 
   lang.sml
   whnf.fun

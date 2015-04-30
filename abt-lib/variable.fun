@@ -1,4 +1,4 @@
-structure Variable :> VARIABLE =
+functor Variable () :> VARIABLE =
 struct
 
   type t = string option * int

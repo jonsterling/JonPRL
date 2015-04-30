@@ -1,11 +1,14 @@
 functor Refiner
-  (structure Syn : ABTUTIL where Operator = Lang and Variable = Variable
+  (structure Syn : ABTUTIL where Operator = Lang
    val print_mode : PrintMode.t) :>
 sig
 
   structure Evidence : ABTUTIL
   exception MalformedEvidence of Evidence.t
   val extract : Evidence.t -> Syn.t
+
+  structure Context : CONTEXT
+    where type name = Syn.Variable.t
 
   type context = Syn.t Context.context
 
@@ -38,6 +41,7 @@ sig
   end
 end =
 struct
+  structure Context = Context(Syn.Variable)
   type context = Syn.t Context.context
   type goal = context * Syn.t
 

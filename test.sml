@@ -2,9 +2,10 @@ structure Test =
 struct
   val print_mode = PrintMode.User
 
-  structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Variable))
+  structure Var = Variable ()
+  structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Var))
   structure Refiner = Refiner(structure Syn = Syn val print_mode = print_mode)
-  structure context = Context
+  structure Context = Context(Var)
   open Lang Syn Refiner
   open CoreTactics DerivedTactics InferenceRules
   infix $$ \\ THEN ORELSE
@@ -32,7 +33,7 @@ struct
   fun fst m = FST $$ #[m]
   fun lam e =
     let
-      val x = Variable.new ()
+      val x = Var.new ()
     in
       LAM $$ #[x \\ e x]
     end
@@ -57,7 +58,7 @@ struct
   val _ =
      check
        (unit ~> (unit & unit))
-       (ImpIntro (Variable.new()) THEN
+       (ImpIntro (Var.new()) THEN
          ProdIntro THEN
            Assumption)
 

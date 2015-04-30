@@ -1,9 +1,9 @@
-structure Context :> CONTEXT where type name = Variable.t =
+functor Context (V : VARIABLE) :> CONTEXT where type name = V.t =
 struct
   structure M = BinaryMapFn
-    (struct type ord_key = Variable.t val compare = Variable.compare end)
+    (struct type ord_key = V.t val compare = V.compare end)
 
-  type name = Variable.t
+  type name = V.t
 
   fun list_search xs p =
     case xs of
