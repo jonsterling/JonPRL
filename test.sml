@@ -3,15 +3,19 @@ struct
   val print_mode = PrintMode.User
 
   structure Var = Variable ()
-  structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Var))
-  structure Refiner = Refiner(structure Syn = Syn val print_mode = print_mode)
-  structure Context = Context(Var)
+  structure Syn =
+    AbtUtil (Abt (structure Operator = Lang and Variable = Var))
+
+  structure Refiner =
+    Refiner
+      (structure Syn = Syn
+       val print_mode = print_mode)
+
   open Lang Syn Refiner
   open CoreTactics DerivedTactics InferenceRules
   infix $$ \\ THEN ORELSE
 
   exception RemainingSubgoals of goal list
-
 
   fun check P (tac : tactic) =
   let
@@ -39,7 +43,7 @@ struct
     end
 
   fun ~> (a, b) = IMP $$ #[a,b]
-  infix ~>
+  infixr ~>
 
   fun can_mem (m, a) = CAN_MEM $$ #[m,a]
   infix can_mem
