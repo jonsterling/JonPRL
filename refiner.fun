@@ -1,45 +1,3 @@
-signature REFINER_TYPES =
-sig
-  type goal
-  type evidence
-
-  type validation = evidence list -> evidence
-  type tactic = goal -> (goal list * validation)
-end
-
-signature REFINER_TACTICS =
-sig
-  type tactic
-  val THEN : tactic * tactic -> tactic
-  val ORELSE : tactic * tactic -> tactic
-end
-
-functor RefinerTactics (R : REFINER_TYPES) :
-sig
-  include REFINER_TACTICS where type tactic = R.tactic
-end =
-struct
-  type tactic = R.tactic
-
-  fun THEN (tac1, tac2) (g : R.goal) =
-    let
-      val (subgoals1, validation1) = tac1 g
-      val (subgoals2, validations2) = ListPair.unzip (List.map tac2 subgoals1)
-    in
-      (List.foldl (op @) [] subgoals2,
-       fn Ds =>
-         let
-           val lengths = List.map List.length subgoals2
-           val derivations = ListUtil.multisplit lengths Ds
-         in
-           validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
-         end)
-    end
-
-  fun ORELSE (tac1, tac2) : R.tactic = fn g =>
-    tac1 g handle _ => tac2 g
-end
-
 functor Refiner
   (structure Syn : ABTUTIL where Operator = Lang and Variable = Variable
    val print_mode : PrintMode.t) :>
@@ -49,12 +7,15 @@ sig
   exception MalformedEvidence of Evidence.t
   val extract : Evidence.t -> Syn.t
 
-  type ctx = Syn.t Context.context
+  type context = Syn.t Context.context
+
   include REFINER_TYPES
-    where type goal = ctx * Syn.t
+    where type goal = context * Syn.t
     and type evidence = Evidence.t
 
-  structure CoreTactics : REFINER_TACTICS where type tactic = tactic
+  structure CoreTactics : CORE_TACTICS
+    where type tactic = tactic
+
   structure InferenceRules :
   sig
     val UnitIntro : tactic
@@ -77,8 +38,8 @@ sig
   end
 end =
 struct
-  type ctx = Syn.t Context.context
-  type goal = ctx * Syn.t
+  type context = Syn.t Context.context
+  type goal = context * Syn.t
 
   structure EOp =
   struct
@@ -180,7 +141,7 @@ struct
 
   structure Whnf = Whnf(Syn)
 
-  structure CoreTactics = RefinerTactics(RefinerTypes)
+  structure CoreTactics = CoreTactics(RefinerTypes)
 
   structure InferenceRules =
   struct
@@ -282,7 +243,6 @@ struct
          | NONE => raise Fail "No matching assumption")
   end
 
-
   structure DerivedTactics =
   struct
     open CoreTactics InferenceRules
@@ -293,85 +253,3 @@ struct
   end
 end
 
-structure Test =
-struct
-  val print_mode = PrintMode.User
-
-  structure Syn = AbtUtil(Abt(structure Operator = Lang and Variable = Variable))
-  structure Refiner = Refiner(structure Syn = Syn val print_mode = print_mode)
-  structure Ctx = Context
-  open Lang Syn Refiner
-  open CoreTactics DerivedTactics InferenceRules
-  infix $$ \\ THEN ORELSE
-
-  exception RemainingSubgoals of goal list
-
-
-  fun check P (tac : tactic) =
-  let
-    val (subgoals, validate) = tac (Context.empty, P)
-    val result = if null subgoals then validate [] else raise RemainingSubgoals subgoals
-  in
-    (print ("Theorem: " ^ Syn.to_string print_mode P ^ "\n");
-     print ("Evidence: " ^ Evidence.to_string print_mode result ^ "\n");
-     print ("Extract: " ^ Syn.to_string print_mode (extract result) ^ "\n\n"))
-  end
-
-  val ax = AX $$ #[]
-  val unit = UNIT $$ #[]
-
-  fun & (a, b) = PROD $$ #[a,b]
-  infix &
-
-  fun pair m n = PAIR $$ #[m,n]
-  fun fst m = FST $$ #[m]
-  fun lam e =
-    let
-      val x = Variable.new ()
-    in
-      LAM $$ #[x \\ e x]
-    end
-
-  fun ~> (a, b) = IMP $$ #[a,b]
-  infix ~>
-
-  fun can_mem (m, a) = CAN_MEM $$ #[m,a]
-  infix can_mem
-
-  fun mem (m, a) = MEM $$ #[m,a]
-  infix mem
-
-  val _ =
-      check
-        (unit & (unit & unit))
-        (ProdIntro THEN
-          (UnitIntro ORELSE
-            ProdIntro THEN
-              UnitIntro))
-
-  val _ =
-     check
-       (unit ~> (unit & unit))
-       (ImpIntro (Variable.new()) THEN
-         ProdIntro THEN
-           Assumption)
-
-  val _ =
-      check
-        (fst (pair ax ax) mem unit)
-        (MemAuto THEN MemAuto)
-
-  val _ =
-      check
-        (lam (fn x => `` x) mem (unit ~> unit))
-        (MemAuto THEN MemAuto)
-
-  val _ =
-      check
-        (unit ~> (unit & unit))
-        (Witness (lam (fn x => pair (`` x) (`` x))) THEN
-          MemAuto THEN
-            MemAuto THEN
-              MemAuto)
-
-end

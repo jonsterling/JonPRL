@@ -11,5 +11,12 @@ group is
 
   lang.sml
   whnf.fun
+
+  refiner_types.sig
+  core_tactics.sig
+
+  core_tactics.fun
   refiner.fun
+
+  test.sml
 
