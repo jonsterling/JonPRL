@@ -4,26 +4,30 @@ sig
   val multisplit : int list -> 'a list -> 'a list list
 end =
 struct
-  exception Hole
-
   local
-    fun go 0 (xs, ys) = (xs, ys)
-      | go n (xs, []) = ([], xs)
-      | go n (xs, y::ys) = go (n - 1) (xs @ [y], ys)
-  in
-    fun split i xs = go i ([], xs)
-  end
-
-  local
-    fun go [] xs r = r @ [xs]
-      | go (n::ns) xs r =
-        let
-          val (ys,zs) = split n xs
+    fun go _ [] = ([], [])
+      | go 1 (x::xs) = ([x], xs)
+      | go m (x::xs) =
+        let val
+          (xs', xs'') = go (m - 1) xs
         in
-          go ns zs (r @ [ys])
+          (x::xs', xs'')
         end
   in
-    fun multisplit ns xs = go ns xs []
+    fun split n ls =
+      if n < 0
+      then raise Subscript
+      else if n = 0
+      then ([], ls)
+      else go n ls
   end
+
+  fun multisplit [] xs = [xs]
+    | multisplit (n::ns) xs =
+      let
+        val (ys,rem) = split n xs
+      in
+        ys :: multisplit ns rem
+      end
 end
 
