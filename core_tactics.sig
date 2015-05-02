@@ -1,9 +1,10 @@
 signature CORE_TACTICS =
 sig
   type tactic
+
   val ID : tactic
   val THEN : tactic * tactic -> tactic
-  val THENL : tactic * (tactic list) -> tactic
+  val THENL : tactic * tactic list -> tactic
   val THEN_LAZY : tactic * (unit -> tactic) -> tactic
   val THENL_LAZY : tactic * (unit -> tactic list) -> tactic
   val REPEAT : tactic -> tactic
