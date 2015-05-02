@@ -20,7 +20,15 @@ struct
   fun check P (tac : tactic) =
   let
     val (subgoals, validate) = tac (Context.empty, P)
-    val result = if null subgoals then validate [] else raise RemainingSubgoals subgoals
+    val result =
+      if null subgoals
+      then validate []
+      else
+        let
+          val readout = List.foldl (fn (g,r) => r ^ "\n" ^ print_goal g) "" subgoals
+        in
+          raise Fail ("Remaining subgoals: " ^ readout)
+        end
   in
     (print ("Theorem: " ^ Syn.to_string print_mode P ^ "\n");
      print ("Evidence: " ^ Evidence.to_string print_mode result ^ "\n");
@@ -46,9 +54,6 @@ struct
   fun ~> (a, b) = IMP $$ #[a,b]
   infixr ~>
 
-  fun can_mem (m, a) = CAN_MEM $$ #[m,a]
-  infix can_mem
-
   fun mem (m, a) = MEM $$ #[m,a]
   infix mem
 
@@ -70,12 +75,12 @@ struct
   val _ =
       check
         (fst (pair ax ax) mem unit)
-        (MemAuto THEN MemAuto)
+        (REPEAT MemAuto)
 
   val _ =
       check
         (lam (fn x => `` x) mem (unit ~> unit))
-        (MemAuto THEN MemAuto)
+        (MemAuto THEN EqAuto)
 
   val _ =
       check
@@ -91,8 +96,6 @@ struct
       check
         (unit ~> (unit & unit))
         (Witness (lam (fn x => pair (`` x) (`` x))) THEN
-          MemAuto THEN
-            MemAuto THEN
-              MemAuto)
-
+          MemAuto THEN (REPEAT EqAuto))
 end
+

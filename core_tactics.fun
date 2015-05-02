@@ -3,22 +3,36 @@ functor CoreTactics (R : REFINER_TYPES) :
 struct
   type tactic = R.tactic
 
-  fun THEN (tac1, tac2) (g : R.goal) =
-    let
-      val (subgoals1, validation1) = tac1 g
-      val (subgoals2, validations2) = ListPair.unzip (List.map tac2 subgoals1)
-    in
-      (List.foldl (op @) [] subgoals2,
-       fn Ds =>
-         let
-           val lengths = List.map List.length subgoals2
-           val derivations = ListUtil.multisplit lengths Ds
-         in
-           validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
-         end)
-    end
+  fun ID g =
+    ([g], fn [D] => D | _ => raise Fail "ID")
 
-  fun ORELSE (tac1, tac2) : R.tactic = fn g =>
+
+  fun THEN_LAZY (tac1, tac2) (g : R.goal) =
+    case tac1 g of
+         ([], validation1) => ([], validation1)
+       | (subgoals1, validation1) =>
+           let
+             val (subgoals2, validations2) = ListPair.unzip (List.map (tac2 ()) subgoals1)
+           in
+             (List.foldl (op @) [] subgoals2,
+              fn Ds =>
+                let
+                  val lengths = List.map List.length subgoals2
+                  val derivations = ListUtil.multisplit lengths Ds
+                in
+                  validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
+                end)
+           end
+
+  fun THEN (tac1, tac2) : tactic =
+    THEN_LAZY (tac1, fn () => tac2)
+
+  fun ORELSE (tac1, tac2) : tactic = fn g =>
     tac1 g handle _ => tac2 g
+
+  fun ORELSE_LAZY (tac1, tac2) : tactic = fn g =>
+    tac1 g handle _ => tac2 () g
+
+  fun REPEAT tac1 = THEN_LAZY (tac1, fn () => REPEAT tac1)
 end
 

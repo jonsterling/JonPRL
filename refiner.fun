@@ -16,6 +16,8 @@ sig
     where type goal = context * Syn.t
     and type evidence = Evidence.t
 
+  val print_goal : goal -> string
+
   structure CoreTactics : CORE_TACTICS
     where type tactic = tactic
 
@@ -25,6 +27,7 @@ sig
     val ProdIntro : tactic
     val ImpIntro : Context.name -> tactic
     val MemIntro : tactic
+    val EqIntro : tactic
     val Witness : Syn.t -> tactic
     val VoidElim : tactic
 
@@ -34,12 +37,13 @@ sig
 
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
-    val HypMem : tactic
+    val HypEq : tactic
   end
 
   structure DerivedTactics :
   sig
-    val CanMemAuto : tactic
+    val EqAuto : tactic
+    val CanEqAuto : tactic
     val MemAuto : tactic
   end
 end =
@@ -58,8 +62,9 @@ struct
       | PAIR_INTRO
       | LAM_INTRO
       | MEM_INTRO
+      | EQ_INTRO
       | WITNESS of Syn.t
-      | HYP_MEM
+      | HYP_EQ
       | VOID_ELIM
 
     fun eq UNIT_INTRO UNIT_INTRO = true
@@ -69,8 +74,9 @@ struct
       | eq PAIR_INTRO PAIR_INTRO = true
       | eq LAM_INTRO LAM_INTRO = true
       | eq MEM_INTRO MEM_INTRO = true
+      | eq EQ_INTRO EQ_INTRO = true
       | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
-      | eq HYP_MEM HYP_MEM = true
+      | eq HYP_EQ HYP_EQ = true
       | eq VOID_ELIM VOID_ELIM = true
       | eq _ _ = false
 
@@ -81,8 +87,9 @@ struct
       | arity PAIR_INTRO = #[0,0]
       | arity LAM_INTRO = #[1]
       | arity MEM_INTRO = #[0]
+      | arity EQ_INTRO = #[0]
       | arity (WITNESS _) = #[0]
-      | arity HYP_MEM = #[0]
+      | arity HYP_EQ = #[0]
       | arity VOID_ELIM = #[0]
 
     fun to_string UNIT_INTRO = "unit-I"
@@ -92,8 +99,9 @@ struct
       | to_string PAIR_INTRO = "pair-I"
       | to_string LAM_INTRO = "lam-I"
       | to_string MEM_INTRO = "∈*-I"
+      | to_string EQ_INTRO = "=*-I"
       | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
-      | to_string HYP_MEM = "hyp-∈"
+      | to_string HYP_EQ = "hyp-∈"
       | to_string VOID_ELIM = "void-E"
   end
 
@@ -155,107 +163,129 @@ struct
 
   structure CoreTactics = CoreTactics(RefinerTypes)
 
+  fun print_goal (G, P) =
+    let
+      val ctx = Context.to_string (print_mode, Syn.to_string) G
+      val prop = Syn.to_string print_mode P
+    in
+      ctx ^ " >> " ^ prop
+    end
+
+
   structure InferenceRules =
   struct
+    fun fail name goal =
+      raise Fail (name ^ "| " ^ print_goal goal)
+
     val UnitIntro : tactic = fn (G, P) =>
       case out P of
            UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
-         | _ => raise Fail "UnitIntro"
+         | _ => fail "UnitIntro" (G, P)
 
     val VoidElim : tactic = fn (G, P) =>
       ([(G, VOID $$ #[])], fn args => VOID_ELIM %$$ Vector.fromList args)
 
     val AxIntro : tactic = fn (G, P) =>
       case out P of
-           CAN_MEM $ #[ax, unit] =>
-             (case (out ax, out unit) of
-                  (AX $ #[], UNIT $ #[]) =>
+           CAN_EQ $ #[ax, ax', unit] =>
+             (case (out ax, out ax', out unit) of
+                  (AX $ #[], AX $ #[], UNIT $ #[]) =>
                     ([], fn args => AX_INTRO %$$ Vector.fromList args)
-                | _ => raise Fail "AxIntro")
-         | _ => raise Fail "AxIntro"
+                | _ => fail "AxIntro" (G, P))
+         | _ => fail "AxIntro" (G, P)
 
     val PairIntro : tactic = fn (G, P) =>
       case out P of
-           CAN_MEM $ #[pair, prod] =>
-             (case (out pair, out prod) of
-                   (PAIR $ #[M,N], PROD $ #[A,B]) =>
-                     ([(G, MEM $$ #[M,A]), (G, MEM $$ #[N,B])],
+           CAN_EQ $ #[pair, pair', prod] =>
+             (case (out pair, out pair', out prod) of
+                   (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,B]) =>
+                     ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
                       fn args => PAIR_INTRO %$$ Vector.fromList args)
-                 | _ => raise Fail "PairIntro")
-         | _ => raise Fail "PairIntro"
+                 | _ => fail "PairIntro" (G, P))
+         | _ => fail "PairIntro" (G, P)
 
     val LamIntro : tactic = fn (G, P) =>
       case out P of
-           CAN_MEM $ #[lam, imp] =>
-             (case (out lam, out imp) of
-                   (LAM $ #[zE], IMP $ #[A,B]) =>
+           CAN_EQ $ #[lam, lam', imp] =>
+             (case (out lam, out lam', out imp) of
+                   (LAM $ #[zE], LAM $ #[z'E'], IMP $ #[A,B]) =>
                    let
                      val (z, E) = unbind zE
+                     val E'z = subst1 z'E' (`` z)
                    in
-                     ([(Context.insert G z A, MEM $$ #[E, B])],
+                     ([(Context.insert G z A, EQ $$ #[E, E'z, B])],
                       fn [D] => LAM_INTRO %$$ #[z %\\ D]
-                         | _ => raise Fail "ImpIntro")
+                         | _ => fail "ImpIntro" (G, P))
                    end
-                 | _ => raise Fail "LamIntro")
-         | _ => raise Fail "LamIntro"
+                 | _ => fail "LamIntro" (G, P))
+         | _ => fail "LamIntro" (G, P)
 
     val MemIntro : tactic = fn (G, P) =>
       case out P of
            MEM $ #[M, A] =>
-           let
-             val M0 = Whnf.whnf M
-             val A0 = Whnf.whnf A
-           in
-             ([(G, CAN_MEM $$ #[M0, A0])], fn args => MEM_INTRO %$$ Vector.fromList args)
-           end
-         | _ => raise Fail "MemIntro"
+             ([(G, EQ $$ #[M, M, A])],
+              fn args => MEM_INTRO %$$ Vector.fromList args)
+         | _ => fail "MemIntro" (G, P)
+
+    val EqIntro : tactic = fn (G, P) =>
+      case out P of
+           EQ $ #[M, N, A] =>
+             let
+               val M0 = Whnf.whnf M
+               val N0 = Whnf.whnf N
+               val A0 = Whnf.whnf A
+             in
+               ([(G, CAN_EQ $$ #[M0, N0, A0])],
+                fn args => EQ_INTRO %$$ Vector.fromList args)
+             end
+         | _ => fail "EqIntro" (G, P)
 
     fun Witness M : tactic = fn (G, P) =>
       ([(G, MEM $$ #[M, P])],
        fn [D] => WITNESS M %$$ #[D]
-         | _ => raise Fail "Witness")
+         | _ => fail "Witness" (G,P))
 
-    val HypMem : tactic = fn (G, P) =>
+    val HypEq : tactic = fn (G, P) =>
       case out P of
-           MEM $ #[M,A] =>
-           (case out M of
-                 ` x =>
+           EQ $ #[M,M',A] =>
+           (case (Syn.eq (M, M'), out M) of
+                 (true, ` x) =>
                    (case Context.lookup G x of
                          SOME Q =>
                            if Syn.eq (A, Q)
-                           then ([], fn _ => HYP_MEM %$$ #[%`` x])
-                           else raise Fail "HypMem"
-                       | NONE => raise Fail "HypMem")
-               | _ => raise Fail "HypMem")
-         | _ => raise Fail "HypMem"
+                           then ([], fn _ => HYP_EQ %$$ #[%`` x])
+                           else fail "HypEq" (G, P)
+                       | NONE => fail "HypEq" (G, P))
+               | _ => fail "HypEq" (G, P))
+         | _ => fail "HypEq" (G, P)
 
     val ProdIntro : tactic = fn (G, P) =>
       case out P of
            PROD $ #[P1, P2] =>
              ([(G, P1), (G, P2)],
               fn args => PROD_INTRO %$$ Vector.fromList args)
-         | _ => raise Fail "ProdIntro"
+         | _ => fail "ProdIntro" (G, P)
 
     fun ImpIntro x : tactic = fn (G, P) =>
       case out P of
            IMP $ #[P1, P2] =>
              ([(Context.insert G x P1, P2)],
               fn [D] => IMP_INTRO %$$ #[x %\\ D]
-                | _ => raise Fail "ImpIntro")
-         | _ => raise Fail "ImpIntro"
+                | _ => fail "ImpIntro" (G, P))
+         | _ => fail "ImpIntro" (G, P)
 
     fun Hypothesis x : tactic = fn (G, P) =>
       (case Context.lookup G x of
             SOME P' =>
               if Syn.eq (P, P')
               then ([], fn _ => %`` x)
-              else raise Fail "Hypothesis does not match"
-          | NONE => raise Fail "No such hypothesis")
+              else fail "Hypothesis" (G, P)
+          | NONE => fail "Hypothesis" (G, P))
 
     val Assumption : tactic = fn (G, P) =>
       (case Context.search G (fn x => Syn.eq (P, x)) of
            SOME (x, _) => ([], fn _ => %`` x)
-         | NONE => raise Fail "No matching assumption")
+         | NONE => fail "Assumption" (G, P))
   end
 
   structure DerivedTactics =
@@ -263,8 +293,9 @@ struct
     open CoreTactics InferenceRules
     infix ORELSE THEN
 
-    val CanMemAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
-    val MemAuto = (MemIntro THEN CanMemAuto) ORELSE HypMem
+    val CanEqAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
+    val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
+    val MemAuto = MemIntro THEN EqAuto
   end
 end
 
