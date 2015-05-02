@@ -43,9 +43,6 @@ sig
   structure DerivedTactics :
   sig
     val Auto : tactic
-    val EqAuto : tactic
-    val CanEqAuto : tactic
-    val MemAuto : tactic
   end
 end =
 struct
@@ -292,13 +289,22 @@ struct
   structure DerivedTactics =
   struct
     open CoreTactics InferenceRules
-    infix ORELSE THEN
+    infix ORELSE ORELSE_LAZY THEN
 
     val CanEqAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
     val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
-    val MemAuto = MemIntro THEN EqAuto
 
-    val Auto = REPEAT (MemIntro ORELSE EqAuto ORELSE Assumption)
+    local
+      val intro_rules =
+        MemIntro ORELSE
+          EqAuto ORELSE
+            Assumption ORELSE
+              ProdIntro ORELSE_LAZY (fn () =>
+                ImpIntro (Variable.new()) ORELSE
+                  UnitIntro )
+    in
+      val Auto = REPEAT intro_rules
+    end
   end
 end
 

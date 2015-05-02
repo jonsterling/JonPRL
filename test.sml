@@ -60,17 +60,12 @@ struct
   val _ =
       check
         (unit & (unit & unit))
-        (ProdIntro THEN
-          (UnitIntro ORELSE
-            ProdIntro THEN
-              UnitIntro))
+        Auto
 
   val _ =
      check
        (unit ~> (unit & unit))
-       (ImpIntro (Var.new()) THEN
-         ProdIntro THEN
-           Assumption)
+       Auto
 
   val _ =
       check
@@ -85,7 +80,7 @@ struct
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemAuto THEN VoidElim THEN Auto)
+        (MemIntro THEN EqIntro THEN LamIntro THEN VoidElim THEN Auto)
 
   val _ =
       check
