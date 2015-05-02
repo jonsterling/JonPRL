@@ -13,7 +13,7 @@ struct
 
   open Lang Syn Refiner
   open CoreTactics DerivedTactics InferenceRules
-  infix $$ \\ THEN ORELSE
+  infix $$ \\ THEN THENL ORELSE
 
   exception RemainingSubgoals of goal list
 
@@ -80,12 +80,12 @@ struct
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN LamIntro THEN VoidElim THEN Auto)
+        (MemIntro THEN EqIntro THEN LamEq THEN VoidElim THEN Auto)
 
   val _ =
       check
         (void ~> (unit & unit))
-        (ImpIntro (Var.new()) THEN VoidElim THEN Auto)
+        (ImpIntro (Var.new()) THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check

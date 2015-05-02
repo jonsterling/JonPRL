@@ -23,7 +23,10 @@ sig
 
   structure InferenceRules :
   sig
+    val VoidEq : tactic
+    val UnitEq : tactic
     val UnitIntro : tactic
+    val ProdEq : tactic
     val ProdIntro : tactic
     val ImpIntro : Context.name -> tactic
     val MemIntro : tactic
@@ -31,9 +34,9 @@ sig
     val Witness : Syn.t -> tactic
     val VoidElim : tactic
 
-    val AxIntro : tactic
-    val PairIntro : tactic
-    val LamIntro : tactic
+    val AxEq : tactic
+    val PairEq : tactic
+    val LamEq : tactic
 
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
@@ -53,12 +56,13 @@ struct
   structure EOp =
   struct
     datatype t
-      = UNIT_INTRO
-      | PROD_INTRO
+      = VOID_EQ
+      | UNIT_INTRO | UNIT_EQ
+      | PROD_INTRO | PROD_EQ
       | IMP_INTRO
-      | AX_INTRO
-      | PAIR_INTRO
-      | LAM_INTRO
+      | AX_EQ
+      | PAIR_EQ
+      | LAM_EQ
       | MEM_INTRO
       | EQ_INTRO
       | WITNESS of Syn.t
@@ -66,11 +70,14 @@ struct
       | VOID_ELIM
 
     fun eq UNIT_INTRO UNIT_INTRO = true
+      | eq VOID_EQ VOID_EQ = true
+      | eq UNIT_EQ UNIT_EQ = true
       | eq PROD_INTRO PROD_INTRO = true
+      | eq PROD_EQ PROD_EQ = true
       | eq IMP_INTRO IMP_INTRO = true
-      | eq AX_INTRO AX_INTRO = true
-      | eq PAIR_INTRO PAIR_INTRO = true
-      | eq LAM_INTRO LAM_INTRO = true
+      | eq AX_EQ AX_EQ = true
+      | eq PAIR_EQ PAIR_EQ = true
+      | eq LAM_EQ LAM_EQ = true
       | eq MEM_INTRO MEM_INTRO = true
       | eq EQ_INTRO EQ_INTRO = true
       | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
@@ -79,11 +86,14 @@ struct
       | eq _ _ = false
 
     fun arity UNIT_INTRO = #[]
+      | arity VOID_EQ = #[]
+      | arity UNIT_EQ = #[]
       | arity PROD_INTRO = #[0,0]
-      | arity IMP_INTRO = #[1]
-      | arity AX_INTRO = #[]
-      | arity PAIR_INTRO = #[0,0]
-      | arity LAM_INTRO = #[1]
+      | arity PROD_EQ = #[0,0]
+      | arity IMP_INTRO = #[1,0]
+      | arity AX_EQ = #[]
+      | arity PAIR_EQ = #[0,0]
+      | arity LAM_EQ = #[1]
       | arity MEM_INTRO = #[0]
       | arity EQ_INTRO = #[0]
       | arity (WITNESS _) = #[0]
@@ -91,11 +101,14 @@ struct
       | arity VOID_ELIM = #[0]
 
     fun to_string UNIT_INTRO = "unit-I"
+      | to_string UNIT_EQ = "unit="
+      | to_string VOID_EQ = "void="
       | to_string PROD_INTRO = "prod-I"
+      | to_string PROD_EQ = "prod="
       | to_string IMP_INTRO = "imp-I"
-      | to_string AX_INTRO = "ax-I"
-      | to_string PAIR_INTRO = "pair-I"
-      | to_string LAM_INTRO = "lam-I"
+      | to_string AX_EQ = "ax="
+      | to_string PAIR_EQ = "pair="
+      | to_string LAM_EQ = "lam="
       | to_string MEM_INTRO = "∈*-I"
       | to_string EQ_INTRO = "=*-I"
       | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
@@ -131,16 +144,19 @@ struct
       case out ev of
            UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
          | PROD_INTRO $ #[D,E] => Syn.$$ (PAIR, #[extract D, extract E])
-         | IMP_INTRO $ #[xE] => Syn.$$ (LAM, #[extract xE])
-         | AX_INTRO $ _ => Syn.$$ (AX, #[])
-         | PAIR_INTRO $ _ => Syn.$$ (AX, #[])
-         | LAM_INTRO $ _ => Syn.$$ (AX, #[])
+         | IMP_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
+         | AX_EQ $ _ => Syn.$$ (AX, #[])
+         | PAIR_EQ $ _ => Syn.$$ (AX, #[])
+         | LAM_EQ $ _ => Syn.$$ (AX, #[])
          | MEM_INTRO $ _ => Syn.$$ (AX, #[])
          | VOID_ELIM $ _ => Syn.$$ (AX, #[])
+         | UNIT_EQ $ _ => Syn.$$ (AX, #[])
+         | VOID_EQ $ _ => Syn.$$ (AX, #[])
+         | PROD_EQ $ _ => Syn.$$ (AX, #[])
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
          | x \ E => Syn.\\ (x, extract E)
-         | _ => raise MalformedEvidence ev
+         | _ => raise Fail (E.to_string print_mode ev)
   end
 
 
@@ -180,29 +196,45 @@ struct
            UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
          | _ => fail "UnitIntro" (G, P)
 
+    val UnitEq : tactic = fn (G, P) =>
+      case out P of
+           CAN_MEM $ #[unit, unit', univ] =>
+             (case (out unit, out unit', out univ) of
+                  (UNIT $ _, UNIT $ _, UNIV $ _) => ([], fn args => UNIT_EQ %$$ Vector.fromList args)
+                | _ => fail "UnitEq" (G, P))
+         | _ => fail "UnitEq" (G, P)
+
+    val VoidEq : tactic = fn (G, P) =>
+      case out P of
+           CAN_MEM $ #[void, void', univ] =>
+             (case (out void, out void', out univ) of
+                  (VOID $ _, VOID $ _, UNIV $ _) => ([], fn args => VOID_EQ %$$ Vector.fromList args)
+                | _ => fail "VoidEq" (G, P))
+         | _ => fail "VoidEq" (G, P)
+
     val VoidElim : tactic = fn (G, P) =>
       ([(G, VOID $$ #[])], fn args => VOID_ELIM %$$ Vector.fromList args)
 
-    val AxIntro : tactic = fn (G, P) =>
+    val AxEq : tactic = fn (G, P) =>
       case out P of
            CAN_EQ $ #[ax, ax', unit] =>
              (case (out ax, out ax', out unit) of
                   (AX $ #[], AX $ #[], UNIT $ #[]) =>
-                    ([], fn args => AX_INTRO %$$ Vector.fromList args)
-                | _ => fail "AxIntro" (G, P))
-         | _ => fail "AxIntro" (G, P)
+                    ([], fn args => AX_EQ %$$ Vector.fromList args)
+                | _ => fail "AxEq" (G, P))
+         | _ => fail "AxEq" (G, P)
 
-    val PairIntro : tactic = fn (G, P) =>
+    val PairEq : tactic = fn (G, P) =>
       case out P of
            CAN_EQ $ #[pair, pair', prod] =>
              (case (out pair, out pair', out prod) of
                    (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,B]) =>
                      ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
-                      fn args => PAIR_INTRO %$$ Vector.fromList args)
-                 | _ => fail "PairIntro" (G, P))
-         | _ => fail "PairIntro" (G, P)
+                      fn args => PAIR_EQ %$$ Vector.fromList args)
+                 | _ => fail "PairEq" (G, P))
+         | _ => fail "PairEq" (G, P)
 
-    val LamIntro : tactic = fn (G, P) =>
+    val LamEq : tactic = fn (G, P) =>
       case out P of
            CAN_EQ $ #[lam, lam', imp] =>
              (case (out lam, out lam', out imp) of
@@ -212,11 +244,11 @@ struct
                      val E'z = subst1 z'E' (`` z)
                    in
                      ([(Context.insert G z A, EQ $$ #[E, E'z, B])],
-                      fn [D] => LAM_INTRO %$$ #[z %\\ D]
-                         | _ => fail "ImpIntro" (G, P))
+                      fn [D] => LAM_EQ %$$ #[z %\\ D]
+                         | _ => fail "LamEq" (G, P))
                    end
-                 | _ => fail "LamIntro" (G, P))
-         | _ => fail "LamIntro" (G, P)
+                 | _ => fail "LamEq" (G, P))
+         | _ => fail "LamEq" (G, P)
 
     val MemIntro : tactic = fn (G, P) =>
       case out P of
@@ -264,11 +296,23 @@ struct
               fn args => PROD_INTRO %$$ Vector.fromList args)
          | _ => fail "ProdIntro" (G, P)
 
+    exception Hole
+
+    val ProdEq : tactic = fn (G, P) =>
+      case out P of
+           CAN_EQ $ #[prod1, prod2, univ] =>
+             (case (out prod1, out prod2, out univ) of
+                  (PROD $ #[A,B], PROD $ #[A',B'], UNIV $ #[]) =>
+                    ([(G, EQ $$ #[A,A',univ]), (G, EQ $$ #[B,B',univ])],
+                     fn args => PROD_EQ %$$ Vector.fromList args)
+                | _ => fail "ProdEq" (G, P))
+         | _ => fail "ProdEq" (G, P)
+
     fun ImpIntro x : tactic = fn (G, P) =>
       case out P of
            IMP $ #[P1, P2] =>
-             ([(Context.insert G x P1, P2)],
-              fn [D] => IMP_INTRO %$$ #[x %\\ D]
+             ([(Context.insert G x P1, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
+              fn [D,E] => IMP_INTRO %$$ #[x %\\ D, E]
                 | _ => fail "ImpIntro" (G, P))
          | _ => fail "ImpIntro" (G, P)
 
@@ -291,7 +335,7 @@ struct
     open CoreTactics InferenceRules
     infix ORELSE ORELSE_LAZY THEN
 
-    val CanEqAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
+    val CanEqAuto = AxEq ORELSE PairEq ORELSE LamEq ORELSE UnitEq ORELSE ProdEq ORELSE VoidEq
     val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
 
     local

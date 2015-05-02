@@ -1,7 +1,8 @@
 structure Lang =
 struct
   datatype t
-    = VOID
+    = UNIV
+    | VOID
     | UNIT | AX
     | PROD | PAIR | FST | SND
     | IMP | LAM | AP
@@ -10,7 +11,8 @@ struct
 
   fun eq (x : t) y = x = y
 
-  fun arity VOID = #[]
+  fun arity UNIV = #[]
+    | arity VOID = #[]
     | arity UNIT = #[]
     | arity AX = #[]
     | arity PROD = #[0,0]
@@ -24,7 +26,8 @@ struct
     | arity CAN_EQ = #[0,0,0]
     | arity MEM = #[0,0]
 
-  fun to_string VOID = "void"
+  fun to_string UNIV = "univ"
+    | to_string VOID = "void"
     | to_string UNIT = "unit"
     | to_string AX = "ax"
     | to_string PROD = "prod"
