@@ -24,19 +24,23 @@ sig
   structure InferenceRules :
   sig
     val VoidEq : tactic
+    val VoidElim : tactic
+
     val UnitEq : tactic
     val UnitIntro : tactic
+    val AxEq : tactic
+
     val ProdEq : tactic
     val ProdIntro : tactic
-    val ImpIntro : Context.name -> tactic
+
+    val FunIntro : tactic
+    val LamEq : tactic
+
     val MemIntro : tactic
     val EqIntro : tactic
     val Witness : Syn.t -> tactic
-    val VoidElim : tactic
 
-    val AxEq : tactic
     val PairEq : tactic
-    val LamEq : tactic
 
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
@@ -59,7 +63,7 @@ struct
       = VOID_EQ
       | UNIT_INTRO | UNIT_EQ
       | PROD_INTRO | PROD_EQ
-      | IMP_INTRO
+      | FUN_INTRO
       | AX_EQ
       | PAIR_EQ
       | LAM_EQ
@@ -74,7 +78,7 @@ struct
       | eq UNIT_EQ UNIT_EQ = true
       | eq PROD_INTRO PROD_INTRO = true
       | eq PROD_EQ PROD_EQ = true
-      | eq IMP_INTRO IMP_INTRO = true
+      | eq FUN_INTRO FUN_INTRO = true
       | eq AX_EQ AX_EQ = true
       | eq PAIR_EQ PAIR_EQ = true
       | eq LAM_EQ LAM_EQ = true
@@ -90,10 +94,10 @@ struct
       | arity UNIT_EQ = #[]
       | arity PROD_INTRO = #[0,0]
       | arity PROD_EQ = #[0,0]
-      | arity IMP_INTRO = #[1,0]
+      | arity FUN_INTRO = #[1,0]
       | arity AX_EQ = #[]
       | arity PAIR_EQ = #[0,0]
-      | arity LAM_EQ = #[1]
+      | arity LAM_EQ = #[1,0]
       | arity MEM_INTRO = #[0]
       | arity EQ_INTRO = #[0]
       | arity (WITNESS _) = #[0]
@@ -105,7 +109,7 @@ struct
       | to_string VOID_EQ = "void="
       | to_string PROD_INTRO = "prod-I"
       | to_string PROD_EQ = "prod="
-      | to_string IMP_INTRO = "imp-I"
+      | to_string FUN_INTRO = "fun-I"
       | to_string AX_EQ = "ax="
       | to_string PAIR_EQ = "pair="
       | to_string LAM_EQ = "lam="
@@ -144,7 +148,7 @@ struct
       case out ev of
            UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
          | PROD_INTRO $ #[D,E] => Syn.$$ (PAIR, #[extract D, extract E])
-         | IMP_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
+         | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
          | AX_EQ $ _ => Syn.$$ (AX, #[])
          | PAIR_EQ $ _ => Syn.$$ (AX, #[])
          | LAM_EQ $ _ => Syn.$$ (AX, #[])
@@ -191,8 +195,12 @@ struct
     exception Refine
 
     fun named name tac = fn goal =>
-      tac goal
-      handle Refine => raise Fail (name ^ "| " ^ print_goal goal)
+      let
+        fun fail () = raise Fail (name ^ "| " ^ print_goal goal)
+        val (subgoals, validation) = tac goal handle Refine => fail ()
+      in
+        (subgoals, fn Ds => validation Ds handle Refine => fail ())
+      end
 
     fun mk_evidence operator = fn Ds => operator %$$ Vector.fromList Ds
 
@@ -245,18 +253,34 @@ struct
                    | _ => raise Refine)
            | _ => raise Refine)
 
+    val FunIntro : tactic =
+      named "FunIntro" (fn (G, P) =>
+        case out P of
+             FUN $ #[P1, xP2] =>
+               let
+                 val (x, P2) = unbind xP2
+                 val Gx = Context.insert G x P1
+               in
+                 ([(Gx, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
+                  fn [D,E] => FUN_INTRO %$$ #[x %\\ D, E]
+                    | _ => raise Refine)
+               end
+           | _ => raise Refine)
+
     val LamEq : tactic =
       named "LamEq" (fn (G, P) =>
         case out P of
-             CAN_EQ $ #[lam, lam', imp] =>
-               (case (out lam, out lam', out imp) of
-                     (LAM $ #[zE], LAM $ #[z'E'], IMP $ #[A,B]) =>
+             CAN_EQ $ #[lam, lam', func] =>
+               (case (out lam, out lam', out func) of
+                     (LAM $ #[zE], LAM $ #[z'E'], FUN $ #[A,xB]) =>
                      let
                        val (z, E) = unbind zE
                        val E'z = subst1 z'E' (`` z)
+                       val Bz = subst1 xB (`` z)
+                       val Gz = Context.insert G z A
                      in
-                       ([(Context.insert G z A, EQ $$ #[E, E'z, B])],
-                        fn [D] => LAM_EQ %$$ #[z %\\ D]
+                       ([(Gz, EQ $$ #[E, E'z, Bz]), (G, MEM $$ #[A, UNIV $$ #[]])],
+                        fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
                            | _ => raise Refine)
                      end
                    | _ => raise Refine)
@@ -319,15 +343,6 @@ struct
                   | _ => raise Refine)
            | _ => raise Refine)
 
-    fun ImpIntro x : tactic =
-      named "ImpIntro" (fn (G, P) =>
-        case out P of
-             IMP $ #[P1, P2] =>
-               ([(Context.insert G x P1, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
-                fn [D,E] => IMP_INTRO %$$ #[x %\\ D, E]
-                  | _ => raise Refine)
-           | _ => raise Refine)
-
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (G, P) =>
         case Context.lookup G x of
@@ -358,7 +373,7 @@ struct
           EqAuto ORELSE
             Assumption ORELSE
               ProdIntro ORELSE_LAZY (fn () =>
-                ImpIntro (Variable.new()) ORELSE
+                FunIntro ORELSE
                   UnitIntro )
     in
       val Auto = REPEAT intro_rules

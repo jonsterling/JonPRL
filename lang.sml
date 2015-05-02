@@ -5,7 +5,7 @@ struct
     | VOID
     | UNIT | AX
     | PROD | PAIR | FST | SND
-    | IMP | LAM | AP
+    | FUN | LAM | AP
     | CAN_EQ | EQ
     | MEM
 
@@ -19,7 +19,7 @@ struct
     | arity PAIR = #[0,0]
     | arity FST = #[0]
     | arity SND = #[0]
-    | arity IMP = #[0,0]
+    | arity FUN = #[0,1]
     | arity LAM = #[1]
     | arity AP = #[0,0]
     | arity EQ = #[0,0,0]
@@ -34,7 +34,7 @@ struct
     | to_string PAIR = "pair"
     | to_string FST = "fst"
     | to_string SND = "fst"
-    | to_string IMP = "imp"
+    | to_string FUN = "fun"
     | to_string LAM = "λ"
     | to_string AP = "ap"
     | to_string EQ = "=*"

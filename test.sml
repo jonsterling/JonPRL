@@ -51,7 +51,7 @@ struct
       LAM $$ #[x \\ e x]
     end
 
-  fun ~> (a, b) = IMP $$ #[a,b]
+  fun ~> (a, b) = FUN $$ #[a,Variable.new () \\ b]
   infixr ~>
 
   fun mem (m, a) = MEM $$ #[m,a]
@@ -80,12 +80,12 @@ struct
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN LamEq THEN VoidElim THEN Auto)
+        (MemIntro THEN EqIntro THEN LamEq THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
         (void ~> (unit & unit))
-        (ImpIntro (Var.new()) THENL [VoidElim THEN Auto, Auto])
+        (FunIntro THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
