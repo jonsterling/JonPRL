@@ -23,7 +23,7 @@ struct
          | (subgoals1, validation1) =>
              let
                val (subgoals2, validations2) =
-                 ListPair.unzip (ListPair.map (fn (f,x) => f x) (tacn (), subgoals1))
+                 ListPair.unzip (ListPair.mapEq (fn (f,x) => f x) (tacn (), subgoals1))
              in
                refine (validation1, subgoals2, validations2)
              end
