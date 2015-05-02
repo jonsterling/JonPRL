@@ -17,4 +17,6 @@ sig
 
   val eq : ('a * 'a -> bool) -> 'a context * 'a context -> bool
 
+  val to_string : PrintMode.t * (PrintMode.t -> 'a -> string) -> 'a context -> string
+
 end

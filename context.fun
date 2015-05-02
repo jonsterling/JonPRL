@@ -35,4 +35,13 @@ struct
     in
       M.foldli probe true ctx
     end
+
+  fun to_string (mode, printer) ctx =
+    let
+      fun welp (x, a, r) =
+        r ^ ", " ^ V.to_string mode x ^ ":" ^ printer mode a
+    in
+      M.foldli welp "." ctx
+    end
+
 end
