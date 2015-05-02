@@ -4,6 +4,6 @@ sig
   type evidence
 
   type validation = evidence list -> evidence
-  type tactic = goal -> (goal list * validation)
+  type tactic = goal -> goal list * validation
 end
 

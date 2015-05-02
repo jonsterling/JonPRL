@@ -188,146 +188,160 @@ struct
 
   structure InferenceRules =
   struct
-    fun fail name goal =
-      raise Fail (name ^ "| " ^ print_goal goal)
+    exception Refine
 
-    val UnitIntro : tactic = fn (G, P) =>
-      case out P of
-           UNIT $ _ => ([], fn args => UNIT_INTRO %$$ Vector.fromList args)
-         | _ => fail "UnitIntro" (G, P)
+    fun named name tac = fn goal =>
+      tac goal
+      handle Refine => raise Fail (name ^ "| " ^ print_goal goal)
 
-    val UnitEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_MEM $ #[unit, unit', univ] =>
-             (case (out unit, out unit', out univ) of
-                  (UNIT $ _, UNIT $ _, UNIV $ _) => ([], fn args => UNIT_EQ %$$ Vector.fromList args)
-                | _ => fail "UnitEq" (G, P))
-         | _ => fail "UnitEq" (G, P)
+    fun mk_evidence operator = fn Ds => operator %$$ Vector.fromList Ds
 
-    val VoidEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_MEM $ #[void, void', univ] =>
-             (case (out void, out void', out univ) of
-                  (VOID $ _, VOID $ _, UNIV $ _) => ([], fn args => VOID_EQ %$$ Vector.fromList args)
-                | _ => fail "VoidEq" (G, P))
-         | _ => fail "VoidEq" (G, P)
+    val UnitIntro : tactic =
+      named "UnitIntro" (fn (G, P) =>
+        case out P of
+             UNIT $ _ => ([], mk_evidence UNIT_INTRO)
+           | _ => raise Refine)
 
-    val VoidElim : tactic = fn (G, P) =>
-      ([(G, VOID $$ #[])], fn args => VOID_ELIM %$$ Vector.fromList args)
+    val UnitEq : tactic =
+      named "UnitEq" (fn (G, P) =>
+        case out P of
+             CAN_MEM $ #[unit, unit', univ] =>
+               (case (out unit, out unit', out univ) of
+                    (UNIT $ _, UNIT $ _, UNIV $ _) => ([], mk_evidence UNIT_EQ)
+                  | _ => raise Refine)
+           | _ => raise Refine)
 
-    val AxEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_EQ $ #[ax, ax', unit] =>
-             (case (out ax, out ax', out unit) of
-                  (AX $ #[], AX $ #[], UNIT $ #[]) =>
-                    ([], fn args => AX_EQ %$$ Vector.fromList args)
-                | _ => fail "AxEq" (G, P))
-         | _ => fail "AxEq" (G, P)
+    val VoidEq : tactic =
+      named "VoidEq" (fn (G, P) =>
+        case out P of
+             CAN_MEM $ #[void, void', univ] =>
+               (case (out void, out void', out univ) of
+                    (VOID $ _, VOID $ _, UNIV $ _) => ([], mk_evidence VOID_EQ)
+                  | _ => raise Refine)
+           | _ => raise Refine)
 
-    val PairEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_EQ $ #[pair, pair', prod] =>
-             (case (out pair, out pair', out prod) of
-                   (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,B]) =>
-                     ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
-                      fn args => PAIR_EQ %$$ Vector.fromList args)
-                 | _ => fail "PairEq" (G, P))
-         | _ => fail "PairEq" (G, P)
+    val VoidElim : tactic =
+      named "VoidEq" (fn (G, P) =>
+        ([(G, VOID $$ #[])], mk_evidence VOID_ELIM))
 
-    val LamEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_EQ $ #[lam, lam', imp] =>
-             (case (out lam, out lam', out imp) of
-                   (LAM $ #[zE], LAM $ #[z'E'], IMP $ #[A,B]) =>
-                   let
-                     val (z, E) = unbind zE
-                     val E'z = subst1 z'E' (`` z)
-                   in
-                     ([(Context.insert G z A, EQ $$ #[E, E'z, B])],
-                      fn [D] => LAM_EQ %$$ #[z %\\ D]
-                         | _ => fail "LamEq" (G, P))
-                   end
-                 | _ => fail "LamEq" (G, P))
-         | _ => fail "LamEq" (G, P)
+    val AxEq : tactic =
+      named "AxEq" (fn (G, P) =>
+        case out P of
+             CAN_EQ $ #[ax, ax', unit] =>
+               (case (out ax, out ax', out unit) of
+                    (AX $ #[], AX $ #[], UNIT $ #[]) =>
+                      ([], mk_evidence AX_EQ)
+                  | _ => raise Refine)
+           | _ => raise Refine)
 
-    val MemIntro : tactic = fn (G, P) =>
+    val PairEq : tactic =
+      named "PairEq" (fn (G, P) =>
+        case out P of
+             CAN_EQ $ #[pair, pair', prod] =>
+               (case (out pair, out pair', out prod) of
+                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,B]) =>
+                       ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
+                        mk_evidence PAIR_EQ)
+                   | _ => raise Refine)
+           | _ => raise Refine)
+
+    val LamEq : tactic =
+      named "LamEq" (fn (G, P) =>
+        case out P of
+             CAN_EQ $ #[lam, lam', imp] =>
+               (case (out lam, out lam', out imp) of
+                     (LAM $ #[zE], LAM $ #[z'E'], IMP $ #[A,B]) =>
+                     let
+                       val (z, E) = unbind zE
+                       val E'z = subst1 z'E' (`` z)
+                     in
+                       ([(Context.insert G z A, EQ $$ #[E, E'z, B])],
+                        fn [D] => LAM_EQ %$$ #[z %\\ D]
+                           | _ => raise Refine)
+                     end
+                   | _ => raise Refine)
+           | _ => raise Refine)
+
+    val MemIntro : tactic =
+      named "MemIntro" (fn (G, P) =>
       case out P of
            MEM $ #[M, A] =>
-             ([(G, EQ $$ #[M, M, A])],
-              fn args => MEM_INTRO %$$ Vector.fromList args)
-         | _ => fail "MemIntro" (G, P)
+             ([(G, EQ $$ #[M, M, A])], mk_evidence MEM_INTRO)
+         | _ => raise Refine)
 
-    val EqIntro : tactic = fn (G, P) =>
-      case out P of
-           EQ $ #[M, N, A] =>
-             let
-               val M0 = Whnf.whnf M
-               val N0 = Whnf.whnf N
-               val A0 = Whnf.whnf A
-             in
-               ([(G, CAN_EQ $$ #[M0, N0, A0])],
-                fn args => EQ_INTRO %$$ Vector.fromList args)
-             end
-         | _ => fail "EqIntro" (G, P)
+    val EqIntro : tactic =
+      named "EqIntro" (fn (G, P) =>
+        case out P of
+             EQ $ #[M, N, A] =>
+               let
+                 val M0 = Whnf.whnf M
+                 val N0 = Whnf.whnf N
+                 val A0 = Whnf.whnf A
+               in
+                 ([(G, CAN_EQ $$ #[M0, N0, A0])], mk_evidence EQ_INTRO)
+               end
+           | _ => raise Refine)
 
-    fun Witness M : tactic = fn (G, P) =>
-      ([(G, MEM $$ #[M, P])],
-       fn [D] => WITNESS M %$$ #[D]
-         | _ => fail "Witness" (G,P))
+    fun Witness M : tactic =
+      named "Witness" (fn (G, P) =>
+        ([(G, MEM $$ #[M, P])], mk_evidence (WITNESS M)))
 
-    val HypEq : tactic = fn (G, P) =>
-      case out P of
-           EQ $ #[M,M',A] =>
-           (case (Syn.eq (M, M'), out M) of
-                 (true, ` x) =>
-                   (case Context.lookup G x of
-                         SOME Q =>
-                           if Syn.eq (A, Q)
-                           then ([], fn _ => HYP_EQ %$$ #[%`` x])
-                           else fail "HypEq" (G, P)
-                       | NONE => fail "HypEq" (G, P))
-               | _ => fail "HypEq" (G, P))
-         | _ => fail "HypEq" (G, P)
+    val HypEq : tactic =
+      named "HypEq" (fn (G, P) =>
+        case out P of
+             EQ $ #[M,M',A] =>
+             (case (Syn.eq (M, M'), out M) of
+                   (true, ` x) =>
+                     (case Context.lookup G x of
+                           SOME Q =>
+                             if Syn.eq (A, Q)
+                             then ([], fn _ => HYP_EQ %$$ #[%`` x])
+                             else raise Refine
+                         | NONE => raise Refine)
+                 | _ => raise Refine)
+           | _ => raise Refine)
 
-    val ProdIntro : tactic = fn (G, P) =>
-      case out P of
-           PROD $ #[P1, P2] =>
-             ([(G, P1), (G, P2)],
-              fn args => PROD_INTRO %$$ Vector.fromList args)
-         | _ => fail "ProdIntro" (G, P)
+    val ProdIntro : tactic =
+      named "ProdIntro" (fn (G, P) =>
+        case out P of
+             PROD $ #[P1, P2] =>
+               ([(G, P1), (G, P2)], mk_evidence PROD_INTRO)
+           | _ => raise Refine)
 
-    exception Hole
+    val ProdEq : tactic =
+      named "ProdEq" (fn (G, P) =>
+        case out P of
+             CAN_EQ $ #[prod1, prod2, univ] =>
+               (case (out prod1, out prod2, out univ) of
+                    (PROD $ #[A,B], PROD $ #[A',B'], UNIV $ #[]) =>
+                      ([(G, EQ $$ #[A,A',univ]), (G, EQ $$ #[B,B',univ])],
+                       mk_evidence PROD_EQ)
+                  | _ => raise Refine)
+           | _ => raise Refine)
 
-    val ProdEq : tactic = fn (G, P) =>
-      case out P of
-           CAN_EQ $ #[prod1, prod2, univ] =>
-             (case (out prod1, out prod2, out univ) of
-                  (PROD $ #[A,B], PROD $ #[A',B'], UNIV $ #[]) =>
-                    ([(G, EQ $$ #[A,A',univ]), (G, EQ $$ #[B,B',univ])],
-                     fn args => PROD_EQ %$$ Vector.fromList args)
-                | _ => fail "ProdEq" (G, P))
-         | _ => fail "ProdEq" (G, P)
+    fun ImpIntro x : tactic =
+      named "ImpIntro" (fn (G, P) =>
+        case out P of
+             IMP $ #[P1, P2] =>
+               ([(Context.insert G x P1, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
+                fn [D,E] => IMP_INTRO %$$ #[x %\\ D, E]
+                  | _ => raise Refine)
+           | _ => raise Refine)
 
-    fun ImpIntro x : tactic = fn (G, P) =>
-      case out P of
-           IMP $ #[P1, P2] =>
-             ([(Context.insert G x P1, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
-              fn [D,E] => IMP_INTRO %$$ #[x %\\ D, E]
-                | _ => fail "ImpIntro" (G, P))
-         | _ => fail "ImpIntro" (G, P)
+    fun Hypothesis x : tactic =
+      named "Hypothesis" (fn (G, P) =>
+        case Context.lookup G x of
+              SOME P' =>
+                if Syn.eq (P, P')
+                then ([], fn _ => %`` x)
+                else raise Refine
+            | NONE => raise Refine)
 
-    fun Hypothesis x : tactic = fn (G, P) =>
-      (case Context.lookup G x of
-            SOME P' =>
-              if Syn.eq (P, P')
-              then ([], fn _ => %`` x)
-              else fail "Hypothesis" (G, P)
-          | NONE => fail "Hypothesis" (G, P))
-
-    val Assumption : tactic = fn (G, P) =>
-      (case Context.search G (fn x => Syn.eq (P, x)) of
-           SOME (x, _) => ([], fn _ => %`` x)
-         | NONE => fail "Assumption" (G, P))
+    val Assumption : tactic =
+      named "Assumption" (fn (G, P) =>
+        case Context.search G (fn x => Syn.eq (P, x)) of
+             SOME (x, _) => ([], fn _ => %`` x)
+           | NONE => raise Refine)
   end
 
   structure DerivedTactics =
