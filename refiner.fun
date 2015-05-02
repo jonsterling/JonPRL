@@ -32,6 +32,7 @@ sig
 
     val ProdEq : tactic
     val ProdIntro : Syn.t -> tactic
+    val PairEq : tactic
 
     val FunEq : tactic
     val FunIntro : tactic
@@ -40,8 +41,6 @@ sig
     val MemIntro : tactic
     val EqIntro : tactic
     val Witness : Syn.t -> tactic
-
-    val PairEq : tactic
 
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
@@ -98,7 +97,7 @@ struct
       | arity FUN_INTRO = #[1,0]
       | arity FUN_EQ = #[0,1]
       | arity AX_EQ = #[]
-      | arity PAIR_EQ = #[0,0]
+      | arity PAIR_EQ = #[0,0,1]
       | arity LAM_EQ = #[1,0]
       | arity MEM_INTRO = #[0]
       | arity EQ_INTRO = #[0]
@@ -254,9 +253,15 @@ struct
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        let
-                         val BM = subst1 xB M
+                         val (x, Bx) = unbind xB
+                         val BM = subst M x Bx
+                         val Gx = Context.insert G x A
                        in
-                         ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',BM])], mk_evidence PAIR_EQ)
+                         ([(G, EQ $$ #[M,M',A]),
+                           (G, EQ $$ #[N,N',BM]),
+                           (Gx, MEM $$ #[Bx, UNIV $$ #[]])],
+                         fn [D,E,F] => PAIR_EQ %$$ #[D, E, x %\\ F]
+                          | _ => raise Refine)
                        end
                    | _ => raise Refine)
            | _ => raise Refine)
