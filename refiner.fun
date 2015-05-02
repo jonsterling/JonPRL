@@ -31,7 +31,7 @@ sig
     val AxEq : tactic
 
     val ProdEq : tactic
-    val ProdIntro : tactic
+    val ProdIntro : Syn.t -> tactic
 
     val FunEq : tactic
     val FunIntro : tactic
@@ -63,7 +63,7 @@ struct
     datatype t
       = VOID_EQ
       | UNIT_INTRO | UNIT_EQ
-      | PROD_INTRO | PROD_EQ
+      | PROD_INTRO of Syn.t | PROD_EQ
       | FUN_INTRO | FUN_EQ | LAM_EQ
       | AX_EQ
       | PAIR_EQ
@@ -76,7 +76,7 @@ struct
     fun eq UNIT_INTRO UNIT_INTRO = true
       | eq VOID_EQ VOID_EQ = true
       | eq UNIT_EQ UNIT_EQ = true
-      | eq PROD_INTRO PROD_INTRO = true
+      | eq (PROD_INTRO x) (PROD_INTRO y) = Syn.eq (x, y)
       | eq PROD_EQ PROD_EQ = true
       | eq FUN_INTRO FUN_INTRO = true
       | eq FUN_EQ FUN_EQ = true
@@ -93,8 +93,8 @@ struct
     fun arity UNIT_INTRO = #[]
       | arity VOID_EQ = #[]
       | arity UNIT_EQ = #[]
-      | arity PROD_INTRO = #[0,0]
-      | arity PROD_EQ = #[0,0]
+      | arity (PROD_INTRO _) = #[0,0]
+      | arity PROD_EQ = #[0,1]
       | arity FUN_INTRO = #[1,0]
       | arity FUN_EQ = #[0,1]
       | arity AX_EQ = #[]
@@ -109,7 +109,7 @@ struct
     fun to_string UNIT_INTRO = "unit-I"
       | to_string UNIT_EQ = "unit="
       | to_string VOID_EQ = "void="
-      | to_string PROD_INTRO = "prod-I"
+      | to_string (PROD_INTRO w) = "prod-I{" ^ Syn.to_string print_mode w ^ "}"
       | to_string PROD_EQ = "prod="
       | to_string FUN_INTRO = "fun-I"
       | to_string FUN_EQ = "fun="
@@ -150,7 +150,7 @@ struct
     fun extract (ev : E.t) : Syn.t =
       case out ev of
            UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
-         | PROD_INTRO $ #[D,E] => Syn.$$ (PAIR, #[extract D, extract E])
+         | PROD_INTRO w $ #[D,E] => Syn.$$ (PAIR, #[w, extract E])
          | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
          | AX_EQ $ _ => Syn.$$ (AX, #[])
          | PAIR_EQ $ _ => Syn.$$ (AX, #[])
@@ -252,9 +252,12 @@ struct
         case out P of
              CAN_EQ $ #[pair, pair', prod] =>
                (case (out pair, out pair', out prod) of
-                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,B]) =>
-                       ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
-                        mk_evidence PAIR_EQ)
+                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
+                       let
+                         val BM = subst1 xB M
+                       in
+                         ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',BM])], mk_evidence PAIR_EQ)
+                       end
                    | _ => raise Refine)
            | _ => raise Refine)
 
@@ -348,11 +351,11 @@ struct
                  | _ => raise Refine)
            | _ => raise Refine)
 
-    val ProdIntro : tactic =
+    fun ProdIntro w : tactic =
       named "ProdIntro" (fn (G, P) =>
         case out P of
-             PROD $ #[P1, P2] =>
-               ([(G, P1), (G, P2)], mk_evidence PROD_INTRO)
+             PROD $ #[P1, xP2] =>
+               ([(G, MEM $$ #[ w, P1]), (G, subst1 xP2 w)], mk_evidence (PROD_INTRO w))
            | _ => raise Refine)
 
     val ProdEq : tactic =
@@ -360,9 +363,16 @@ struct
         case out P of
              CAN_EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
-                    (PROD $ #[A,B], PROD $ #[A',B'], UNIV $ #[]) =>
-                      ([(G, EQ $$ #[A,A',univ]), (G, EQ $$ #[B,B',univ])],
-                       mk_evidence PROD_EQ)
+                    (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
+                      let
+                        val (x, Bx) = unbind xB
+                        val B'x = subst1 yB' (`` x)
+                        val Gx = Context.insert G x A
+                      in
+                        ([(G, EQ $$ #[A,A',univ]), (Gx, EQ $$ #[Bx,B'x,univ])],
+                         fn [D, E] => PROD_EQ %$$ #[D, x %\\ E]
+                          | _ => raise Refine)
+                      end
                   | _ => raise Refine)
            | _ => raise Refine)
 
@@ -394,9 +404,8 @@ struct
         MemIntro ORELSE
           EqAuto ORELSE
             Assumption ORELSE
-              ProdIntro ORELSE
-                FunIntro ORELSE
-                  UnitIntro
+              FunIntro ORELSE
+                UnitIntro
     in
       val Auto = REPEAT intro_rules
     end

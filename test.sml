@@ -39,7 +39,7 @@ struct
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
 
-  fun & (a, b) = PROD $$ #[a,b]
+  fun & (a, b) = PROD $$ #[a, Variable.new() \\ b]
   infix &
 
   fun pair m n = PAIR $$ #[m,n]
@@ -60,12 +60,12 @@ struct
   val _ =
       check
         (unit & (unit & unit))
-        Auto
+        (ProdIntro ax THENL [Auto, ProdIntro ax THEN Auto])
 
   val _ =
      check
        (unit ~> (unit & unit))
-       Auto
+       (FunIntro THENL [ProdIntro ax THEN Auto, Auto])
 
   val _ =
       check

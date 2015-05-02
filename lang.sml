@@ -15,7 +15,7 @@ struct
     | arity VOID = #[]
     | arity UNIT = #[]
     | arity AX = #[]
-    | arity PROD = #[0,0]
+    | arity PROD = #[0,1]
     | arity PAIR = #[0,0]
     | arity FST = #[0]
     | arity SND = #[0]
