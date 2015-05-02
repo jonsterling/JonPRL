@@ -75,27 +75,26 @@ struct
   val _ =
       check
         (fst (pair ax ax) mem unit)
-        (REPEAT MemAuto)
+        Auto
 
   val _ =
       check
         (lam (fn x => `` x) mem (unit ~> unit))
-        (MemAuto THEN EqAuto)
+        Auto
 
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemAuto THEN VoidElim THEN Assumption)
+        (MemAuto THEN VoidElim THEN Auto)
 
   val _ =
       check
         (void ~> (unit & unit))
-        (ImpIntro (Var.new()) THEN VoidElim THEN Assumption)
+        (ImpIntro (Var.new()) THEN VoidElim THEN Auto)
 
   val _ =
       check
         (unit ~> (unit & unit))
-        (Witness (lam (fn x => pair (`` x) (`` x))) THEN
-          MemAuto THEN (REPEAT EqAuto))
+        (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
 end
 

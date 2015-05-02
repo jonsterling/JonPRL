@@ -42,6 +42,7 @@ sig
 
   structure DerivedTactics :
   sig
+    val Auto : tactic
     val EqAuto : tactic
     val CanEqAuto : tactic
     val MemAuto : tactic
@@ -296,6 +297,8 @@ struct
     val CanEqAuto = AxIntro ORELSE PairIntro ORELSE LamIntro
     val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
     val MemAuto = MemIntro THEN EqAuto
+
+    val Auto = REPEAT (MemIntro ORELSE EqAuto ORELSE Assumption)
   end
 end
 
