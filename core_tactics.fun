@@ -6,6 +6,23 @@ struct
   fun ID g =
     ([g], fn [D] => D | _ => raise Fail "ID")
 
+  fun THENL_LAZY (tac1, tacn) (g : R.goal) =
+    case tac1 g of
+         ([], validation1) => ([], validation1)
+       | (subgoals1, validation1) =>
+           let
+             val (subgoals2, validations2) =
+               ListPair.unzip (ListPair.map (fn (f,x) => f x) (tacn (), subgoals1))
+           in
+             (List.foldl (op @) [] subgoals2,
+              fn Ds =>
+                let
+                  val lengths = List.map List.length subgoals2
+                  val derivations = ListUtil.multisplit lengths Ds
+                in
+                  validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
+                end)
+           end
 
   fun THEN_LAZY (tac1, tac2) (g : R.goal) =
     case tac1 g of
@@ -24,23 +41,8 @@ struct
                 end)
            end
 
-  fun THENL (tac1, tacn) (g : R.goal) =
-    case tac1 g of
-         ([], validation1) => ([], validation1)
-       | (subgoals1, validation1) =>
-           let
-             val (subgoals2, validations2) =
-               ListPair.unzip (ListPair.map (fn (f,x) => f x) (tacn, subgoals1))
-           in
-             (List.foldl (op @) [] subgoals2,
-              fn Ds =>
-                let
-                  val lengths = List.map List.length subgoals2
-                  val derivations = ListUtil.multisplit lengths Ds
-                in
-                  validation1 (ListPair.map (fn (v, d) => v d) (validations2, derivations))
-                end)
-           end
+  fun THENL (tac1, tacn) =
+    THENL_LAZY (tac1, fn () => tacn)
 
   fun THEN (tac1, tac2) : tactic =
     THEN_LAZY (tac1, fn () => tac2)
