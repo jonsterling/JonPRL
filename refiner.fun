@@ -33,6 +33,7 @@ sig
     val ProdEq : tactic
     val ProdIntro : tactic
 
+    val FunEq : tactic
     val FunIntro : tactic
     val LamEq : tactic
 
@@ -63,10 +64,9 @@ struct
       = VOID_EQ
       | UNIT_INTRO | UNIT_EQ
       | PROD_INTRO | PROD_EQ
-      | FUN_INTRO
+      | FUN_INTRO | FUN_EQ | LAM_EQ
       | AX_EQ
       | PAIR_EQ
-      | LAM_EQ
       | MEM_INTRO
       | EQ_INTRO
       | WITNESS of Syn.t
@@ -79,6 +79,7 @@ struct
       | eq PROD_INTRO PROD_INTRO = true
       | eq PROD_EQ PROD_EQ = true
       | eq FUN_INTRO FUN_INTRO = true
+      | eq FUN_EQ FUN_EQ = true
       | eq AX_EQ AX_EQ = true
       | eq PAIR_EQ PAIR_EQ = true
       | eq LAM_EQ LAM_EQ = true
@@ -95,6 +96,7 @@ struct
       | arity PROD_INTRO = #[0,0]
       | arity PROD_EQ = #[0,0]
       | arity FUN_INTRO = #[1,0]
+      | arity FUN_EQ = #[0,1]
       | arity AX_EQ = #[]
       | arity PAIR_EQ = #[0,0]
       | arity LAM_EQ = #[1,0]
@@ -110,6 +112,7 @@ struct
       | to_string PROD_INTRO = "prod-I"
       | to_string PROD_EQ = "prod="
       | to_string FUN_INTRO = "fun-I"
+      | to_string FUN_EQ = "fun="
       | to_string AX_EQ = "ax="
       | to_string PAIR_EQ = "pair="
       | to_string LAM_EQ = "lam="
@@ -157,6 +160,8 @@ struct
          | UNIT_EQ $ _ => Syn.$$ (AX, #[])
          | VOID_EQ $ _ => Syn.$$ (AX, #[])
          | PROD_EQ $ _ => Syn.$$ (AX, #[])
+         | FUN_EQ $ _ => Syn.$$ (AX, #[])
+         | HYP_EQ $ _ => Syn.$$ (AX, #[])
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
          | x \ E => Syn.\\ (x, extract E)
@@ -251,6 +256,24 @@ struct
                        ([(G, EQ $$ #[M,M',A]), (G, EQ $$ #[N,N',B])],
                         mk_evidence PAIR_EQ)
                    | _ => raise Refine)
+           | _ => raise Refine)
+
+    val FunEq : tactic =
+      named "FunEq" (fn (G, P) =>
+        case out P of
+             CAN_EQ $ #[fun1, fun2, univ] =>
+               (case (out fun1, out fun1, out univ) of
+                    (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
+                      let
+                        val (x, Bx) = unbind xB
+                        val B'x = subst1 yB' (`` x)
+                        val Gx = Context.insert G x A
+                      in
+                        ([(G, EQ $$ #[A,A',univ]), (Gx, EQ $$ #[Bx,B'x,univ])],
+                         fn [D, E] => FUN_EQ %$$ #[D, x %\\ E]
+                          | _ => raise Refine)
+                      end
+                  | _ => raise Refine)
            | _ => raise Refine)
 
     val FunIntro : tactic =
@@ -364,17 +387,16 @@ struct
     open CoreTactics InferenceRules
     infix ORELSE ORELSE_LAZY THEN
 
-    val CanEqAuto = AxEq ORELSE PairEq ORELSE LamEq ORELSE UnitEq ORELSE ProdEq ORELSE VoidEq
-    val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
-
     local
+      val CanEqAuto = AxEq ORELSE PairEq ORELSE LamEq ORELSE UnitEq ORELSE ProdEq ORELSE VoidEq
+      val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
       val intro_rules =
         MemIntro ORELSE
           EqAuto ORELSE
             Assumption ORELSE
-              ProdIntro ORELSE_LAZY (fn () =>
+              ProdIntro ORELSE
                 FunIntro ORELSE
-                  UnitIntro )
+                  UnitIntro
     in
       val Auto = REPEAT intro_rules
     end
