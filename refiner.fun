@@ -28,6 +28,7 @@ sig
 
     val UnitEq : tactic
     val UnitIntro : tactic
+    val UnitElim : Context.name -> tactic
     val AxEq : tactic
 
     val ProdEq : tactic
@@ -57,11 +58,18 @@ struct
   type context = Syn.t Context.context
   type goal = context * Syn.t
 
+  fun ctx_subst (G : context) (m : Syn.t) (x : Context.name) =
+    let
+      val (G', _) = Context.remove G x
+    in
+      Context.map (Syn.subst m x) G'
+    end
+
   structure EOp =
   struct
     datatype t
       = VOID_EQ
-      | UNIT_INTRO | UNIT_EQ
+      | UNIT_INTRO | UNIT_EQ | UNIT_ELIM of Context.name
       | PROD_INTRO of Syn.t | PROD_EQ
       | FUN_INTRO | FUN_EQ | LAM_EQ
       | AX_EQ
@@ -75,6 +83,7 @@ struct
     fun eq UNIT_INTRO UNIT_INTRO = true
       | eq VOID_EQ VOID_EQ = true
       | eq UNIT_EQ UNIT_EQ = true
+      | eq (UNIT_ELIM x) (UNIT_ELIM y) = Syn.Variable.eq x y
       | eq (PROD_INTRO x) (PROD_INTRO y) = Syn.eq (x, y)
       | eq PROD_EQ PROD_EQ = true
       | eq FUN_INTRO FUN_INTRO = true
@@ -92,6 +101,7 @@ struct
     fun arity UNIT_INTRO = #[]
       | arity VOID_EQ = #[]
       | arity UNIT_EQ = #[]
+      | arity (UNIT_ELIM _) = #[0]
       | arity (PROD_INTRO _) = #[0,0]
       | arity PROD_EQ = #[0,1]
       | arity FUN_INTRO = #[1,0]
@@ -107,6 +117,7 @@ struct
 
     fun to_string UNIT_INTRO = "unit-I"
       | to_string UNIT_EQ = "unit="
+      | to_string (UNIT_ELIM x) = "unit-E{" ^ Syn.Variable.to_string print_mode x ^ "}"
       | to_string VOID_EQ = "void="
       | to_string (PROD_INTRO w) = "prod-I{" ^ Syn.to_string print_mode w ^ "}"
       | to_string PROD_EQ = "prod="
@@ -151,6 +162,7 @@ struct
            UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
          | PROD_INTRO w $ #[D,E] => Syn.$$ (PAIR, #[w, extract E])
          | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
+         | UNIT_ELIM x $ #[E] => Syn.$$ (MATCH_UNIT, #[Syn.`` x, extract E])
          | AX_EQ $ _ => Syn.$$ (AX, #[])
          | PAIR_EQ $ _ => Syn.$$ (AX, #[])
          | LAM_EQ $ _ => Syn.$$ (AX, #[])
@@ -213,6 +225,22 @@ struct
         case out P of
              UNIT $ _ => ([], mk_evidence UNIT_INTRO)
            | _ => raise Refine)
+
+    fun UnitElim x : tactic =
+      named "UnitElim" (fn (G, P) =>
+        case Context.lookup G x of
+             SOME unit =>
+               (case out unit of
+                     UNIT $ #[] =>
+                       let
+                         val ax = AX $$ #[]
+                         val G' = ctx_subst G ax x
+                         val P' = subst ax x P
+                       in
+                         ([(G', P')], mk_evidence (UNIT_ELIM x))
+                       end
+                   | _ => raise Refine)
+           | NONE => raise Refine)
 
     val UnitEq : tactic =
       named "UnitEq" (fn (G, P) =>

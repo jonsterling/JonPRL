@@ -3,7 +3,7 @@ struct
   datatype t
     = UNIV
     | VOID
-    | UNIT | AX
+    | UNIT | AX | MATCH_UNIT
     | PROD | PAIR | FST | SND
     | FUN | LAM | AP
     | CAN_EQ | EQ
@@ -15,6 +15,7 @@ struct
     | arity VOID = #[]
     | arity UNIT = #[]
     | arity AX = #[]
+    | arity MATCH_UNIT = #[0,0]
     | arity PROD = #[0,1]
     | arity PAIR = #[0,0]
     | arity FST = #[0]
@@ -30,6 +31,7 @@ struct
     | to_string VOID = "void"
     | to_string UNIT = "unit"
     | to_string AX = "ax"
+    | to_string MATCH_UNIT = "match"
     | to_string PROD = "prod"
     | to_string PAIR = "pair"
     | to_string FST = "fst"

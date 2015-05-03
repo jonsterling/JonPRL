@@ -23,6 +23,10 @@ struct
            (case out (whnf M) of
                  LAM $ #[xE] => whnf (subst1 xE N)
                | _ => raise WhnfStuck)
+       | MATCH_UNIT $ #[M,N] =>
+           (case out (whnf M) of
+                 AX $ #[] => whnf N
+               | _ => raise WhnfStuck)
        | _ => x
 
 
