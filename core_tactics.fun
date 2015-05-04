@@ -17,7 +17,7 @@ struct
 
   local
     fun refine (supervalidation, subgoals, validations) =
-      (List.foldl (op @) [] subgoals,
+      (List.concat subgoals,
        supervalidation o
          map_shape (map length subgoals) validations)
   in
