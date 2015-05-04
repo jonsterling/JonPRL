@@ -1,6 +1,6 @@
 structure Test =
 struct
-  val print_mode = PrintMode.User
+  val print_mode = PrintMode.Debug
 
   structure Var = Variable ()
   structure Syn =
@@ -39,57 +39,71 @@ struct
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
 
-  fun & (a, b) = PROD $$ #[a, Variable.new() \\ b]
+  fun & (a, b) = PROD $$ #[a, Variable.named "x" \\ b]
   infix &
 
   fun pair m n = PAIR $$ #[m,n]
   fun fst m = FST $$ #[m]
   fun lam e =
     let
-      val x = Var.new ()
+      val x = Var.named "x"
     in
       LAM $$ #[x \\ e x]
     end
 
-  fun ~> (a, b) = FUN $$ #[a,Variable.new () \\ b]
+  fun pi a b =
+    let
+      val x = Var.named "x"
+    in
+      FUN $$ #[a, x \\ b x]
+    end
+
+  fun ~> (a, b) = FUN $$ #[a,Variable.named "x" \\ b]
   infixr ~>
 
   fun mem (m, a) = MEM $$ #[m,a]
   infix mem
 
   val _ =
-      check
-        (unit & (unit & unit))
-        (ProdIntro ax THENL [Auto, ProdIntro ax THEN Auto])
+    check
+      (unit & (unit & unit))
+      (ProdIntro ax THEN (TRY (ProdIntro ax)) THEN Auto)
 
   val _ =
-     check
-       (unit ~> (unit & unit))
-       (FunIntro THENL [ProdIntro ax THEN Auto, Auto])
+    check
+      (unit ~> (unit & unit))
+      (FunIntro (Variable.new ()) THENL [ProdIntro ax THEN Auto, Auto])
 
   val _ =
-      check
-        (fst (pair ax ax) mem unit)
-        Auto
+    check
+      (fst (pair ax ax) mem unit)
+      Auto
 
   val _ =
-      check
-        (lam (fn x => `` x) mem (unit ~> unit))
-        Auto
+    check
+      (lam (fn x => `` x) mem (unit ~> unit))
+      Auto
 
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN LamEq THENL [VoidElim THEN Auto, Auto])
+        (MemIntro THEN EqIntro THEN (LamEq (Variable.new())) THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
         (void ~> (unit & unit))
-        (FunIntro THENL [VoidElim THEN Auto, Auto])
+        (FunIntro (Variable.new()) THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
         (unit ~> (unit & unit))
         (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
+
+  val z = Variable.named "z"
+  val _ =
+      check
+        (FUN $$ #[unit, z \\ unit])
+        (FunIntro z THENL [Hypothesis z, Auto])
 end
+
 

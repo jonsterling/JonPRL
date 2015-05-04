@@ -31,13 +31,13 @@ sig
     val UnitElim : Context.name -> tactic
     val AxEq : tactic
 
-    val ProdEq : tactic
+    val ProdEq : Context.name -> tactic
     val ProdIntro : Syn.t -> tactic
-    val PairEq : tactic
+    val PairEq : Context.name -> tactic
 
-    val FunEq : tactic
-    val FunIntro : tactic
-    val LamEq : tactic
+    val FunEq : Context.name -> tactic
+    val FunIntro : Context.name -> tactic
+    val LamEq : Context.name -> tactic
 
     val MemIntro : tactic
     val EqIntro : tactic
@@ -274,71 +274,71 @@ struct
                   | _ => raise Refine)
            | _ => raise Refine)
 
-    val PairEq : tactic =
+    fun PairEq z : tactic =
       named "PairEq" (fn (G, P) =>
         case out P of
              CAN_EQ $ #[pair, pair', prod] =>
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        let
-                         val (x, Bx) = unbind xB
-                         val BM = subst M x Bx
-                         val Gx = Context.insert G x A
+                         val Bz = subst1 xB (`` z)
+                         val BM = subst1 xB M
+                         val Gz = Context.insert G z A
                        in
                          ([(G, EQ $$ #[M,M',A]),
                            (G, EQ $$ #[N,N',BM]),
-                           (Gx, MEM $$ #[Bx, UNIV $$ #[]])],
-                         fn [D,E,F] => PAIR_EQ %$$ #[D, E, x %\\ F]
+                           (Gz, MEM $$ #[Bz, UNIV $$ #[]])],
+                         fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
                           | _ => raise Refine)
                        end
                    | _ => raise Refine)
            | _ => raise Refine)
 
-    val FunEq : tactic =
+    fun FunEq z : tactic =
       named "FunEq" (fn (G, P) =>
         case out P of
              CAN_EQ $ #[fun1, fun2, univ] =>
                (case (out fun1, out fun1, out univ) of
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val (x, Bx) = unbind xB
-                        val B'x = subst1 yB' (`` x)
-                        val Gx = Context.insert G x A
+                        val Bz = subst1 xB (`` z)
+                        val B'z = subst1 yB' (`` z)
+                        val Gz = Context.insert G z A
                       in
-                        ([(G, EQ $$ #[A,A',univ]), (Gx, EQ $$ #[Bx,B'x,univ])],
-                         fn [D, E] => FUN_EQ %$$ #[D, x %\\ E]
+                        ([(G, EQ $$ #[A,A',univ]), (Gz, EQ $$ #[Bz,B'z,univ])],
+                         fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
                           | _ => raise Refine)
                       end
                   | _ => raise Refine)
            | _ => raise Refine)
 
-    val FunIntro : tactic =
+    fun FunIntro z : tactic =
       named "FunIntro" (fn (G, P) =>
         case out P of
              FUN $ #[P1, xP2] =>
                let
-                 val (x, P2) = unbind xP2
-                 val Gx = Context.insert G x P1
+                 val P2z = subst1 xP2 (`` z)
+                 val Gz = Context.insert G z P1
                in
-                 ([(Gx, P2), (G, MEM $$ #[P1, UNIV $$ #[]])],
-                  fn [D,E] => FUN_INTRO %$$ #[x %\\ D, E]
+                 ([(Gz, P2z), (G, MEM $$ #[P1, UNIV $$ #[]])],
+                  fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
                     | _ => raise Refine)
                end
            | _ => raise Refine)
 
-    val LamEq : tactic =
+    fun LamEq z : tactic =
       named "LamEq" (fn (G, P) =>
         case out P of
              CAN_EQ $ #[lam, lam', func] =>
                (case (out lam, out lam', out func) of
-                     (LAM $ #[zE], LAM $ #[z'E'], FUN $ #[A,xB]) =>
+                     (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                      let
-                       val (z, E) = unbind zE
-                       val E'z = subst1 z'E' (`` z)
-                       val Bz = subst1 xB (`` z)
+                       val Ez = subst1 aE (`` z)
+                       val E'z = subst1 bE' (`` z)
+                       val Bz = subst1 cB (`` z)
                        val Gz = Context.insert G z A
                      in
-                       ([(Gz, EQ $$ #[E, E'z, Bz]), (G, MEM $$ #[A, UNIV $$ #[]])],
+                       ([(Gz, EQ $$ #[Ez, E'z, Bz]), (G, MEM $$ #[A, UNIV $$ #[]])],
                         fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
                            | _ => raise Refine)
                      end
@@ -391,19 +391,19 @@ struct
                ([(G, MEM $$ #[ w, P1]), (G, subst1 xP2 w)], mk_evidence (PROD_INTRO w))
            | _ => raise Refine)
 
-    val ProdEq : tactic =
+    fun ProdEq z : tactic =
       named "ProdEq" (fn (G, P) =>
         case out P of
              CAN_EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val (x, Bx) = unbind xB
-                        val B'x = subst1 yB' (`` x)
-                        val Gx = Context.insert G x A
+                        val Bz = subst1 xB (`` z)
+                        val B'z = subst1 yB' (`` z)
+                        val Gz = Context.insert G z A
                       in
-                        ([(G, EQ $$ #[A,A',univ]), (Gx, EQ $$ #[Bx,B'x,univ])],
-                         fn [D, E] => PROD_EQ %$$ #[D, x %\\ E]
+                        ([(G, EQ $$ #[A,A',univ]), (Gz, EQ $$ #[Bz,B'z,univ])],
+                         fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
                           | _ => raise Refine)
                       end
                   | _ => raise Refine)
@@ -431,13 +431,13 @@ struct
     infix ORELSE ORELSE_LAZY THEN
 
     local
-      val CanEqAuto = AxEq ORELSE PairEq ORELSE LamEq ORELSE UnitEq ORELSE ProdEq ORELSE VoidEq
+      val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ())) ORELSE_LAZY (fn () => LamEq (Variable.new ())) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq
       val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
       val intro_rules =
         MemIntro ORELSE
           EqAuto ORELSE
-            Assumption ORELSE
-              FunIntro ORELSE
+            Assumption ORELSE_LAZY
+              (fn () => FunIntro (Variable.new ())) ORELSE
                 UnitIntro
     in
       val Auto = REPEAT intro_rules
