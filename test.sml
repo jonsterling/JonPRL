@@ -1,6 +1,6 @@
 structure Test =
 struct
-  val print_mode = PrintMode.Debug
+  val print_mode = PrintMode.User
 
   structure Var = Variable ()
   structure Syn =
@@ -69,10 +69,12 @@ struct
       (unit & (unit & unit))
       (ProdIntro ax THEN (TRY (ProdIntro ax)) THEN Auto)
 
+  val z = Variable.named "z"
+
   val _ =
     check
       (unit ~> (unit & unit))
-      (FunIntro (Variable.new ()) THENL [ProdIntro ax THEN Auto, Auto])
+      (FunIntro z THENL [ProdIntro ax THEN Auto, Auto])
 
   val _ =
     check
@@ -87,23 +89,16 @@ struct
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN (LamEq (Variable.new())) THENL [VoidElim THEN Auto, Auto])
+        (MemIntro THEN EqIntro THEN (LamEq z) THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
         (void ~> (unit & unit))
-        (FunIntro (Variable.new()) THENL [VoidElim THEN Auto, Auto])
+        (FunIntro z THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check
         (unit ~> (unit & unit))
         (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
-
-  val z = Variable.named "z"
-  val _ =
-      check
-        (FUN $$ #[unit, z \\ unit])
-        (FunIntro z THENL [Hypothesis z, Auto])
 end
-
 
