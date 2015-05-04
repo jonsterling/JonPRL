@@ -6,16 +6,20 @@ struct
   fun ID g =
     ([g], fn [D] => D | _ => raise Fail "ID")
 
+  fun map_shape [] _ _ =  []
+    | map_shape (n1::nums) (f1::funcs) args =
+        let
+          val (f1_args,args') = ListUtil.split_at n1 args
+        in
+          f1 f1_args :: map_shape nums funcs args'
+        end
+    | map_shape _ _ _ = raise Subscript
+
   local
     fun refine (supervalidation, subgoals, validations) =
       (List.foldl (op @) [] subgoals,
-       fn Ds =>
-         let
-           val lengths = List.map List.length subgoals
-           val derivations = ListUtil.multisplit lengths Ds
-         in
-           supervalidation (ListPair.map (fn (v, d) => v d) (validations, derivations))
-         end)
+       supervalidation o
+         map_shape (map length subgoals) validations)
   in
     fun THENL_LAZY (tac1, tacn) g =
       case tac1 g of

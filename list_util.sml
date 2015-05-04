@@ -1,7 +1,6 @@
 structure ListUtil :
 sig
-  val split : int -> 'a list -> 'a list * 'a list
-  val multisplit : int list -> 'a list -> 'a list list
+  val split_at : int -> 'a list -> 'a list * 'a list
 end =
 struct
   local
@@ -14,20 +13,12 @@ struct
           (x::xs', xs'')
         end
   in
-    fun split n ls =
+    fun split_at n ls =
       if n < 0
       then raise Subscript
       else if n = 0
       then ([], ls)
       else go n ls
   end
-
-  fun multisplit [] xs = [xs]
-    | multisplit (n::ns) xs =
-      let
-        val (ys,rem) = split n xs
-      in
-        ys :: multisplit ns rem
-      end
 end
 
