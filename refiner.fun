@@ -226,6 +226,9 @@ struct
     fun BY (Ds, V) = (Ds, V)
     infix BY
 
+    fun // (xM, N) = subst1 xM N
+    infix 7 //
+
     val UnitIntro : tactic =
       named "UnitIntro" (fn (G >> P) =>
         case out P of
@@ -291,8 +294,8 @@ struct
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        let
-                         val Bz = subst1 xB (`` z)
-                         val BM = subst1 xB M
+                         val Bz = xB // (`` z)
+                         val BM = xB // M
                          val Gz = Context.insert G z A
                        in
                          ([G >> EQ $$ #[M,M',A],
@@ -311,8 +314,8 @@ struct
                (case (out fun1, out fun1, out univ) of
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val Bz = subst1 xB (`` z)
-                        val B'z = subst1 yB' (`` z)
+                        val Bz = xB // (`` z)
+                        val B'z = yB' // (`` z)
                         val Gz = Context.insert G z A
                       in
                         ([G >> EQ $$ #[A,A',univ],
@@ -328,7 +331,7 @@ struct
         case out P of
              FUN $ #[P1, xP2] =>
                let
-                 val P2z = subst1 xP2 (`` z)
+                 val P2z = xP2 // (`` z)
                  val Gz = Context.insert G z P1
                in
                  ([Gz >> P2z,
@@ -345,9 +348,9 @@ struct
                (case (out lam, out lam', out func) of
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                      let
-                       val Ez = subst1 aE (`` z)
-                       val E'z = subst1 bE' (`` z)
-                       val Bz = subst1 cB (`` z)
+                       val Ez = aE // (`` z)
+                       val E'z = bE' // (`` z)
+                       val Bz = cB // (`` z)
                        val Gz = Context.insert G z A
                      in
                        ([Gz >> EQ $$ #[Ez, E'z, Bz],
@@ -405,7 +408,7 @@ struct
         case out P of
              PROD $ #[P1, xP2] =>
                [ G >> MEM $$ #[ w, P1]
-               , G >> subst1 xP2 w
+               , G >> xP2 // w
                ] BY mk_evidence (PROD_INTRO w)
            | _ => raise Refine)
 
@@ -416,8 +419,8 @@ struct
                (case (out prod1, out prod2, out univ) of
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val Bz = subst1 xB (`` z)
-                        val B'z = subst1 yB' (`` z)
+                        val Bz = xB // (`` z)
+                        val B'z = yB' // (`` z)
                         val Gz = Context.insert G z A
                       in
                         [ G >> EQ $$ #[A,A',univ]
