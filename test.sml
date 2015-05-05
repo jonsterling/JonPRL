@@ -84,18 +84,32 @@ struct
       Auto
 
   val _ =
-      check
-        (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN LamEq z THENL [VoidElim THEN Auto, Auto])
+    check
+      (lam (fn x => pair ax ax) mem (void ~> void))
+      (MemIntro THEN EqIntro THEN LamEq z THENL [VoidElim THEN Auto, Auto])
 
   val _ =
-      check
-        (void ~> (unit & unit))
-        (FunIntro z THENL [VoidElim THEN Auto, Auto])
+    check
+      (void ~> (unit & unit))
+      (FunIntro z THENL [VoidElim THEN Auto, Auto])
 
   val _ =
+    check
+      (unit ~> (unit & unit))
+      (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
+
+ local
+   val x = Variable.named "x"
+   val y = Variable.named "y"
+  in
+    val _ =
       check
-        (unit ~> (unit & unit))
-        (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
+        ((void & unit) ~> void)
+        (FunIntro z THENL
+          [ ProdElim z (x, y) THEN Assumption
+          , Auto
+          ])
+  end
+
 end
 
