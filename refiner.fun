@@ -34,7 +34,7 @@ sig
 
     val ProdEq : Context.name -> tactic
     val ProdIntro : Syn.t -> tactic
-    val ProdElim : Context.name * Context.name * Context.name -> tactic
+    val ProdElim : Context.name -> Context.name * Context.name -> tactic
     val PairEq : Context.name -> tactic
 
     val FunEq : Context.name -> tactic
@@ -395,15 +395,16 @@ struct
                ] BY mk_evidence (PROD_INTRO w)
            | _ => raise Refine)
 
-    fun ProdElim (z, s, t) : tactic =
+    fun ProdElim z (s, t) : tactic =
       named "ProdElim" (fn (G >> P) =>
         case Context.lookup G z of
              SOME Q => (case out Q of
                  PROD $ #[ S, xT ] =>
                    let
                      val st = PAIR $$ #[``s, ``t]
+                     val G' = ctx_subst G st z @@ (s, S) @@ (t, (xT // `` s))
                    in
-                     [ ctx_subst G st z >> subst st z P
+                     [ G' >> subst st z P
                      ] BY (fn [D] => PROD_ELIM z %$$ #[s %\\ (t %\\ D)]
                             | _ => raise Refine)
                    end
