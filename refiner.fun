@@ -294,13 +294,11 @@ struct
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        let
-                         val Bz = xB // (`` z)
-                         val BM = xB // M
                          val Gz = Context.insert G z A
                        in
-                         ([G >> EQ $$ #[M,M',A],
-                           G >> EQ $$ #[N,N',BM],
-                           Gz >> MEM $$ #[Bz, UNIV $$ #[]]],
+                         ([G >> EQ $$ #[M, M', A],
+                           G >> EQ $$ #[N, N', xB // M],
+                           Gz >> MEM $$ #[xB // `` z, UNIV $$ #[]]],
                          fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
                           | _ => raise Refine)
                        end
@@ -314,14 +312,12 @@ struct
                (case (out fun1, out fun1, out univ) of
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val Bz = xB // (`` z)
-                        val B'z = yB' // (`` z)
                         val Gz = Context.insert G z A
                       in
-                        ([G >> EQ $$ #[A,A',univ],
-                          Gz >> EQ $$ #[Bz,B'z,univ]],
-                         fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
-                          | _ => raise Refine)
+                        [ G >> EQ $$ #[A,A',univ]
+                        , Gz >> EQ $$ #[xB // ``z, yB' // `` z, univ]
+                        ] BY (fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
+                               | _ => raise Refine)
                       end
                   | _ => raise Refine)
            | _ => raise Refine)
@@ -331,13 +327,12 @@ struct
         case out P of
              FUN $ #[P1, xP2] =>
                let
-                 val P2z = xP2 // (`` z)
                  val Gz = Context.insert G z P1
                in
-                 ([Gz >> P2z,
-                   G >> MEM $$ #[P1, UNIV $$ #[]]],
-                  fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
-                    | _ => raise Refine)
+                 [ Gz >> xP2 // `` z
+                 , G >> MEM $$ #[P1, UNIV $$ #[]]
+                 ] BY (fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
+                        | _ => raise Refine)
                end
            | _ => raise Refine)
 
@@ -348,15 +343,12 @@ struct
                (case (out lam, out lam', out func) of
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                      let
-                       val Ez = aE // (`` z)
-                       val E'z = bE' // (`` z)
-                       val Bz = cB // (`` z)
                        val Gz = Context.insert G z A
                      in
-                       ([Gz >> EQ $$ #[Ez, E'z, Bz],
-                         G >> MEM $$ #[A, UNIV $$ #[]]],
-                        fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
-                           | _ => raise Refine)
+                       [ Gz >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
+                       , G >> MEM $$ #[A, UNIV $$ #[]]
+                       ] BY (fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
+                               | _ => raise Refine)
                      end
                    | _ => raise Refine)
            | _ => raise Refine)
@@ -419,12 +411,10 @@ struct
                (case (out prod1, out prod2, out univ) of
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
                       let
-                        val Bz = xB // (`` z)
-                        val B'z = yB' // (`` z)
                         val Gz = Context.insert G z A
                       in
                         [ G >> EQ $$ #[A,A',univ]
-                        , Gz >> EQ $$ #[Bz,B'z,univ]
+                        , Gz >> EQ $$ #[xB // ``z, yB' // ``z, univ]
                         ] BY (fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
                                | _ => raise Refine)
                       end
