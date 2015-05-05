@@ -13,13 +13,16 @@ struct
 
   open Lang Syn Refiner
   open CoreTactics DerivedTactics InferenceRules
-  infix $$ \\ THEN THENL ORELSE
+
+  infix 4 >>
+  infix 7 $$
+  infix \\ THEN THENL ORELSE
 
   exception RemainingSubgoals of goal list
 
   fun check P (tac : tactic) =
   let
-    val (subgoals, validate) = tac (Context.empty, P)
+    val (subgoals, validate) = tac (Context.empty >> P)
     val result =
       if null subgoals
       then validate []
@@ -89,7 +92,7 @@ struct
   val _ =
       check
         (lam (fn x => pair ax ax) mem (void ~> void))
-        (MemIntro THEN EqIntro THEN (LamEq z) THENL [VoidElim THEN Auto, Auto])
+        (MemIntro THEN EqIntro THEN LamEq z THENL [VoidElim THEN Auto, Auto])
 
   val _ =
       check

@@ -11,9 +11,10 @@ sig
     where type name = Syn.Variable.t
 
   type context = Syn.t Context.context
+  datatype sequent = >> of context * Syn.t
 
   include REFINER_TYPES
-    where type goal = context * Syn.t
+    where type goal = sequent
     and type evidence = Evidence.t
 
   val print_goal : goal -> string
@@ -56,7 +57,9 @@ end =
 struct
   structure Context = Context(Syn.Variable)
   type context = Syn.t Context.context
-  type goal = context * Syn.t
+
+  datatype sequent = >> of context * Syn.t
+  infix 3 >>
 
   fun ctx_subst (G : context) (m : Syn.t) (x : Context.name) =
     let
@@ -143,7 +146,7 @@ struct
 
   structure RefinerTypes : REFINER_TYPES =
   struct
-    type goal = goal
+    type goal = sequent
     type evidence = E.t
     type validation = evidence list -> evidence
     type tactic = goal -> (goal list * validation)
@@ -183,7 +186,7 @@ struct
   open Lang
   open Syn EOp
   infix $
-  infix $$
+  infix 8 $$
 
   val %$$ = Evidence.$$
   infix %$$
@@ -197,7 +200,7 @@ struct
 
   structure CoreTactics = CoreTactics(RefinerTypes)
 
-  fun print_goal (G, P) =
+  fun print_goal (G >> P) =
     let
       val ctx = Context.to_string (print_mode, Syn.to_string) G
       val prop = Syn.to_string print_mode P
@@ -210,7 +213,7 @@ struct
   struct
     exception Refine
 
-    fun named name tac = fn goal =>
+    fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
         fun fail () = raise Fail (name ^ "| " ^ print_goal goal)
         val (subgoals, validation) = tac goal handle Refine => fail ()
@@ -221,13 +224,13 @@ struct
     fun mk_evidence operator = fn Ds => operator %$$ Vector.fromList Ds
 
     val UnitIntro : tactic =
-      named "UnitIntro" (fn (G, P) =>
+      named "UnitIntro" (fn (G >> P) =>
         case out P of
              UNIT $ _ => ([], mk_evidence UNIT_INTRO)
            | _ => raise Refine)
 
     fun UnitElim x : tactic =
-      named "UnitElim" (fn (G, P) =>
+      named "UnitElim" (fn (G >> P) =>
         case Context.lookup G x of
              SOME unit =>
                (case out unit of
@@ -237,13 +240,13 @@ struct
                          val G' = ctx_subst G ax x
                          val P' = subst ax x P
                        in
-                         ([(G', P')], mk_evidence (UNIT_ELIM x))
+                         ([G' >> P'], mk_evidence (UNIT_ELIM x))
                        end
                    | _ => raise Refine)
            | NONE => raise Refine)
 
     val UnitEq : tactic =
-      named "UnitEq" (fn (G, P) =>
+      named "UnitEq" (fn (G >> P) =>
         case out P of
              CAN_MEM $ #[unit, unit', univ] =>
                (case (out unit, out unit', out univ) of
@@ -252,7 +255,7 @@ struct
            | _ => raise Refine)
 
     val VoidEq : tactic =
-      named "VoidEq" (fn (G, P) =>
+      named "VoidEq" (fn (G >> P) =>
         case out P of
              CAN_MEM $ #[void, void', univ] =>
                (case (out void, out void', out univ) of
@@ -261,11 +264,11 @@ struct
            | _ => raise Refine)
 
     val VoidElim : tactic =
-      named "VoidEq" (fn (G, P) =>
-        ([(G, VOID $$ #[])], mk_evidence VOID_ELIM))
+      named "VoidEq" (fn (G >> P) =>
+        ([G >> VOID $$ #[]], mk_evidence VOID_ELIM))
 
     val AxEq : tactic =
-      named "AxEq" (fn (G, P) =>
+      named "AxEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[ax, ax', unit] =>
                (case (out ax, out ax', out unit) of
@@ -275,7 +278,7 @@ struct
            | _ => raise Refine)
 
     fun PairEq z : tactic =
-      named "PairEq" (fn (G, P) =>
+      named "PairEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[pair, pair', prod] =>
                (case (out pair, out pair', out prod) of
@@ -285,9 +288,9 @@ struct
                          val BM = subst1 xB M
                          val Gz = Context.insert G z A
                        in
-                         ([(G, EQ $$ #[M,M',A]),
-                           (G, EQ $$ #[N,N',BM]),
-                           (Gz, MEM $$ #[Bz, UNIV $$ #[]])],
+                         ([G >> EQ $$ #[M,M',A],
+                           G >> EQ $$ #[N,N',BM],
+                           Gz >> MEM $$ #[Bz, UNIV $$ #[]]],
                          fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
                           | _ => raise Refine)
                        end
@@ -295,7 +298,7 @@ struct
            | _ => raise Refine)
 
     fun FunEq z : tactic =
-      named "FunEq" (fn (G, P) =>
+      named "FunEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[fun1, fun2, univ] =>
                (case (out fun1, out fun1, out univ) of
@@ -305,7 +308,8 @@ struct
                         val B'z = subst1 yB' (`` z)
                         val Gz = Context.insert G z A
                       in
-                        ([(G, EQ $$ #[A,A',univ]), (Gz, EQ $$ #[Bz,B'z,univ])],
+                        ([G >> EQ $$ #[A,A',univ],
+                          Gz >> EQ $$ #[Bz,B'z,univ]],
                          fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
                           | _ => raise Refine)
                       end
@@ -313,21 +317,22 @@ struct
            | _ => raise Refine)
 
     fun FunIntro z : tactic =
-      named "FunIntro" (fn (G, P) =>
+      named "FunIntro" (fn (G >> P) =>
         case out P of
              FUN $ #[P1, xP2] =>
                let
                  val P2z = subst1 xP2 (`` z)
                  val Gz = Context.insert G z P1
                in
-                 ([(Gz, P2z), (G, MEM $$ #[P1, UNIV $$ #[]])],
+                 ([Gz >> P2z,
+                   G >> MEM $$ #[P1, UNIV $$ #[]]],
                   fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
                     | _ => raise Refine)
                end
            | _ => raise Refine)
 
     fun LamEq z : tactic =
-      named "LamEq" (fn (G, P) =>
+      named "LamEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[lam, lam', func] =>
                (case (out lam, out lam', out func) of
@@ -338,7 +343,8 @@ struct
                        val Bz = subst1 cB (`` z)
                        val Gz = Context.insert G z A
                      in
-                       ([(Gz, EQ $$ #[Ez, E'z, Bz]), (G, MEM $$ #[A, UNIV $$ #[]])],
+                       ([Gz >> EQ $$ #[Ez, E'z, Bz],
+                         G >> MEM $$ #[A, UNIV $$ #[]]],
                         fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
                            | _ => raise Refine)
                      end
@@ -346,14 +352,14 @@ struct
            | _ => raise Refine)
 
     val MemIntro : tactic =
-      named "MemIntro" (fn (G, P) =>
+      named "MemIntro" (fn (G >> P) =>
       case out P of
            MEM $ #[M, A] =>
-             ([(G, EQ $$ #[M, M, A])], mk_evidence MEM_INTRO)
+             ([G >> EQ $$ #[M, M, A]], mk_evidence MEM_INTRO)
          | _ => raise Refine)
 
     val EqIntro : tactic =
-      named "EqIntro" (fn (G, P) =>
+      named "EqIntro" (fn (G >> P) =>
         case out P of
              EQ $ #[M, N, A] =>
                let
@@ -361,16 +367,16 @@ struct
                  val N0 = Whnf.whnf N
                  val A0 = Whnf.whnf A
                in
-                 ([(G, CAN_EQ $$ #[M0, N0, A0])], mk_evidence EQ_INTRO)
+                 ([G >> CAN_EQ $$ #[M0, N0, A0]], mk_evidence EQ_INTRO)
                end
            | _ => raise Refine)
 
     fun Witness M : tactic =
-      named "Witness" (fn (G, P) =>
-        ([(G, MEM $$ #[M, P])], mk_evidence (WITNESS M)))
+      named "Witness" (fn (G >> P) =>
+        ([G >> MEM $$ #[M, P]], mk_evidence (WITNESS M)))
 
     val HypEq : tactic =
-      named "HypEq" (fn (G, P) =>
+      named "HypEq" (fn (G >> P) =>
         case out P of
              EQ $ #[M,M',A] =>
              (case (Syn.eq (M, M'), out M) of
@@ -385,14 +391,16 @@ struct
            | _ => raise Refine)
 
     fun ProdIntro w : tactic =
-      named "ProdIntro" (fn (G, P) =>
+      named "ProdIntro" (fn (G >> P) =>
         case out P of
              PROD $ #[P1, xP2] =>
-               ([(G, MEM $$ #[ w, P1]), (G, subst1 xP2 w)], mk_evidence (PROD_INTRO w))
+               ([G >> MEM $$ #[ w, P1],
+                 G >> subst1 xP2 w],
+                mk_evidence (PROD_INTRO w))
            | _ => raise Refine)
 
     fun ProdEq z : tactic =
-      named "ProdEq" (fn (G, P) =>
+      named "ProdEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
@@ -402,7 +410,8 @@ struct
                         val B'z = subst1 yB' (`` z)
                         val Gz = Context.insert G z A
                       in
-                        ([(G, EQ $$ #[A,A',univ]), (Gz, EQ $$ #[Bz,B'z,univ])],
+                        ([G >> EQ $$ #[A,A',univ],
+                          Gz >> EQ $$ #[Bz,B'z,univ]],
                          fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
                           | _ => raise Refine)
                       end
@@ -410,7 +419,7 @@ struct
            | _ => raise Refine)
 
     fun Hypothesis x : tactic =
-      named "Hypothesis" (fn (G, P) =>
+      named "Hypothesis" (fn (G >> P) =>
         case Context.lookup G x of
               SOME P' =>
                 if Syn.eq (P, P')
@@ -419,7 +428,7 @@ struct
             | NONE => raise Refine)
 
     val Assumption : tactic =
-      named "Assumption" (fn (G, P) =>
+      named "Assumption" (fn (G >> P) =>
         case Context.search G (fn x => Syn.eq (P, x)) of
              SOME (x, _) => ([], fn _ => %`` x)
            | NONE => raise Refine)
