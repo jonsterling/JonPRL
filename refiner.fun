@@ -229,6 +229,9 @@ struct
     fun // (xM, N) = subst1 xM N
     infix 7 //
 
+    fun @@ (G, (x,A)) = Context.insert G x A
+    infix 8 @@
+
     val UnitIntro : tactic =
       named "UnitIntro" (fn (G >> P) =>
         case out P of
@@ -293,15 +296,11 @@ struct
              CAN_EQ $ #[pair, pair', prod] =>
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
-                       let
-                         val Gz = Context.insert G z A
-                       in
-                         ([G >> EQ $$ #[M, M', A],
-                           G >> EQ $$ #[N, N', xB // M],
-                           Gz >> MEM $$ #[xB // `` z, UNIV $$ #[]]],
-                         fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
-                          | _ => raise Refine)
-                       end
+                       [ G >> EQ $$ #[M, M', A]
+                       , G >> EQ $$ #[N, N', xB // M]
+                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[]]
+                       ] BY (fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
+                              | _ => raise Refine)
                    | _ => raise Refine)
            | _ => raise Refine)
 
@@ -311,14 +310,10 @@ struct
              CAN_EQ $ #[fun1, fun2, univ] =>
                (case (out fun1, out fun1, out univ) of
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
-                      let
-                        val Gz = Context.insert G z A
-                      in
-                        [ G >> EQ $$ #[A,A',univ]
-                        , Gz >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-                        ] BY (fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
-                               | _ => raise Refine)
-                      end
+                      [ G >> EQ $$ #[A,A',univ]
+                      , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
+                      ] BY (fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
+                             | _ => raise Refine)
                   | _ => raise Refine)
            | _ => raise Refine)
 
@@ -326,14 +321,10 @@ struct
       named "FunIntro" (fn (G >> P) =>
         case out P of
              FUN $ #[P1, xP2] =>
-               let
-                 val Gz = Context.insert G z P1
-               in
-                 [ Gz >> xP2 // `` z
-                 , G >> MEM $$ #[P1, UNIV $$ #[]]
-                 ] BY (fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
-                        | _ => raise Refine)
-               end
+               [ G @@ (z,P1) >> xP2 // `` z
+               , G >> MEM $$ #[P1, UNIV $$ #[]]
+               ] BY (fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
+                      | _ => raise Refine)
            | _ => raise Refine)
 
     fun LamEq z : tactic =
@@ -342,14 +333,10 @@ struct
              CAN_EQ $ #[lam, lam', func] =>
                (case (out lam, out lam', out func) of
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
-                     let
-                       val Gz = Context.insert G z A
-                     in
-                       [ Gz >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
+                       [ G @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
                        , G >> MEM $$ #[A, UNIV $$ #[]]
                        ] BY (fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
                                | _ => raise Refine)
-                     end
                    | _ => raise Refine)
            | _ => raise Refine)
 
@@ -410,14 +397,10 @@ struct
              CAN_EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
-                      let
-                        val Gz = Context.insert G z A
-                      in
-                        [ G >> EQ $$ #[A,A',univ]
-                        , Gz >> EQ $$ #[xB // ``z, yB' // ``z, univ]
-                        ] BY (fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
-                               | _ => raise Refine)
-                      end
+                      [ G >> EQ $$ #[A,A',univ]
+                      , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
+                      ] BY (fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
+                             | _ => raise Refine)
                   | _ => raise Refine)
            | _ => raise Refine)
 
