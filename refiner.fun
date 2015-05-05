@@ -34,6 +34,7 @@ sig
 
     val ProdEq : Context.name -> tactic
     val ProdIntro : Syn.t -> tactic
+    val ProdElim : Context.name * Context.name * Context.name -> tactic
     val PairEq : Context.name -> tactic
 
     val FunEq : Context.name -> tactic
@@ -62,18 +63,14 @@ struct
   infix 3 >>
 
   fun ctx_subst (G : context) (m : Syn.t) (x : Context.name) =
-    let
-      val (G', _) = Context.remove G x
-    in
-      Context.map (Syn.subst m x) G'
-    end
+    Context.map (Syn.subst m x) G
 
   structure EOp =
   struct
     datatype t
       = VOID_EQ
       | UNIT_INTRO | UNIT_EQ | UNIT_ELIM of Context.name
-      | PROD_INTRO of Syn.t | PROD_EQ
+      | PROD_INTRO of Syn.t | PROD_EQ | PROD_ELIM of Context.name
       | FUN_INTRO | FUN_EQ | LAM_EQ
       | AX_EQ
       | PAIR_EQ
@@ -89,10 +86,11 @@ struct
       | eq (UNIT_ELIM x) (UNIT_ELIM y) = Syn.Variable.eq x y
       | eq (PROD_INTRO x) (PROD_INTRO y) = Syn.eq (x, y)
       | eq PROD_EQ PROD_EQ = true
+      | eq PAIR_EQ PAIR_EQ = true
+      | eq (PROD_ELIM z) (PROD_ELIM z') = Syn.Variable.eq z z'
       | eq FUN_INTRO FUN_INTRO = true
       | eq FUN_EQ FUN_EQ = true
       | eq AX_EQ AX_EQ = true
-      | eq PAIR_EQ PAIR_EQ = true
       | eq LAM_EQ LAM_EQ = true
       | eq MEM_INTRO MEM_INTRO = true
       | eq EQ_INTRO EQ_INTRO = true
@@ -106,6 +104,7 @@ struct
       | arity UNIT_EQ = #[]
       | arity (UNIT_ELIM _) = #[0]
       | arity (PROD_INTRO _) = #[0,0]
+      | arity (PROD_ELIM _) = #[2]
       | arity PROD_EQ = #[0,1]
       | arity FUN_INTRO = #[1,0]
       | arity FUN_EQ = #[0,1]
@@ -123,6 +122,7 @@ struct
       | to_string (UNIT_ELIM x) = "unit-E{" ^ Syn.Variable.to_string print_mode x ^ "}"
       | to_string VOID_EQ = "void="
       | to_string (PROD_INTRO w) = "prod-I{" ^ Syn.to_string print_mode w ^ "}"
+      | to_string (PROD_ELIM x) = "prod-E{" ^ Syn.Variable.to_string print_mode x ^ "}"
       | to_string PROD_EQ = "prod="
       | to_string FUN_INTRO = "fun-I"
       | to_string FUN_EQ = "fun="
@@ -159,22 +159,28 @@ struct
   local
     open E EOp Lang
     infix $ \
+    exception Hole
   in
     fun extract (ev : E.t) : Syn.t =
       case out ev of
-           UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
-         | PROD_INTRO w $ #[D,E] => Syn.$$ (PAIR, #[w, extract E])
-         | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
+           VOID_EQ $ _ => Syn.$$ (AX, #[])
+         | VOID_ELIM $ _ => Syn.$$ (AX, #[])
+
+         | UNIT_EQ $ _ => Syn.$$ (AX, #[])
+         | UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
          | UNIT_ELIM x $ #[E] => Syn.$$ (MATCH_UNIT, #[Syn.`` x, extract E])
          | AX_EQ $ _ => Syn.$$ (AX, #[])
-         | PAIR_EQ $ _ => Syn.$$ (AX, #[])
-         | LAM_EQ $ _ => Syn.$$ (AX, #[])
-         | MEM_INTRO $ _ => Syn.$$ (AX, #[])
-         | VOID_ELIM $ _ => Syn.$$ (AX, #[])
-         | UNIT_EQ $ _ => Syn.$$ (AX, #[])
-         | VOID_EQ $ _ => Syn.$$ (AX, #[])
+
          | PROD_EQ $ _ => Syn.$$ (AX, #[])
+         | PROD_INTRO w $ #[D,E] => Syn.$$ (PAIR, #[w, extract E])
+         | PROD_ELIM z $ #[stD] => Syn.$$ (SPREAD, #[Syn.`` z, extract stD])
+         | PAIR_EQ $ _ => Syn.$$ (AX, #[])
+
          | FUN_EQ $ _ => Syn.$$ (AX, #[])
+         | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
+         | LAM_EQ $ _ => Syn.$$ (AX, #[])
+
+         | MEM_INTRO $ _ => Syn.$$ (AX, #[])
          | HYP_EQ $ _ => Syn.$$ (AX, #[])
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
@@ -241,18 +247,17 @@ struct
     fun UnitElim x : tactic =
       named "UnitElim" (fn (G >> P) =>
         case Context.lookup G x of
-             SOME unit =>
-               (case out unit of
-                     UNIT $ #[] =>
-                       let
-                         val ax = AX $$ #[]
-                         val G' = ctx_subst G ax x
-                         val P' = subst ax x P
-                       in
-                         [ G' >> P'
-                         ] BY mk_evidence (UNIT_ELIM x)
-                       end
-                   | _ => raise Refine)
+             SOME unit => (case out unit of
+                 UNIT $ #[] =>
+                   let
+                     val ax = AX $$ #[]
+                     val G' = ctx_subst G ax x
+                     val P' = subst ax x P
+                   in
+                     [ G' >> P'
+                     ] BY mk_evidence (UNIT_ELIM x)
+                   end
+               | _ => raise Refine)
            | NONE => raise Refine)
 
     val UnitEq : tactic =
@@ -288,20 +293,6 @@ struct
                     (AX $ #[], AX $ #[], UNIT $ #[]) =>
                       [] BY mk_evidence AX_EQ
                   | _ => raise Refine)
-           | _ => raise Refine)
-
-    fun PairEq z : tactic =
-      named "PairEq" (fn (G >> P) =>
-        case out P of
-             CAN_EQ $ #[pair, pair', prod] =>
-               (case (out pair, out pair', out prod) of
-                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
-                       [ G >> EQ $$ #[M, M', A]
-                       , G >> EQ $$ #[N, N', xB // M]
-                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[]]
-                       ] BY (fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
-                              | _ => raise Refine)
-                   | _ => raise Refine)
            | _ => raise Refine)
 
     fun FunEq z : tactic =
@@ -382,15 +373,6 @@ struct
                  | _ => raise Refine)
            | _ => raise Refine)
 
-    fun ProdIntro w : tactic =
-      named "ProdIntro" (fn (G >> P) =>
-        case out P of
-             PROD $ #[P1, xP2] =>
-               [ G >> MEM $$ #[ w, P1]
-               , G >> xP2 // w
-               ] BY mk_evidence (PROD_INTRO w)
-           | _ => raise Refine)
-
     fun ProdEq z : tactic =
       named "ProdEq" (fn (G >> P) =>
         case out P of
@@ -402,6 +384,45 @@ struct
                       ] BY (fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
                              | _ => raise Refine)
                   | _ => raise Refine)
+           | _ => raise Refine)
+
+    fun ProdIntro w : tactic =
+      named "ProdIntro" (fn (G >> P) =>
+        case out P of
+             PROD $ #[P1, xP2] =>
+               [ G >> MEM $$ #[ w, P1]
+               , G >> xP2 // w
+               ] BY mk_evidence (PROD_INTRO w)
+           | _ => raise Refine)
+
+    fun ProdElim (z, s, t) : tactic =
+      named "ProdElim" (fn (G >> P) =>
+        case Context.lookup G z of
+             SOME Q => (case out Q of
+                 PROD $ #[ S, xT ] =>
+                   let
+                     val st = PAIR $$ #[``s, ``t]
+                   in
+                     [ ctx_subst G st z >> subst st z P
+                     ] BY (fn [D] => PROD_ELIM z %$$ #[s %\\ (t %\\ D)]
+                            | _ => raise Refine)
+                   end
+               | _ => raise Refine)
+           | NONE => raise Refine
+      )
+
+    fun PairEq z : tactic =
+      named "PairEq" (fn (G >> P) =>
+        case out P of
+             CAN_EQ $ #[pair, pair', prod] =>
+               (case (out pair, out pair', out prod) of
+                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
+                       [ G >> EQ $$ #[M, M', A]
+                       , G >> EQ $$ #[N, N', xB // M]
+                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[]]
+                       ] BY (fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
+                              | _ => raise Refine)
+                   | _ => raise Refine)
            | _ => raise Refine)
 
     fun Hypothesis x : tactic =

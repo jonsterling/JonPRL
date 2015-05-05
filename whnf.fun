@@ -11,14 +11,17 @@ struct
 
   fun whnf x =
     case out x of
-         FST $ #[M] =>
+         SPREAD $ #[M, xyN] =>
            (case out (whnf M) of
-                PAIR $ #[M1, M2] => whnf M1
+                PAIR $ #[M1, M2] =>
+                  let
+                    val (x,yN) = unbind xyN
+                    val (y, N) = unbind yN
+                    val N' = subst M1 x (subst M2 y N)
+                  in
+                    whnf N'
+                  end
               | _ => raise WhnfStuck)
-       | SND $ #[M] =>
-           (case out (whnf M) of
-                 PAIR $ #[M1, M2] => whnf M2
-               | _ => raise WhnfStuck)
        | AP $ #[M,N] =>
            (case out (whnf M) of
                  LAM $ #[xE] => whnf (subst1 xE N)

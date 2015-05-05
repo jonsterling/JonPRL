@@ -46,7 +46,6 @@ struct
   infix &
 
   fun pair m n = PAIR $$ #[m,n]
-  fun fst m = FST $$ #[m]
   fun lam e =
     let
       val x = Var.named "x"
@@ -78,11 +77,6 @@ struct
     check
       (unit ~> (unit & unit))
       (FunIntro z THENL [ProdIntro ax THEN Auto, Auto])
-
-  val _ =
-    check
-      (fst (pair ax ax) mem unit)
-      Auto
 
   val _ =
     check
