@@ -357,14 +357,14 @@ struct
                  val N0 = Whnf.whnf N
                  val A0 = Whnf.whnf A
                in
-                 [G >> CAN_EQ $$ #[M0, N0, A0]
+                 [ G >> CAN_EQ $$ #[M0, N0, A0]
                  ] BY mk_evidence EQ_INTRO
                end
            | _ => raise Refine)
 
     fun Witness M : tactic =
       named "Witness" (fn (G >> P) =>
-        [G >> MEM $$ #[M, P]
+        [ G >> MEM $$ #[M, P]
         ] BY mk_evidence (WITNESS M))
 
     val HypEq : tactic =
