@@ -41,7 +41,7 @@ sig
     val FunIntro : Context.name -> tactic
     val LamEq : Context.name -> tactic
 
-    val MemIntro : tactic
+    val MemUnfold : tactic
     val ReduceGoal : tactic
     val Witness : Syn.t -> tactic
 
@@ -74,7 +74,6 @@ struct
       | FUN_INTRO | FUN_EQ | LAM_EQ
       | AX_EQ
       | PAIR_EQ
-      | MEM_INTRO
       | WITNESS of Syn.t
       | HYP_EQ
       | VOID_ELIM
@@ -91,7 +90,6 @@ struct
       | eq FUN_EQ FUN_EQ = true
       | eq AX_EQ AX_EQ = true
       | eq LAM_EQ LAM_EQ = true
-      | eq MEM_INTRO MEM_INTRO = true
       | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
       | eq HYP_EQ HYP_EQ = true
       | eq VOID_ELIM VOID_ELIM = true
@@ -109,7 +107,6 @@ struct
       | arity AX_EQ = #[]
       | arity PAIR_EQ = #[0,0,1]
       | arity LAM_EQ = #[1,0]
-      | arity MEM_INTRO = #[0]
       | arity (WITNESS _) = #[0]
       | arity HYP_EQ = #[0]
       | arity VOID_ELIM = #[0]
@@ -126,7 +123,6 @@ struct
       | to_string AX_EQ = "ax="
       | to_string PAIR_EQ = "pair="
       | to_string LAM_EQ = "lam="
-      | to_string MEM_INTRO = "∈-I"
       | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
       | to_string HYP_EQ = "hyp-∈"
       | to_string VOID_ELIM = "void-E"
@@ -175,8 +171,6 @@ struct
          | FUN_EQ $ _ => Syn.$$ (AX, #[])
          | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
          | LAM_EQ $ _ => Syn.$$ (AX, #[])
-
-         | MEM_INTRO $ _ => Syn.$$ (AX, #[])
          | HYP_EQ $ _ => Syn.$$ (AX, #[])
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
@@ -327,12 +321,13 @@ struct
                    | _ => raise Refine)
            | _ => raise Refine)
 
-    val MemIntro : tactic =
-      named "MemIntro" (fn (G >> P) =>
+    val MemUnfold : tactic =
+      named "MemUnfold" (fn (G >> P) =>
       case out P of
            MEM $ #[M, A] =>
              [ G >> EQ $$ #[M, M, A]
-             ] BY mk_evidence MEM_INTRO
+             ] BY (fn [D] => D
+                    | _ => raise Refine)
          | _ => raise Refine)
 
     val ReduceGoal : tactic =
@@ -447,7 +442,7 @@ struct
       val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ())) ORELSE_LAZY (fn () => LamEq (Variable.new ())) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq
       val EqAuto = (ReduceGoal THEN CanEqAuto) ORELSE HypEq
       val intro_rules =
-        MemIntro ORELSE
+        MemUnfold ORELSE
           EqAuto ORELSE
             Assumption ORELSE_LAZY
               (fn () => FunIntro (Variable.new ())) ORELSE

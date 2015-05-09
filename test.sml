@@ -86,7 +86,7 @@ struct
   val _ =
     check
       (lam (fn x => pair ax ax) mem (void ~> void))
-      (MemIntro THEN ReduceGoal THEN LamEq z THENL [VoidElim THEN Auto, Auto])
+      (MemUnfold THEN ReduceGoal THEN LamEq z THENL [VoidElim THEN Auto, Auto])
 
   val _ =
     check
