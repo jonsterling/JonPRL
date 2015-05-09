@@ -335,9 +335,9 @@ struct
         case out P of
              EQ $ #[M, N, A] =>
                let
-                 val M0 = Whnf.whnf M
-                 val N0 = Whnf.whnf N
-                 val A0 = Whnf.whnf A
+                 val M0 = Whnf.whnf M handle _ => M
+                 val N0 = Whnf.whnf N handle _ => N
+                 val A0 = Whnf.whnf A handle _ => A
                in
                  [ G >> EQ $$ #[M0, N0, A0]
                  ] BY (fn [D] => D
