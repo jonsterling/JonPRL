@@ -42,7 +42,7 @@ sig
     val LamEq : Context.name -> tactic
 
     val MemIntro : tactic
-    val EqIntro : tactic
+    val ReduceGoal : tactic
     val Witness : Syn.t -> tactic
 
     val Assumption : tactic
@@ -75,7 +75,6 @@ struct
       | AX_EQ
       | PAIR_EQ
       | MEM_INTRO
-      | EQ_INTRO
       | WITNESS of Syn.t
       | HYP_EQ
       | VOID_ELIM
@@ -93,7 +92,6 @@ struct
       | eq AX_EQ AX_EQ = true
       | eq LAM_EQ LAM_EQ = true
       | eq MEM_INTRO MEM_INTRO = true
-      | eq EQ_INTRO EQ_INTRO = true
       | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
       | eq HYP_EQ HYP_EQ = true
       | eq VOID_ELIM VOID_ELIM = true
@@ -112,7 +110,6 @@ struct
       | arity PAIR_EQ = #[0,0,1]
       | arity LAM_EQ = #[1,0]
       | arity MEM_INTRO = #[0]
-      | arity EQ_INTRO = #[0]
       | arity (WITNESS _) = #[0]
       | arity HYP_EQ = #[0]
       | arity VOID_ELIM = #[0]
@@ -129,8 +126,7 @@ struct
       | to_string AX_EQ = "ax="
       | to_string PAIR_EQ = "pair="
       | to_string LAM_EQ = "lam="
-      | to_string MEM_INTRO = "∈*-I"
-      | to_string EQ_INTRO = "=*-I"
+      | to_string MEM_INTRO = "∈-I"
       | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
       | to_string HYP_EQ = "hyp-∈"
       | to_string VOID_ELIM = "void-E"
@@ -288,7 +284,7 @@ struct
     val AxEq : tactic =
       named "AxEq" (fn (G >> P) =>
         case out P of
-             CAN_EQ $ #[ax, ax', unit] =>
+             EQ $ #[ax, ax', unit] =>
                (case (out ax, out ax', out unit) of
                     (AX $ #[], AX $ #[], UNIT $ #[]) =>
                       [] BY mk_evidence AX_EQ
@@ -298,7 +294,7 @@ struct
     fun FunEq z : tactic =
       named "FunEq" (fn (G >> P) =>
         case out P of
-             CAN_EQ $ #[fun1, fun2, univ] =>
+             EQ $ #[fun1, fun2, univ] =>
                (case (out fun1, out fun1, out univ) of
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
                       [ G >> EQ $$ #[A,A',univ]
@@ -321,7 +317,7 @@ struct
     fun LamEq z : tactic =
       named "LamEq" (fn (G >> P) =>
         case out P of
-             CAN_EQ $ #[lam, lam', func] =>
+             EQ $ #[lam, lam', func] =>
                (case (out lam, out lam', out func) of
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                        [ G @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
@@ -339,8 +335,8 @@ struct
              ] BY mk_evidence MEM_INTRO
          | _ => raise Refine)
 
-    val EqIntro : tactic =
-      named "EqIntro" (fn (G >> P) =>
+    val ReduceGoal : tactic =
+      named "ReduceGoal" (fn (G >> P) =>
         case out P of
              EQ $ #[M, N, A] =>
                let
@@ -348,8 +344,9 @@ struct
                  val N0 = Whnf.whnf N
                  val A0 = Whnf.whnf A
                in
-                 [ G >> CAN_EQ $$ #[M0, N0, A0]
-                 ] BY mk_evidence EQ_INTRO
+                 [ G >> EQ $$ #[M0, N0, A0]
+                 ] BY (fn [D] => D
+                        | _ => raise Refine)
                end
            | _ => raise Refine)
 
@@ -409,8 +406,7 @@ struct
                             | _ => raise Refine)
                    end
                | _ => raise Refine)
-           | NONE => raise Refine
-      )
+           | NONE => raise Refine)
 
     fun PairEq z : tactic =
       named "PairEq" (fn (G >> P) =>
@@ -449,7 +445,7 @@ struct
 
     local
       val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ())) ORELSE_LAZY (fn () => LamEq (Variable.new ())) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq
-      val EqAuto = (EqIntro THEN CanEqAuto) ORELSE HypEq
+      val EqAuto = (ReduceGoal THEN CanEqAuto) ORELSE HypEq
       val intro_rules =
         MemIntro ORELSE
           EqAuto ORELSE

@@ -6,8 +6,7 @@ struct
     | UNIT | AX | MATCH_UNIT
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
-    | CAN_EQ | EQ
-    | MEM
+    | EQ | MEM
 
   fun eq (x : t) y = x = y
 
@@ -23,7 +22,6 @@ struct
     | arity LAM = #[1]
     | arity AP = #[0,0]
     | arity EQ = #[0,0,0]
-    | arity CAN_EQ = #[0,0,0]
     | arity MEM = #[0,0]
 
   fun to_string UNIV = "univ"
@@ -37,7 +35,6 @@ struct
     | to_string FUN = "fun"
     | to_string LAM = "λ"
     | to_string AP = "ap"
-    | to_string EQ = "=*"
-    | to_string CAN_EQ = "="
+    | to_string EQ = "="
     | to_string MEM = "∈"
 end
