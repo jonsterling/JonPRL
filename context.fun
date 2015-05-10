@@ -44,4 +44,6 @@ struct
       M.foldli welp "." ctx
     end
 
+  val foldri = M.foldri
+
 end

@@ -15,6 +15,9 @@ group is
   lang.sml
   whnf.fun
 
+  library.sig
+  library.fun
+
   refiner_types.sig
   core_tactics.sig
 

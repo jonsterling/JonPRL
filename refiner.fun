@@ -18,14 +18,10 @@ sig
   type validation = evidence list -> evidence
   type tactic = goal -> goal list * validation
 
-  structure Library : sig
-    type lemma
-    val all_lemmas : unit -> lemma list
-    val lemma_name : lemma -> string
-    val lemma_goal : lemma -> Syn.t
-    val install_lemma : string -> Syn.t -> tactic -> lemma
-    val validate_lemma : lemma -> Evidence.t
-  end
+  structure Library : LIBRARY
+    where type goal = sequent
+      and type evidence = Evidence.t
+      and type tactic = tactic
 
   val print_goal : goal -> string
 
@@ -58,7 +54,7 @@ sig
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
     val HypEq : tactic
-    val Lemma : Library.lemma -> tactic
+    val Lemma : Library.t -> tactic
   end
 
   structure DerivedTactics :
@@ -145,26 +141,32 @@ struct
         (structure Operator = EOp
          and Variable = Syn.Variable))
 
-  structure E = Evidence
-
   structure RefinerTypes : REFINER_TYPES =
   struct
     type goal = sequent
-    type evidence = E.t
+    type evidence = Evidence.t
     type validation = evidence list -> evidence
     type tactic = goal -> (goal list * validation)
+
+    fun print_goal (G >> P) =
+      let
+        val ctx = Context.to_string (print_mode, Syn.to_string) G
+        val prop = Syn.to_string print_mode P
+      in
+        ctx ^ " >> " ^ prop
+      end
   end
 
   open RefinerTypes
 
-  exception MalformedEvidence of E.t
+  exception MalformedEvidence of evidence
 
   local
-    open E EOp Lang
+    open Evidence EOp Lang
     infix $ \
     exception Hole
   in
-    fun extract (ev : E.t) : Syn.t =
+    fun extract (ev : evidence) : Syn.t =
       case out ev of
            VOID_EQ $ _ => Syn.$$ (AX, #[])
          | VOID_ELIM $ _ => Syn.$$ (AX, #[])
@@ -186,7 +188,7 @@ struct
          | WITNESS m $ _ => m
          | ` x => Syn.`` x
          | x \ E => Syn.\\ (x, extract E)
-         | _ => raise Fail (E.to_string print_mode ev)
+         | _ => raise Fail (Evidence.to_string print_mode ev)
   end
 
   open Lang
@@ -205,63 +207,7 @@ struct
   structure Whnf = Whnf(Syn)
 
   structure CoreTactics = CoreTactics(RefinerTypes)
-
-  fun print_goal (G >> P) =
-    let
-      val ctx = Context.to_string (print_mode, Syn.to_string) G
-      val prop = Syn.to_string print_mode P
-    in
-      ctx ^ " >> " ^ prop
-    end
-
-  structure Library =
-  struct
-    type lemma = string
-
-    structure Lib = BinaryMapFn
-      (struct type ord_key = lemma
-       val compare = String.compare end)
-
-    val installed_lemmas : (Syn.t * (Evidence.t Susp.susp)) Lib.map ref = ref (Lib.empty)
-
-    fun install_lemma name P tac =
-      let
-        val (subgoals, validation) = tac (Context.empty >> P)
-        val evidence =
-          if null subgoals
-          then Susp.delay (fn () => validation [])
-          else
-            let
-              val readout = List.foldl (fn (g,r) => r ^ "\n" ^ print_goal g) "" subgoals
-            in
-              raise Fail ("Remaining subgoals: " ^ readout)
-            end
-      in
-        installed_lemmas := Lib.insert (! installed_lemmas, name, (P, evidence));
-        name
-      end
-
-    fun lookup_lemma lemma =
-      let
-        val library = ! installed_lemmas
-      in
-        Lib.lookup (library, lemma)
-      end
-
-    fun lemma_name lem = lem
-    fun lemma_goal lem =
-      let
-        val (P, E) = lookup_lemma lem
-      in
-        P
-      end
-
-    fun validate_lemma lemma =
-      Susp.force (#2 (lookup_lemma lemma))
-
-    fun all_lemmas () =
-      Lib.foldri (fn (k, _, memo) => k :: memo) [] (! installed_lemmas)
-  end
+  structure Library = Library(RefinerTypes)
 
   structure InferenceRules =
   struct
@@ -493,10 +439,10 @@ struct
     fun Lemma lem : tactic =
       named "Lemma" (fn (G >> P) =>
         let
-          val (P', D) = Library.lookup_lemma lem
+          val (G' >> P') = Library.goal lem
         in
-          if Syn.eq (P, P')
-          then [] BY (fn _ => Susp.force D)
+          if Context.eq Syn.eq (G, G') andalso Syn.eq (P, P')
+          then [] BY (fn _ => Library.validate lem)
           else raise Refine
         end)
   end

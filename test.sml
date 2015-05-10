@@ -14,7 +14,7 @@ struct
   open Lang Syn Refiner
   open CoreTactics DerivedTactics InferenceRules
 
-  infix 4 >>
+  infix 2 >>
   infix 7 $$
   infix \\ THEN THENL ORELSE
 
@@ -23,7 +23,7 @@ struct
   val ax = AX $$ #[]
 
   fun & (a, b) = PROD $$ #[a, Variable.named "x" \\ b]
-  infix &
+  infix 6 &
 
   fun pair m n = PAIR $$ #[m,n]
   fun lam e =
@@ -41,39 +41,41 @@ struct
     end
 
   fun ~> (a, b) = FUN $$ #[a,Variable.named "x" \\ b]
-  infixr ~>
+  infixr 5 ~>
 
   fun mem (m, a) = MEM $$ #[m,a]
-  infix mem
+  infix 5 mem
+
+  val Emp = Context.empty
 
   val test1 =
-    Library.install_lemma "test1" (unit & (unit & unit))
+    Library.save "test1" (Emp >> unit & (unit & unit))
       (ProdIntro ax THEN (TRY (ProdIntro ax)) THEN Auto)
 
   val test1' =
-    Library.install_lemma "test1'" (unit & (unit & unit))
+    Library.save "test1'" (Emp >> unit & (unit & unit))
       (Lemma test1)
 
   val z = Variable.named "z"
 
   val test2 =
-    Library.install_lemma "test2" (unit ~> (unit & unit))
+    Library.save "test2" (Emp >> unit ~> (unit & unit))
       (FunIntro z THENL [ProdIntro ax THEN Auto, Auto])
 
   val test3 =
-    Library.install_lemma "test3" (lam (fn x => `` x) mem (unit ~> unit))
+    Library.save "test3" (Emp >> lam (fn x => `` x) mem (unit ~> unit))
       Auto
 
   val test4 =
-    Library.install_lemma "test4" (lam (fn x => pair ax ax) mem (void ~> void))
+    Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
       (MemUnfold THEN ReduceGoal THEN LamEq z THENL [VoidElim THEN Auto, Auto])
 
   val test5 =
-    Library.install_lemma "test5" (void ~> (unit & unit))
+    Library.save "test5" (Emp >> void ~> (unit & unit))
       (FunIntro z THENL [VoidElim THEN Auto, Auto])
 
   val test6 =
-    Library.install_lemma "test6" (unit ~> (unit & unit))
+    Library.save "test6" (Emp >> unit ~> (unit & unit))
       (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
 
  local
@@ -81,7 +83,7 @@ struct
    val y = Variable.named "y"
   in
     val test7 =
-      Library.install_lemma "test7" ((void & unit) ~> void)
+      Library.save "test7" (Emp >> (void & unit) ~> void)
         (FunIntro z THENL
           [ ProdElim z (x, y) THEN Assumption
           , Auto
@@ -91,17 +93,17 @@ struct
   fun print_lemma lemma =
     let
       open Library
-      val P = lemma_goal lemma
-      val evidence = validate_lemma lemma
+      val gl = goal lemma
+      val evidence = validate lemma
     in
-      print ("\n" ^ lemma_name lemma ^ "\n");
+      print ("\n" ^ name lemma ^ "\n");
       print "----------------------------------------\n";
-      print ("Goal: " ^ Syn.to_string print_mode P ^ "\n");
+      print ("Goal: " ^ print_goal gl ^ "\n");
       print ("Evidence: " ^ Evidence.to_string print_mode evidence ^ "\n");
       print ("Extract: " ^ Syn.to_string print_mode (extract evidence) ^ "\n\n")
     end
 
   val _ =
-    List.map print_lemma (Library.all_lemmas ())
+    List.map print_lemma (Library.all ())
 end
 
