@@ -1,8 +1,4 @@
-functor Library (R : REFINER_TYPES) :
-  LIBRARY
-    where type tactic = R.tactic
-    and type goal = R.goal
-    and type evidence = R.evidence =
+functor Library (R : REFINER_TYPES) : LIBRARY =
 struct
   structure V = Variable ()
   structure C = Context (V)
