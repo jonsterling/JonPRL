@@ -4,6 +4,9 @@ group is
   abt-lib/abt-lib.cm
 
 
+  susp.sig
+  susp.sml
+
   list_util.sml
 
   context.sig

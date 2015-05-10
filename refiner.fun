@@ -2,7 +2,6 @@ functor Refiner
   (structure Syn : ABTUTIL where Operator = Lang
    val print_mode : PrintMode.t) :>
 sig
-
   structure Evidence : ABTUTIL
   exception MalformedEvidence of Evidence.t
   val extract : Evidence.t -> Syn.t
@@ -13,9 +12,18 @@ sig
   type context = Syn.t Context.context
   datatype sequent = >> of context * Syn.t
 
-  include REFINER_TYPES
-    where type goal = sequent
-    and type evidence = Evidence.t
+  type goal = sequent
+  type evidence = Evidence.t
+
+  type validation = evidence list -> evidence
+  type tactic = goal -> goal list * validation
+
+  type lemma
+  val all_lemmas : unit -> lemma list
+  val lemma_name : lemma -> string
+  val lemma_goal : lemma -> Syn.t
+  val install_lemma : string -> Syn.t -> tactic -> lemma
+  val validate_lemma : lemma -> Evidence.t
 
   val print_goal : goal -> string
 
@@ -48,6 +56,7 @@ sig
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
     val HypEq : tactic
+    val Lemma : lemma -> tactic
   end
 
   structure DerivedTactics :
@@ -204,6 +213,65 @@ struct
       ctx ^ " >> " ^ prop
     end
 
+  structure Library :>
+  sig
+    type lemma
+    val install_lemma : string -> Syn.t -> tactic -> lemma
+    val lemma_name : lemma -> string
+    val all_lemmas : unit -> lemma list
+    val lemma_goal : lemma -> Syn.t
+    val validate_lemma : lemma -> Evidence.t
+    val lookup_lemma : lemma -> Syn.t * (Evidence.t Susp.susp)
+  end =
+  struct
+    type lemma = string
+
+    structure Lib = BinaryMapFn
+      (struct type ord_key = lemma
+       val compare = String.compare end)
+
+    val installed_lemmas : (Syn.t * (Evidence.t Susp.susp)) Lib.map ref = ref (Lib.empty)
+
+    fun install_lemma name P tac =
+      let
+        val (subgoals, validation) = tac (Context.empty >> P)
+        val evidence =
+          if null subgoals
+          then Susp.delay (fn () => validation [])
+          else
+            let
+              val readout = List.foldl (fn (g,r) => r ^ "\n" ^ print_goal g) "" subgoals
+            in
+              raise Fail ("Remaining subgoals: " ^ readout)
+            end
+      in
+        installed_lemmas := Lib.insert (! installed_lemmas, name, (P, evidence));
+        name
+      end
+
+    fun lookup_lemma lemma =
+      let
+        val library = ! installed_lemmas
+      in
+        Lib.lookup (library, lemma)
+      end
+
+    fun lemma_name lem = lem
+    fun lemma_goal lem =
+      let
+        val (P, E) = lookup_lemma lem
+      in
+        P
+      end
+
+    fun validate_lemma lemma =
+      Susp.force (#2 (lookup_lemma lemma))
+
+    fun all_lemmas () =
+      Lib.foldri (fn (k, _, memo) => k :: memo) [] (! installed_lemmas)
+  end
+
+  open Library
 
   structure InferenceRules =
   struct
@@ -431,6 +499,16 @@ struct
         case Context.search G (fn x => Syn.eq (P, x)) of
              SOME (x, _) => [] BY (fn _ => %`` x)
            | NONE => raise Refine)
+
+    fun Lemma lem : tactic =
+      named "Lemma" (fn (G >> P) =>
+        let
+          val (P', D) = lookup_lemma lem
+        in
+          if Syn.eq (P, P')
+          then [] BY (fn _ => Susp.force D)
+          else raise Refine
+        end)
   end
 
   structure DerivedTactics =
