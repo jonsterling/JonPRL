@@ -9,7 +9,9 @@ sig
   val insert : 'a context -> name -> 'a -> 'a context
   val remove : 'a context -> name -> 'a context * 'a
 
-  val lookup : 'a context -> name -> 'a option
+  exception NotFound of name
+  val lookup : 'a context -> name -> 'a
+
   val search : 'a context -> ('a -> bool) -> (name * 'a) option
 
   val map : ('a -> 'b) -> 'a context -> 'b context

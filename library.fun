@@ -38,22 +38,13 @@ struct
   fun name k =
     V.to_string PrintMode.User k
 
-  fun lookup_lemma k =
-    let
-      val library = ! installed_lemmas
-      val (SOME lemma) = C.lookup library k
-    in
-      lemma
-    end
+  fun lookup k =
+    C.lookup (! installed_lemmas) k
 
-  fun goal lem =
-    let
-      val (P, E) = lookup_lemma lem
-    in
-      P
-    end
+  fun goal k =
+    #1 (lookup k)
 
-  fun validate lemma =
-    Susp.force (#2 (lookup_lemma lemma))
+  fun validate k =
+    Susp.force (#2 (lookup k))
 
 end

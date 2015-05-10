@@ -18,7 +18,11 @@ struct
   fun insert ctx k v = M.insert (ctx, k, v)
   fun remove ctx k = M.remove (ctx, k)
 
-  fun lookup ctx k = M.find (ctx, k)
+  exception NotFound of name
+  fun lookup ctx k =
+    case M.find (ctx, k) of
+         SOME v => v
+       | NONE => raise NotFound k
 
   (* Needs to be made more lazy *)
   fun search ctx p = list_search (M.listItemsi ctx) p
@@ -29,7 +33,7 @@ struct
   fun eq test (ctx, ctx') =
     let
       fun probe (x, a, r) =
-        case lookup ctx' x of
+        case M.find (ctx', x) of
              SOME b => r andalso test (a, b)
            | NONE => false
     in

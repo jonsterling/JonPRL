@@ -216,9 +216,9 @@ struct
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
         fun fail () = raise Fail (name ^ "| " ^ print_goal goal)
-        val (subgoals, validation) = tac goal handle Refine => fail ()
+        val (subgoals, validation) = tac goal handle _ => fail ()
       in
-        (subgoals, fn Ds => validation Ds handle Refine => fail ())
+        (subgoals, fn Ds => validation Ds handle _ => fail ())
       end
 
     fun mk_evidence operator = fn Ds => operator %$$ Vector.fromList Ds
@@ -240,19 +240,17 @@ struct
 
     fun UnitElim x : tactic =
       named "UnitElim" (fn (G >> P) =>
-        case Context.lookup G x of
-             SOME unit => (case out unit of
-                 UNIT $ #[] =>
-                   let
-                     val ax = AX $$ #[]
-                     val G' = ctx_subst G ax x
-                     val P' = subst ax x P
-                   in
-                     [ G' >> P'
-                     ] BY mk_evidence (UNIT_ELIM x)
-                   end
-               | _ => raise Refine)
-           | NONE => raise Refine)
+        case out (Context.lookup G x) of
+             UNIT $ #[] =>
+               let
+                 val ax = AX $$ #[]
+                 val G' = ctx_subst G ax x
+                 val P' = subst ax x P
+               in
+                 [ G' >> P'
+                 ] BY mk_evidence (UNIT_ELIM x)
+               end
+           | _ => raise Refine)
 
     val UnitEq : tactic =
       named "UnitEq" (fn (G >> P) =>
@@ -360,12 +358,9 @@ struct
              EQ $ #[M,M',A] =>
              (case (Syn.eq (M, M'), out M) of
                    (true, ` x) =>
-                     (case Context.lookup G x of
-                           SOME Q =>
-                             if Syn.eq (A, Q)
-                             then ([], fn _ => HYP_EQ %$$ #[%`` x])
-                             else raise Refine
-                         | NONE => raise Refine)
+                      if Syn.eq (A, Context.lookup G x)
+                      then [] BY (fn _ => HYP_EQ %$$ #[%`` x])
+                      else raise Refine
                  | _ => raise Refine)
            | _ => raise Refine)
 
@@ -393,19 +388,17 @@ struct
 
     fun ProdElim z (s, t) : tactic =
       named "ProdElim" (fn (G >> P) =>
-        case Context.lookup G z of
-             SOME Q => (case out Q of
-                 PROD $ #[ S, xT ] =>
-                   let
-                     val st = PAIR $$ #[``s, ``t]
-                     val G' = ctx_subst G st z @@ (s, S) @@ (t, (xT // `` s))
-                   in
-                     [ G' >> subst st z P
-                     ] BY (fn [D] => PROD_ELIM z %$$ #[s %\\ (t %\\ D)]
-                            | _ => raise Refine)
-                   end
-               | _ => raise Refine)
-           | NONE => raise Refine)
+        case out (Context.lookup G z) of
+             PROD $ #[ S, xT ] =>
+               let
+                 val st = PAIR $$ #[``s, ``t]
+                 val G' = ctx_subst G st z @@ (s, S) @@ (t, (xT // `` s))
+               in
+                 [ G' >> subst st z P
+                 ] BY (fn [D] => PROD_ELIM z %$$ #[s %\\ (t %\\ D)]
+                        | _ => raise Refine)
+               end
+           | _ => raise Refine)
 
     fun PairEq z : tactic =
       named "PairEq" (fn (G >> P) =>
@@ -423,12 +416,9 @@ struct
 
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (G >> P) =>
-        case Context.lookup G x of
-              SOME P' =>
-                if Syn.eq (P, P')
-                then [] BY (fn _ => %`` x)
-                else raise Refine
-            | NONE => raise Refine)
+        if Syn.eq (P, Context.lookup G x)
+        then [] BY (fn _ => %`` x)
+        else raise Refine)
 
     val Assumption : tactic =
       named "Assumption" (fn (G >> P) =>
