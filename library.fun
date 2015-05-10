@@ -7,7 +7,7 @@ struct
   open R
 
   type object = {goal: goal, evidence: evidence Susp.susp}
-  val library : object C.context ref = ref (C.empty)
+  val library : object C.context ref = ref C.empty
 
   fun save name goal tac =
     let
