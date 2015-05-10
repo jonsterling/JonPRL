@@ -1,29 +1,18 @@
 functor Refiner
-  (structure Syn : ABTUTIL where Operator = Lang
+  (structure Syn : ABTUTIL where Operator = Operator
+   structure Sequent : SEQUENT
+     where type term = Syn.t
+     and type name = Syn.Variable.t
    val print_mode : PrintMode.t) :>
 sig
-  structure Evidence : ABTUTIL
-  exception MalformedEvidence of Evidence.t
-  val extract : Evidence.t -> Syn.t
-
-  structure Context : CONTEXT
-    where type name = Syn.Variable.t
-
-  type context = Syn.t Context.context
-  datatype sequent = >> of context * Syn.t
-
-  type goal = sequent
-  type evidence = Evidence.t
-
+  type evidence = Syn.t
   type validation = evidence list -> evidence
-  type tactic = goal -> goal list * validation
+  type tactic = Sequent.sequent -> Sequent.sequent list * validation
 
   structure Library : LIBRARY
-    where type goal = sequent
-      and type evidence = Evidence.t
+    where type goal = Sequent.sequent
+      and type evidence = evidence
       and type tactic = tactic
-
-  val print_goal : goal -> string
 
   structure CoreTactics : CORE_TACTICS
     where type tactic = tactic
@@ -35,24 +24,24 @@ sig
 
     val UnitEq : tactic
     val UnitIntro : tactic
-    val UnitElim : Context.name -> tactic
+    val UnitElim : Sequent.name -> tactic
     val AxEq : tactic
 
-    val ProdEq : Context.name -> tactic
+    val ProdEq : Sequent.name -> tactic
     val ProdIntro : Syn.t -> tactic
-    val ProdElim : Context.name -> Context.name * Context.name -> tactic
-    val PairEq : Context.name -> tactic
+    val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
+    val PairEq : Sequent.name -> tactic
 
-    val FunEq : Context.name -> tactic
-    val FunIntro : Context.name -> tactic
-    val LamEq : Context.name -> tactic
+    val FunEq : Sequent.name -> tactic
+    val FunIntro : Sequent.name -> tactic
+    val LamEq : Sequent.name -> tactic
 
     val MemUnfold : tactic
     val ReduceGoal : tactic
     val Witness : Syn.t -> tactic
 
     val Assumption : tactic
-    val Hypothesis : Context.name -> tactic
+    val Hypothesis : Sequent.name -> tactic
     val HypEq : tactic
     val Lemma : Library.t -> tactic
   end
@@ -63,146 +52,22 @@ sig
   end
 end =
 struct
-  structure Context = Context(Syn.Variable)
-  type context = Syn.t Context.context
-
-  datatype sequent = >> of context * Syn.t
-  infix 3 >>
+  structure Context = Sequent.Context
+  type context = Sequent.context
 
   fun ctx_subst (G : context) (m : Syn.t) (x : Context.name) =
     Context.map (Syn.subst m x) G
 
-  structure EOp =
-  struct
-    datatype t
-      = VOID_EQ
-      | UNIT_INTRO | UNIT_EQ | UNIT_ELIM of Context.name
-      | PROD_INTRO of Syn.t | PROD_EQ | PROD_ELIM of Context.name
-      | FUN_INTRO | FUN_EQ | LAM_EQ
-      | AX_EQ
-      | PAIR_EQ
-      | WITNESS of Syn.t
-      | HYP_EQ
-      | VOID_ELIM
-
-    fun eq UNIT_INTRO UNIT_INTRO = true
-      | eq VOID_EQ VOID_EQ = true
-      | eq UNIT_EQ UNIT_EQ = true
-      | eq (UNIT_ELIM x) (UNIT_ELIM y) = Syn.Variable.eq x y
-      | eq (PROD_INTRO x) (PROD_INTRO y) = Syn.eq (x, y)
-      | eq PROD_EQ PROD_EQ = true
-      | eq PAIR_EQ PAIR_EQ = true
-      | eq (PROD_ELIM z) (PROD_ELIM z') = Syn.Variable.eq z z'
-      | eq FUN_INTRO FUN_INTRO = true
-      | eq FUN_EQ FUN_EQ = true
-      | eq AX_EQ AX_EQ = true
-      | eq LAM_EQ LAM_EQ = true
-      | eq (WITNESS m) (WITNESS n) = Syn.eq (m, n)
-      | eq HYP_EQ HYP_EQ = true
-      | eq VOID_ELIM VOID_ELIM = true
-      | eq _ _ = false
-
-    fun arity UNIT_INTRO = #[]
-      | arity VOID_EQ = #[]
-      | arity UNIT_EQ = #[]
-      | arity (UNIT_ELIM _) = #[0]
-      | arity (PROD_INTRO _) = #[0,0]
-      | arity (PROD_ELIM _) = #[2]
-      | arity PROD_EQ = #[0,1]
-      | arity FUN_INTRO = #[1,0]
-      | arity FUN_EQ = #[0,1]
-      | arity AX_EQ = #[]
-      | arity PAIR_EQ = #[0,0,1]
-      | arity LAM_EQ = #[1,0]
-      | arity (WITNESS _) = #[0]
-      | arity HYP_EQ = #[0]
-      | arity VOID_ELIM = #[0]
-
-    fun to_string UNIT_INTRO = "unit-I"
-      | to_string UNIT_EQ = "unit="
-      | to_string (UNIT_ELIM x) = "unit-E{" ^ Syn.Variable.to_string print_mode x ^ "}"
-      | to_string VOID_EQ = "void="
-      | to_string (PROD_INTRO w) = "prod-I{" ^ Syn.to_string print_mode w ^ "}"
-      | to_string (PROD_ELIM x) = "prod-E{" ^ Syn.Variable.to_string print_mode x ^ "}"
-      | to_string PROD_EQ = "prod="
-      | to_string FUN_INTRO = "fun-I"
-      | to_string FUN_EQ = "fun="
-      | to_string AX_EQ = "ax="
-      | to_string PAIR_EQ = "pair="
-      | to_string LAM_EQ = "lam="
-      | to_string (WITNESS m) = "witness{" ^ Syn.to_string print_mode m ^ "}"
-      | to_string HYP_EQ = "hyp-∈"
-      | to_string VOID_ELIM = "void-E"
-  end
-
-  structure Evidence =
-    AbtUtil
-      (Abt
-        (structure Operator = EOp
-         and Variable = Syn.Variable))
-
-  structure RefinerTypes : REFINER_TYPES =
-  struct
-    type goal = sequent
-    type evidence = Evidence.t
-    type validation = evidence list -> evidence
-    type tactic = goal -> (goal list * validation)
-
-    fun print_goal (G >> P) =
-      let
-        val ctx = Context.to_string (print_mode, Syn.to_string) G
-        val prop = Syn.to_string print_mode P
-      in
-        ctx ^ " >> " ^ prop
-      end
-  end
+  structure RefinerTypes =
+    RefinerTypes
+      (structure Sequent = Sequent
+       type evidence = Syn.t)
 
   open RefinerTypes
 
-  exception MalformedEvidence of evidence
-
-  local
-    open Evidence EOp Lang
-    infix $ \
-    exception Hole
-  in
-    fun extract (ev : evidence) : Syn.t =
-      case out ev of
-           VOID_EQ $ _ => Syn.$$ (AX, #[])
-         | VOID_ELIM $ _ => Syn.$$ (AX, #[])
-
-         | UNIT_EQ $ _ => Syn.$$ (AX, #[])
-         | UNIT_INTRO $ #[] => Syn.$$ (AX, #[])
-         | UNIT_ELIM x $ #[E] => Syn.$$ (MATCH_UNIT, #[Syn.`` x, extract E])
-         | AX_EQ $ _ => Syn.$$ (AX, #[])
-
-         | PROD_EQ $ _ => Syn.$$ (AX, #[])
-         | PROD_INTRO w $ #[D,E] => Syn.$$ (PAIR, #[w, extract E])
-         | PROD_ELIM z $ #[stD] => Syn.$$ (SPREAD, #[Syn.`` z, extract stD])
-         | PAIR_EQ $ _ => Syn.$$ (AX, #[])
-
-         | FUN_EQ $ _ => Syn.$$ (AX, #[])
-         | FUN_INTRO $ #[xE, _] => Syn.$$ (LAM, #[extract xE])
-         | LAM_EQ $ _ => Syn.$$ (AX, #[])
-         | HYP_EQ $ _ => Syn.$$ (AX, #[])
-         | WITNESS m $ _ => m
-         | ` x => Syn.`` x
-         | x \ E => Syn.\\ (x, extract E)
-         | _ => raise Fail (Evidence.to_string print_mode ev)
-  end
-
-  open Lang
-  open Syn EOp
-  infix $
-  infix 8 $$
-
-  val %$$ = Evidence.$$
-  infix %$$
-
-  val %\\ = Evidence.\\
-  infix %\\
-
-  val %`` = Evidence.``
+  open Operator Syn
+  infix $ \
+  infix 8 $$ // \\
 
   structure Whnf = Whnf(Syn)
 
@@ -212,22 +77,21 @@ struct
   structure InferenceRules =
   struct
     exception Refine
+    open Sequent
+    infix >>
 
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
-        fun fail () = raise Fail (name ^ "| " ^ print_goal goal)
+        fun fail () = raise Fail (name ^ "| " ^ goal_to_string goal)
         val (subgoals, validation) = tac goal handle _ => fail ()
       in
         (subgoals, fn Ds => validation Ds handle _ => fail ())
       end
 
-    fun mk_evidence operator = fn Ds => operator %$$ Vector.fromList Ds
+    fun mk_evidence operator = fn Ds => operator $$ Vector.fromList Ds
 
     fun BY (Ds, V) = (Ds, V)
     infix BY
-
-    fun // (xM, N) = subst1 xM N
-    infix 7 //
 
     fun @@ (G, (x,A)) = Context.insert G x A
     infix 8 @@
@@ -248,7 +112,8 @@ struct
                  val P' = subst ax x P
                in
                  [ G' >> P'
-                 ] BY mk_evidence (UNIT_ELIM x)
+                 ] BY (fn [D] => UNIT_ELIM $$ #[`` x, D]
+                        | _ => raise Refine)
                end
            | _ => raise Refine)
 
@@ -295,7 +160,7 @@ struct
                     (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
                       [ G >> EQ $$ #[A,A',univ]
                       , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-                      ] BY (fn [D, E] => FUN_EQ %$$ #[D, z %\\ E]
+                      ] BY (fn [D, E] => FUN_EQ $$ #[D, z \\ E]
                              | _ => raise Refine)
                   | _ => raise Refine)
            | _ => raise Refine)
@@ -306,7 +171,7 @@ struct
              FUN $ #[P1, xP2] =>
                [ G @@ (z,P1) >> xP2 // `` z
                , G >> MEM $$ #[P1, UNIV $$ #[]]
-               ] BY (fn [D,E] => FUN_INTRO %$$ #[z %\\ D, E]
+               ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
                       | _ => raise Refine)
            | _ => raise Refine)
 
@@ -318,7 +183,7 @@ struct
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                        [ G @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
                        , G >> MEM $$ #[A, UNIV $$ #[]]
-                       ] BY (fn [D, E] => LAM_EQ %$$ #[z %\\ D, E]
+                       ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
                                | _ => raise Refine)
                    | _ => raise Refine)
            | _ => raise Refine)
@@ -350,7 +215,8 @@ struct
     fun Witness M : tactic =
       named "Witness" (fn (G >> P) =>
         [ G >> MEM $$ #[M, P]
-        ] BY mk_evidence (WITNESS M))
+        ] BY (fn [D] => WITNESS $$ #[M, D]
+               | _ => raise Refine))
 
     val HypEq : tactic =
       named "HypEq" (fn (G >> P) =>
@@ -359,7 +225,7 @@ struct
              (case (Syn.eq (M, M'), out M) of
                    (true, ` x) =>
                       if Syn.eq (A, Context.lookup G x)
-                      then [] BY (fn _ => HYP_EQ %$$ #[%`` x])
+                      then [] BY (fn _ => HYP_EQ $$ #[`` x])
                       else raise Refine
                  | _ => raise Refine)
            | _ => raise Refine)
@@ -372,7 +238,7 @@ struct
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
                       [ G >> EQ $$ #[A,A',univ]
                       , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
-                      ] BY (fn [D, E] => PROD_EQ %$$ #[D, z %\\ E]
+                      ] BY (fn [D, E] => PROD_EQ $$ #[D, z \\ E]
                              | _ => raise Refine)
                   | _ => raise Refine)
            | _ => raise Refine)
@@ -383,7 +249,8 @@ struct
              PROD $ #[P1, xP2] =>
                [ G >> MEM $$ #[ w, P1]
                , G >> xP2 // w
-               ] BY mk_evidence (PROD_INTRO w)
+               ] BY (fn [D, E] => PROD_INTRO $$ #[w, D, E]
+                      | _ => raise Refine)
            | _ => raise Refine)
 
     fun ProdElim z (s, t) : tactic =
@@ -395,7 +262,7 @@ struct
                  val G' = ctx_subst G st z @@ (s, S) @@ (t, (xT // `` s))
                in
                  [ G' >> subst st z P
-                 ] BY (fn [D] => PROD_ELIM z %$$ #[s %\\ (t %\\ D)]
+                 ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
                         | _ => raise Refine)
                end
            | _ => raise Refine)
@@ -409,7 +276,7 @@ struct
                        [ G >> EQ $$ #[M, M', A]
                        , G >> EQ $$ #[N, N', xB // M]
                        , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[]]
-                       ] BY (fn [D,E,F] => PAIR_EQ %$$ #[D, E, z %\\ F]
+                       ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
                               | _ => raise Refine)
                    | _ => raise Refine)
            | _ => raise Refine)
@@ -417,13 +284,13 @@ struct
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (G >> P) =>
         if Syn.eq (P, Context.lookup G x)
-        then [] BY (fn _ => %`` x)
+        then [] BY (fn _ => `` x)
         else raise Refine)
 
     val Assumption : tactic =
       named "Assumption" (fn (G >> P) =>
         case Context.search G (fn x => Syn.eq (P, x)) of
-             SOME (x, _) => [] BY (fn _ => %`` x)
+             SOME (x, _) => [] BY (fn _ => `` x)
            | NONE => raise Refine)
 
     fun Lemma lem : tactic =

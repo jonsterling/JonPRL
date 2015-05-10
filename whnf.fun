@@ -1,4 +1,4 @@
-functor Whnf (Syn : ABTUTIL where Operator = Lang) :
+functor Whnf (Syn : ABTUTIL where Operator = Operator) :
 sig
   val whnf : Syn.t -> Syn.t
   exception WhnfStuck
@@ -6,7 +6,7 @@ end =
 struct
   exception WhnfStuck
 
-  open Lang Syn
+  open Operator Syn
   infix $ $$
 
   fun whnf x =

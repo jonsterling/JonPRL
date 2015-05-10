@@ -3,6 +3,13 @@ group is
   $/smlnj-lib.cm
   abt-lib/abt-lib.cm
 
+  operator.sml
+  syntax.sml
+
+  extract.sig
+  extract.fun
+
+  whnf.fun
 
   susp.sig
   susp.sml
@@ -12,16 +19,18 @@ group is
   context.sig
   context.fun
 
-  lang.sml
-  whnf.fun
+  sequent.sig
+  sequent.fun
 
   library.sig
   library.fun
 
   refiner_types.sig
-  core_tactics.sig
+  refiner_types.fun
 
+  core_tactics.sig
   core_tactics.fun
+
   refiner.fun
 
   test.sml

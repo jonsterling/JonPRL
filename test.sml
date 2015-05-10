@@ -4,15 +4,23 @@ struct
 
   structure Var = Variable ()
   structure Syn =
-    AbtUtil (Abt (structure Operator = Lang and Variable = Var))
+    AbtUtil (Abt (structure Operator = Operator and Variable = Var))
+
+ structure Sequent =
+   Sequent
+     (structure Context = Context(Syn.Variable)
+      structure Syntax = Syn)
 
   structure Refiner =
     Refiner
       (structure Syn = Syn
+       structure Sequent = Sequent
        val print_mode = print_mode)
 
-  open Lang Syn Refiner
-  open CoreTactics DerivedTactics InferenceRules
+  structure Extract = Extract(Syn)
+
+  open Operator Syn Refiner
+  open CoreTactics DerivedTactics InferenceRules Sequent
 
   infix 2 >>
   infix 7 $$
@@ -98,9 +106,9 @@ struct
     in
       print ("\n" ^ name lemma ^ "\n");
       print "----------------------------------------\n";
-      print ("Goal: " ^ print_goal gl ^ "\n");
-      print ("Evidence: " ^ Evidence.to_string print_mode evidence ^ "\n");
-      print ("Extract: " ^ Syn.to_string print_mode (extract evidence) ^ "\n\n")
+      print ("Goal: " ^ Sequent.to_string print_mode gl ^ "\n");
+      print ("Evidence: " ^ Syn.to_string print_mode evidence ^ "\n");
+      print ("Extract: " ^ Syn.to_string print_mode (Extract.extract evidence) ^ "\n\n")
     end
 
   val _ =

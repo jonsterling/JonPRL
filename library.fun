@@ -17,7 +17,7 @@ struct
         then Susp.delay (fn () => validation [])
         else
           let
-            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.print_goal g) "" subgoals
+            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.goal_to_string g) "" subgoals
           in
             raise Fail ("Remaining subgoals: " ^ readout ^ "\n")
           end

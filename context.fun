@@ -29,16 +29,15 @@ struct
 
   val map = M.map
   val mapi = M.mapi
+  val foldri = M.foldri
 
   fun to_string (mode, printer) ctx =
     let
       fun welp (x, a, r) =
         r ^ ", " ^ V.to_string mode x ^ ":" ^ printer mode a
     in
-      M.foldli welp "." ctx
+      M.foldli welp "◊" ctx
     end
-
-  val foldri = M.foldri
 
   fun subcontext test (G, G') =
     let
@@ -54,5 +53,4 @@ struct
     subcontext test (G, G')
       andalso
         subcontext test (G', G)
-
 end
