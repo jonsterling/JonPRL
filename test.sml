@@ -47,33 +47,33 @@ struct
   infix mem
 
   val test1 =
-    install_lemma "test1" (unit & (unit & unit))
+    Library.install_lemma "test1" (unit & (unit & unit))
       (ProdIntro ax THEN (TRY (ProdIntro ax)) THEN Auto)
 
   val test1' =
-    install_lemma "test1'" (unit & (unit & unit))
+    Library.install_lemma "test1'" (unit & (unit & unit))
       (Lemma test1)
 
   val z = Variable.named "z"
 
   val test2 =
-    install_lemma "test2" (unit ~> (unit & unit))
+    Library.install_lemma "test2" (unit ~> (unit & unit))
       (FunIntro z THENL [ProdIntro ax THEN Auto, Auto])
 
   val test3 =
-    install_lemma "test3" (lam (fn x => `` x) mem (unit ~> unit))
+    Library.install_lemma "test3" (lam (fn x => `` x) mem (unit ~> unit))
       Auto
 
   val test4 =
-    install_lemma "test4" (lam (fn x => pair ax ax) mem (void ~> void))
+    Library.install_lemma "test4" (lam (fn x => pair ax ax) mem (void ~> void))
       (MemUnfold THEN ReduceGoal THEN LamEq z THENL [VoidElim THEN Auto, Auto])
 
   val test5 =
-    install_lemma "test5" (void ~> (unit & unit))
+    Library.install_lemma "test5" (void ~> (unit & unit))
       (FunIntro z THENL [VoidElim THEN Auto, Auto])
 
   val test6 =
-    install_lemma "test6" (unit ~> (unit & unit))
+    Library.install_lemma "test6" (unit ~> (unit & unit))
       (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
 
  local
@@ -81,7 +81,7 @@ struct
    val y = Variable.named "y"
   in
     val test7 =
-      install_lemma "test7" ((void & unit) ~> void)
+      Library.install_lemma "test7" ((void & unit) ~> void)
         (FunIntro z THENL
           [ ProdElim z (x, y) THEN Assumption
           , Auto
@@ -90,6 +90,7 @@ struct
 
   fun print_lemma lemma =
     let
+      open Library
       val P = lemma_goal lemma
       val evidence = validate_lemma lemma
     in
@@ -101,6 +102,6 @@ struct
     end
 
   val _ =
-    List.map print_lemma (all_lemmas ())
+    List.map print_lemma (Library.all_lemmas ())
 end
 

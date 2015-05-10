@@ -18,12 +18,14 @@ sig
   type validation = evidence list -> evidence
   type tactic = goal -> goal list * validation
 
-  type lemma
-  val all_lemmas : unit -> lemma list
-  val lemma_name : lemma -> string
-  val lemma_goal : lemma -> Syn.t
-  val install_lemma : string -> Syn.t -> tactic -> lemma
-  val validate_lemma : lemma -> Evidence.t
+  structure Library : sig
+    type lemma
+    val all_lemmas : unit -> lemma list
+    val lemma_name : lemma -> string
+    val lemma_goal : lemma -> Syn.t
+    val install_lemma : string -> Syn.t -> tactic -> lemma
+    val validate_lemma : lemma -> Evidence.t
+  end
 
   val print_goal : goal -> string
 
@@ -56,7 +58,7 @@ sig
     val Assumption : tactic
     val Hypothesis : Context.name -> tactic
     val HypEq : tactic
-    val Lemma : lemma -> tactic
+    val Lemma : Library.lemma -> tactic
   end
 
   structure DerivedTactics :
@@ -187,7 +189,6 @@ struct
          | _ => raise Fail (E.to_string print_mode ev)
   end
 
-
   open Lang
   open Syn EOp
   infix $
@@ -213,16 +214,7 @@ struct
       ctx ^ " >> " ^ prop
     end
 
-  structure Library :>
-  sig
-    type lemma
-    val install_lemma : string -> Syn.t -> tactic -> lemma
-    val lemma_name : lemma -> string
-    val all_lemmas : unit -> lemma list
-    val lemma_goal : lemma -> Syn.t
-    val validate_lemma : lemma -> Evidence.t
-    val lookup_lemma : lemma -> Syn.t * (Evidence.t Susp.susp)
-  end =
+  structure Library =
   struct
     type lemma = string
 
@@ -270,8 +262,6 @@ struct
     fun all_lemmas () =
       Lib.foldri (fn (k, _, memo) => k :: memo) [] (! installed_lemmas)
   end
-
-  open Library
 
   structure InferenceRules =
   struct
@@ -503,7 +493,7 @@ struct
     fun Lemma lem : tactic =
       named "Lemma" (fn (G >> P) =>
         let
-          val (P', D) = lookup_lemma lem
+          val (P', D) = Library.lookup_lemma lem
         in
           if Syn.eq (P, P')
           then [] BY (fn _ => Susp.force D)
