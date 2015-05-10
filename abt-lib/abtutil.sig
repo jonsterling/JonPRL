@@ -13,6 +13,7 @@ sig
   val unbind : t -> Variable.t * t
 
   val subst1 : (* binding *) t -> t -> t
+  val // : (* binding *) t * t -> t
 
   exception ExpectedBinding of t
 

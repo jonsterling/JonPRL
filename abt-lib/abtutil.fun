@@ -38,4 +38,6 @@ struct
     case unbind xe of
       (x,e) => subst b x e
 
+  fun op // (x, y) = subst1 x y
+
 end
