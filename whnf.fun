@@ -1,10 +1,7 @@
-functor Whnf (Syn : ABTUTIL where Operator = Operator) :
-sig
-  val whnf : Syn.t -> Syn.t
-  exception WhnfStuck
-end =
+functor Whnf (Syn : ABTUTIL where Operator = Operator) : WHNF =
 struct
-  exception WhnfStuck
+  type term = Syn.t
+  exception Stuck of term
 
   open Operator Syn
   infix $ $$
@@ -21,15 +18,15 @@ struct
                   in
                     whnf N'
                   end
-              | _ => raise WhnfStuck)
+              | _ => raise Stuck x)
        | AP $ #[M,N] =>
            (case out (whnf M) of
                  LAM $ #[xE] => whnf (subst1 xE N)
-               | _ => raise WhnfStuck)
+               | _ => raise Stuck x)
        | MATCH_UNIT $ #[M,N] =>
            (case out (whnf M) of
                  AX $ #[] => whnf N
-               | _ => raise WhnfStuck)
+               | _ => raise Stuck x)
        | _ => x
 
 

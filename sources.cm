@@ -9,6 +9,7 @@ group is
   extract.sig
   extract.fun
 
+  whnf.sig
   whnf.fun
 
   susp.sig
