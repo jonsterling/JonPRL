@@ -431,7 +431,7 @@ struct
         let
           val (G' >> P') = Library.goal lem
         in
-          if Context.eq Syn.eq (G, G') andalso Syn.eq (P, P')
+          if Context.subcontext Syn.eq (G', G) andalso Syn.eq (P, P')
           then [] BY (fn _ => Library.validate lem)
           else raise Refine
         end)

@@ -16,11 +16,10 @@ sig
 
   val map : ('a -> 'b) -> 'a context -> 'b context
   val mapi : (name * 'a -> 'b) -> 'a context -> 'b context
-
-  val eq : ('a * 'a -> bool) -> 'a context * 'a context -> bool
-
   val foldri : ((name * 'a * 'b) -> 'b) -> 'b -> 'a context -> 'b
 
   val to_string : PrintMode.t * (PrintMode.t -> 'a -> string) -> 'a context -> string
 
+  val eq : ('a * 'a -> bool) -> 'a context * 'a context -> bool
+  val subcontext : ('a * 'a -> bool) -> 'a context * 'a context -> bool
 end

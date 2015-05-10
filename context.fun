@@ -30,16 +30,6 @@ struct
   val map = M.map
   val mapi = M.mapi
 
-  fun eq test (ctx, ctx') =
-    let
-      fun probe (x, a, r) =
-        case M.find (ctx', x) of
-             SOME b => r andalso test (a, b)
-           | NONE => false
-    in
-      M.foldli probe true ctx
-    end
-
   fun to_string (mode, printer) ctx =
     let
       fun welp (x, a, r) =
@@ -49,5 +39,20 @@ struct
     end
 
   val foldri = M.foldri
+
+  fun subcontext test (G, G') =
+    let
+      fun probe (x, a, r) =
+        case M.find (G', x) of
+             SOME b => r andalso test (a,b)
+           | NONE => false
+    in
+      M.foldli probe true G
+    end
+
+  fun eq test (G, G') =
+    subcontext test (G, G')
+      andalso
+        subcontext test (G', G)
 
 end
