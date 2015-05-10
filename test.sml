@@ -18,8 +18,6 @@ struct
   infix 7 $$
   infix \\ THEN THENL ORELSE
 
-  exception RemainingSubgoals of goal list
-
   val void = VOID $$ #[]
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
