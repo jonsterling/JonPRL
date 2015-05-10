@@ -4,11 +4,10 @@ struct
   structure C = Context (V)
 
   type t = V.t
-  type goal = R.goal
-  type evidence = R.evidence
-  type tactic = R.tactic
+  open R
 
-  val installed_lemmas : (goal * (evidence Susp.susp)) C.context ref = ref (C.empty)
+  type object = {goal: goal, evidence: evidence Susp.susp}
+  val library : object C.context ref = ref (C.empty)
 
   fun save name goal tac =
     let
@@ -20,27 +19,17 @@ struct
           let
             val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.print_goal g) "" subgoals
           in
-            raise Fail ("Remaining subgoals: " ^ readout)
+            raise Fail ("Remaining subgoals: " ^ readout ^ "\n")
           end
       val key = V.named name
     in
-      installed_lemmas := C.insert (! installed_lemmas) key (goal, evidence);
+      library := C.insert (! library) key {goal = goal, evidence = evidence};
       key
     end
 
-  fun all () =
-    C.foldri (fn (k, _, memo) => k :: memo) [] (! installed_lemmas)
-
-  fun name k =
-    V.to_string PrintMode.User k
-
-  fun lookup k =
-    C.lookup (! installed_lemmas) k
-
-  fun goal k =
-    #1 (lookup k)
-
-  fun validate k =
-    Susp.force (#2 (lookup k))
-
+  fun all () = C.foldri (fn (k, _, memo) => k :: memo) [] (! library)
+  val name = V.to_string PrintMode.User
+  fun lookup k = C.lookup (! library) k
+  val goal = #goal o lookup
+  val validate = Susp.force o #evidence o lookup
 end
