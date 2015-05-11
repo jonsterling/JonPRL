@@ -1,5 +1,5 @@
 functor Sequent
-  (structure Syntax : ABTUTIL
+  (structure Syntax : ABT_UTIL
    structure Context : CONTEXT
      where type name = Syntax.Variable.t) : SEQUENT =
 struct

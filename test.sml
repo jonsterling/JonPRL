@@ -76,7 +76,7 @@ struct
 
   val test4 =
     Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
-      (MemUnfold THEN ReduceGoal THEN LamEq z THENL [VoidElim THEN Auto, Auto])
+      (MemUnfold THEN LamEq z THENL [VoidElim, Auto] THEN Assumption)
 
   val test5 =
     Library.save "test5" (Emp >> void ~> (unit & unit))
@@ -100,11 +100,10 @@ struct
 
   fun print_lemma lemma =
     let
-      open Library
-      val gl = goal lemma
-      val evidence = validate lemma
+      val gl = Library.goal lemma
+      val evidence = Library.validate lemma
     in
-      print ("\n" ^ name lemma ^ "\n");
+      print ("\n" ^ Library.name lemma ^ "\n");
       print "----------------------------------------\n";
       print ("Goal: " ^ Sequent.to_string print_mode gl ^ "\n");
       print ("Evidence: " ^ Syn.to_string print_mode evidence ^ "\n");

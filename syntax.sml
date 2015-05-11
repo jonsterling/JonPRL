@@ -1,4 +1,4 @@
-structure Syntax : ABTUTIL =
+structure Syntax : ABT_UTIL =
 struct
   structure V = Variable ()
   structure Abt = Abt

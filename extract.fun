@@ -1,4 +1,4 @@
-functor Extract (Syn : ABTUTIL where Operator = Operator) : EXTRACT =
+functor Extract (Syn : ABT_UTIL where Operator = Operator) : EXTRACT =
 struct
   type evidence = Syn.t
   type term = Syn.t

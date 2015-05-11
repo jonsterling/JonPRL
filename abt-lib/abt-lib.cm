@@ -1,27 +1,40 @@
 Library
   signature VARIABLE
   signature OPERATOR
+  signature PARSE_OPERATOR
+
   signature ABT
-  signature ABTUTIL
+  signature ABT_UTIL
+  signature PARSE_ABT
   signature VECTORUTIL
 
   functor Abt
   functor AbtUtil
   functor Variable
+  functor ParseAbt
   structure VectorUtil
   structure PrintMode
+
+  (* examples *)
+  functor ParseAbtTest
 is
   variable.sig
   operator.sig
-  abt.sig
-  abtutil.sig
+  parse_operator.sig
+
   vectorutil.sig
+
+  abt.sig
+  abt_util.sig
   abt.fun
-  abtutil.fun
+  abt_util.fun
+  parse_abt.sig
+  parse_abt.fun
   vectorutil.sml
   print_mode.sml
   variable.fun
 
-  $/basis.cm
-  $/smlnj-lib.cm
+  parse_abt_test.fun
 
+  $SMACKAGE/parcom/v1/parcom.cm
+  $SMACKAGE/cmlib/v1/cmlib.cm

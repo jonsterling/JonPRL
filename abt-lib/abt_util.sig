@@ -1,6 +1,5 @@
-signature ABTUTIL =
+signature ABT_UTIL =
 sig
-
   include ABT
 
   val `` : Variable.t -> t

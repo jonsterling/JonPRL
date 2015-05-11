@@ -1,5 +1,5 @@
 functor Refiner
-  (structure Syn : ABTUTIL where Operator = Operator
+  (structure Syn : ABT_UTIL where Operator = Operator
    structure Sequent : SEQUENT
      where type term = Syn.t
      and type name = Syn.Variable.t

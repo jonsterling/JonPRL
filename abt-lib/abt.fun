@@ -1,9 +1,6 @@
 functor Abt
   (structure Operator : OPERATOR
-   structure Variable : VARIABLE) :> ABT
-  where Operator = Operator
-    and Variable = Variable
-  =
+   structure Variable : VARIABLE) : ABT =
 struct
   structure Operator : OPERATOR = Operator
   structure Variable : VARIABLE = Variable
@@ -11,16 +8,16 @@ struct
   infix 5 \
   infix 5 $
 
-  datatype t =
-    FREE of Variable.t
-  | BOUND of int
-  | ABS of Variable.t * t
-  | APP of Operator.t * t vector
+  datatype t
+    = FREE of Variable.t
+    | BOUND of int
+    | ABS of Variable.t * t
+    | APP of Operator.t * t vector
 
-  datatype 'a view =
-    ` of Variable.t
-  | \ of Variable.t * 'a
-  | $ of Operator.t * 'a vector
+  datatype 'a view
+    = ` of Variable.t
+    | \ of Variable.t * 'a
+    | $ of Operator.t * 'a vector
 
   fun map f (` v) = ` v
     | map f (v \ e') = v \ f e'
