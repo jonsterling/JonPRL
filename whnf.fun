@@ -1,4 +1,4 @@
-functor Whnf (Syn : ABTUTIL where Operator = Operator) : WHNF =
+functor Whnf (Syn : ABT_UTIL where Operator = Operator) : WHNF =
 struct
   type term = Syn.t
   exception Stuck of term

@@ -1,6 +1,5 @@
-functor AbtUtil (A : ABT) : ABTUTIL =
+functor AbtUtil (A : ABT) : ABT_UTIL =
 struct
-
   open A
 
   infix 5 $
