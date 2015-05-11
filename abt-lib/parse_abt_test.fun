@@ -31,7 +31,8 @@ struct
 
   val _ =
     (doit "λ(x.λ(x.ap(x;<>)))";
-     doit "ap(λ(x.x);x)")
+     doit "ap(λ(x.x);x)";
+     doit "ap(ap(x;x);λ(x.x))")
 end
 
 structure T  = ParseAbtTest ()

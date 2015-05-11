@@ -38,10 +38,26 @@ struct
 
   structure SymbolTable =
   struct
-    type t = Variable.t StringListDict.dict
-    fun bind H (n, v) = StringListDict.insert H n v
-    fun named H n = StringListDict.lookup H n handle _ => Variable.named n
-    val empty = StringListDict.empty
+    type table = Variable.t StringListDict.dict
+    type t = {bound: table, free: table ref}
+    fun bind {bound,free} (n, v) =
+      {bound = StringListDict.insert bound n v,
+       free = free}
+
+    fun named {bound,free} n =
+      StringListDict.lookup bound n
+      handle _ => StringListDict.lookup (!free) n
+      handle _ =>
+        let
+          val v = Variable.named n
+        in
+          free := StringListDict.insert (!free) n v;
+          v
+        end
+
+    val empty : t =
+      {bound = StringListDict.empty,
+       free = ref StringListDict.empty}
   end
 
   fun parens p = (symbol "(" >> spaces) >> p << (spaces >> symbol ")")
