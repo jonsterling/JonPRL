@@ -33,5 +33,3 @@ struct
     (doit "λ(x.λ(x.ap(x;<>)))";
      doit "ap(λ(x.x);x)")
 end
-
-structure T  = ParseAbtTest ()
