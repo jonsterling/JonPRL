@@ -99,7 +99,7 @@ whenever `H >> A [ext M]`.
 It is still possible to prove membership and equality in the refinement logic,
 even though the categorical judgements are inaccessible. In order to do this,
 an equality type is introduced, whose *truth* is defined specifically so as to
-coincide with the (mere) evidence of the equality judgement. In practice, you
+coincide with the (mere) evidence of CTT's equality judgement. In practice, you
 will often see goals like `H >> M in A [ext •]`, and in this case you are
 proving the proposition `M in A` (which is an abbreviation for `M = M in A`).
 Based on the meaning explanation for the refinement logic, you are indirectly
