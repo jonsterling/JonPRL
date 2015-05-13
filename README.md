@@ -38,11 +38,11 @@ from Allen, Bickford, Constable, Harper and many other names.
 
 #### CTT
 
-CTT is a version of Martin-Löf's extensional type theory which has been heavily
-modified in order to be suitable for use in refinement-based proof assistants.
-Finally, Nuprl and JonPRL employ a proof refinement theory which has its
-semantics in CTT, but which is arranged to support the economical construction
-of *derivations*.
+CTT (computational type theory) is a version of Martin-Löf's extensional type
+theory (ETT) which has been heavily modified in order to be suitable for use in
+refinement-based proof assistants.  Finally, Nuprl and JonPRL employ a proof
+refinement logic which has its semantics in CTT, but which is arranged to
+support the economical construction of *derivations*.
 
 The primary differences between CTT and ETT are as follows:
 
