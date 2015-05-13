@@ -48,7 +48,7 @@ The primary differences between CTT and ETT are as follows:
 
 1. ETT has four categorical judgements: `A type`, `A = B type`, `M ∈ A` and
 `M = N ∈ A`; CTT has only one categorical judgement, which is `M = N ∈ A`.
-`A = B type` is recovered as equality in a universe, and `M in A` is recovered as
+`A = B type` is recovered as equality in a universe, and `M ∈ A` is recovered as
 an abbreviation for `M = M ∈ A`.
 
 2. The meaning of equality of types is different. In ETT, types are
@@ -64,7 +64,7 @@ judgement; in CTT, the rules are arranged so as to cause the old
 presuppositions to become evident by virtue of the evidence of a judgement. An
 example is the meaning of the sequent `x:A >> B(x) type` (`B` is a family
 fibred over `A`): in ETT, you must demonstrate `A type`, and then you must
-demonstrate `|x B(x) type (x in A)`. In CTT, however, the meaning of the
+demonstrate `|x B(x) type (x ∈ A)`. In CTT, however, the meaning of the
 sequent does not include the presupposition at all, and the rules are carefully
 arranged in order that the "moral" presuppositions shall be satisfied *in the
 course of* demonstrating the evidence of a judgement.
