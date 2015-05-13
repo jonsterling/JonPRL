@@ -100,3 +100,22 @@ will often see goals like `H >> M in A [ext •]`, and in this case you are
 proving the proposition `M in A` (which is an abbreviation for `M = M in A`).
 Based on the meaning explanation for the refinement logic, you are indirectly
 causing the categorical equality judgement of CTT to become evident.
+
+It is *not the case* that CTT (or even ETT) contains some special "equality
+reflection" rule which allows propositional equalities to leak into the
+judgemental equality. When Martin-Löf mentioned this rule in 1979, it was not
+as a defining factor of the theory, but rather as an *admissible rule* which is
+immediate under the meaning explanations and the definitions of the types. The
+judgemental equality comes first in ETT (and CTT), and it contains the true,
+typical equality for each type (this is part of the definition of each type);
+then, the propositional equality is defined in terms of the judgemental
+equality.
+
+It would make no sense to define the judgemental equality in terms of the
+propositional equality, since the judgements are prior to the types! Martin-Löf
+never intended this, but that did not stop many people from coming under the
+impression that ETT was somehow distinguished from later type theories by the
+addition or removal of the equality reflection rule. Rather, the difference
+between ETT and other theories is the *meaning explanation*, which causes the
+equality reflection rule to be evident (or not).
+
