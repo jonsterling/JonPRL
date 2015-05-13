@@ -94,8 +94,8 @@ mode of a judgement), and `M` is an output. The judgement is pronounced, "`H`
 entails the truth of `A`, with extract `M`".
 
 Then, in the refinement logic it is not possible to access the categorical
-judgements of CTT. Rather than constructing a witness to a proposition, you are
-causing the truth of a proposition to become evident: this judgement is
+judgements of CTT. Rather than asserting that a term witnesses a proposition,
+you are causing the truth of a proposition to become evident: this judgement is
 essentially a functional, hypothetico-general assertion of truth. In parallel
 with a derivation of truth, an extract term `M` is incrementally constructed;
 the meaning explanation for the refinement logic entails that `H >> M ∈ A`
