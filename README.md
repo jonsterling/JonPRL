@@ -60,14 +60,14 @@ reasons, and the equality of types is intensional/structural.
 
 3. The semantics of presuppositions is different. In ETT, the presuppositions
 of a judgement must be satisfied in addition to the meaning of the
-judgement; in CTT, a derived judgement is considered evident *if* its
-presuppositions are also evident. An example is the meaning of the sequent
-`x:A >> B(x) type` (`B` is a family fibred over `A`): in ETT, you must
-demonstrate `A type`, and then you must demonstrate `|x B(x) type (x in A)`. In
-CTT, however, the meaning of the sequent does not include the presupposition at
-all, and the rules are carefully arranged in order that the "moral"
-presuppositions shall be satisfied *in the course of* demonstrating the
-evidence of a judgement.
+judgement; in CTT, the rules are arranged so as to cause the old
+presuppositions to become evident by virtue of the evidence of a judgement. An
+example is the meaning of the sequent `x:A >> B(x) type` (`B` is a family
+fibred over `A`): in ETT, you must demonstrate `A type`, and then you must
+demonstrate `|x B(x) type (x in A)`. In CTT, however, the meaning of the
+sequent does not include the presupposition at all, and the rules are carefully
+arranged in order that the "moral" presuppositions shall be satisfied *in the
+course of* demonstrating the evidence of a judgement.
 
 In practice, this means that where Martin-Löf's meaning explanation readily
 justifies a rule like `M ∈ A ===> inl(M) ∈ A + B` (which would presuppose `A
