@@ -53,8 +53,8 @@ an abbreviation for `M = M ∈ A`.
 
 2. The semantics of presuppositions is different. In ETT, the presuppositions
 of a judgement must be satisfied in addition to the meaning of the
-judgement; in CTT, a derived judgement is considered evidence *if* its
-presuppositions are also evident. An example is the meaning of the sequence
+judgement; in CTT, a derived judgement is considered evident *if* its
+presuppositions are also evident. An example is the meaning of the sequent
 `x:A >> B(x) type` (`B` is a family fibred over `A`): in ETT, you must
 demonstrate `A type`, and then you must demonstrate `|x B(x) type (x in A)`. In
 CTT, however, the meaning of the sequent does not include the presupposition at
