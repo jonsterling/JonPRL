@@ -63,17 +63,19 @@ presuppositions shall be satisfied *in the course of* demonstrating the
 evidence of a judgement.
 
 In practice, this means that where Martin-Löf's meaning explanation readily
-justifies a rule like `M ∈ A ===> inl(M) ∈ A + B`, in CTT it would be necessary
-to give an additional premise, `M ∈ A ; B type ===> inl(M) ∈ A + B`.
+justifies a rule like `M ∈ A ===> inl(M) ∈ A + B` (which would presuppose `A
+type`, `A + B type`), in CTT it would be necessary to give an additional
+premise, `M ∈ A ; B type ===> inl(M) ∈ A + B`.
 
 Why is CTT's meaning explanation arranged in this way, when the one for ETT is
 evidently better factored and more modular? The simple reason is that it makes
 the derivations smaller and less tedious. For instance, in order to cause the
-rule in the previous paragraph to be evident, assuming that `A type` is known,
-one still has to demonstrate the presupposition `A + B type`, whereas in the
-CTT version it is only necessary to demonstrate `B type`. It may not seem like
-a big deal here, but in general, CTT's meaning explanation is more practical
-for refinement-based proof.
+rule in the previous paragraph to be evident, one has to first demonstrate `A
+type` and `A + B type` before proving the intended entailment, whereas in the
+CTT version it is only necessary to demonstrate `B type` (and in CTT's
+semantics, `A type` shall be evident in the conclusion by virtue of the
+evidence of `M ∈ A`). It may not seem like a big deal here, but in general,
+CTT's meaning explanation is more practical for refinement-based proof.
 
 
 #### The Refinement Logic
