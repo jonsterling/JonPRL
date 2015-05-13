@@ -55,7 +55,7 @@ an abbreviation for `M = M ∈ A`.
 distinguished from terms via their categorical judgement, and their equality
 is itself extensional (in the sense of the axiom of extensionality): two types
 are equal when they have the same members and the same members are equal in
-both type. In CTT, however, this not possible (or practical) for a number of
+both types. In CTT, however, this not possible (or practical) for a number of
 reasons, and the equality of types is intensional/structural.
 
 3. The semantics of presuppositions is different. In ETT, the presuppositions
