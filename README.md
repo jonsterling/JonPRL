@@ -92,6 +92,8 @@ with a derivation of truth, an extract term `M` is incrementally constructed;
 the meaning explanation for the refinement logic entails that `H >> M ∈ A`
 whenever `H >> A [ext M]`.
 
+#### Propositional Equality
+
 It is still possible to prove membership and equality in the refinement logic,
 even though the categorical judgements are inaccessible. In order to do this,
 an equality type is introduced, whose *truth* is defined specifically so as to
@@ -100,6 +102,9 @@ will often see goals like `H >> M in A [ext •]`, and in this case you are
 proving the proposition `M in A` (which is an abbreviation for `M = M in A`).
 Based on the meaning explanation for the refinement logic, you are indirectly
 causing the categorical equality judgement of CTT to become evident.
+
+
+#### Clarification of "Equality Reflection"
 
 It is *not the case* that CTT (or even ETT) contains some special "equality
 reflection" rule which allows propositional equalities to leak into the
