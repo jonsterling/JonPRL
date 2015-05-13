@@ -51,7 +51,14 @@ The primary differences between CTT and ETT are as follows:
 `A = B type` is recovered as equality in a universe, and `M in A` is recovered as
 an abbreviation for `M = M ∈ A`.
 
-2. The semantics of presuppositions is different. In ETT, the presuppositions
+2. The meaning of equality of types is different. In ETT, types are
+distinguished from terms via their categorical judgement, and their equality
+is itself extensional (in the sense of the axiom of extensionality): two types
+are equal when they have the same members and the same members are equal in
+both type. In CTT, however, this not possible (or practical) for a number of
+reasons, and the equality of types is intensional/structural.
+
+3. The semantics of presuppositions is different. In ETT, the presuppositions
 of a judgement must be satisfied in addition to the meaning of the
 judgement; in CTT, a derived judgement is considered evident *if* its
 presuppositions are also evident. An example is the meaning of the sequent
