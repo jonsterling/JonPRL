@@ -64,7 +64,7 @@ evidence of a judgement.
 
 In practice, this means that where Martin-Löf's meaning explanation readily
 justifies a rule like `M ∈ A ===> inl(M) ∈ A + B`, in CTT it would be necessary
-to give an additional premise, `M ∈ A  B type ===> inl(M) ∈ A + B`.
+to give an additional premise, `M ∈ A ; B type ===> inl(M) ∈ A + B`.
 
 Why is CTT's meaning explanation arranged in this way, when the one for ETT is
 evidently better factored and more modular? The simple reason is that it makes
