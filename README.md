@@ -2,6 +2,9 @@
 
 JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build, and
 [Smackage](https://github.com/standardml/smackage) for its dependencies.
+(JonPRL is likely compatible with other SML implementations, but I currently
+rely on CM and don't have the engineering bandwidth to test it with other
+implementations and build systems.)
 
 First make sure you have SML/NJ and Smackage set up properly. Then, install
 JonPRL's dependencies:
