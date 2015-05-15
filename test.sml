@@ -26,6 +26,8 @@ struct
   infix 7 $$
   infix \\ THEN THENL ORELSE
 
+  fun univ i = UNIV $$ #[i]
+  fun lsuc i = LSUCC $$ #[i]
   val void = VOID $$ #[]
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
@@ -65,10 +67,11 @@ struct
       (Lemma test1)
 
   val z = Variable.named "z"
+  val i = Variable.named "i"
 
   val test2 =
     Library.save "test2" (Emp >> unit ~> (unit & unit))
-      (FunIntro z THENL [ProdIntro ax THEN Auto, Auto])
+      (FunIntro z (`` i) THENL [ProdIntro ax THEN Auto, Auto])
 
   val test3 =
     Library.save "test3" (Emp >> lam (fn x => `` x) mem (unit ~> unit))
@@ -76,11 +79,11 @@ struct
 
   val test4 =
     Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
-      (MemUnfold THEN LamEq z THENL [VoidElim, Auto] THEN Assumption)
+      (MemUnfold THEN LamEq z (`` i) THENL [VoidElim, Auto] THEN Assumption)
 
   val test5 =
     Library.save "test5" (Emp >> void ~> (unit & unit))
-      (FunIntro z THENL [VoidElim THEN Auto, Auto])
+      (FunIntro z (`` i) THENL [VoidElim THEN Auto, Auto])
 
   val test6 =
     Library.save "test6" (Emp >> unit ~> (unit & unit))
@@ -92,11 +95,19 @@ struct
   in
     val test7 =
       Library.save "test7" (Emp >> (void & unit) ~> void)
-        (FunIntro z THENL
+        (FunIntro z (`` i) THENL
           [ ProdElim z (x, y) THEN Assumption
           , Auto
           ])
   end
+
+  val test8 =
+    Library.save "test8" (Emp >> (univ (`` i)) mem (univ (lsuc (lsuc (`` i)))))
+      Auto
+
+  val test9 =
+    Library.save "test9" (Emp >> (univ (`` i) & unit) mem (univ (lsuc (`` i))))
+      Auto
 
   fun print_lemma lemma =
     let
@@ -109,6 +120,7 @@ struct
       print ("Evidence: " ^ Syn.to_string print_mode evidence ^ "\n");
       print ("Extract: " ^ Syn.to_string print_mode (Extract.extract evidence) ^ "\n\n")
     end
+
 
   val _ =
     List.map print_lemma (Library.all ())

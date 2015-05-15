@@ -19,6 +19,7 @@ sig
 
   structure InferenceRules :
   sig
+    val UnivEq : tactic
     val VoidEq : tactic
     val VoidElim : tactic
 
@@ -30,11 +31,11 @@ sig
     val ProdEq : Sequent.name -> tactic
     val ProdIntro : Syn.t -> tactic
     val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
-    val PairEq : Sequent.name -> tactic
+    val PairEq : Sequent.name -> Syn.t -> tactic
 
     val FunEq : Sequent.name -> tactic
-    val FunIntro : Sequent.name -> tactic
-    val LamEq : Sequent.name -> tactic
+    val FunIntro : Sequent.name -> Syn.t -> tactic
+    val LamEq : Sequent.name -> Syn.t -> tactic
 
     val MemUnfold : tactic
     val ReduceGoal : tactic
@@ -96,6 +97,23 @@ struct
     fun @@ (G, (x,A)) = Context.insert G x A
     infix 8 @@
 
+    fun assert_level_lt (l, k) =
+      case out k of
+           LSUCC $ #[k'] => if Syn.eq (l, k') then () else assert_level_lt (l, k')
+         | _ => raise Refine
+
+    val UnivEq : tactic =
+      named "UnivEq" (fn (G >> P) =>
+        case out P of
+             EQ $ #[univ1, univ2, univ3] =>
+             (case (out univ1, out univ2, out univ3) of
+                   (UNIV $ #[l], UNIV $ #[l'], UNIV $ #[k]) =>
+                   if Syn.eq (l, l')
+                   then (assert_level_lt (l, k); [] BY mk_evidence UNIV_EQ)
+                   else raise Refine
+                 | _ => raise Refine)
+           | _ => raise Refine)
+
     val UnitIntro : tactic =
       named "UnitIntro" (fn (G >> P) =>
         case out P of
@@ -120,7 +138,7 @@ struct
     val UnitEq : tactic =
       named "UnitEq" (fn (G >> P) =>
         case out P of
-             CAN_MEM $ #[unit, unit', univ] =>
+             EQ $ #[unit, unit', univ] =>
                (case (out unit, out unit', out univ) of
                     (UNIT $ _, UNIT $ _, UNIV $ _) =>
                       [] BY mk_evidence UNIT_EQ
@@ -130,7 +148,7 @@ struct
     val VoidEq : tactic =
       named "VoidEq" (fn (G >> P) =>
         case out P of
-             CAN_MEM $ #[void, void', univ] =>
+             EQ $ #[void, void', univ] =>
                (case (out void, out void', out univ) of
                     (VOID $ _, VOID $ _, UNIV $ _) =>
                       [] BY mk_evidence VOID_EQ
@@ -157,7 +175,7 @@ struct
         case out P of
              EQ $ #[fun1, fun2, univ] =>
                (case (out fun1, out fun1, out univ) of
-                    (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[]) =>
+                    (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[k]) =>
                       [ G >> EQ $$ #[A,A',univ]
                       , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
                       ] BY (fn [D, E] => FUN_EQ $$ #[D, z \\ E]
@@ -165,24 +183,24 @@ struct
                   | _ => raise Refine)
            | _ => raise Refine)
 
-    fun FunIntro z : tactic =
+    fun FunIntro z k : tactic =
       named "FunIntro" (fn (G >> P) =>
         case out P of
              FUN $ #[P1, xP2] =>
                [ G @@ (z,P1) >> xP2 // `` z
-               , G >> MEM $$ #[P1, UNIV $$ #[]]
+               , G >> MEM $$ #[P1, UNIV $$ #[k]]
                ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
                       | _ => raise Refine)
            | _ => raise Refine)
 
-    fun LamEq z : tactic =
+    fun LamEq z k : tactic =
       named "LamEq" (fn (G >> P) =>
         case out P of
              EQ $ #[lam, lam', func] =>
                (case (out lam, out lam', out func) of
                      (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
                        [ G @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
-                       , G >> MEM $$ #[A, UNIV $$ #[]]
+                       , G >> MEM $$ #[A, UNIV $$ #[k]]
                        ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
                                | _ => raise Refine)
                    | _ => raise Refine)
@@ -235,7 +253,7 @@ struct
         case out P of
              CAN_EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
-                    (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[]) =>
+                    (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[k]) =>
                       [ G >> EQ $$ #[A,A',univ]
                       , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
                       ] BY (fn [D, E] => PROD_EQ $$ #[D, z \\ E]
@@ -267,7 +285,7 @@ struct
                end
            | _ => raise Refine)
 
-    fun PairEq z : tactic =
+    fun PairEq z k : tactic =
       named "PairEq" (fn (G >> P) =>
         case out P of
              CAN_EQ $ #[pair, pair', prod] =>
@@ -275,7 +293,7 @@ struct
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        [ G >> EQ $$ #[M, M', A]
                        , G >> EQ $$ #[N, N', xB // M]
-                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[]]
+                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[k]]
                        ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
                               | _ => raise Refine)
                    | _ => raise Refine)
@@ -310,13 +328,14 @@ struct
     infix ORELSE ORELSE_LAZY THEN
 
     local
-      val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ())) ORELSE_LAZY (fn () => LamEq (Variable.new ())) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq
+      val i = Variable.named "i"
+      val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ()) (`` i)) ORELSE_LAZY (fn () => LamEq (Variable.new ()) (`` i)) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq ORELSE UnivEq
       val EqAuto = (ReduceGoal THEN CanEqAuto) ORELSE HypEq
       val intro_rules =
         MemUnfold ORELSE
           EqAuto ORELSE
             Assumption ORELSE_LAZY
-              (fn () => FunIntro (Variable.new ())) ORELSE
+              (fn () => FunIntro (Variable.new ()) (`` i)) ORELSE
                 UnitIntro
     in
       val Auto = REPEAT intro_rules

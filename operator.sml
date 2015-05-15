@@ -2,11 +2,15 @@ structure Operator =
 struct
   datatype t
     = (* Derivations *)
-      VOID_EQ | VOID_ELIM
+      UNIV_EQ
+    | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ
     | FUN_EQ | FUN_INTRO | LAM_EQ
     | WITNESS | HYP_EQ
+
+      (* Level expressions *)
+    | LSUCC
 
       (* Computational Type Theory *)
     | UNIV
@@ -22,7 +26,8 @@ struct
 
   fun arity O =
     case O of
-         VOID_EQ => #[]
+         UNIV_EQ => #[]
+       | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
        | UNIT_EQ => #[]
@@ -42,7 +47,10 @@ struct
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
 
-       | UNIV => #[]
+
+       | LSUCC => #[0]
+
+       | UNIV => #[0]
        | VOID => #[]
        | UNIT => #[]
        | AX => #[]
@@ -58,7 +66,8 @@ struct
 
   fun to_string O =
     case O of
-         VOID_EQ => "void="
+         UNIV_EQ => "univ="
+       | VOID_EQ => "void="
        | VOID_ELIM => "void-elim"
 
        | UNIT_EQ => "unit="
@@ -77,6 +86,8 @@ struct
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
+
+       | LSUCC => "s"
 
        | UNIV => "𝕌"
        | VOID => "void"
