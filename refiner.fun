@@ -33,10 +33,13 @@ sig
     val ProdIntro : Syn.t -> tactic
     val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
     val PairEq : Sequent.name -> Syn.t -> tactic
+    val SpreadEq : Syn.t -> Syn.t -> Sequent.name * Sequent.name * Sequent.name -> tactic
 
     val FunEq : Sequent.name -> tactic
     val FunIntro : Sequent.name -> Syn.t -> tactic
+    val FunElim : Sequent.name -> Syn.t -> Sequent.name * Sequent.name -> tactic
     val LamEq : Sequent.name -> Syn.t -> tactic
+    val ApEq : Syn.t -> tactic
 
     val MemUnfold : tactic
     val ReduceGoal : tactic
@@ -102,6 +105,15 @@ struct
       case out k of
            LSUCC $ #[k'] => if Syn.eq (l, k') then () else assert_level_lt (l, k')
          | _ => raise Refine
+
+    fun match_operator O M =
+      case out M of
+           O' $ ES => if Operator.eq O O' then ES else raise Refine
+         | _ => raise Refine
+
+    fun unify M N =
+      if Syn.eq (M, N) then M else raise Refine
+
 
     fun Cum k : tactic =
       named "Cum" (fn (G >> P) =>
@@ -205,6 +217,19 @@ struct
                       | _ => raise Refine)
            | _ => raise Refine)
 
+    fun FunElim f s (y, z) : tactic =
+      named "FunElim" (fn (G >> P) =>
+        let
+          val #[S, xT] = match_operator FUN (Context.lookup G f)
+          val Ts = xT // s
+          val fsTs = EQ $$ #[``y, AP $$ #[``f, s], Ts]
+        in
+          [ G >> MEM $$ #[s, S]
+          , G @@ (y, Ts) @@ (z, fsTs) >> P
+          ] BY (fn [D, E] => FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
+                  | _ => raise Refine)
+        end)
+
     fun LamEq z k : tactic =
       named "LamEq" (fn (G >> P) =>
         case out P of
@@ -217,6 +242,20 @@ struct
                                | _ => raise Refine)
                    | _ => raise Refine)
            | _ => raise Refine)
+
+    fun ApEq funty : tactic =
+      named "ApEq" (fn (G >> P) =>
+        let
+          val #[f1t1, f2t2, Tt1] = match_operator EQ P
+          val #[f1, t1] = match_operator AP f1t1
+          val #[f2, t2] = match_operator AP f2t2
+          val #[S, xT] = match_operator FUN funty
+          val Tt1' = unify Tt1 (xT // t1)
+        in
+          [ G >> EQ $$ #[f1, f2, funty]
+          , G >> EQ $$ #[t1, t2, S]
+          ] BY mk_evidence AP_EQ
+        end)
 
     val MemUnfold : tactic =
       named "MemUnfold" (fn (G >> P) =>
@@ -240,7 +279,8 @@ struct
                  ] BY (fn [D] => D
                         | _ => raise Refine)
                end
-           | _ => raise Refine)
+           | _ => [G >> Whnf.whnf P] BY (fn [D] => D
+                                          | _ => raise Refine))
 
     fun Witness M : tactic =
       named "Witness" (fn (G >> P) =>
@@ -310,6 +350,28 @@ struct
                               | _ => raise Refine)
                    | _ => raise Refine)
            | _ => raise Refine)
+
+    fun SpreadEq zC prod (s, t, y) : tactic =
+      named "SpreadEq" (fn (G >> P) =>
+        let
+          val #[spread, spread', CE1] = match_operator EQ P
+          val #[S, xT] = match_operator PROD prod
+          val #[E1, xyT1] = match_operator SPREAD spread
+          val #[E2, uvT2] = match_operator SPREAD spread'
+          val CE1' = unify CE1 (zC // E1)
+          val Ts = xT // ``s
+          val st = PAIR $$ #[``s, ``t]
+          val E1pair = EQ $$ #[E1, st, prod]
+          val Cst = zC // st
+          val T1st = (xyT1 // ``s) // ``t
+          val T2st = (uvT2 // ``s) // ``t
+          exception XXX
+        in
+          [ G >> EQ $$ #[E1, E2, prod]
+          , G @@ (s, S) @@ (t, Ts) @@ (y, E1pair) >> EQ $$ #[T1st, T2st, Cst]
+          ] BY (fn [D, E] => SPREAD_EQ $$ #[D, s \\ (t \\ (y \\ E))]
+                  | _ => raise Refine)
+        end)
 
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (G >> P) =>
