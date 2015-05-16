@@ -42,7 +42,6 @@ sig
     val ApEq : Syn.t -> tactic
 
     val MemUnfold : tactic
-    val ReduceGoal : tactic
     val Witness : Syn.t -> tactic
 
     val Assumption : tactic
@@ -60,8 +59,8 @@ struct
   structure Context = Sequent.Context
   type context = Sequent.context
 
-  fun ctx_subst (G : context) (m : Syn.t) (x : Context.name) =
-    Context.map (Syn.subst m x) G
+  fun ctx_subst (H : context) (m : Syn.t) (x : Context.name) =
+    Context.map (Syn.subst m x) H
 
   structure RefinerTypes =
     RefinerTypes
@@ -98,266 +97,264 @@ struct
     fun BY (Ds, V) = (Ds, V)
     infix BY
 
-    fun @@ (G, (x,A)) = Context.insert G x A
+    fun @@ (H, (x,A)) = Context.insert H x A
     infix 8 @@
 
-    fun assert_level_lt (l, k) =
-      case out k of
-           LSUCC $ #[k'] => if Syn.eq (l, k') then () else assert_level_lt (l, k')
-         | _ => raise Refine
-
-    fun match_operator O M =
+    fun ^! (M, O) =
       case out M of
            O' $ ES => if Operator.eq O O' then ES else raise Refine
          | _ => raise Refine
+    infix ^!
+
+    fun as_variable M =
+      case out M of
+           ` x => x
+         | _ => raise Refine
+
+    fun assert_level_lt (l, k) =
+      let
+        val #[k'] = k ^! LSUCC
+      in
+        if Syn.eq (l, k') then () else assert_level_lt (l, k')
+      end
 
     fun unify M N =
       if Syn.eq (M, N) then M else raise Refine
 
 
     fun Cum k : tactic =
-      named "Cum" (fn (G >> P) =>
-        case out P of
-             EQ $ #[A, B, univ] =>
-             (case out univ of
-                   UNIV $ #[l] =>
-                    (assert_level_lt (k,l);
-                     [G >> EQ $$ #[A,B,UNIV $$ #[k]]] BY mk_evidence CUM)
-                 | _ => raise Refine)
-           | _ => raise Refine)
+      named "Cum" (fn (H >> P) =>
+        let
+          val #[A, B, univ] = P ^! EQ
+          val #[l] = univ ^! UNIV
+          val _ = assert_level_lt (k, l)
+        in
+          [H >> EQ $$ #[A,B, UNIV $$ #[k]]] BY mk_evidence CUM
+        end)
 
     val UnivEq : tactic =
-      named "UnivEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[univ1, univ2, univ3] =>
-             (case (out univ1, out univ2, out univ3) of
-                   (UNIV $ #[l], UNIV $ #[l'], UNIV $ #[k]) =>
-                   if Syn.eq (l, l')
-                   then (assert_level_lt (l, k); [] BY mk_evidence UNIV_EQ)
-                   else raise Refine
-                 | _ => raise Refine)
-           | _ => raise Refine)
+      named "UnivEq" (fn (H >> P) =>
+        let
+          val #[univ1, univ2, univ3] = P ^! EQ
+          val #[l] = univ1 ^! UNIV
+          val #[l'] = univ2 ^! UNIV
+          val #[k] = univ3 ^! UNIV
+          val l'' = unify l l'
+          val _ = assert_level_lt (l'', k)
+        in
+          [] BY mk_evidence UNIV_EQ
+        end)
 
     val UnitIntro : tactic =
-      named "UnitIntro" (fn (G >> P) =>
-        case out P of
-             UNIT $ _ => [] BY mk_evidence UNIT_INTRO
-           | _ => raise Refine)
+      named "UnitIntro" (fn (H >> P) =>
+        let
+          val #[] = P ^! UNIT
+        in
+          [] BY mk_evidence UNIT_INTRO
+        end)
 
     fun UnitElim x : tactic =
-      named "UnitElim" (fn (G >> P) =>
-        case out (Context.lookup G x) of
-             UNIT $ #[] =>
-               let
-                 val ax = AX $$ #[]
-                 val G' = ctx_subst G ax x
-                 val P' = subst ax x P
-               in
-                 [ G' >> P'
-                 ] BY (fn [D] => UNIT_ELIM $$ #[`` x, D]
-                        | _ => raise Refine)
-               end
-           | _ => raise Refine)
+      named "UnitElim" (fn (H >> P) =>
+        let
+          val #[] = Context.lookup H x ^! UNIT
+          val ax = AX $$ #[]
+          val H' = ctx_subst H ax x
+          val P' = subst ax x P
+        in
+          [ H' >> P'
+          ] BY (fn [D] => UNIT_ELIM $$ #[`` x, D]
+                 | _ => raise Refine)
+        end)
 
     val UnitEq : tactic =
-      named "UnitEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[unit, unit', univ] =>
-               (case (out unit, out unit', out univ) of
-                    (UNIT $ _, UNIT $ _, UNIV $ _) =>
-                      [] BY mk_evidence UNIT_EQ
-                  | _ => raise Refine)
-           | _ => raise Refine)
+      named "UnitEq" (fn (H >> P) =>
+        let
+          val #[unit, unit', univ] = P ^! EQ
+          val #[] = unit ^! UNIT
+          val #[] = unit' ^! UNIT
+          val #[_] = univ ^! UNIV
+        in
+          [] BY mk_evidence UNIT_EQ
+        end)
 
     val VoidEq : tactic =
-      named "VoidEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[void, void', univ] =>
-               (case (out void, out void', out univ) of
-                    (VOID $ _, VOID $ _, UNIV $ _) =>
-                      [] BY mk_evidence VOID_EQ
-                  | _ => raise Refine)
-           | _ => raise Refine)
+      named "VoidEq" (fn (H >> P) =>
+        let
+          val #[void, void', univ] = P ^! EQ
+          val #[] = void ^! VOID
+          val #[] = void' ^! VOID
+          val #[_] = univ ^! UNIV
+        in
+          [] BY mk_evidence VOID_EQ
+        end)
 
     val VoidElim : tactic =
-      named "VoidEq" (fn (G >> P) =>
-        [ G >> VOID $$ #[]
+      named "VoidEq" (fn (H >> P) =>
+        [ H >> VOID $$ #[]
         ] BY mk_evidence VOID_ELIM)
 
     val AxEq : tactic =
-      named "AxEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[ax, ax', unit] =>
-               (case (out ax, out ax', out unit) of
-                    (AX $ #[], AX $ #[], UNIT $ #[]) =>
-                      [] BY mk_evidence AX_EQ
-                  | _ => raise Refine)
-           | _ => raise Refine)
+      named "AxEq" (fn (H >> P) =>
+        let
+          val #[ax, ax', unit] = P ^! EQ
+          val #[] = ax ^! AX
+          val #[] = ax' ^! AX
+          val #[] = unit ^! UNIT
+        in
+          [] BY mk_evidence AX_EQ
+        end)
 
     fun FunEq z : tactic =
-      named "FunEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[fun1, fun2, univ] =>
-               (case (out fun1, out fun1, out univ) of
-                    (FUN $ #[A,xB], FUN $ #[A',yB'], UNIV $ #[k]) =>
-                      [ G >> EQ $$ #[A,A',univ]
-                      , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-                      ] BY (fn [D, E] => FUN_EQ $$ #[D, z \\ E]
-                             | _ => raise Refine)
-                  | _ => raise Refine)
-           | _ => raise Refine)
+      named "FunEq" (fn (H >> P) =>
+        let
+          val #[fun1, fun2, univ] = P ^! EQ
+          val #[A, xB] = fun1 ^! FUN
+          val #[A', yB'] = fun2 ^! FUN
+          val #[k] = univ ^! UNIV
+        in
+          [ H >> EQ $$ #[A,A',univ]
+          , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
+          ] BY (fn [D, E] => FUN_EQ $$ #[D, z \\ E]
+                 | _ => raise Refine)
+        end)
 
     fun FunIntro z k : tactic =
-      named "FunIntro" (fn (G >> P) =>
-        case out P of
-             FUN $ #[P1, xP2] =>
-               [ G @@ (z,P1) >> xP2 // `` z
-               , G >> MEM $$ #[P1, UNIV $$ #[k]]
-               ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
-                      | _ => raise Refine)
-           | _ => raise Refine)
+      named "FunIntro" (fn (H >> P) =>
+        let
+          val #[P1, xP2] = P ^! FUN
+        in
+          [ H @@ (z,P1) >> xP2 // `` z
+          , H >> MEM $$ #[P1, UNIV $$ #[k]]
+          ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
+                 | _ => raise Refine)
+        end)
 
     fun FunElim f s (y, z) : tactic =
-      named "FunElim" (fn (G >> P) =>
+      named "FunElim" (fn (H >> P) =>
         let
-          val #[S, xT] = match_operator FUN (Context.lookup G f)
+          val #[S, xT] = Context.lookup H f ^! FUN
           val Ts = xT // s
           val fsTs = EQ $$ #[``y, AP $$ #[``f, s], Ts]
         in
-          [ G >> MEM $$ #[s, S]
-          , G @@ (y, Ts) @@ (z, fsTs) >> P
+          [ H >> MEM $$ #[s, S]
+          , H @@ (y, Ts) @@ (z, fsTs) >> P
           ] BY (fn [D, E] => FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
                   | _ => raise Refine)
         end)
 
     fun LamEq z k : tactic =
-      named "LamEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[lam, lam', func] =>
-               (case (out lam, out lam', out func) of
-                     (LAM $ #[aE], LAM $ #[bE'], FUN $ #[A,cB]) =>
-                       [ G @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
-                       , G >> MEM $$ #[A, UNIV $$ #[k]]
-                       ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
-                               | _ => raise Refine)
-                   | _ => raise Refine)
-           | _ => raise Refine)
+      named "LamEq" (fn (H >> P) =>
+        let
+          val #[lam, lam', func] = P ^! EQ
+          val #[aE] = lam ^! LAM
+          val #[bE'] = lam' ^! LAM
+          val #[A, cB] = func ^! FUN
+        in
+          [ H @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
+          , H >> MEM $$ #[A, UNIV $$ #[k]]
+          ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
+                  | _ => raise Refine)
+        end)
 
     fun ApEq funty : tactic =
-      named "ApEq" (fn (G >> P) =>
+      named "ApEq" (fn (H >> P) =>
         let
-          val #[f1t1, f2t2, Tt1] = match_operator EQ P
-          val #[f1, t1] = match_operator AP f1t1
-          val #[f2, t2] = match_operator AP f2t2
-          val #[S, xT] = match_operator FUN funty
+          val #[f1t1, f2t2, Tt1] = P ^! EQ
+          val #[f1, t1] = f1t1 ^! AP
+          val #[f2, t2] = f2t2 ^! AP
+          val #[S, xT] = funty ^! FUN
           val Tt1' = unify Tt1 (xT // t1)
         in
-          [ G >> EQ $$ #[f1, f2, funty]
-          , G >> EQ $$ #[t1, t2, S]
+          [ H >> EQ $$ #[f1, f2, funty]
+          , H >> EQ $$ #[t1, t2, S]
           ] BY mk_evidence AP_EQ
         end)
 
     val MemUnfold : tactic =
-      named "MemUnfold" (fn (G >> P) =>
-      case out P of
-           MEM $ #[M, A] =>
-             [ G >> EQ $$ #[M, M, A]
-             ] BY (fn [D] => D
-                    | _ => raise Refine)
-         | _ => raise Refine)
-
-    val ReduceGoal : tactic =
-      named "ReduceGoal" (fn (G >> P) =>
-        case out P of
-             EQ $ #[M, N, A] =>
-               let
-                 val M0 = Whnf.whnf M handle _ => M
-                 val N0 = Whnf.whnf N handle _ => N
-                 val A0 = Whnf.whnf A handle _ => A
-               in
-                 [ G >> EQ $$ #[M0, N0, A0]
-                 ] BY (fn [D] => D
-                        | _ => raise Refine)
-               end
-           | _ => [G >> Whnf.whnf P] BY (fn [D] => D
-                                          | _ => raise Refine))
+      named "MemUnfold" (fn (H >> P) =>
+        let
+          val #[M, A] = P ^! MEM
+        in
+          [ H >> EQ $$ #[M, M, A]
+          ] BY (fn [D] => D
+                 | _ => raise Refine)
+        end)
 
     fun Witness M : tactic =
-      named "Witness" (fn (G >> P) =>
-        [ G >> MEM $$ #[M, P]
+      named "Witness" (fn (H >> P) =>
+        [ H >> MEM $$ #[M, P]
         ] BY (fn [D] => WITNESS $$ #[M, D]
                | _ => raise Refine))
 
     val HypEq : tactic =
-      named "HypEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[M,M',A] =>
-             (case (Syn.eq (M, M'), out M) of
-                   (true, ` x) =>
-                      if Syn.eq (A, Context.lookup G x)
-                      then [] BY (fn _ => HYP_EQ $$ #[`` x])
-                      else raise Refine
-                 | _ => raise Refine)
-           | _ => raise Refine)
+      named "HypEq" (fn (H >> P) =>
+        let
+          val #[M, M', A] = P ^! EQ
+          val x = as_variable (unify M M')
+          val _ = unify A (Context.lookup H x)
+        in
+          [] BY (fn _ => HYP_EQ $$ #[`` x])
+        end)
 
     fun ProdEq z : tactic =
-      named "ProdEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[prod1, prod2, univ] =>
-               (case (out prod1, out prod2, out univ) of
-                    (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[k]) =>
-                      [ G >> EQ $$ #[A,A',univ]
-                      , G @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
-                      ] BY (fn [D, E] => PROD_EQ $$ #[D, z \\ E]
-                             | _ => raise Refine)
-                  | _ => raise Refine)
-           | _ => raise Refine)
+      named "ProdEq" (fn (H >> P) =>
+        let
+          val #[prod1, prod2, univ] = P ^! EQ
+          val #[A, xB] = prod1 ^! PROD
+          val #[A', yB'] = prod2 ^! PROD
+          val #[k] = univ ^! UNIV
+        in
+          [ H >> EQ $$ #[A,A',univ]
+          , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
+          ] BY (fn [D, E] => PROD_EQ $$ #[D, z \\ E]
+                 | _ => raise Refine)
+        end)
 
     fun ProdIntro w : tactic =
-      named "ProdIntro" (fn (G >> P) =>
-        case out P of
-             PROD $ #[P1, xP2] =>
-               [ G >> MEM $$ #[ w, P1]
-               , G >> xP2 // w
-               ] BY (fn [D, E] => PROD_INTRO $$ #[w, D, E]
-                      | _ => raise Refine)
-           | _ => raise Refine)
+      named "ProdIntro" (fn (H >> P) =>
+        let
+          val #[P1, xP2] = P ^! PROD
+        in
+          [ H >> MEM $$ #[ w, P1]
+          , H >> xP2 // w
+          ] BY (fn [D, E] => PROD_INTRO $$ #[w, D, E]
+                 | _ => raise Refine)
+        end)
 
     fun ProdElim z (s, t) : tactic =
-      named "ProdElim" (fn (G >> P) =>
-        case out (Context.lookup G z) of
-             PROD $ #[ S, xT ] =>
-               let
-                 val st = PAIR $$ #[``s, ``t]
-                 val G' = ctx_subst G st z @@ (s, S) @@ (t, (xT // `` s))
-               in
-                 [ G' >> subst st z P
-                 ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
-                        | _ => raise Refine)
-               end
-           | _ => raise Refine)
+      named "ProdElim" (fn (H >> P) =>
+        let
+          val #[S, xT] = Context.lookup H z ^! PROD
+          val st = PAIR $$ #[``s, ``t]
+          val H' = ctx_subst H st z @@ (s, S) @@ (t, (xT // `` s))
+        in
+          [ H' >> subst st z P
+          ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
+                 | _ => raise Refine)
+        end)
 
     fun PairEq z k : tactic =
-      named "PairEq" (fn (G >> P) =>
-        case out P of
-             EQ $ #[pair, pair', prod] =>
-               (case (out pair, out pair', out prod) of
-                     (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
-                       [ G >> EQ $$ #[M, M', A]
-                       , G >> EQ $$ #[N, N', xB // M]
-                       , G @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[k]]
-                       ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
-                              | _ => raise Refine)
-                   | _ => raise Refine)
-           | _ => raise Refine)
+      named "PairEq" (fn (H >> P) =>
+        let
+          val #[pair, pair', prod] = P ^! EQ
+          val #[M, N] = pair ^! PAIR
+          val #[M', N'] = pair' ^! PAIR
+          val #[A, xB] = prod ^! PROD
+        in
+          [ H >> EQ $$ #[M, M', A]
+          , H >> EQ $$ #[N, N', xB // M]
+          , H @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[k]]
+          ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
+                 | _ => raise Refine)
+        end)
 
     fun SpreadEq zC prod (s, t, y) : tactic =
-      named "SpreadEq" (fn (G >> P) =>
+      named "SpreadEq" (fn (H >> P) =>
         let
-          val #[spread, spread', CE1] = match_operator EQ P
-          val #[S, xT] = match_operator PROD prod
-          val #[E1, xyT1] = match_operator SPREAD spread
-          val #[E2, uvT2] = match_operator SPREAD spread'
+          val #[spread, spread', CE1] = P ^! EQ
+          val #[S, xT] = prod ^! PROD
+          val #[E1, xyT1] = spread ^! SPREAD
+          val #[E2, uvT2] = spread' ^! SPREAD
           val CE1' = unify CE1 (zC // E1)
           val Ts = xT // ``s
           val st = PAIR $$ #[``s, ``t]
@@ -367,30 +364,30 @@ struct
           val T2st = (uvT2 // ``s) // ``t
           exception XXX
         in
-          [ G >> EQ $$ #[E1, E2, prod]
-          , G @@ (s, S) @@ (t, Ts) @@ (y, E1pair) >> EQ $$ #[T1st, T2st, Cst]
+          [ H >> EQ $$ #[E1, E2, prod]
+          , H @@ (s, S) @@ (t, Ts) @@ (y, E1pair) >> EQ $$ #[T1st, T2st, Cst]
           ] BY (fn [D, E] => SPREAD_EQ $$ #[D, s \\ (t \\ (y \\ E))]
                   | _ => raise Refine)
         end)
 
     fun Hypothesis x : tactic =
-      named "Hypothesis" (fn (G >> P) =>
-        if Syn.eq (P, Context.lookup G x)
+      named "Hypothesis" (fn (H >> P) =>
+        if Syn.eq (P, Context.lookup H x)
         then [] BY (fn _ => `` x)
         else raise Refine)
 
     val Assumption : tactic =
-      named "Assumption" (fn (G >> P) =>
-        case Context.search G (fn x => Syn.eq (P, x)) of
+      named "Assumption" (fn (H >> P) =>
+        case Context.search H (fn x => Syn.eq (P, x)) of
              SOME (x, _) => [] BY (fn _ => `` x)
            | NONE => raise Refine)
 
     fun Lemma lem : tactic =
-      named "Lemma" (fn (G >> P) =>
+      named "Lemma" (fn (H >> P) =>
         let
-          val (G' >> P') = Library.goal lem
+          val (H' >> P') = Library.goal lem
         in
-          if Context.subcontext Syn.eq (G', G) andalso Syn.eq (P, P')
+          if Context.subcontext Syn.eq (H', H) andalso Syn.eq (P, P')
           then [] BY (fn _ => Library.validate lem)
           else raise Refine
         end)
@@ -404,7 +401,7 @@ struct
     local
       val i = Variable.named "i"
       val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ()) (`` i)) ORELSE_LAZY (fn () => LamEq (Variable.new ()) (`` i)) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq ORELSE UnivEq
-      val EqAuto = (ReduceGoal THEN CanEqAuto) ORELSE HypEq
+      val EqAuto = CanEqAuto ORELSE HypEq
       val intro_rules =
         MemUnfold ORELSE
           EqAuto ORELSE
