@@ -15,6 +15,7 @@ struct
          UNIV_EQ $ _ => ax
        | VOID_EQ $ _ => ax
        | VOID_ELIM $ _ => ax
+       | CUM $ _ => ax
 
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax

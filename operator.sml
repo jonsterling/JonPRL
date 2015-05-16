@@ -2,7 +2,7 @@ structure Operator =
 struct
   datatype t
     = (* Derivations *)
-      UNIV_EQ
+      UNIV_EQ | CUM
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ
@@ -27,6 +27,7 @@ struct
   fun arity O =
     case O of
          UNIV_EQ => #[]
+       | CUM => #[0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -67,6 +68,7 @@ struct
   fun to_string O =
     case O of
          UNIV_EQ => "univ="
+       | CUM => "cum"
        | VOID_EQ => "void="
        | VOID_ELIM => "void-elim"
 

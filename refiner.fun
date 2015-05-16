@@ -19,6 +19,7 @@ sig
 
   structure InferenceRules :
   sig
+    val Cum : Syn.t -> tactic
     val UnivEq : tactic
     val VoidEq : tactic
     val VoidElim : tactic
@@ -101,6 +102,17 @@ struct
       case out k of
            LSUCC $ #[k'] => if Syn.eq (l, k') then () else assert_level_lt (l, k')
          | _ => raise Refine
+
+    fun Cum k : tactic =
+      named "Cum" (fn (G >> P) =>
+        case out P of
+             EQ $ #[A, B, univ] =>
+             (case out univ of
+                   UNIV $ #[l] =>
+                    (assert_level_lt (k,l);
+                     [G >> EQ $$ #[A,B,UNIV $$ #[k]]] BY mk_evidence CUM)
+                 | _ => raise Refine)
+           | _ => raise Refine)
 
     val UnivEq : tactic =
       named "UnivEq" (fn (G >> P) =>
