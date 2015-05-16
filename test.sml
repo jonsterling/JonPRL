@@ -50,6 +50,16 @@ struct
       FUN $$ #[a, x \\ b x]
     end
 
+  fun sg a b =
+    let
+      val x = Var.named "x"
+    in
+      PROD $$ #[a, x \\ b x]
+    end
+
+  fun ap m n =
+    AP $$ #[m, n]
+
   fun ~> (a, b) = FUN $$ #[a,Variable.named "x" \\ b]
   infixr 5 ~>
 
@@ -109,6 +119,86 @@ struct
     Library.save "test9" (Emp >> (univ (`` i) & unit) mem (univ (lsuc (`` i))))
       Auto
 
+  local
+    val univi = univ (`` i)
+    val A = Variable.named "A"
+    val B = Variable.named "B"
+    val Q = Variable.named "Q"
+    val a = Variable.named "a"
+    val b = Variable.named "b"
+    val q = Variable.named "q"
+    val f = Variable.named "f"
+    val x = Variable.named "x"
+    val s = Variable.named "s"
+    val t = Variable.named "t"
+    val y = Variable.named "y"
+    val qa = Variable.named "qa"
+    val qa' = Variable.named "qa~"
+    val qa1 = Variable.named "qa1"
+    val qa2 = Variable.named "qa2"
+
+    exception XXX
+  in
+    val ac_premise =
+      FUN $$ #[ `` A, a \\
+        PROD $$ #[ `` B, b \\
+          ap (ap (`` Q) (`` a)) (`` b)]]
+
+    val ac_conclusion =
+      PROD $$ #[ `` A ~> `` B, f \\
+        FUN $$ #[ `` A, a \\
+          ap (ap (`` Q) (`` a)) (ap (`` f) (`` a))]]
+
+    val ac_prop =
+      FUN $$ #[univi, A \\
+        FUN $$ #[univi, B \\
+          FUN $$ #[ (`` A ~> (``B ~> univi)), Q \\
+            ac_premise ~> ac_conclusion ]]]
+
+    fun fst m =
+    let
+      val x = Variable.named "x"
+      val y = Variable.named "y"
+    in
+      SPREAD $$ #[ m, x \\ (y \\ `` x) ]
+    end
+
+    fun snd m =
+    let
+      val x = Variable.named "x"
+      val y = Variable.named "y"
+    in
+      SPREAD $$ #[ m, x \\ (y \\ `` y) ]
+    end
+
+    (*
+    val _ =
+      Library.save "ac" (Emp >> ac_prop)
+        (FunIntro A (lsuc (`` i)) THEN Auto
+         THEN FunIntro B (lsuc (`` i)) THEN Auto
+         THEN FunIntro Q (lsuc (`` i))
+         THENL
+           [ FunIntro q (`` i) THENL
+             [ ProdIntro (lam (fn x => fst (ap (`` q) (`` x)))) THENL
+               [ MemUnfold THEN (LamEq a (`` i)) THEN Auto
+                 THEN SpreadEq (z \\ `` B) (PROD $$ #[``B, b \\ (ap (ap (``Q) (``a)) (``b))]) (s, t, y) THEN Auto
+                 THEN ApEq (FUN $$ #[``A, a \\ PROD $$ #[``B, b \\ ap (ap (``Q) (``a)) (``b) ]]) THEN Auto
+               , FunIntro a (`` i) THEN Auto
+                 THEN FunElim q (``a) (qa, qa') THEN Auto
+                 THEN ProdElim qa (qa1, qa2)
+                 THEN Witness (``qa2)
+               ]
+             , MemUnfold THEN FunEq a THEN Auto THEN ProdEq b THEN Auto THEN ApEq (``B ~> univi) THEN Auto THEN ApEq (``A ~> (``B ~> univi)) THEN Auto
+             ]
+           , MemUnfold THEN (FunEq a) THENL
+             [ Cum (`` i)
+             , FunEq b THEN Auto THEN Cum (`` i)
+             ] THEN Auto
+           ])
+
+           *)
+  end
+
   fun print_lemma lemma =
     let
       val gl = Library.goal lemma
@@ -125,4 +215,3 @@ struct
   val _ =
     List.map print_lemma (Library.all ())
 end
-
