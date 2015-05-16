@@ -338,7 +338,7 @@ struct
               (fn () => FunIntro (Variable.new ()) (`` i)) ORELSE
                 UnitIntro
     in
-      val Auto = REPEAT intro_rules
+      val Auto = REPEAT0 intro_rules
     end
   end
 end

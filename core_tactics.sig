@@ -8,6 +8,7 @@ sig
   val THEN_LAZY : tactic * (unit -> tactic) -> tactic
   val THENL_LAZY : tactic * (unit -> tactic list) -> tactic
   val REPEAT : tactic -> tactic
+  val REPEAT0 : tactic -> tactic
 
   val ORELSE : tactic * tactic -> tactic
   val ORELSE_LAZY : tactic * (unit -> tactic) -> tactic

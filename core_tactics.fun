@@ -58,6 +58,9 @@ struct
   fun REPEAT tac =
     THEN_LAZY (tac, fn () => REPEAT tac)
 
+  fun REPEAT0 tac =
+    ORELSE ((REPEAT tac), ID)
+
   fun TRY tac =
     ORELSE(tac, ID)
 end
