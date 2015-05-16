@@ -251,7 +251,7 @@ struct
     fun ProdEq z : tactic =
       named "ProdEq" (fn (G >> P) =>
         case out P of
-             CAN_EQ $ #[prod1, prod2, univ] =>
+             EQ $ #[prod1, prod2, univ] =>
                (case (out prod1, out prod2, out univ) of
                     (PROD $ #[A,xB], PROD $ #[A',yB'], UNIV $ #[k]) =>
                       [ G >> EQ $$ #[A,A',univ]
@@ -288,7 +288,7 @@ struct
     fun PairEq z k : tactic =
       named "PairEq" (fn (G >> P) =>
         case out P of
-             CAN_EQ $ #[pair, pair', prod] =>
+             EQ $ #[pair, pair', prod] =>
                (case (out pair, out pair', out prod) of
                      (PAIR $ #[M,N], PAIR $ #[M', N'], PROD $ #[A,xB]) =>
                        [ G >> EQ $$ #[M, M', A]
