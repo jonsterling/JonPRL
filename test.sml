@@ -81,7 +81,7 @@ struct
 
   val test2 =
     Library.save "test2" (Emp >> unit ~> (unit & unit))
-      (FunIntro z (`` i) THENL [ProdIntro ax THEN Auto, Auto])
+      (FunIntro z (`` i) THEN Auto THEN ProdIntro ax THEN Auto)
 
   val test3 =
     Library.save "test3" (Emp >> lam (fn x => `` x) mem (unit ~> unit))
@@ -89,11 +89,11 @@ struct
 
   val test4 =
     Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
-      (MemUnfold THEN LamEq z (`` i) THENL [VoidElim, Auto] THEN Assumption)
+      (MemUnfold THEN LamEq z (`` i) THEN Auto THEN VoidElim THEN Auto)
 
   val test5 =
     Library.save "test5" (Emp >> void ~> (unit & unit))
-      (FunIntro z (`` i) THENL [VoidElim THEN Auto, Auto])
+      (FunIntro z (`` i) THEN Auto THEN VoidElim THEN Auto)
 
   val test6 =
     Library.save "test6" (Emp >> unit ~> (unit & unit))
@@ -105,10 +105,7 @@ struct
   in
     val test7 =
       Library.save "test7" (Emp >> (void & unit) ~> void)
-        (FunIntro z (`` i) THENL
-          [ ProdElim z (x, y) THEN Assumption
-          , Auto
-          ])
+        (FunIntro z (`` i) THEN Auto THEN ProdElim z (x, y) THEN Auto)
   end
 
   val test8 =
@@ -119,6 +116,7 @@ struct
     Library.save "test9" (Emp >> (univ (`` i) & unit) mem (univ (lsuc (`` i))))
       Auto
 
+    (*
   local
     val univi = univ (`` i)
     val A = Variable.named "A"
@@ -171,7 +169,6 @@ struct
       SPREAD $$ #[ m, x \\ (y \\ `` y) ]
     end
 
-    (*
     val _ =
       Library.save "ac" (Emp >> ac_prop)
         (FunIntro A (lsuc (`` i)) THEN Auto
@@ -196,8 +193,8 @@ struct
              ] THEN Auto
            ])
 
-           *)
   end
+           *)
 
   fun print_lemma lemma =
     let
