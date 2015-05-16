@@ -15,7 +15,11 @@ struct
 
   val empty = M.empty
 
-  fun insert ctx k v = M.insert (ctx, k, v)
+  fun insert ctx k v =
+    case M.find (ctx, k) of
+         NONE => M.insert (ctx, k, v)
+       | _ => raise Fail "variable already bound"
+
   fun remove ctx k = M.remove (ctx, k)
 
   exception NotFound of name
