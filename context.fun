@@ -1,10 +1,11 @@
-functor Context (V : VARIABLE) :> CONTEXT where type name = V.t =
+functor Context (V : VARIABLE) :> CONTEXT where Name = V =
 struct
   structure M = BinaryMapFn
     (struct type ord_key = V.t
      val compare = V.compare end)
 
-  type name = V.t
+  structure Name = V
+  type name = Name.t
 
   type 'a context = ('a * int) M.map
   structure Key = M.Key
@@ -14,7 +15,7 @@ struct
   fun insert ctx k v =
     case M.find (ctx, k) of
          NONE => M.insert (ctx, k, (v, M.numItems ctx))
-       | _ => raise Fail "variable already bound"
+       | _ => insert ctx (Name.prime k) v
 
   fun remove (ctx : 'a context) (k : V.t) =
     let

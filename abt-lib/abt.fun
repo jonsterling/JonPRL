@@ -2,8 +2,8 @@ functor Abt
   (structure Operator : OPERATOR
    structure Variable : VARIABLE) : ABT =
 struct
-  structure Operator : OPERATOR = Operator
-  structure Variable : VARIABLE = Variable
+  structure Operator = Operator
+  structure Variable = Variable
 
   infix 5 \
   infix 5 $
@@ -55,10 +55,7 @@ struct
     | BOUND n => raise Malformed "bound variable occured in out"
     | ABS (x, e') =>
       let
-        val v =
-          case Variable.name x of
-               SOME str => Variable.named str
-             | NONE => Variable.new ()
+        val v = Variable.clone x
       in
         v \ addvar v 0 e'
       end

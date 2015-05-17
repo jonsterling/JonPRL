@@ -1,7 +1,8 @@
 signature CONTEXT =
 sig
+  structure Name : VARIABLE
 
-  type name
+  type name = Name.t
   type 'a context
 
   val empty : 'a context

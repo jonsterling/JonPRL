@@ -2,7 +2,7 @@ structure Test =
 struct
   val print_mode = PrintMode.Debug
 
-  structure Var = Variable ()
+  structure Var = StringVariable
   structure Syn =
     AbtUtil (Abt (structure Operator = Operator and Variable = Var))
 
@@ -34,10 +34,12 @@ struct
   fun & (a, b) = PROD $$ #[a, Variable.named "x" \\ b]
   infix 6 &
 
+  val % = Variable.named
+
   fun pair m n = PAIR $$ #[m,n]
   fun lam e =
     let
-      val x = Var.named "x"
+      val x = %"x"
     in
       LAM $$ #[x \\ e x]
     end
@@ -93,17 +95,12 @@ struct
 
   val test6 =
     Library.save "test6" (Emp >> unit ~> (unit & unit))
-      (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
+      (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto
+       THEN PairEq NONE NONE)
 
-  local
-    val x = Variable.named "x"
-    val y = Variable.named "y"
-    val z = Variable.named "z"
-  in
-    val test7 =
-      Library.save "test7" (Emp >> (void & unit) ~> void)
-        (FunIntro (SOME z) NONE THEN Auto THEN ProdElim z (x, y) THEN Auto)
-  end
+  val test7 =
+    Library.save "test7" (Emp >> (void & unit) ~> void)
+      (FunIntro (SOME "z") NONE THEN Auto THEN ProdElim "z" ("x", "y") THEN Auto)
 
   val test8 =
     Library.save "test8" (Emp >> (univ 0) mem (univ 2))
@@ -113,68 +110,27 @@ struct
     Library.save "test9" (Emp >> (univ 0 & unit) mem (univ 1))
       Auto
 
-      (*
   local
-    val univi = univ 0
-    val A = Variable.named "A"
-    val B = Variable.named "B"
-    val Q = Variable.named "Q"
-    val a = Variable.named "a"
-    val b = Variable.named "b"
-    val q = Variable.named "q"
-    val f = Variable.named "f"
-    val x = Variable.named "x"
-    val s = Variable.named "s"
-    val t = Variable.named "t"
-    val y = Variable.named "y"
-    val qa = Variable.named "qa"
-    val qa' = Variable.named "qa~"
-    val qa1 = Variable.named "qa1"
-    val qa2 = Variable.named "qa2"
-
-    exception XXX
-  in
     val ac_premise =
-      FUN $$ #[ `` A, a \\
-        PROD $$ #[ `` B, b \\
-          ap (ap (`` Q) (`` a)) (`` b)]]
+      FUN $$ #[ ``"A", "a" \\
+        PROD $$ #[ ``"B", "b" \\
+          ap (ap (``"Q") (``"a")) (``"b")]]
 
     val ac_conclusion =
-      PROD $$ #[ `` A ~> `` B, f \\
-        FUN $$ #[ `` A, a \\
-          ap (ap (`` Q) (`` a)) (ap (`` f) (`` a))]]
+      PROD $$ #[ ``"A" ~> ``"B", "f" \\
+        FUN $$ #[ ``"A", "a" \\
+          ap (ap (``"A") (``"a")) (ap (``"f") (``"a"))]]
 
     val ac_prop =
-      FUN $$ #[univi, A \\
-        FUN $$ #[univi, B \\
-          FUN $$ #[ (`` A ~> (``B ~> univi)), Q \\
+      FUN $$ #[univ 0, "A" \\
+        FUN $$ #[univ 0, "B" \\
+          FUN $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
             ac_premise ~> ac_conclusion ]]]
-
-    fun fst m =
-    let
-      val x = Variable.named "x"
-      val y = Variable.named "y"
-    in
-      SPREAD $$ #[ m, x \\ (y \\ `` x) ]
-    end
-
-    fun snd m =
-    let
-      val x = Variable.named "x"
-      val y = Variable.named "y"
-    in
-      SPREAD $$ #[ m, x \\ (y \\ `` y) ]
-    end
-
+  in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
-        (Auto THENL
-          [ ID
-          , ID
-          ])
-
+      Auto
   end
-  *)
 
   fun print_lemma lemma =
     let
@@ -187,7 +143,6 @@ struct
       print ("Evidence: " ^ Syn.to_string print_mode evidence ^ "\n");
       print ("Extract: " ^ Syn.to_string print_mode (Extract.extract evidence) ^ "\n\n")
     end
-
 
   val _ =
     List.map print_lemma (Library.all ())

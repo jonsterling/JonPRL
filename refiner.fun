@@ -2,7 +2,7 @@ functor Refiner
   (structure Syn : ABT_UTIL where Operator = Operator
    structure Sequent : SEQUENT
      where type term = Syn.t
-     and type name = Syn.Variable.t
+     where Name = Syn.Variable
    val print_mode : PrintMode.t) :>
 sig
   type evidence = Syn.t
