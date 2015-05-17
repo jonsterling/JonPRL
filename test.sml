@@ -58,8 +58,9 @@ struct
       PROD $$ #[a, x \\ b x]
     end
 
-  fun ap m n =
+  fun ap (m, n) =
     AP $$ #[m, n]
+  infix 1 ap
 
   fun ~> (a, b) = FUN $$ #[a,Variable.named "x" \\ b]
   infixr 5 ~>
@@ -115,24 +116,30 @@ struct
     val ac_premise =
       FUN $$ #[ ``"A", "a" \\
         PROD $$ #[ ``"B", "b" \\
-          ap (ap (``"Q") (``"a")) (``"b")]]
+          ``"Q" ap ``"a" ap ``"b"]]
 
     val ac_conclusion =
       PROD $$ #[ ``"A" ~> ``"B", "f" \\
         FUN $$ #[ ``"A", "a" \\
-          ap (ap (``"A") (``"a")) (ap (``"f") (``"a"))]]
+          ``"Q" ap ``"a" ap (``"f" ap ``"a")]]
 
     val ac_prop =
       FUN $$ #[univ 0, "A" \\
         FUN $$ #[univ 0, "B" \\
           FUN $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
             ac_premise ~> ac_conclusion ]]]
+
+  fun fst M =
+    SPREAD $$ #[M, "u" \\ ("v" \\ ``"u")]
+
   in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
-      Auto
+      (Auto
+       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")])
+       )
   end
-  *)
+   *)
 
   fun print_lemma lemma =
     let

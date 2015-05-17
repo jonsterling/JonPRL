@@ -39,7 +39,7 @@ sig
     val FunIntro : Sequent.name option -> Level.t option -> tactic
     val FunElim : Sequent.name -> Syn.t -> Sequent.name * Sequent.name -> tactic
     val LamEq : Sequent.name option -> Level.t option -> tactic
-    val ApEq : Syn.t -> tactic
+    val ApEq : Syn.t option -> tactic
 
     val MemUnfold : tactic
     val Witness : Syn.t -> tactic
@@ -144,6 +144,18 @@ struct
               k - 1
             end
          | _ => 0
+
+    fun infer_type (H, M) =
+      case out M of
+           UNIV l $ _ => UNIV (l + 1) $$ #[]
+         | AP $ #[F, N] =>
+             let
+               val #[A, xB] = infer_type (H, F) ^! FUN
+             in
+               xB // N
+             end
+         | ` x => Context.lookup H x
+         | _ => raise Refine
 
     fun Cum ok : tactic =
       named "Cum" (fn (H >> P) =>
@@ -284,12 +296,16 @@ struct
                   | _ => raise Refine)
         end)
 
-    fun ApEq funty : tactic =
+    fun ApEq ofunty : tactic =
       named "ApEq" (fn (H >> P) =>
         let
           val #[f1t1, f2t2, Tt1] = P ^! EQ
           val #[f1, t1] = f1t1 ^! AP
           val #[f2, t2] = f2t2 ^! AP
+          val funty =
+            case ofunty of
+                 NONE => unify (infer_type (H, f1)) (infer_type (H, f2))
+               | SOME funty => funty
           val #[S, xT] = funty ^! FUN
           val Tt1' = unify Tt1 (xT // t1)
         in
@@ -448,8 +464,11 @@ struct
         ORELSE Assumption
         ORELSE FunIntro NONE NONE
         ORELSE UnitIntro
+
+      val elim_rules =
+        ApEq NONE
     in
-      val Auto = REPEAT intro_rules
+      val Auto = REPEAT (intro_rules ORELSE elim_rules)
     end
   end
 end
