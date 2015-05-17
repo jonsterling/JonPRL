@@ -20,6 +20,9 @@ group is
   context.sig
   context.fun
 
+  context_util.sig
+  context_util.fun
+
   sequent.sig
   sequent.fun
 

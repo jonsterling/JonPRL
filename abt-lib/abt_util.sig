@@ -6,6 +6,9 @@ sig
   val \\ : Variable.t * t -> t
   val $$ : Operator.t * t vector -> t
 
+  val free_variables : t -> Variable.t list
+  val has_free : t * Variable.t -> bool
+
   val subst : t -> Variable.t -> t -> t
   val to_string : PrintMode.t -> t -> string
 

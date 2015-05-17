@@ -7,7 +7,10 @@ struct
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
-    | WITNESS | HYP_EQ | ADMIT
+    | WITNESS | HYP_EQ
+    | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
+
+    | ADMIT
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -16,6 +19,7 @@ struct
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
     | EQ | MEM
+    | SQUASH
 
   fun eq O1 (O2 : t) = O1 = O2
 
@@ -47,6 +51,11 @@ struct
 
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
+
+       | SQUASH_EQ => #[0]
+       | SQUASH_INTRO => #[0]
+       | SQUASH_ELIM => #[0]
+
        | ADMIT => #[]
 
 
@@ -63,6 +72,8 @@ struct
        | AP => #[0,0]
        | EQ => #[0,0,0]
        | MEM => #[0,0]
+
+       | SQUASH => #[0]
 
   fun to_string O =
     case O of
@@ -92,6 +103,10 @@ struct
        | HYP_EQ => "hyp="
        | ADMIT => "<<<<<ADMIT>>>>>"
 
+       | SQUASH_EQ => "squash="
+       | SQUASH_INTRO => "squash-intro"
+       | SQUASH_ELIM => "squash-elim"
+
        | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
@@ -105,4 +120,6 @@ struct
        | AP => "ap"
        | EQ => "="
        | MEM => "∈"
+
+       | SQUASH => "↓"
 end

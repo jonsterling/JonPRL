@@ -17,7 +17,7 @@ struct
         then Susp.delay (fn () => validation [])
         else
           let
-            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.goal_to_string PrintMode.User g) "" subgoals
+            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.goal_to_string PrintMode.Debug g) "" subgoals
           in
             raise Fail ("Remaining subgoals: " ^ readout ^ "\n")
           end
@@ -27,7 +27,10 @@ struct
       key
     end
 
-  fun all () = C.foldri (fn (k, _, memo) => k :: memo) [] (! library)
+  fun all () =
+    List.foldr (fn ((k, _), memo) => k :: memo) []
+    (C.list_items (!  library))
+
   val name = V.to_string PrintMode.User
   fun lookup k = C.lookup (! library) k
   val goal = #goal o lookup
