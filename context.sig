@@ -5,6 +5,8 @@ sig
   type name = Name.t
   type 'a context
 
+  val fresh : 'a context * name -> name
+
   val empty : 'a context
 
   val insert : 'a context -> name -> 'a -> 'a context

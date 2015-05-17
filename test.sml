@@ -136,7 +136,7 @@ struct
     val _ =
       Library.save "ac" (Emp >> ac_prop)
       (Auto
-       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")])
+       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")]) THEN Auto
        )
   end
    *)

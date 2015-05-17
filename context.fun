@@ -12,10 +12,15 @@ struct
 
   val empty = M.empty
 
+  fun fresh (ctx, k) =
+    case M.find (ctx, k) of
+         NONE => k
+       | _ => fresh (ctx, Name.prime k)
+
   fun insert ctx k v =
     case M.find (ctx, k) of
          NONE => M.insert (ctx, k, (v, M.numItems ctx))
-       | _ => insert ctx (Name.prime k) v
+       | _ => raise Fail "Name already bound"
 
   fun remove (ctx : 'a context) (k : V.t) =
     let

@@ -33,7 +33,7 @@ sig
     val ProdIntro : Syn.t -> tactic
     val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
     val PairEq : Sequent.name option -> Level.t option -> tactic
-    val SpreadEq : Syn.t -> Syn.t -> Sequent.name * Sequent.name * Sequent.name -> tactic
+    val SpreadEq : Syn.t option -> Syn.t option -> (Sequent.name * Sequent.name * Sequent.name) option  -> tactic
 
     val FunEq : Sequent.name option -> tactic
     val FunIntro : Sequent.name option -> Level.t option -> tactic
@@ -72,6 +72,16 @@ struct
   open Operator Syn
   infix $ \
   infix 8 $$ // \\
+
+  fun ctx_unbind (H : context, A : Syn.t, xE : Syn.t) =
+    let
+      val (x, E) = unbind xE
+      val x' = Context.fresh (H, x)
+      val H' = Context.insert H x' A
+      val E' = subst (``x') x E
+    in
+      (H', x', E')
+    end
 
   structure Whnf = Whnf(Syn)
 
@@ -124,15 +134,13 @@ struct
            UNIV l $ _ => l + 1
          | FUN $ #[A, xB] =>
            let
-             val (x, B) = unbind xB
-             val H' = H @@ (x, A)
+             val (H', x, B) = ctx_unbind (H, A, xB)
            in
              Level.max (infer_level (H, A), infer_level (H', B))
            end
          | PROD $ #[A, xB] =>
            let
-             val (x, B) = unbind xB
-             val H' = H @@ (x, A)
+             val (H', x, B) = ctx_unbind (H, A, xB)
            in
              Level.max (infer_level (H, A), infer_level (H', B))
            end
@@ -153,6 +161,14 @@ struct
                val #[A, xB] = infer_type (H, F) ^! FUN
              in
                xB // N
+             end
+         | SPREAD $ #[X, uvE] =>
+             let
+               val #[A, xB] = infer_type (H, X) ^! PROD
+               val (H', u, vE) = ctx_unbind (H, A, uvE)
+               val (H'', v, E) = ctx_unbind (H', xB // ``u, vE)
+             in
+               infer_type (H'', E)
              end
          | ` x => Context.lookup H x
          | _ => raise Refine
@@ -246,7 +262,12 @@ struct
           val #[A, xB] = fun1 ^! FUN
           val #[A', yB'] = fun2 ^! FUN
           val (UNIV _, #[]) = as_app univ
-          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
+
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xB)
+                 | SOME z => z)
         in
           [ H >> EQ $$ #[A,A',univ]
           , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
@@ -258,7 +279,11 @@ struct
       named "FunIntro" (fn (H >> P) =>
         let
           val #[P1, xP2] = P ^! FUN
-          val z = case oz of NONE => #1 (unbind xP2) | SOME z => z
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xP2)
+                 | SOME z => z)
           val k = case ok of NONE => infer_level (H, P1) | SOME k => k
         in
           [ H @@ (z,P1) >> xP2 // `` z
@@ -287,7 +312,11 @@ struct
           val #[aE] = lam ^! LAM
           val #[bE'] = lam' ^! LAM
           val #[A, cB] = func ^! FUN
-          val z = case oz of NONE => #1 (unbind cB) | SOME z => z
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind cB)
+                 | SOME z => z)
           val k = case ok of NONE => infer_level (H, A) | SOME k => k
         in
           [ H @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
@@ -347,7 +376,11 @@ struct
           val #[A, xB] = prod1 ^! PROD
           val #[A', yB'] = prod2 ^! PROD
           val (UNIV _, #[]) = as_app univ
-          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xB)
+                 | SOME z => z)
         in
           [ H >> EQ $$ #[A,A',univ]
           , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
@@ -385,7 +418,11 @@ struct
           val #[M, N] = pair ^! PAIR
           val #[M', N'] = pair' ^! PAIR
           val #[A, xB] = prod ^! PROD
-          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xB)
+                 | SOME z => z)
           val k = case ok of NONE => infer_level (H, A) | SOME k => k
         in
           [ H >> EQ $$ #[M, M', A]
@@ -395,13 +432,43 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun SpreadEq zC prod (s, t, y) : tactic =
+    fun SpreadEq ozC oprod onames : tactic =
       named "SpreadEq" (fn (H >> P) =>
         let
           val #[spread, spread', CE1] = P ^! EQ
-          val #[S, xT] = prod ^! PROD
           val #[E1, xyT1] = spread ^! SPREAD
           val #[E2, uvT2] = spread' ^! SPREAD
+
+          val prod =
+            case oprod of
+                 NONE => unify (infer_type (H, E1)) (infer_type (H, E2))
+               | SOME prod => prod
+
+          val (s,t,y) =
+            case onames of
+                 NONE =>
+                  (Context.fresh (H, Variable.named "s"),
+                   Context.fresh (H, Variable.named "t"),
+                   Context.fresh (H, Variable.named "y"))
+               | SOME names => names
+
+          val #[S, xT] = prod ^! PROD
+
+          val zC =
+            case ozC of
+                 NONE =>
+                 let
+                   val z = Context.fresh (H, Variable.named "z")
+                   val H' = H @@ (z, prod)
+                   val Cz =
+                     unify
+                       (infer_type (H', SPREAD $$ #[``z, xyT1]))
+                       (infer_type (H', SPREAD $$ #[``z, uvT2]))
+                 in
+                   z \\ Cz
+                 end
+               | SOME zC => zC
+
           val CE1' = unify CE1 (zC // E1)
           val Ts = xT // ``s
           val st = PAIR $$ #[``s, ``t]
@@ -467,6 +534,7 @@ struct
 
       val elim_rules =
         ApEq NONE
+        ORELSE SpreadEq NONE NONE NONE
     in
       val Auto = REPEAT (intro_rules ORELSE elim_rules)
     end
