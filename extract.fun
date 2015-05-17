@@ -41,6 +41,11 @@ struct
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
+
+       | SQUASH_EQ $ _ => ax
+       | SQUASH_INTRO $ #[D] => extract D
+       | SQUASH_ELIM $ _ => ax
+
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 
        | ` x => `` x

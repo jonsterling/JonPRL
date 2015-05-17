@@ -12,15 +12,29 @@ struct
   fun p $$ es = into (p $ es)
 
   local
-    fun elem (X, x) = List.exists (fn y => Variable.eq x y) X
-    fun go X Y M =
-      case out M of
-           ` x => if elem (X, x) then Y else (x :: Y)
-         | x \ E => go (x :: X) Y E
-         | p $ Es => Vector.foldl (op @) Y (Vector.map (go X []) Es)
+    fun elem (X, x) = List.exists (Variable.eq x) X
   in
-    fun free_variables M = go [] [] M
+    local
+      fun go X Y M =
+        case out M of
+             ` x => if elem (X, x) then Y else (x :: Y)
+           | x \ E => go (x :: X) Y E
+           | p $ Es => Vector.foldl (op @) Y (Vector.map (go X []) Es)
+    in
+      fun free_variables M = go [] [] M
+    end
+
+    local
+      fun go X r (M, x) =
+        case out M of
+             ` y => if elem (X, y) then r else Variable.eq x y
+           | y \ E => go (y :: X) r (E, x)
+           | p $ Es => Vector.foldl (fn (N,r') => r' orelse go X r' (N, x)) r Es
+    in
+      fun has_free (M, x) = go [] false (M, x)
+    end
   end
+
 
   fun subst e v e' =
     case out e' of
@@ -34,7 +48,7 @@ struct
     | v \ e =>
         let
           val v_str =
-            if List.exists (fn u => Variable.eq u v) (free_variables e)
+            if has_free (e, v)
             then Variable.to_string mode v
             else "_"
         in

@@ -12,13 +12,14 @@ sig
   val insert : 'a context -> name -> 'a -> 'a context
   val remove : 'a context -> name -> 'a context * 'a
 
+  val modify : 'a context -> name -> ('a -> 'a) -> 'a context
+
   exception NotFound of name
   val lookup : 'a context -> name -> 'a
-
   val search : 'a context -> ('a -> bool) -> (name * 'a) option
 
   val map : ('a -> 'b) -> 'a context -> 'b context
-  val foldri : ((name * 'a * 'b) -> 'b) -> 'b -> 'a context -> 'b
+  val list_items : 'a context -> (name * 'a) list
 
   val to_string : PrintMode.t * (PrintMode.t -> 'a -> string) -> 'a context -> string
 

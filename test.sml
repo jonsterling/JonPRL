@@ -30,6 +30,7 @@ struct
   val void = VOID $$ #[]
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
+  fun squash A = SQUASH $$ #[A]
 
   fun & (a, b) = PROD $$ #[a, Variable.named "x" \\ b]
   infix 6 &
@@ -110,6 +111,10 @@ struct
   val test9 =
     Library.save "test9" (Emp >> (univ 0 & unit) mem (univ 1))
       Auto
+
+  val squash_test =
+    Library.save "squash_test" (Emp >> squash (unit & unit))
+      (Auto THEN ProdIntro ax THEN Auto)
 
   local
     val ac_premise =

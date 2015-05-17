@@ -2,7 +2,7 @@ functor Refiner
   (structure Syn : ABT_UTIL where Operator = Operator
    structure Sequent : SEQUENT
      where type term = Syn.t
-     where Name = Syn.Variable
+     where Context.Name = Syn.Variable
    val print_mode : PrintMode.t) :>
 sig
   type evidence = Syn.t
@@ -23,6 +23,7 @@ sig
 
     val Cum : Level.t option -> tactic
     val UnivEq : tactic
+
     val VoidEq : tactic
     val VoidElim : tactic
 
@@ -30,6 +31,10 @@ sig
     val UnitIntro : tactic
     val UnitElim : Sequent.name -> tactic
     val AxEq : tactic
+
+    val SquashEq : tactic
+    val SquashIntro : tactic
+    val SquashElim : Sequent.name -> tactic
 
     val ProdEq : Sequent.name option -> tactic
     val ProdIntro : Syn.t -> tactic
@@ -58,7 +63,10 @@ sig
   end
 end =
 struct
-  structure Context = Sequent.Context
+  structure Context : CONTEXT_UTIL = ContextUtil
+    (structure Context = Sequent.Context
+     structure Syntax = Syn)
+
   type context = Sequent.context
 
   fun ctx_subst (H : context) (m : Syn.t) (x : Context.name) =
@@ -93,7 +101,9 @@ struct
   structure InferenceRules =
   struct
     exception Refine
+    structure Context' = Context
     open Sequent
+    structure Context = Context'
     infix >>
 
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
@@ -255,6 +265,42 @@ struct
           val #[] = unit ^! UNIT
         in
           [] BY mk_evidence AX_EQ
+        end)
+
+    val SquashEq : tactic =
+      named "SquashEq" (fn (H >> P) =>
+        let
+          val #[sq1, sq2, univ] = P ^! EQ
+          val #[P1] = sq1 ^! SQUASH
+          val #[P2] = sq2 ^! SQUASH
+          val (UNIV _, #[]) = as_app univ
+        in
+          [ H >> EQ $$ #[P1, P2, univ]
+          ] BY mk_evidence SQUASH_EQ
+        end)
+
+    val SquashIntro : tactic =
+      named "SquashIntro" (fn (H >> P) =>
+        let
+          val #[P'] = P ^! SQUASH
+        in
+          [ H >> P'
+          ] BY mk_evidence SQUASH_INTRO
+        end)
+
+    fun SquashElim z : tactic =
+      named "SquashElim" (fn (H >> P) =>
+        let
+          val #[M, N, A] = P ^! EQ
+          val _ =
+            if has_free (P, z) orelse not (Context.is_irrelevant (H, z))
+            then raise Refine
+            else ()
+
+          val H' = Context.modify H z (fn Z => SQUASH $$ #[Z])
+        in
+          [ H' >> P
+          ] BY mk_evidence SQUASH_ELIM
         end)
 
     fun FunEq oz : tactic =
@@ -528,6 +574,7 @@ struct
         ORELSE ProdEq NONE
         ORELSE VoidEq
         ORELSE UnivEq
+        ORELSE SquashEq
         ORELSE HypEq
         ORELSE Cum NONE
 
@@ -537,6 +584,7 @@ struct
         ORELSE Assumption
         ORELSE FunIntro NONE NONE
         ORELSE UnitIntro
+        ORELSE SquashIntro
 
       val elim_rules =
         ApEq NONE

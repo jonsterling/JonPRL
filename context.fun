@@ -30,6 +30,12 @@ struct
     end
 
   exception NotFound of name
+
+  fun modify (ctx : 'a context) (k : V.t) f =
+    case M.find (ctx, k) of
+         NONE => raise NotFound k
+       | SOME (a, i) => M.insert (ctx, k, (f a, i))
+
   fun lookup ctx k =
     case M.find (ctx, k) of
          SOME (v, _) => v
@@ -48,7 +54,6 @@ struct
     | ((i,(x, _)) :: ys) => if p x then SOME (i,x) else list_search ys p
 
   fun map f = M.map (fn (v, i) => (f v, i))
-  fun foldri f = M.foldri (fn (v, (a, i), m) => f (v, a, m))
 
   fun to_string (mode, printer) =
     let
