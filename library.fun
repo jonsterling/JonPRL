@@ -23,12 +23,12 @@ struct
           end
       val key = V.named name
     in
-      library := C.insert (! library) key {goal = goal, evidence = evidence};
+      library := C.insert (! library) key Visibility.Visible {goal = goal, evidence = evidence};
       key
     end
 
   fun all () =
-    List.foldr (fn ((k, _), memo) => k :: memo) []
+    List.foldr (fn ((k, _, _), memo) => k :: memo) []
     (C.list_items (!  library))
 
   val name = V.to_string PrintMode.User

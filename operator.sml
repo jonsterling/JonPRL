@@ -7,6 +7,7 @@ struct
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
+    | ISECT_EQ | ISECT_INTRO
     | WITNESS | HYP_EQ
     | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
 
@@ -18,6 +19,7 @@ struct
     | UNIT | AX | MATCH_UNIT
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
+    | ISECT
     | EQ | MEM
     | SQUASH
 
@@ -49,6 +51,9 @@ struct
        | LAM_EQ => #[1,0]
        | AP_EQ => #[0,0]
 
+       | ISECT_EQ => #[0,1]
+       | ISECT_INTRO => #[1,0]
+
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
 
@@ -70,6 +75,9 @@ struct
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+
+       | ISECT => #[0,1]
+
        | EQ => #[0,0,0]
        | MEM => #[0,0]
 
@@ -99,6 +107,9 @@ struct
        | LAM_EQ => "lam="
        | AP_EQ => "ap="
 
+       | ISECT_EQ => "isect="
+       | ISECT_INTRO => "isect-intro"
+
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
        | ADMIT => "<<<<<ADMIT>>>>>"
@@ -118,6 +129,7 @@ struct
        | FUN => "∏"
        | LAM => "λ"
        | AP => "ap"
+       | ISECT => "∩"
        | EQ => "="
        | MEM => "∈"
 

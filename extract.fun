@@ -39,6 +39,9 @@ struct
        | LAM_EQ $ _ => ax
        | AP_EQ $ _ => ax
 
+       | ISECT_EQ $ _ => ax
+       | ISECT_INTRO $ #[xD, _] => extract (#2 (unbind xD))
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
 

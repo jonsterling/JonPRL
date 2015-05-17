@@ -128,9 +128,9 @@ struct
           ``"Q" ap ``"a" ap (``"f" ap ``"a")]]
 
     val ac_prop =
-      FUN $$ #[univ 0, "A" \\
-        FUN $$ #[univ 0, "B" \\
-          FUN $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
+      ISECT $$ #[univ 0, "A" \\
+        ISECT $$ #[univ 0, "B" \\
+          ISECT $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
             ac_premise ~> ac_conclusion ]]]
 
   fun fst M =
@@ -142,8 +142,7 @@ struct
       (Auto
        THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")])
        THEN Auto
-       THEN Admit
-       )
+      )
   end
 
   fun print_lemma lemma =

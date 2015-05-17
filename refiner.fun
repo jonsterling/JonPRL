@@ -48,6 +48,9 @@ sig
     val LamEq : Sequent.name option -> Level.t option -> tactic
     val ApEq : Syn.t option -> tactic
 
+    val IsectEq : Sequent.name option -> tactic
+    val IsectIntro : Sequent.name option -> Level.t option -> tactic
+
     val MemUnfold : tactic
     val Witness : Syn.t -> tactic
 
@@ -63,9 +66,7 @@ sig
   end
 end =
 struct
-  structure Context : CONTEXT_UTIL = ContextUtil
-    (structure Context = Sequent.Context
-     structure Syntax = Syn)
+  structure Context = Sequent.Context
 
   type context = Sequent.context
 
@@ -87,7 +88,7 @@ struct
     let
       val (x, E) = unbind xE
       val x' = Context.fresh (H, x)
-      val H' = Context.insert H x' A
+      val H' = Context.insert H x' Visibility.Visible A
       val E' = subst (``x') x E
     in
       (H', x', E')
@@ -119,7 +120,7 @@ struct
     fun BY (Ds, V) = (Ds, V)
     infix BY
 
-    fun @@ (H, (x,A)) = Context.insert H x A
+    fun @@ (H, (x,A)) = Context.insert H x Visibility.Visible A
     infix 8 @@
 
     fun as_app M =
@@ -141,6 +142,19 @@ struct
     fun unify M N =
       if Syn.eq (M, N) then M else raise Refine
 
+    fun operator_irrelevant O =
+      case O of
+           EQ => true
+         | MEM => true
+         | SQUASH => true
+         | UNIT => true
+         | _ => false
+
+    fun assert_irrelevant (H, P) =
+      case out P of
+           O $ _ => if operator_irrelevant O then () else raise Refine
+         | _ => raise Refine
+
     fun infer_level (H, P) =
       case out P of
            UNIV l $ _ => l + 1
@@ -156,6 +170,14 @@ struct
            in
              Level.max (infer_level (H, A), infer_level (H', B))
            end
+         | ISECT $ #[A, xB] =>
+           let
+             val (H', x, B) = ctx_unbind (H, A, xB)
+           in
+             Level.max (infer_level (H, A), infer_level (H', B))
+           end
+
+         | SQUASH $ #[A] => infer_level (H, A)
          | ` x =>
             let
               val X = Context.lookup H x
@@ -168,6 +190,7 @@ struct
     fun infer_type (H, M) =
       case out M of
            UNIV l $ _ => UNIV (l + 1) $$ #[]
+         | SQUASH $ #[A] => infer_type (H, A)
          | AP $ #[F, N] =>
              let
                val #[A, xB] = infer_type (H, F) ^! FUN
@@ -296,14 +319,10 @@ struct
           fun unsquash Z =
             let val #[Z'] = Z ^! SQUASH in Z' end
 
-          val H' = Context.modify H z unsquash
-
-          val _ =
-            if has_free (P, z) orelse not (Context.is_irrelevant (H, z))
-            then raise Refine
-            else ()
+          val ax = AX $$ #[]
+          val H' = ctx_subst (Context.modify H z unsquash) ax z
         in
-          [ H' >> P
+          [ H' >> subst ax z P
           ] BY mk_evidence SQUASH_ELIM
         end)
 
@@ -393,6 +412,44 @@ struct
           [ H >> EQ $$ #[f1, f2, funty]
           , H >> EQ $$ #[t1, t2, S]
           ] BY mk_evidence AP_EQ
+        end)
+
+    fun IsectEq oz : tactic =
+      named "IsectEq" (fn (H >> P) =>
+        let
+          val #[isect1, isect2, univ] = P ^! EQ
+          val #[A, xB] = isect1 ^! ISECT
+          val #[A', yB'] = isect2 ^! ISECT
+          val (UNIV _, #[]) = as_app univ
+
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xB)
+                 | SOME z => z)
+        in
+          [ H >> EQ $$ #[A,A',univ]
+          , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
+          ] BY (fn [D, E] => ISECT_EQ $$ #[D, z \\ E]
+                 | _ => raise Refine)
+        end)
+
+    fun IsectIntro oz ok : tactic =
+      named "IsectIntro" (fn (H >> P) =>
+        let
+          val #[P1, xP2] = P ^! ISECT
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xP2)
+                 | SOME z => z)
+          val k = case ok of NONE => infer_level (H, P1) | SOME k => k
+          val H' = Context.insert H z Visibility.Hidden P1
+        in
+          [ H' >> xP2 // `` z
+          , H >> MEM $$ #[P1, UNIV k $$ #[]]
+          ] BY (fn [D,E] => ISECT_INTRO $$ #[z \\ D, E]
+                 | _ => raise Refine)
         end)
 
     val MemUnfold : tactic =
@@ -538,14 +595,20 @@ struct
 
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (H >> P) =>
-        if Syn.eq (P, Context.lookup H x)
-        then [] BY (fn _ => `` x)
-        else raise Refine)
+        let
+          val (P', visibility) = Context.lookup_visibility H x
+          val P'' = unify P P'
+        in
+          (case visibility of
+               Visibility.Visible => ()
+             | Visibility.Hidden => assert_irrelevant (H, P''));
+          [] BY (fn _ => ``x)
+        end)
 
     val Assumption : tactic =
       named "Assumption" (fn (H >> P) =>
         case Context.search H (fn x => Syn.eq (P, x)) of
-             SOME (x, _) => [] BY (fn _ => `` x)
+             SOME (x, _) => Hypothesis x (H >> P)
            | NONE => raise Refine)
 
     fun Lemma lem : tactic =
@@ -571,7 +634,9 @@ struct
     local
       val EqAuto =
         AxEq
+        ORELSE SquashEq
         ORELSE FunEq NONE
+        ORELSE IsectEq NONE
         ORELSE PairEq NONE NONE
         ORELSE LamEq NONE NONE
         ORELSE UnitEq
@@ -587,6 +652,7 @@ struct
         ORELSE EqAuto
         ORELSE Assumption
         ORELSE FunIntro NONE NONE
+        ORELSE IsectIntro NONE NONE
         ORELSE UnitIntro
         ORELSE SquashIntro
 

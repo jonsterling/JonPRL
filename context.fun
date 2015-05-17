@@ -7,7 +7,7 @@ struct
   structure Name = V
   type name = Name.t
 
-  type 'a context = ('a * int) M.map
+  type 'a context = ('a * Visibility.t * int) M.map
   structure Key = M.Key
 
   val empty = M.empty
@@ -17,14 +17,14 @@ struct
          NONE => k
        | _ => fresh (ctx, Name.prime k)
 
-  fun insert ctx k v =
+  fun insert ctx k vis v =
     case M.find (ctx, k) of
-         NONE => M.insert (ctx, k, (v, M.numItems ctx))
+         NONE => M.insert (ctx, k, (v, vis, M.numItems ctx))
        | _ => raise Fail "Name already bound"
 
   fun remove (ctx : 'a context) (k : V.t) =
     let
-      val (ctx', (a, _)) = M.remove (ctx, k)
+      val (ctx', (a, _, _)) = M.remove (ctx, k)
     in
       (ctx', a)
     end
@@ -34,16 +34,18 @@ struct
   fun modify (ctx : 'a context) (k : V.t) f =
     case M.find (ctx, k) of
          NONE => raise NotFound k
-       | SOME (a, i) => M.insert (ctx, k, (f a, i))
+       | SOME (a, vis, i) => M.insert (ctx, k, (f a, vis, i))
 
-  fun lookup ctx k =
+  fun lookup_visibility ctx k =
     case M.find (ctx, k) of
-         SOME (v, _) => v
+         SOME (v, vis, _) => (v, vis)
        | NONE => raise NotFound k
 
-  val list_items : 'a context -> (V.t * 'a) list = fn ctx =>
-    List.map (fn (v, (a, _)) => (v, a))
-     ((ListMergeSort.sort (fn ((_, (_, i)), (_, (_, j))) => i > j))
+  fun lookup ctx k = #1 (lookup_visibility ctx k)
+
+  val list_items : 'a context -> (V.t * Visibility.t * 'a) list = fn ctx =>
+    List.map (fn (v, (a, vis, _)) => (v, vis, a))
+     ((ListMergeSort.sort (fn ((_, (_, _, i)), (_, (_, _, j))) => i > j))
       (M.listItemsi ctx))
 
   (* Needs to be made more lazy *)
@@ -51,23 +53,26 @@ struct
   and list_search xs p =
     case xs of
       nil => NONE
-    | ((i,(x, _)) :: ys) => if p x then SOME (i,x) else list_search ys p
+    | ((i,(x, _, _)) :: ys) => if p x then SOME (i,x) else list_search ys p
 
-  fun map f = M.map (fn (v, i) => (f v, i))
+  fun map f = M.map (fn (v, vis, i) => (f v, vis, i))
 
   fun to_string (mode, printer) =
     let
-      fun welp ((x, a), r) =
-        r ^ ", " ^ V.to_string mode x ^ " : " ^ printer mode a
+      fun var_to_string (x, Visibility.Visible) = V.to_string mode x
+        | var_to_string (x, Visibility.Hidden) = "[" ^ V.to_string mode x ^ "]"
+
+      fun go ((x, vis, a), r) =
+        r ^ ", " ^ var_to_string (x, vis) ^ " : " ^ printer mode a
     in
-      foldl welp "◊" o list_items
+      foldl go "◊" o list_items
     end
 
   fun subcontext test (G, G') =
     let
-      fun probe (x, (a, _), r) =
+      fun probe (x, (a, visa, _), r) =
         case M.find (G', x) of
-             SOME (b, _) => r andalso test (a,b)
+             SOME (b, visb, _) => r andalso test (a,b) andalso visa = visb
            | NONE => false
     in
       M.foldli probe true G
