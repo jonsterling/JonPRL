@@ -1,12 +1,12 @@
 functor Sequent
   (structure Syntax : ABT_UTIL
-   structure Context : CONTEXT
-     where type name = Syntax.Variable.t) : SEQUENT =
+   structure Context : CONTEXT) : SEQUENT where Name = Context.Name =
 struct
   type term = Syntax.t
-  type name = Syntax.Variable.t
 
+  structure Name = Context.Name
   structure Context = Context
+  type name = Name.t
 
   type context = term Context.context
   datatype sequent = >> of context * term

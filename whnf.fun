@@ -18,15 +18,15 @@ struct
                   in
                     whnf N'
                   end
-              | _ => raise Stuck x)
+              | _ => x)
        | AP $ #[M,N] =>
            (case out (whnf M) of
                  LAM $ #[xE] => whnf (subst1 xE N)
-               | _ => raise Stuck x)
+               | _ => x)
        | MATCH_UNIT $ #[M,N] =>
            (case out (whnf M) of
                  AX $ #[] => whnf N
-               | _ => raise Stuck x)
+               | _ => x)
        | _ => x
 
 

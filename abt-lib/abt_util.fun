@@ -14,7 +14,7 @@ struct
   fun subst e v e' =
     case out e' of
       ` v' => if Variable.eq v v' then e else e'
-    | v' \ e'' => v' \\ subst e v e''
+    | v' \ e'' => if Variable.eq v v' then e' else (v' \\ subst e v e'')
     | p $ es => p $$ Vector.map (subst e v) es
 
   fun to_string mode e =

@@ -1,10 +1,10 @@
 signature SEQUENT =
 sig
   type term
-  type name
 
-  structure Context : CONTEXT
-    where type name = name
+  structure Name : VARIABLE
+  structure Context : CONTEXT where Name = Name
+  type name = Name.t
 
   type context = term Context.context
 

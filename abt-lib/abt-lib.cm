@@ -11,6 +11,7 @@ Library
   functor Abt
   functor AbtUtil
   functor Variable
+  structure StringVariable
   functor ParseAbt
   structure VectorUtil
   structure PrintMode

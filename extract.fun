@@ -12,8 +12,10 @@ struct
 
   fun extract E =
     case out E of
-         VOID_EQ $ _ => ax
+         UNIV_EQ $ _ => ax
+       | VOID_EQ $ _ => ax
        | VOID_ELIM $ _ => ax
+       | CUM $ _ => ax
 
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
@@ -24,10 +26,18 @@ struct
        | PROD_INTRO $ #[W, D, E] => PAIR $$ #[W, extract E]
        | PROD_ELIM $ #[R, xyD] => SPREAD $$ #[R, extract xyD]
        | PAIR_EQ $ _ => ax
+       | SPREAD_EQ $ _ => ax
 
        | FUN_EQ $ _ => ax
        | FUN_INTRO $ #[xE, _] => LAM $$ #[extract xE]
+       | FUN_ELIM $ #[f, s, D, yzE] =>
+           let
+             val t = extract yzE
+           in
+             (t // (AP $$ #[f,s])) // ax
+           end
        | LAM_EQ $ _ => ax
+       | AP_EQ $ _ => ax
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

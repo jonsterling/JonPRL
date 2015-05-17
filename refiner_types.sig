@@ -6,6 +6,6 @@ sig
   type validation = evidence list -> evidence
   type tactic = goal -> goal list * validation
 
-  val goal_to_string : goal -> string
+  val goal_to_string : PrintMode.t -> goal -> string
 end
 
