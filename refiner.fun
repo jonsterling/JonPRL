@@ -292,12 +292,16 @@ struct
       named "SquashElim" (fn (H >> P) =>
         let
           val #[M, N, A] = P ^! EQ
+
+          fun unsquash Z =
+            let val #[Z'] = Z ^! SQUASH in Z' end
+
+          val H' = Context.modify H z unsquash
+
           val _ =
             if has_free (P, z) orelse not (Context.is_irrelevant (H, z))
             then raise Refine
             else ()
-
-          val H' = Context.modify H z (fn Z => SQUASH $$ #[Z])
         in
           [ H' >> P
           ] BY mk_evidence SQUASH_ELIM
