@@ -19,7 +19,7 @@ struct
 
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
-       | UNIT_ELIM $ #[R, E] => MATCH_UNIT $$ #[extract R, extract E]
+       | UNIT_ELIM $ #[R, E] => extract (E // ax)
        | AX_EQ $ _ => AX $$ #[]
 
        | PROD_EQ $ _ => ax

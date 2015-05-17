@@ -16,7 +16,7 @@ struct
       (* Computational Type Theory *)
     | UNIV of Level.t
     | VOID
-    | UNIT | AX | MATCH_UNIT
+    | UNIT | AX
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
     | ISECT
@@ -68,7 +68,6 @@ struct
        | VOID => #[]
        | UNIT => #[]
        | AX => #[]
-       | MATCH_UNIT => #[0,0]
        | PROD => #[0,1]
        | PAIR => #[0,0]
        | SPREAD => #[0,2]
@@ -122,7 +121,6 @@ struct
        | VOID => "void"
        | UNIT => "unit"
        | AX => "•"
-       | MATCH_UNIT => "match"
        | PROD => "prod"
        | PAIR => "pair"
        | SPREAD => "spread"
