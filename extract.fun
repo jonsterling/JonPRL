@@ -41,6 +41,7 @@ struct
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
+       | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 
        | ` x => `` x
        | x \ E => x \\ extract E

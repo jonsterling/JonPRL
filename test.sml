@@ -111,7 +111,6 @@ struct
     Library.save "test9" (Emp >> (univ 0 & unit) mem (univ 1))
       Auto
 
-      (*
   local
     val ac_premise =
       FUN $$ #[ ``"A", "a" \\
@@ -136,10 +135,11 @@ struct
     val _ =
       Library.save "ac" (Emp >> ac_prop)
       (Auto
-       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")]) THEN Auto
+       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")])
+       THEN Auto
+       THEN Admit
        )
   end
-   *)
 
   fun print_lemma lemma =
     let

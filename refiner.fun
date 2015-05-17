@@ -19,6 +19,8 @@ sig
 
   structure InferenceRules :
   sig
+    val Admit : tactic
+
     val Cum : Level.t option -> tactic
     val UnivEq : tactic
     val VoidEq : tactic
@@ -505,6 +507,10 @@ struct
           then [] BY (fn _ => Library.validate lem)
           else raise Refine
         end)
+
+    val Admit : tactic =
+      named "Admit" (fn (H >> P) =>
+        [] BY (fn _ => ADMIT $$ #[]))
   end
 
   structure DerivedTactics =

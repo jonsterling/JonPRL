@@ -7,7 +7,7 @@ struct
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
-    | WITNESS | HYP_EQ
+    | WITNESS | HYP_EQ | ADMIT
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -47,6 +47,7 @@ struct
 
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
+       | ADMIT => #[]
 
 
        | UNIV i => #[]
@@ -89,6 +90,7 @@ struct
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
+       | ADMIT => "<<<<<ADMIT>>>>>"
 
        | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
