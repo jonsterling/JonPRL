@@ -19,7 +19,7 @@ sig
 
   structure InferenceRules :
   sig
-    val Cum : Syn.t -> tactic
+    val Cum : Level.t option -> tactic
     val UnivEq : tactic
     val VoidEq : tactic
     val VoidElim : tactic
@@ -29,16 +29,16 @@ sig
     val UnitElim : Sequent.name -> tactic
     val AxEq : tactic
 
-    val ProdEq : Sequent.name -> tactic
+    val ProdEq : Sequent.name option -> tactic
     val ProdIntro : Syn.t -> tactic
     val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
-    val PairEq : Sequent.name -> Syn.t -> tactic
+    val PairEq : Sequent.name option -> Level.t option -> tactic
     val SpreadEq : Syn.t -> Syn.t -> Sequent.name * Sequent.name * Sequent.name -> tactic
 
-    val FunEq : Sequent.name -> tactic
-    val FunIntro : Sequent.name -> Syn.t -> tactic
+    val FunEq : Sequent.name option -> tactic
+    val FunIntro : Sequent.name option -> Level.t option -> tactic
     val FunElim : Sequent.name -> Syn.t -> Sequent.name * Sequent.name -> tactic
-    val LamEq : Sequent.name -> Syn.t -> tactic
+    val LamEq : Sequent.name option -> Level.t option -> tactic
     val ApEq : Syn.t -> tactic
 
     val MemUnfold : tactic
@@ -86,10 +86,10 @@ struct
 
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
-        fun fail () = raise Fail (name ^ "| " ^ goal_to_string goal)
-        val (subgoals, validation) = tac goal handle _ => fail ()
+        fun fail () = raise Fail (name ^ "| " ^ goal_to_string print_mode goal)
+        val (subgoals, validation) = tac goal handle Refine => fail ()
       in
-        (subgoals, fn Ds => validation Ds handle _ => fail ())
+        (subgoals, fn Ds => validation Ds handle Refine => fail ())
       end
 
     fun mk_evidence operator = fn Ds => operator $$ Vector.fromList Ds
@@ -99,6 +99,11 @@ struct
 
     fun @@ (H, (x,A)) = Context.insert H x A
     infix 8 @@
+
+    fun as_app M =
+      case out M of
+           O $ ES => (O, ES)
+         | _ => raise Refine
 
     fun ^! (M, O) =
       case out M of
@@ -111,36 +116,54 @@ struct
            ` x => x
          | _ => raise Refine
 
-    fun assert_level_lt (l, k) =
-      let
-        val #[k'] = k ^! LSUCC
-      in
-        if Syn.eq (l, k') then () else assert_level_lt (l, k')
-      end
-
     fun unify M N =
       if Syn.eq (M, N) then M else raise Refine
 
+    fun infer_level (H, P) =
+      case out P of
+           UNIV l $ _ => l + 1
+         | FUN $ #[A, xB] =>
+           let
+             val (x, B) = unbind xB
+             val H' = H @@ (x, A)
+           in
+             Level.max (infer_level (H, A), infer_level (H', B))
+           end
+         | PROD $ #[A, xB] =>
+           let
+             val (x, B) = unbind xB
+             val H' = H @@ (x, A)
+           in
+             Level.max (infer_level (H, A), infer_level (H', B))
+           end
+         | ` x =>
+            let
+              val X = Context.lookup H x
+              val k = infer_level (H, X)
+            in
+              k - 1
+            end
+         | _ => 0
 
-    fun Cum k : tactic =
+    fun Cum ok : tactic =
       named "Cum" (fn (H >> P) =>
         let
           val #[A, B, univ] = P ^! EQ
-          val #[l] = univ ^! UNIV
-          val _ = assert_level_lt (k, l)
+          val (UNIV l, #[]) = as_app univ
+          val k = case ok of NONE => Level.max (infer_level (H, A), infer_level (H, B)) | SOME k => k
+          val _ = Level.assert_lt (k, l)
         in
-          [H >> EQ $$ #[A,B, UNIV $$ #[k]]] BY mk_evidence CUM
+          [H >> EQ $$ #[A,B, UNIV k $$ #[]]] BY mk_evidence CUM
         end)
 
     val UnivEq : tactic =
       named "UnivEq" (fn (H >> P) =>
         let
           val #[univ1, univ2, univ3] = P ^! EQ
-          val #[l] = univ1 ^! UNIV
-          val #[l'] = univ2 ^! UNIV
-          val #[k] = univ3 ^! UNIV
-          val l'' = unify l l'
-          val _ = assert_level_lt (l'', k)
+          val (UNIV l, #[]) = as_app univ1
+          val (UNIV l', #[]) = as_app univ2
+          val (UNIV k, #[]) = as_app univ3
+          val _ = Level.assert_lt (Level.unify (l, l'), k)
         in
           [] BY mk_evidence UNIV_EQ
         end)
@@ -172,7 +195,7 @@ struct
           val #[unit, unit', univ] = P ^! EQ
           val #[] = unit ^! UNIT
           val #[] = unit' ^! UNIT
-          val #[_] = univ ^! UNIV
+          val (UNIV _, #[]) = as_app univ
         in
           [] BY mk_evidence UNIT_EQ
         end)
@@ -183,7 +206,7 @@ struct
           val #[void, void', univ] = P ^! EQ
           val #[] = void ^! VOID
           val #[] = void' ^! VOID
-          val #[_] = univ ^! UNIV
+          val (UNIV _, #[]) = as_app univ
         in
           [] BY mk_evidence VOID_EQ
         end)
@@ -204,13 +227,14 @@ struct
           [] BY mk_evidence AX_EQ
         end)
 
-    fun FunEq z : tactic =
+    fun FunEq oz : tactic =
       named "FunEq" (fn (H >> P) =>
         let
           val #[fun1, fun2, univ] = P ^! EQ
           val #[A, xB] = fun1 ^! FUN
           val #[A', yB'] = fun2 ^! FUN
-          val #[k] = univ ^! UNIV
+          val (UNIV _, #[]) = as_app univ
+          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
         in
           [ H >> EQ $$ #[A,A',univ]
           , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
@@ -218,13 +242,15 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun FunIntro z k : tactic =
+    fun FunIntro oz ok : tactic =
       named "FunIntro" (fn (H >> P) =>
         let
           val #[P1, xP2] = P ^! FUN
+          val z = case oz of NONE => #1 (unbind xP2) | SOME z => z
+          val k = case ok of NONE => infer_level (H, P1) | SOME k => k
         in
           [ H @@ (z,P1) >> xP2 // `` z
-          , H >> MEM $$ #[P1, UNIV $$ #[k]]
+          , H >> MEM $$ #[P1, UNIV k $$ #[]]
           ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
                  | _ => raise Refine)
         end)
@@ -242,16 +268,18 @@ struct
                   | _ => raise Refine)
         end)
 
-    fun LamEq z k : tactic =
+    fun LamEq oz ok : tactic =
       named "LamEq" (fn (H >> P) =>
         let
           val #[lam, lam', func] = P ^! EQ
           val #[aE] = lam ^! LAM
           val #[bE'] = lam' ^! LAM
           val #[A, cB] = func ^! FUN
+          val z = case oz of NONE => #1 (unbind cB) | SOME z => z
+          val k = case ok of NONE => infer_level (H, A) | SOME k => k
         in
           [ H @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
-          , H >> MEM $$ #[A, UNIV $$ #[k]]
+          , H >> MEM $$ #[A, UNIV k $$ #[]]
           ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
                   | _ => raise Refine)
         end)
@@ -296,13 +324,14 @@ struct
           [] BY (fn _ => HYP_EQ $$ #[`` x])
         end)
 
-    fun ProdEq z : tactic =
+    fun ProdEq oz : tactic =
       named "ProdEq" (fn (H >> P) =>
         let
           val #[prod1, prod2, univ] = P ^! EQ
           val #[A, xB] = prod1 ^! PROD
           val #[A', yB'] = prod2 ^! PROD
-          val #[k] = univ ^! UNIV
+          val (UNIV _, #[]) = as_app univ
+          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
         in
           [ H >> EQ $$ #[A,A',univ]
           , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
@@ -333,17 +362,19 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun PairEq z k : tactic =
+    fun PairEq oz ok : tactic =
       named "PairEq" (fn (H >> P) =>
         let
           val #[pair, pair', prod] = P ^! EQ
           val #[M, N] = pair ^! PAIR
           val #[M', N'] = pair' ^! PAIR
           val #[A, xB] = prod ^! PROD
+          val z = case oz of NONE => #1 (unbind xB) | SOME z => z
+          val k = case ok of NONE => infer_level (H, A) | SOME k => k
         in
           [ H >> EQ $$ #[M, M', A]
           , H >> EQ $$ #[N, N', xB // M]
-          , H @@ (z,A) >> MEM $$ #[xB // `` z, UNIV $$ #[k]]
+          , H @@ (z,A) >> MEM $$ #[xB // `` z, UNIV k $$ #[]]
           ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
                  | _ => raise Refine)
         end)
@@ -399,17 +430,26 @@ struct
     infix ORELSE ORELSE_LAZY THEN
 
     local
-      val i = Variable.named "i"
-      val CanEqAuto = AxEq ORELSE_LAZY (fn () => PairEq (Variable.new ()) (`` i)) ORELSE_LAZY (fn () => LamEq (Variable.new ()) (`` i)) ORELSE UnitEq ORELSE_LAZY (fn () => ProdEq (Variable.new())) ORELSE VoidEq ORELSE UnivEq
-      val EqAuto = CanEqAuto ORELSE HypEq
+      val EqAuto =
+        AxEq
+        ORELSE FunEq NONE
+        ORELSE PairEq NONE NONE
+        ORELSE LamEq NONE NONE
+        ORELSE UnitEq
+        ORELSE ProdEq NONE
+        ORELSE VoidEq
+        ORELSE UnivEq
+        ORELSE HypEq
+        ORELSE Cum NONE
+
       val intro_rules =
-        MemUnfold ORELSE
-          EqAuto ORELSE
-            Assumption ORELSE_LAZY
-              (fn () => FunIntro (Variable.new ()) (`` i)) ORELSE
-                UnitIntro
+        MemUnfold
+        ORELSE EqAuto
+        ORELSE Assumption
+        ORELSE FunIntro NONE NONE
+        ORELSE UnitIntro
     in
-      val Auto = REPEAT0 intro_rules
+      val Auto = REPEAT intro_rules
     end
   end
 end

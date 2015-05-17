@@ -6,6 +6,6 @@ struct
   type evidence = evidence
   type validation = evidence list -> evidence
   type tactic = goal -> (goal list * validation)
-  val goal_to_string = Sequent.to_string PrintMode.User
+  val goal_to_string = Sequent.to_string
 end
 

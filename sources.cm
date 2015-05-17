@@ -32,6 +32,8 @@ group is
   core_tactics.sig
   core_tactics.fun
 
+  level.sig
+  level.sml
   refiner.fun
 
   test.sml

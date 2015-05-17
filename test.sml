@@ -1,6 +1,6 @@
 structure Test =
 struct
-  val print_mode = PrintMode.User
+  val print_mode = PrintMode.Debug
 
   structure Var = Variable ()
   structure Syn =
@@ -26,8 +26,7 @@ struct
   infix 7 $$
   infix \\ THEN THENL ORELSE
 
-  fun univ i = UNIV $$ #[i]
-  fun lsuc i = LSUCC $$ #[i]
+  fun univ i = UNIV i $$ #[]
   val void = VOID $$ #[]
   val unit = UNIT $$ #[]
   val ax = AX $$ #[]
@@ -76,12 +75,9 @@ struct
     Library.save "test1'" (Emp >> unit & (unit & unit))
       (Lemma test1)
 
-  val z = Variable.named "z"
-  val i = Variable.named "i"
-
   val test2 =
     Library.save "test2" (Emp >> unit ~> (unit & unit))
-      (FunIntro z (`` i) THEN Auto THEN ProdIntro ax THEN Auto)
+      (FunIntro NONE NONE THEN Auto THEN ProdIntro ax THEN Auto)
 
   val test3 =
     Library.save "test3" (Emp >> lam (fn x => `` x) mem (unit ~> unit))
@@ -89,36 +85,37 @@ struct
 
   val test4 =
     Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
-      (MemUnfold THEN LamEq z (`` i) THEN Auto THEN VoidElim THEN Auto)
+      (MemUnfold THEN LamEq NONE NONE THEN Auto THEN VoidElim THEN Auto)
 
   val test5 =
     Library.save "test5" (Emp >> void ~> (unit & unit))
-      (FunIntro z (`` i) THEN Auto THEN VoidElim THEN Auto)
+      (FunIntro NONE NONE THEN Auto THEN VoidElim THEN Auto)
 
   val test6 =
     Library.save "test6" (Emp >> unit ~> (unit & unit))
       (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto)
 
- local
-   val x = Variable.named "x"
-   val y = Variable.named "y"
+  local
+    val x = Variable.named "x"
+    val y = Variable.named "y"
+    val z = Variable.named "z"
   in
     val test7 =
       Library.save "test7" (Emp >> (void & unit) ~> void)
-        (FunIntro z (`` i) THEN Auto THEN ProdElim z (x, y) THEN Auto)
+        (FunIntro (SOME z) NONE THEN Auto THEN ProdElim z (x, y) THEN Auto)
   end
 
   val test8 =
-    Library.save "test8" (Emp >> (univ (`` i)) mem (univ (lsuc (lsuc (`` i)))))
+    Library.save "test8" (Emp >> (univ 0) mem (univ 2))
       Auto
 
   val test9 =
-    Library.save "test9" (Emp >> (univ (`` i) & unit) mem (univ (lsuc (`` i))))
+    Library.save "test9" (Emp >> (univ 0 & unit) mem (univ 1))
       Auto
 
-    (*
+      (*
   local
-    val univi = univ (`` i)
+    val univi = univ 0
     val A = Variable.named "A"
     val B = Variable.named "B"
     val Q = Variable.named "Q"
@@ -171,30 +168,13 @@ struct
 
     val _ =
       Library.save "ac" (Emp >> ac_prop)
-        (FunIntro A (lsuc (`` i)) THEN Auto
-         THEN FunIntro B (lsuc (`` i)) THEN Auto
-         THEN FunIntro Q (lsuc (`` i))
-         THENL
-           [ FunIntro q (`` i) THENL
-             [ ProdIntro (lam (fn x => fst (ap (`` q) (`` x)))) THENL
-               [ MemUnfold THEN (LamEq a (`` i)) THEN Auto
-                 THEN SpreadEq (z \\ `` B) (PROD $$ #[``B, b \\ (ap (ap (``Q) (``a)) (``b))]) (s, t, y) THEN Auto
-                 THEN ApEq (FUN $$ #[``A, a \\ PROD $$ #[``B, b \\ ap (ap (``Q) (``a)) (``b) ]]) THEN Auto
-               , FunIntro a (`` i) THEN Auto
-                 THEN FunElim q (``a) (qa, qa') THEN Auto
-                 THEN ProdElim qa (qa1, qa2)
-                 THEN Witness (``qa2)
-               ]
-             , MemUnfold THEN FunEq a THEN Auto THEN ProdEq b THEN Auto THEN ApEq (``B ~> univi) THEN Auto THEN ApEq (``A ~> (``B ~> univi)) THEN Auto
-             ]
-           , MemUnfold THEN (FunEq a) THENL
-             [ Cum (`` i)
-             , FunEq b THEN Auto THEN Cum (`` i)
-             ] THEN Auto
-           ])
+        (Auto THENL
+          [ ID
+          , ID
+          ])
 
   end
-           *)
+  *)
 
   fun print_lemma lemma =
     let

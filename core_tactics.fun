@@ -55,13 +55,9 @@ struct
   fun ORELSE (tac1, tac2) =
     ORELSE_LAZY (tac1, fn () => tac2)
 
-  fun REPEAT tac =
-    THEN_LAZY (tac, fn () => REPEAT tac)
-
-  fun REPEAT0 tac =
-    ORELSE ((REPEAT tac), ID)
-
   fun TRY tac =
     ORELSE(tac, ID)
+
+  fun REPEAT tac = TRY (THEN_LAZY (tac, fn () => TRY (REPEAT tac)))
 end
 

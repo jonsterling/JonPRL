@@ -9,11 +9,8 @@ struct
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
     | WITNESS | HYP_EQ
 
-      (* Level expressions *)
-    | LSUCC
-
       (* Computational Type Theory *)
-    | UNIV
+    | UNIV of Level.t
     | VOID
     | UNIT | AX | MATCH_UNIT
     | PROD | PAIR | SPREAD
@@ -52,9 +49,7 @@ struct
        | HYP_EQ => #[0]
 
 
-       | LSUCC => #[0]
-
-       | UNIV => #[0]
+       | UNIV i => #[]
        | VOID => #[]
        | UNIT => #[]
        | AX => #[]
@@ -95,9 +90,7 @@ struct
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
 
-       | LSUCC => "s"
-
-       | UNIV => "𝕌"
+       | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
        | AX => "•"
