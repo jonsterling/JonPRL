@@ -102,7 +102,7 @@ struct
 
   val test7 =
     Library.save "test7" (Emp >> (void & unit) ~> void)
-      (FunIntro (SOME "z") NONE THEN Auto THEN ProdElim "z" ("x", "y") THEN Auto)
+      (FunIntro (SOME "z") NONE THEN Auto THEN ProdElim "z" NONE THEN Auto)
 
   val test8 =
     Library.save "test8" (Emp >> (univ 0) mem (univ 2))
@@ -128,9 +128,9 @@ struct
           ``"Q" ap ``"a" ap (``"f" ap ``"a")]]
 
     val ac_prop =
-      FUN $$ #[univ 0, "A" \\
-        FUN $$ #[univ 0, "B" \\
-          FUN $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
+      ISECT $$ #[univ 0, "A" \\
+        ISECT $$ #[univ 0, "B" \\
+          ISECT $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
             ac_premise ~> ac_conclusion ]]]
 
   fun fst M =
@@ -140,10 +140,13 @@ struct
     val _ =
       Library.save "ac" (Emp >> ac_prop)
       (Auto
-       THEN ProdIntro (LAM $$ #["z" \\ fst (``"x" ap ``"z")])
+       THEN ProdIntro (LAM $$ #["w" \\ fst (``"x" ap ``"w")])
        THEN Auto
+       THEN FunElim "x" (``"a") NONE THEN Auto
+       THEN ProdElim "y" NONE
+       THEN Witness (``"t")
        THEN Admit
-       )
+      )
   end
 
   fun print_lemma lemma =

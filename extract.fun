@@ -19,7 +19,7 @@ struct
 
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
-       | UNIT_ELIM $ #[R, E] => MATCH_UNIT $$ #[extract R, extract E]
+       | UNIT_ELIM $ #[R, E] => extract (E // ax)
        | AX_EQ $ _ => AX $$ #[]
 
        | PROD_EQ $ _ => ax
@@ -39,11 +39,17 @@ struct
        | LAM_EQ $ _ => ax
        | AP_EQ $ _ => ax
 
+       | ISECT_EQ $ _ => ax
+       | ISECT_INTRO $ #[xD, _] => extract (#2 (unbind xD))
+       | ISECT_ELIM $ #[f, s, D, yzE] => (extract yzE // f) // ax
+       | ISECT_MEMBER_EQ $ _ => ax
+       | ISECT_MEMBER_CASE_EQ $ _ => ax
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
 
        | SQUASH_EQ $ _ => ax
-       | SQUASH_INTRO $ #[D] => extract D
+       | SQUASH_INTRO $ _ => ax
        | SQUASH_ELIM $ _ => ax
 
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
