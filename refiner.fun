@@ -50,6 +50,7 @@ sig
 
     val IsectEq : Sequent.name option -> tactic
     val IsectIntro : Sequent.name option -> Level.t option -> tactic
+    val IsectMemberEq : Sequent.name option -> Level.t option -> tactic
 
     val MemUnfold : tactic
     val Witness : Syn.t -> tactic
@@ -456,6 +457,25 @@ struct
           [ H' >> xP2 // `` z
           , H >> MEM $$ #[P1, UNIV k $$ #[]]
           ] BY (fn [D,E] => ISECT_INTRO $$ #[z \\ D, E]
+                 | _ => raise Refine)
+        end)
+
+    fun IsectMemberEq oz ok : tactic =
+      named "IsectMemberEq" (fn (H >> P) =>
+        let
+          val #[M,N,A] = P ^! EQ
+          val #[P1, xP2] = A ^! ISECT
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xP2)
+                 | SOME z => z)
+          val k = case ok of NONE => infer_level (H, P1) | SOME k => k
+          val H' = Context.insert H z Visibility.Hidden P1
+        in
+          [ H' >> EQ $$ #[M,N, xP2 // ``z]
+          , H >> MEM $$ #[P1, UNIV k $$ #[]]
+          ] BY (fn [D, E] => ISECT_MEMBER_EQ $$ #[z \\ D, E]
                  | _ => raise Refine)
         end)
 
