@@ -51,6 +51,7 @@ sig
     val IsectEq : Sequent.name option -> tactic
     val IsectIntro : Sequent.name option -> Level.t option -> tactic
     val IsectMemberEq : Sequent.name option -> Level.t option -> tactic
+    val IsectMemberCaseEq : Syn.t option -> Syn.t -> tactic
 
     val MemUnfold : tactic
     val Witness : Syn.t -> tactic
@@ -477,6 +478,23 @@ struct
           , H >> MEM $$ #[P1, UNIV k $$ #[]]
           ] BY (fn [D, E] => ISECT_MEMBER_EQ $$ #[z \\ D, E]
                  | _ => raise Refine)
+        end)
+
+    fun IsectMemberCaseEq oisect t : tactic =
+      named "IsectMemberCaseEq" (fn (H >> P) =>
+        let
+          val #[F1,F2, Tt] = P ^! EQ
+          val isect =
+            case oisect of
+                 SOME isect => isect
+               | NONE => unify (infer_type (H, F1)) (infer_type (H, F2))
+
+          val #[S, xT] = isect ^! ISECT
+          val _ = unify Tt (xT // t)
+        in
+          [ H >> EQ $$ #[F1, F2, isect]
+          , H >> MEM $$ #[t, S]
+          ] BY mk_evidence ISECT_MEMBER_CASE_EQ
         end)
 
     val MemUnfold : tactic =

@@ -7,7 +7,7 @@ struct
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
-    | ISECT_EQ | ISECT_INTRO | ISECT_MEMBER_EQ
+    | ISECT_EQ | ISECT_INTRO | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ
     | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
 
@@ -54,6 +54,7 @@ struct
        | ISECT_EQ => #[0,1]
        | ISECT_INTRO => #[1,0]
        | ISECT_MEMBER_EQ => #[1,0]
+       | ISECT_MEMBER_CASE_EQ => #[0,0]
 
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
@@ -110,6 +111,7 @@ struct
        | ISECT_EQ => "isect="
        | ISECT_INTRO => "isect-intro"
        | ISECT_MEMBER_EQ => "isect-mem="
+       | ISECT_MEMBER_CASE_EQ => "isect-mem-case="
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp="

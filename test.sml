@@ -145,6 +145,7 @@ struct
        THEN FunElim "x" (``"a") NONE THEN Auto
        THEN ProdElim "y" NONE
        THEN Witness (``"t")
+       THEN Admit
       )
   end
 
