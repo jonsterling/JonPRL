@@ -20,6 +20,7 @@ sig
   val search : 'a context -> ('a -> bool) -> (name * 'a) option
 
   val map : ('a -> 'b) -> 'a context -> 'b context
+  val map_after : name -> ('a -> 'a) -> 'a context -> 'a context
   val list_items : 'a context -> (name * Visibility.t * 'a) list
 
   val to_string : PrintMode.t * (PrintMode.t -> 'a -> string) -> 'a context -> string

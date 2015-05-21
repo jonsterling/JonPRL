@@ -71,7 +71,7 @@ struct
   type context = Sequent.context
 
   fun ctx_subst (H : context) (m : Syn.t) (x : Context.name) =
-    Context.map (Syn.subst m x) H
+    Context.map_after x (Syn.subst m x) H
 
   structure RefinerTypes =
     RefinerTypes

@@ -55,7 +55,13 @@ struct
       nil => NONE
     | ((i,(x, _, _)) :: ys) => if p x then SOME (i,x) else list_search ys p
 
-  fun map f = M.map (fn (v, vis, i) => (f v, vis, i))
+  fun map f = M.map (fn (a, vis, i) => (f a, vis, i))
+
+  fun map_after x f H =
+    case M.find (H, x) of
+         NONE => raise NotFound x
+       | SOME (a, _, i) =>
+           M.map (fn (b, vis, j) => if j < i then (f b, vis, j) else (b, vis, j)) H
 
   fun to_string (mode, printer) =
     let
