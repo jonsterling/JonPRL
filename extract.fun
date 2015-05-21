@@ -41,6 +41,7 @@ struct
 
        | ISECT_EQ $ _ => ax
        | ISECT_INTRO $ #[xD, _] => extract (#2 (unbind xD))
+       | ISECT_ELIM $ #[f, s, D, yzE] => (extract yzE // f) // ax
        | ISECT_MEMBER_EQ $ _ => ax
        | ISECT_MEMBER_CASE_EQ $ _ => ax
 

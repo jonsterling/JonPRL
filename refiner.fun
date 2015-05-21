@@ -50,6 +50,7 @@ sig
 
     val IsectEq : Sequent.name option -> tactic
     val IsectIntro : Sequent.name option -> Level.t option -> tactic
+    val IsectElim : Sequent.name -> Syn.t -> (Sequent.name * Sequent.name) option -> tactic
     val IsectMemberEq : Sequent.name option -> Level.t option -> tactic
     val IsectMemberCaseEq : Syn.t option -> Syn.t -> tactic
 
@@ -459,6 +460,26 @@ struct
           , H >> MEM $$ #[P1, UNIV k $$ #[]]
           ] BY (fn [D,E] => ISECT_INTRO $$ #[z \\ D, E]
                  | _ => raise Refine)
+        end)
+
+    fun IsectElim f s onames : tactic =
+      named "IsectElim" (fn (H >> P) =>
+        let
+          val #[S, xT] = Context.lookup H f ^! ISECT
+          val Ts = xT // s
+          val (y, z) =
+            case onames of
+                 SOME names => names
+               | NONE =>
+                   (Context.fresh (H, Variable.named "y"),
+                    Context.fresh (H, Variable.named "z"))
+
+          val fsTs = EQ $$ #[``y, ``f, Ts]
+        in
+          [ H >> MEM $$ #[s, S]
+          , H @@ (y, Ts) @@ (z, fsTs) >> P
+          ] BY (fn [D, E] => FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
+                  | _ => raise Refine)
         end)
 
     fun IsectMemberEq oz ok : tactic =
