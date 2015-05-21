@@ -38,13 +38,13 @@ sig
 
     val ProdEq : Sequent.name option -> tactic
     val ProdIntro : Syn.t -> tactic
-    val ProdElim : Sequent.name -> Sequent.name * Sequent.name -> tactic
+    val ProdElim : Sequent.name -> (Sequent.name * Sequent.name) option -> tactic
     val PairEq : Sequent.name option -> Level.t option -> tactic
     val SpreadEq : Syn.t option -> Syn.t option -> (Sequent.name * Sequent.name * Sequent.name) option  -> tactic
 
     val FunEq : Sequent.name option -> tactic
     val FunIntro : Sequent.name option -> Level.t option -> tactic
-    val FunElim : Sequent.name -> Syn.t -> Sequent.name * Sequent.name -> tactic
+    val FunElim : Sequent.name -> Syn.t -> (Sequent.name * Sequent.name) option -> tactic
     val LamEq : Sequent.name option -> Level.t option -> tactic
     val ApEq : Syn.t option -> tactic
 
@@ -363,11 +363,18 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun FunElim f s (y, z) : tactic =
+    fun FunElim f s onames : tactic =
       named "FunElim" (fn (H >> P) =>
         let
           val #[S, xT] = Context.lookup H f ^! FUN
           val Ts = xT // s
+          val (y, z) =
+            case onames of
+                 SOME names => names
+               | NONE =>
+                   (Context.fresh (H, Variable.named "y"),
+                    Context.fresh (H, Variable.named "z"))
+
           val fsTs = EQ $$ #[``y, AP $$ #[``f, s], Ts]
         in
           [ H >> MEM $$ #[s, S]
@@ -508,10 +515,17 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun ProdElim z (s, t) : tactic =
+    fun ProdElim z onames : tactic =
       named "ProdElim" (fn (H >> P) =>
         let
           val #[S, xT] = Context.lookup H z ^! PROD
+          val (s, t) =
+            case onames of
+                 SOME names => names
+               | NONE =>
+                   (Context.fresh (H, Variable.named "s"),
+                    Context.fresh (H, Variable.named "t"))
+
           val st = PAIR $$ #[``s, ``t]
           val H' = ctx_subst H st z @@ (s, S) @@ (t, (xT // `` s))
         in
