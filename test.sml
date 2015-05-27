@@ -133,19 +133,22 @@ struct
           ISECT $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
             ac_premise ~> ac_conclusion ]]]
 
-  fun fst M =
-    SPREAD $$ #[M, "u" \\ ("v" \\ ``"u")]
+    fun fst M =
+      SPREAD $$ #[M, "u" \\ ("v" \\ ``"u")]
+
+    infix CORELSE CTHEN
 
   in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
         (Auto
          THEN ProdIntro (LAM $$ #["w" \\ fst (``"x" ap ``"w")]) THEN Auto
-         THEN FunElim "x" (``"a") NONE THEN Auto
-         THEN ProdElim "y" NONE
-         THEN Witness (``"t")
          THEN RewriteGoal (CDEEP ApBeta)
-         )
+         THEN FunElim "x" (``"a") NONE THEN Auto
+         THEN RewriteHyp RIGHT "z"
+         THEN ProdElim "y" NONE
+         THEN RewriteGoal (CDEEP SpreadBeta)
+         THEN Auto)
   end
 
   fun print_lemma lemma =
