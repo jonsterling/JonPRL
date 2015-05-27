@@ -9,8 +9,10 @@ group is
   extract.sig
   extract.fun
 
-  whnf.sig
-  whnf.fun
+  conv_types.sig
+  conv_types.fun
+  core_conv.sig
+  core_conv.fun
 
   susp.sig
   susp.sml

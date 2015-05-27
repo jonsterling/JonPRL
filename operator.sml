@@ -8,7 +8,7 @@ struct
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
-    | WITNESS | HYP_EQ
+    | WITNESS | HYP_EQ | REWRITE_EQ
     | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
 
     | ADMIT
@@ -59,6 +59,7 @@ struct
 
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
+       | REWRITE_EQ => #[0,0]
 
        | SQUASH_EQ => #[0]
        | SQUASH_INTRO => #[0]
@@ -117,6 +118,7 @@ struct
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
+       | REWRITE_EQ => "rewrite="
        | ADMIT => "<<<<<ADMIT>>>>>"
 
        | SQUASH_EQ => "squash="

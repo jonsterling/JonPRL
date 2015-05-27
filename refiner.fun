@@ -17,6 +17,8 @@ sig
   structure CoreTactics : CORE_TACTICS
     where type tactic = tactic
 
+  structure CoreConv : CORE_CONV
+
   structure InferenceRules :
   sig
 
@@ -110,11 +112,23 @@ sig
     val Hypothesis : Sequent.name -> tactic
     val HypEq : tactic
     val Lemma : Library.t -> tactic
+
+    val RewriteGoal : CoreConv.conv -> tactic
+    val RewriteEq : Syn.t -> tactic
+
+    datatype DIR = LEFT | RIGHT
+    val RewriteHyp : DIR -> Sequent.name -> tactic
   end
 
   structure DerivedTactics :
   sig
     val Auto : tactic
+  end
+
+  structure Conversions :
+  sig
+    val ApBeta : CoreConv.conv
+    val SpreadBeta : CoreConv.conv
   end
 end =
 struct
@@ -130,7 +144,8 @@ struct
       (structure Sequent = Sequent
        type evidence = Syn.t)
 
-  open RefinerTypes
+  structure ConvTypes = ConvTypes(Syn)
+  open RefinerTypes ConvTypes
 
   open Operator Syn
   infix $ \
@@ -146,9 +161,8 @@ struct
       (H', x', E')
     end
 
-  structure Whnf = Whnf(Syn)
-
   structure CoreTactics = CoreTactics(RefinerTypes)
+  structure CoreConv = CoreConv(ConvTypes)
   structure Library = Library(RefinerTypes)
 
   structure InferenceRules =
@@ -746,6 +760,41 @@ struct
     val Admit : tactic =
       named "Admit" (fn (H >> P) =>
         [] BY (fn _ => ADMIT $$ #[]))
+
+    fun RewriteGoal (c : conv) : tactic =
+      named "RewriteGoal" (fn (H >> P) =>
+        [ H >> c P ] BY (fn [D] => D | _ => raise Refine))
+
+    datatype DIR = LEFT | RIGHT
+
+    local
+      open CoreConv
+      fun rw (M, N) = CDEEP (fn X =>
+        let
+          val _ = unify X M
+        in
+          N
+        end)
+    in
+      fun RewriteEq E : tactic =
+        named "RewriteEq" (fn (H >> P) =>
+          let
+            val #[M,N,_] = E ^! EQ
+          in
+            [ H >> E
+            , H >> rw (M,N) P
+            ] BY (fn [D] => REWRITE_EQ $$ #[E,D] | _ => raise Refine)
+          end)
+
+      fun RewriteHyp dir z : tactic =
+        named "RewriteHyp" (fn (H >> P) =>
+          let
+            val #[M,N,_] = Context.lookup H z ^! EQ
+          in
+            [ H >> (case dir of LEFT => rw (M,N) P | RIGHT => rw (N, M) P)
+            ] BY (fn [D] => REWRITE_EQ $$ #[``z,D] | _ => raise Refine)
+          end)
+    end
   end
 
   structure DerivedTactics =
@@ -784,6 +833,19 @@ struct
     in
       val Auto = REPEAT (intro_rules ORELSE elim_rules)
     end
+  end
+
+  structure Conversions =
+  struct
+    open CoreConv
+
+    val ApBeta : conv = reduction_rule
+      (fn AP $ #[LAM $ #[xE], N] => xE // into N
+        | _ => raise Conv)
+
+    val SpreadBeta : conv = reduction_rule
+      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
+        | _ => raise Conv)
   end
 end
 
