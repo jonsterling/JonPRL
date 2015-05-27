@@ -157,8 +157,6 @@ struct
       (H', x', E')
     end
 
-  structure Whnf = Whnf(Syn)
-
   structure CoreTactics = CoreTactics(RefinerTypes)
   structure CoreConv = CoreConv(ConvTypes)
   structure Library = Library(RefinerTypes)
