@@ -20,7 +20,7 @@ struct
   structure Extract = Extract(Syn)
 
   open Operator Syn Refiner
-  open CoreTactics DerivedTactics InferenceRules Sequent
+  open CoreTactics DerivedTactics InferenceRules Sequent CoreConv Conversions
 
   infix 2 >>
   infix 7 $$
@@ -139,14 +139,13 @@ struct
   in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
-      (Auto
-       THEN ProdIntro (LAM $$ #["w" \\ fst (``"x" ap ``"w")])
-       THEN Auto
-       THEN FunElim "x" (``"a") NONE THEN Auto
-       THEN ProdElim "y" NONE
-       THEN Witness (``"t")
-       THEN Admit
-      )
+        (Auto
+         THEN ProdIntro (LAM $$ #["w" \\ fst (``"x" ap ``"w")]) THEN Auto
+         THEN FunElim "x" (``"a") NONE THEN Auto
+         THEN ProdElim "y" NONE
+         THEN Witness (``"t")
+         THEN RewriteGoal (CDEEP ApBeta)
+         )
   end
 
   fun print_lemma lemma =

@@ -1,5 +1,4 @@
-functor CoreTactics (R : REFINER_TYPES) :
-  CORE_TACTICS where type tactic = R.tactic =
+functor CoreTactics (R : REFINER_TYPES) : CORE_TACTICS =
 struct
   type tactic = R.tactic
 

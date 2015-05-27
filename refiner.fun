@@ -17,6 +17,8 @@ sig
   structure CoreTactics : CORE_TACTICS
     where type tactic = tactic
 
+  structure CoreConv : CORE_CONV
+
   structure InferenceRules :
   sig
 
@@ -110,11 +112,19 @@ sig
     val Hypothesis : Sequent.name -> tactic
     val HypEq : tactic
     val Lemma : Library.t -> tactic
+
+    val RewriteGoal : CoreConv.conv -> tactic
   end
 
   structure DerivedTactics :
   sig
     val Auto : tactic
+  end
+
+  structure Conversions :
+  sig
+    val ApBeta : CoreConv.conv
+    val SpreadBeta : CoreConv.conv
   end
 end =
 struct
@@ -130,7 +140,8 @@ struct
       (structure Sequent = Sequent
        type evidence = Syn.t)
 
-  open RefinerTypes
+  structure ConvTypes = ConvTypes(Syn)
+  open RefinerTypes ConvTypes
 
   open Operator Syn
   infix $ \
@@ -149,6 +160,7 @@ struct
   structure Whnf = Whnf(Syn)
 
   structure CoreTactics = CoreTactics(RefinerTypes)
+  structure CoreConv = CoreConv(ConvTypes)
   structure Library = Library(RefinerTypes)
 
   structure InferenceRules =
@@ -746,6 +758,11 @@ struct
     val Admit : tactic =
       named "Admit" (fn (H >> P) =>
         [] BY (fn _ => ADMIT $$ #[]))
+
+    fun RewriteGoal (c : conv) : tactic =
+      named "RewriteGoal" (fn (H >> P) =>
+        [ H >> c P ] BY (fn [D] => D | _ => raise Refine))
+
   end
 
   structure DerivedTactics =
@@ -784,6 +801,19 @@ struct
     in
       val Auto = REPEAT (intro_rules ORELSE elim_rules)
     end
+  end
+
+  structure Conversions =
+  struct
+    open CoreConv
+
+    val ApBeta : conv = reduction_rule
+      (fn AP $ #[LAM $ #[xE], N] => xE // into N
+        | _ => raise Conv)
+
+    val SpreadBeta : conv = reduction_rule
+      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
+        | _ => raise Conv)
   end
 end
 
