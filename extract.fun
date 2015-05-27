@@ -47,6 +47,7 @@ struct
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
+       | REWRITE_EQ $ #[_, D] => extract D
 
        | SQUASH_EQ $ _ => ax
        | SQUASH_INTRO $ _ => ax

@@ -114,6 +114,10 @@ sig
     val Lemma : Library.t -> tactic
 
     val RewriteGoal : CoreConv.conv -> tactic
+    val RewriteEq : Syn.t -> tactic
+
+    datatype DIR = LEFT | RIGHT
+    val RewriteHyp : DIR -> Sequent.name -> tactic
   end
 
   structure DerivedTactics :
@@ -761,6 +765,36 @@ struct
       named "RewriteGoal" (fn (H >> P) =>
         [ H >> c P ] BY (fn [D] => D | _ => raise Refine))
 
+    datatype DIR = LEFT | RIGHT
+
+    local
+      open CoreConv
+      fun rw (M, N) = CDEEP (fn X =>
+        let
+          val _ = unify X M
+        in
+          N
+        end)
+    in
+      fun RewriteEq E : tactic =
+        named "RewriteEq" (fn (H >> P) =>
+          let
+            val #[M,N,_] = E ^! EQ
+          in
+            [ H >> E
+            , H >> rw (M,N) P
+            ] BY (fn [D] => REWRITE_EQ $$ #[E,D] | _ => raise Refine)
+          end)
+
+      fun RewriteHyp dir z : tactic =
+        named "RewriteHyp" (fn (H >> P) =>
+          let
+            val #[M,N,_] = Context.lookup H z ^! EQ
+          in
+            [ H >> (case dir of LEFT => rw (M,N) P | RIGHT => rw (N, M) P)
+            ] BY (fn [D] => REWRITE_EQ $$ #[``z,D] | _ => raise Refine)
+          end)
+    end
   end
 
   structure DerivedTactics =
