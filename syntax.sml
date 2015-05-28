@@ -59,7 +59,7 @@ struct
                end
 
            | AP $ #[M, N] =>
-               display M ^ "[" ^ display N ^ "]"
+               enclose M ^ "[" ^ display N ^ "]"
 
            | PAIR $ #[M, N] =>
                "⟨" ^ display M ^ ", " ^ display N ^ "⟩"
@@ -141,7 +141,7 @@ struct
                  val (y, zE) = unbind yzE
                  val (z, E) = unbind zE
                in
-                 "let " ^ dvar (y, zE) ^ " = " ^ display f ^ "[" ^ display s ^ " : " ^ display D ^ "] by " ^ dvar (z, E) ^ " in " ^ display E
+                 "let " ^ dvar (y, zE) ^ " = " ^ enclose f ^ "[" ^ display s ^ " : " ^ display D ^ "] by " ^ dvar (z, E) ^ " in " ^ display E
                end
 
            | LAM_EQ $ #[xD, E] =>
