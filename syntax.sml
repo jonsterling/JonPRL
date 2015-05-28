@@ -108,12 +108,13 @@ struct
                  "let " ^ dvar (x, yE) ^ "," ^ dvar (y, E) ^ " = " ^ display D ^ " in " ^ display E
                end
 
-           | SPREAD_EQ $ #[D, xyE] =>
+           | SPREAD_EQ $ #[D, xyzE] =>
                let
-                 val (x, yE) = unbind xyE
-                 val (y, E) = unbind yE
+                 val (x, yzE) = unbind xyzE
+                 val (y, zE) = unbind yzE
+                 val (z, E) = unbind zE
                in
-                 "let⁼ " ^ dvar (x, yE) ^ "," ^ dvar (y, E) ^ " = " ^ display D ^ " in " ^ display E
+                 "let⁼ " ^ dvar (x, yzE) ^ "," ^ dvar (y, zE) ^ " = " ^ display D ^ " by " ^ dvar (z, E) ^ " in " ^ display E
                end
 
            | SQUASH_INTRO $ #[M] =>
