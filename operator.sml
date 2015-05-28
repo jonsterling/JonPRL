@@ -88,27 +88,27 @@ struct
 
   fun to_string O =
     case O of
-         UNIV_EQ => "univ="
+         UNIV_EQ => "U⁼"
        | CUM => "cum"
-       | VOID_EQ => "void="
+       | VOID_EQ => "void⁼"
        | VOID_ELIM => "void-elim"
 
-       | UNIT_EQ => "unit="
+       | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
-       | AX_EQ => "ax="
+       | AX_EQ => "⬧⁼"
 
-       | PROD_EQ => "prod="
+       | PROD_EQ => "prod⁼"
        | PROD_INTRO => "prod-intro"
        | PROD_ELIM => "prod-elim"
-       | PAIR_EQ => "pair="
-       | SPREAD_EQ => "spread="
+       | PAIR_EQ => "pair⁼"
+       | SPREAD_EQ => "spread⁼"
 
-       | FUN_EQ => "fun="
+       | FUN_EQ => "fun⁼"
        | FUN_INTRO => "fun-intro"
        | FUN_ELIM => "fun-elim"
-       | LAM_EQ => "lam="
-       | AP_EQ => "ap="
+       | LAM_EQ => "lam⁼"
+       | AP_EQ => "ap⁼"
 
        | ISECT_EQ => "isect="
        | ISECT_INTRO => "isect-intro"
@@ -118,7 +118,7 @@ struct
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp="
-       | REWRITE_EQ => "rewrite="
+       | REWRITE_EQ => "rewrite"
        | ADMIT => "<<<<<ADMIT>>>>>"
 
        | SQUASH_EQ => "squash="
