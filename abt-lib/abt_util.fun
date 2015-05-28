@@ -42,7 +42,7 @@ struct
     | v' \ e'' => if Variable.eq v v' then e' else (v' \\ subst e v e'')
     | p $ es => p $$ Vector.map (subst e v) es
 
-  fun to_string mode e =
+  fun to_string_open F mode e =
     case out e of
       ` v => Variable.to_string mode v
     | v \ e =>
@@ -52,12 +52,14 @@ struct
             then Variable.to_string mode v
             else "_"
         in
-          v_str ^ "." ^ (to_string mode e)
+          v_str ^ "." ^ (F mode e)
         end
     | p $ es =>
         Operator.to_string p ^
           (if Vector.length es = 0 then ""
-             else VectorUtil.to_string (to_string mode) es)
+             else VectorUtil.to_string (F mode) es)
+
+  fun to_string mode e = to_string_open to_string mode e
 
   exception ExpectedBinding of t
 

@@ -17,7 +17,7 @@ struct
       val ctx = Context.to_string (print_mode, Syntax.to_string) G
       val prop = Syntax.to_string print_mode P
     in
-      ctx ^ " ≫ " ^ prop
+      ctx ^ " ⊢ " ^ prop
     end
 end
 

@@ -797,6 +797,19 @@ struct
     end
   end
 
+  structure Conversions =
+  struct
+    open CoreConv
+
+    val ApBeta : conv = reduction_rule
+      (fn AP $ #[LAM $ #[xE], N] => xE // into N
+        | _ => raise Conv)
+
+    val SpreadBeta : conv = reduction_rule
+      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
+        | _ => raise Conv)
+  end
+
   structure DerivedTactics =
   struct
     open CoreTactics InferenceRules
@@ -830,22 +843,14 @@ struct
       val elim_rules =
         ApEq NONE
         ORELSE SpreadEq NONE NONE NONE
+
+      open Conversions
+      infix CORELSE
+
+      val whnf = ApBeta CORELSE SpreadBeta
     in
-      val Auto = REPEAT (intro_rules ORELSE elim_rules)
+      val Auto = REPEAT (intro_rules ORELSE elim_rules ORELSE RewriteGoal whnf)
     end
-  end
-
-  structure Conversions =
-  struct
-    open CoreConv
-
-    val ApBeta : conv = reduction_rule
-      (fn AP $ #[LAM $ #[xE], N] => xE // into N
-        | _ => raise Conv)
-
-    val SpreadBeta : conv = reduction_rule
-      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
-        | _ => raise Conv)
   end
 end
 

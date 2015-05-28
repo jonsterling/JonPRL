@@ -3,8 +3,7 @@ struct
   val print_mode = PrintMode.Debug
 
   structure Var = StringVariable
-  structure Syn =
-    AbtUtil (Abt (structure Operator = Operator and Variable = Var))
+  structure Syn = Syntax
 
  structure Sequent =
    Sequent

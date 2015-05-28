@@ -71,7 +71,7 @@ struct
       fun go ((x, vis, a), r) =
         r ^ ", " ^ var_to_string (x, vis) ^ " : " ^ printer mode a
     in
-      foldl go "◊" o list_items
+      foldl go "·" o list_items
     end
 
   fun subcontext test (G, G') =

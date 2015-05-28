@@ -128,7 +128,7 @@ struct
        | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
-       | AX => "•"
+       | AX => "⬧"
        | PROD => "prod"
        | PAIR => "pair"
        | SPREAD => "spread"
