@@ -1,4 +1,4 @@
-functor Context (V : VARIABLE) :> CONTEXT where Name = V =
+functor Context (V : VARIABLE) :> CONTEXT where type name = V.t =
 struct
   structure M = BinaryMapFn
     (struct type ord_key = V.t

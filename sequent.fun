@@ -5,7 +5,7 @@ struct
   type term = Syntax.t
 
   structure Context = Context
-  type name = Context.Name.t
+  type name = Context.name
 
   type context = term Context.context
   datatype sequent = >> of context * term
