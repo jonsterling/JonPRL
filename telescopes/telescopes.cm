@@ -1,0 +1,8 @@
+Library
+  signature TELESCOPE
+  functor Telescope
+  functor TelescopeNotation
+is
+  $SMACKAGE/cmlib/v1/cmlib.cm
+  telescope.sig
+  telescope.fun
