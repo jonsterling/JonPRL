@@ -2,6 +2,7 @@ group is
   $/basis.cm
   $/smlnj-lib.cm
   abt-lib/abt-lib.cm
+  telescopes/telescopes.cm
 
   operator.sml
   syntax.sml
