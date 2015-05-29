@@ -1,91 +1,64 @@
 functor Context (V : VARIABLE) :> CONTEXT where type name = V.t =
 struct
-  structure M = BinaryMapFn
-    (struct type ord_key = V.t
-     val compare = V.compare end)
 
+  structure Label =
+  struct
+    type t = V.t
+    val compare = V.compare
+    fun eq (x,y) = V.eq x y
+    val to_string = V.to_string PrintMode.User
+    val prime = V.prime
+  end
+
+  structure Tel = Telescope (Label)
   structure Name = V
   type name = Name.t
 
-  type 'a context = ('a * Visibility.t * int) M.map
-  structure Key = M.Key
+  type 'a context = ('a * Visibility.t) Tel.telescope
 
-  val empty = M.empty
+  val empty = Tel.empty
+  fun insert H k vis v =
+    Tel.snoc H (k, (v, vis))
 
-  fun fresh (ctx, k) =
-    case M.find (ctx, k) of
-         NONE => k
-       | _ => fresh (ctx, Name.prime k)
+  val interpose_after = Tel.interpose_after
 
-  fun insert ctx k vis v =
-    case M.find (ctx, k) of
-         NONE => M.insert (ctx, k, (v, vis, M.numItems ctx))
-       | _ => raise Fail "Name already bound"
-
-  fun remove (ctx : 'a context) (k : V.t) =
-    let
-      val (ctx', (a, _, _)) = M.remove (ctx, k)
-    in
-      (ctx', a)
-    end
+  val fresh = Tel.fresh
 
   exception NotFound of name
 
   fun modify (ctx : 'a context) (k : V.t) f =
-    case M.find (ctx, k) of
-         NONE => raise NotFound k
-       | SOME (a, vis, i) => M.insert (ctx, k, (f a, vis, i))
+    Tel.modify ctx (k, fn (a, vis) => (f a, vis))
 
-  fun lookup_visibility ctx k =
-    case M.find (ctx, k) of
-         SOME (v, vis, _) => (v, vis)
-       | NONE => raise NotFound k
+  fun lookup_visibility (ctx : 'a context) k =
+    (Tel.lookup ctx k)
 
   fun lookup ctx k = #1 (lookup_visibility ctx k)
 
-  val list_items : 'a context -> (V.t * Visibility.t * 'a) list = fn ctx =>
-    List.map (fn (v, (a, vis, _)) => (v, vis, a))
-     ((ListMergeSort.sort (fn ((_, (_, _, i)), (_, (_, _, j))) => i > j))
-      (M.listItemsi ctx))
+  fun search ctx phi =
+    case Tel.search ctx (phi o #1) of
+         SOME (lbl, (a, vis)) => SOME (lbl, a)
+       | NONE => NONE
 
-  (* Needs to be made more lazy *)
-  fun search (ctx : 'a context) p = list_search (M.listItemsi ctx) p
-  and list_search xs p =
-    case xs of
-      nil => NONE
-    | ((i,(x, _, _)) :: ys) => if p x then SOME (i,x) else list_search ys p
-
-  fun map f = M.map (fn (a, vis, i) => (f a, vis, i))
-
-  fun map_after x f H =
-    case M.find (H, x) of
-         NONE => raise NotFound x
-       | SOME (a, _, i) =>
-           M.map (fn (b, vis, j) => if j < i then (f b, vis, j) else (b, vis, j)) H
-
-  fun to_string (mode, printer) =
+  fun list_items ctx =
     let
-      fun var_to_string (x, Visibility.Visible) = V.to_string mode x
-        | var_to_string (x, Visibility.Hidden) = "[" ^ V.to_string mode x ^ "]"
-
-      fun go ((x, vis, a), r) =
-        r ^ ", " ^ var_to_string (x, vis) ^ " : " ^ printer mode a
+      open Tel.ConsView
+      fun go Empty r = r
+        | go (Cons (lbl, (a, vis), tele')) r = go (out tele') ((lbl, vis, a) :: r)
     in
-      foldl go "·" o list_items
+      rev (go (out ctx) [])
     end
 
-  fun subcontext test (G, G') =
-    let
-      fun probe (x, (a, visa, _), r) =
-        case M.find (G', x) of
-             SOME (b, visb, _) => r andalso test (a,b) andalso visa = visb
-           | NONE => false
-    in
-      M.foldli probe true G
-    end
+  fun map f ctx =
+    Tel.map ctx (fn (a, vis) => (f a, vis))
 
-  fun eq test (G, G') =
-    subcontext test (G, G')
-      andalso
-        subcontext test (G', G)
+  fun map_after k f ctx =
+    Tel.map_after ctx (k, fn (a, vis) => (f a, vis))
+
+  fun to_string (pm : PrintMode.t, f) ctx = Tel.to_string (fn (x, _) => f pm x) ctx
+
+  fun eq test =
+    Tel.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))
+  fun subcontext test =
+    Tel.subtelescope (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))
+
 end

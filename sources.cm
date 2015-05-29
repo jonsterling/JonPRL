@@ -1,7 +1,7 @@
 group is
-  $/basis.cm
-  $/smlnj-lib.cm
+  $SMACKAGE/cmlib/v1/cmlib.cm
   abt-lib/abt-lib.cm
+  telescopes/telescopes.cm
 
   operator.sml
   syntax.sml
@@ -13,9 +13,6 @@ group is
   conv_types.fun
   core_conv.sig
   core_conv.fun
-
-  susp.sig
-  susp.sml
 
   list_util.sml
 

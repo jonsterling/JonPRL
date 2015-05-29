@@ -8,7 +8,7 @@ sig
   val empty : 'a context
 
   val insert : 'a context -> name -> Visibility.t -> 'a -> 'a context
-  val remove : 'a context -> name -> 'a context * 'a
+  val interpose_after : 'a context -> name * 'a context -> 'a context
 
   val modify : 'a context -> name -> ('a -> 'a) -> 'a context
 

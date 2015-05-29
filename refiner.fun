@@ -85,9 +85,6 @@ sig
     (* H, z : (Σx:A)B[x], H'[z] >> P[z] by ProdElim z (s, t)
      * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
      *)
-    (* !!! TODO, ProdElim's implementation does not conform to its
-     * specification. We need to support the insertion of variables into the
-     * middle of a context. *)
     val ProdElim : Sequent.name -> (Sequent.name * Sequent.name) option -> tactic
 
     val PairEq : Sequent.name option -> Level.t option -> tactic
@@ -649,7 +646,8 @@ struct
                     Context.fresh (H, Variable.named "t"))
 
           val st = PAIR $$ #[``s, ``t]
-          val H' = ctx_subst H st z @@ (s, S) @@ (t, (xT // `` s))
+          val J = Context.empty @@ (s, S) @@ (t, (xT // ``s))
+          val H' = ctx_subst (Context.interpose_after H (z, J)) st z
         in
           [ H' >> subst st z P
           ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
