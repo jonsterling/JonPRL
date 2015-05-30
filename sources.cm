@@ -2,6 +2,7 @@ group is
   $SMACKAGE/cmlib/v1/cmlib.cm
   abt-lib/abt-lib.cm
   telescopes/telescopes.cm
+  lcf/lcf.cm
 
   operator.sml
   syntax.sml
@@ -14,8 +15,6 @@ group is
   conversionals.sig
   conversionals.fun
 
-  list_util.sml
-
   visibility.sml
 
   context.sig
@@ -24,14 +23,10 @@ group is
   sequent.sig
   sequent.fun
 
+  lcf.fun
+
   library.sig
   library.fun
-
-  refiner_types.sig
-  refiner_types.fun
-
-  tacticals.sig
-  tacticals.fun
 
   level.sig
   level.sml

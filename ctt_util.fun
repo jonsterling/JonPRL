@@ -1,13 +1,13 @@
 functor CttUtil
-  (structure RefinerTypes : REFINER_TYPES
+  (structure Lcf : LCF
    structure ConvTypes : CONV_TYPES
    structure Ctt : CTT
-     where type tactic = RefinerTypes.tactic
+     where type tactic = Lcf.tactic
      where type conv = ConvTypes.conv) : CTT_UTIL =
 struct
   open Ctt
 
-  structure Tacticals = Tacticals(RefinerTypes)
+  structure Tacticals = Tacticals(Lcf)
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure ConvTypes = ConvTypes)
@@ -55,6 +55,6 @@ struct
 end
 
 structure CttUtil = CttUtil
-  (structure RefinerTypes = RefinerTypes
+  (structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Ctt = Ctt)

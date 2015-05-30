@@ -4,6 +4,7 @@ struct
 
   structure Extract = Extract(Syntax)
   structure Var = Syntax.Variable
+  structure Tacticals = Tacticals(Lcf)
 
   open Operator Syntax Tacticals Conversionals CttUtil Sequent
   open Rules Conversions

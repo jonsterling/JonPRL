@@ -1,10 +1,10 @@
-functor Library (R : REFINER_TYPES) : LIBRARY =
+functor Library (Lcf : LCF) : LIBRARY =
 struct
   structure V = Variable ()
   structure C = Context (V)
 
   type t = V.t
-  open R
+  open Lcf
 
   type object = {goal: goal, evidence: evidence Susp.susp}
   val library : object C.context ref = ref C.empty
@@ -17,7 +17,7 @@ struct
         then Susp.delay (fn () => validation [])
         else
           let
-            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ R.goal_to_string PrintMode.Debug g) "" subgoals
+            val readout = List.foldl (fn (g,r) => r ^ "\n" ^ goal_to_string g) "" subgoals
           in
             raise Fail ("Remaining subgoals: " ^ readout ^ "\n")
           end
@@ -37,4 +37,4 @@ struct
   val validate = Susp.force o #evidence o lookup
 end
 
-structure Library = Library (RefinerTypes)
+structure Library = Library (Lcf)
