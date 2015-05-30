@@ -669,7 +669,7 @@ struct
           let
             val #[M,N,_] = Context.lookup H z ^! EQ
           in
-            [ H >> (case dir of LEFT => rw (M,N) P | RIGHT => rw (N, M) P)
+            [ H >> (case dir of RIGHT => rw (M,N) P | LEFT => rw (N, M) P)
             ] BY (fn [D] => REWRITE_EQ $$ #[``z,D] | _ => raise Refine)
           end)
     end

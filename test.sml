@@ -11,126 +11,66 @@ struct
   infix 7 $$
   infix \\ THEN THENL ORELSE
 
-  fun univ i = UNIV i $$ #[]
-  val void = VOID $$ #[]
-  val unit = UNIT $$ #[]
-  val ax = AX $$ #[]
-  fun squash A = SQUASH $$ #[A]
-
-  fun & (a, b) = PROD $$ #[a, Variable.named "x" \\ b]
-  infix 6 &
-
-  val % = Variable.named
-
-  fun pair m n = PAIR $$ #[m,n]
-  fun lam e =
-    let
-      val x = %"x"
-    in
-      LAM $$ #[x \\ e x]
-    end
-
-  fun pi a b =
-    let
-      val x = Var.named "x"
-    in
-      FUN $$ #[a, x \\ b x]
-    end
-
-  fun sg a b =
-    let
-      val x = Var.named "x"
-    in
-      PROD $$ #[a, x \\ b x]
-    end
-
-  fun ap (m, n) =
-    AP $$ #[m, n]
-  infix 1 ap
-
-  fun ~> (a, b) = FUN $$ #[a,Variable.named "x" \\ b]
-  infixr 5 ~>
-
-  fun mem (m, a) = MEM $$ #[m,a]
-  infix 5 mem
-
+  val % = Sum.outR o CharParser.parseString Syntax.parse_abt
   val Emp = Context.empty
 
   val test1 =
-    Library.save "test1" (Emp >> unit & (unit & unit))
-      (ProdIntro ax THEN (TRY (ProdIntro ax)) THEN Auto)
+    Library.save "test1" (Emp >> %"Σ(unit; _. Σ(unit; _. unit))")
+      (ProdIntro (%"<>") THEN (TRY (ProdIntro (%"<>"))) THEN Auto)
 
   val test1' =
-    Library.save "test1'" (Emp >> unit & (unit & unit))
+    Library.save "test1'" (Emp >> %"Σ(unit; _. Σ(unit; _. unit))")
       (Lemma test1)
 
   val test2 =
-    Library.save "test2" (Emp >> unit ~> (unit & unit))
-      (FunIntro NONE NONE THEN Auto THEN ProdIntro ax THEN Auto)
+    Library.save "test2" (Emp >> %"Π(unit; _. Σ(unit; _. unit))")
+      (FunIntro NONE NONE THEN Auto THEN ProdIntro (%"<>") THEN Auto)
 
   val test3 =
-    Library.save "test3" (Emp >> lam (fn x => `` x) mem (unit ~> unit))
+    Library.save "test3" (Emp >> %"∈(λ(x. x); Π(unit; _. unit))")
       Auto
 
   val test4 =
-    Library.save "test4" (Emp >> lam (fn x => pair ax ax) mem (void ~> void))
+    Library.save "test4" (Emp >> %"∈(λ(x.pair(x;x)); Π(void;_.void))")
       (MemUnfold THEN LamEq NONE NONE THEN Auto THEN VoidElim THEN Auto)
 
   val test5 =
-    Library.save "test5" (Emp >> void ~> (unit & unit))
+    Library.save "test5" (Emp >> %"Π(void; _. Σ(unit; _.unit))")
       (FunIntro NONE NONE THEN Auto THEN VoidElim THEN Auto)
 
   val test6 =
-    Library.save "test6" (Emp >> unit ~> (unit & unit))
-      (Witness (lam (fn x => pair (`` x) (`` x))) THEN Auto
+    Library.save "test6" (Emp >> %"Π(unit; _. Σ(unit; _.unit))")
+      (Witness (%"λ(x. pair(x;x)))")
+       THEN Auto
        THEN PairEq NONE NONE)
 
   val test7 =
-    Library.save "test7" (Emp >> (void & unit) ~> void)
+    Library.save "test7" (Emp >> %"Π(Σ(void;_.unit); _. void)")
       (FunIntro (SOME "z") NONE THEN Auto THEN ProdElim "z" NONE THEN Auto)
 
   val test8 =
-    Library.save "test8" (Emp >> (univ 0) mem (univ 2))
+    Library.save "test8" (Emp >> %"∈(U<0>; U<2>)")
       Auto
 
   val test9 =
-    Library.save "test9" (Emp >> (univ 0 & unit) mem (univ 1))
+    Library.save "test9" (Emp >> %"∈(Σ(U<0>; _.unit); U<1>)")
       Auto
 
   val squash_test =
-    Library.save "squash_test" (Emp >> squash (unit & unit))
-      (Auto THEN ProdIntro ax THEN Auto)
+    Library.save "squash_test" (Emp >> %"!(Σ(unit;_.unit))")
+      (Auto THEN ProdIntro (%"<>") THEN Auto)
 
   local
-    val ac_premise =
-      FUN $$ #[ ``"A", "a" \\
-        PROD $$ #[ ``"B", "b" \\
-          ``"Q" ap ``"a" ap ``"b"]]
-
-    val ac_conclusion =
-      PROD $$ #[ ``"A" ~> ``"B", "f" \\
-        FUN $$ #[ ``"A", "a" \\
-          ``"Q" ap ``"a" ap (``"f" ap ``"a")]]
-
     val ac_prop =
-      ISECT $$ #[univ 0, "A" \\
-        ISECT $$ #[univ 0, "B" \\
-          ISECT $$ #[ (``"A" ~> (``"B" ~> univ 0)), "Q" \\
-            ac_premise ~> ac_conclusion ]]]
-
-    fun fst M =
-      SPREAD $$ #[M, "u" \\ ("v" \\ ``"u")]
-
-    infix CORELSE CTHEN
-
+      %"∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))"
   in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
         (Auto
-         THEN ProdIntro (LAM $$ #["w" \\ fst (``"x" ap ``"w")]) THEN Auto
+         THEN ProdIntro (%"λ(w. spread(ap(φ;w); x. y. x))") THEN Auto
          THEN RewriteGoal (CDEEP ApBeta)
-         THEN FunElim "x" (``"a") NONE THEN Auto
-         THEN RewriteHyp RIGHT "z"
+         THEN FunElim "φ" (%"a") NONE THEN Auto
+         THEN RewriteHyp LEFT "z"
          THEN ProdElim "y" NONE
          THEN RewriteGoal (CDEEP SpreadBeta)
          THEN Auto)
