@@ -38,7 +38,7 @@ struct
   fun doapp (oper, es) =
     if VectorUtil.pair_all_eq match_arity (Operator.arity oper, es)
     then APP (oper, es)
-    else raise Malformed "Bad arity"
+    else raise Malformed ("Bad arity: " ^ Operator.to_string oper)
 
   fun into (` v) = FREE v
     | into (v \ e') = ABS (v, shiftvar v 0 e')
