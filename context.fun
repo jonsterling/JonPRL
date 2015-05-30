@@ -60,5 +60,6 @@ struct
     Tel.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))
   fun subcontext test =
     Tel.subtelescope (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))
-
 end
+
+structure Context = Context(Syntax.Variable)

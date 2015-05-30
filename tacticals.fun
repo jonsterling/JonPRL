@@ -1,4 +1,4 @@
-functor CoreTactics (R : REFINER_TYPES) : CORE_TACTICS =
+functor Tacticals (R : REFINER_TYPES) : TACTICALS =
 struct
   type tactic = R.tactic
 
@@ -60,3 +60,4 @@ struct
   fun REPEAT tac = TRY (THEN_LAZY (tac, fn () => TRY (REPEAT tac)))
 end
 
+structure Tacticals = Tacticals (RefinerTypes)

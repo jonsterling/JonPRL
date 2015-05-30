@@ -1,4 +1,4 @@
-signature CORE_CONV =
+signature CONVERSIONALS =
 sig
   type conv
 

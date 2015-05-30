@@ -10,3 +10,4 @@ struct
   exception Conv
 end
 
+structure ConvTypes = ConvTypes (Syntax)

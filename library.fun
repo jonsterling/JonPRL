@@ -36,3 +36,5 @@ struct
   val goal = #goal o lookup
   val validate = Susp.force o #evidence o lookup
 end
+
+structure Library = Library (RefinerTypes)

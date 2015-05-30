@@ -9,3 +9,6 @@ struct
   val goal_to_string = Sequent.to_string
 end
 
+structure RefinerTypes = RefinerTypes
+  (structure Sequent = Sequent
+   type evidence = Syntax.t)

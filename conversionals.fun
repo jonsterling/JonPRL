@@ -1,6 +1,8 @@
-functor CoreConv (CT : CONV_TYPES) : CORE_CONV =
+functor Conversionals
+  (structure Syntax : ABT_UTIL
+   structure ConvTypes : CONV_TYPES) : CONVERSIONALS =
 struct
-  open CT
+  open ConvTypes
   open Syntax
   infix $ \
   infix 8 $$ // \\
@@ -24,3 +26,7 @@ struct
   val CID : conv = fn M => M
   val CFAIL : conv = fn M => raise Conv
 end
+
+structure Conversionals = Conversionals
+  (structure Syntax = Syntax
+   structure ConvTypes = ConvTypes)

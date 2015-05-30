@@ -1,4 +1,4 @@
-signature CORE_TACTICS =
+signature TACTICALS =
 sig
   type tactic
 

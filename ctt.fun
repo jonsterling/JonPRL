@@ -1,178 +1,58 @@
-functor Refiner
-  (structure Syn : ABT_UTIL where Operator = Operator
+functor Ctt
+  (structure Syntax : ABT_UTIL
+     where Operator = Operator
+   structure Context : CONTEXT
+     where type name = Syntax.Variable.t
    structure Sequent : SEQUENT
-     where type term = Syn.t
-     where type Context.name = Syn.Variable.t
-   val print_mode : PrintMode.t) :>
-sig
-  type evidence = Syn.t
-  type validation = evidence list -> evidence
-  type tactic = Sequent.sequent -> Sequent.sequent list * validation
-
-  structure Library : LIBRARY
-    where type goal = Sequent.sequent
-      and type evidence = evidence
-      and type tactic = tactic
-
-  structure CoreTactics : CORE_TACTICS
-    where type tactic = tactic
-
-  structure CoreConv : CORE_CONV
-
-  structure InferenceRules :
-  sig
-
-    (* Pretend you have got a proof. *)
-    val Admit : tactic
-
-    (* H >> A = B ∈ U{l} by Cum k (k < l)
-     * 1.  H >> A = B ∈ U{k}
-     *)
-    val Cum : Level.t option -> tactic
-
-    (* H >> U{l} = U{l} ∈ U{k} by UnivEq (l < k) *)
-    val UnivEq : tactic
-
-    (* H >> Void = Void ∈ U{k} by VoidEq *)
-    val VoidEq : tactic
-
-    (* H >> A by VoidElim
-     * 1. H >> Void
-     *)
-    val VoidElim : tactic
-
-    (* H >> Unit = Unit ∈ U{k} by UnitEq *)
-    val UnitEq : tactic
-
-    (* H >> Unit by UnitIntro *)
-    val UnitIntro : tactic
-
-    (* H, x : Unit, H'[x] >> P by UnitElim x
-     * 1. H, x : Unit, H'[Ax] >> P[Ax]
-     *)
-    val UnitElim : Sequent.name -> tactic
-
-    (* H >> Ax = Ax ∈ Unit *)
-    val AxEq : tactic
-
-    (* H >> !A = !B ∈ U{k} by SquashEq
-     * 1. H >> A = B ∈ U{k}
-     *)
-    val SquashEq : tactic
-
-    (* H >> !A by SquashIntro
-     * 1. H >> A
-     *)
-    val SquashIntro : tactic
-
-    (* H, x : !A, H'[x] >> P[x] by SquashElim x
-     * 1. H, x : !A, H'[Ax] >> P[Ax]
-     *)
-    val SquashElim : Sequent.name -> tactic
-
-    (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
-     * 1. H >> A = A' ∈ U{k}
-     * 2. H, z : A >> B[z] = B'[z] ∈ U{k}
-     *)
-    val ProdEq : Sequent.name option -> tactic
-
-    (* H >> (Σx:A)B[x] by ProdIntro M
-     * 1. H >> M ∈ A
-     * 2. H >> B[M]
-     *)
-    val ProdIntro : Syn.t -> tactic
-
-    (* H, z : (Σx:A)B[x], H'[z] >> P[z] by ProdElim z (s, t)
-     * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
-     *)
-    val ProdElim : Sequent.name -> (Sequent.name * Sequent.name) option -> tactic
-
-    val PairEq : Sequent.name option -> Level.t option -> tactic
-    val SpreadEq : Syn.t option -> Syn.t option -> (Sequent.name * Sequent.name * Sequent.name) option  -> tactic
-
-    val FunEq : Sequent.name option -> tactic
-    val FunIntro : Sequent.name option -> Level.t option -> tactic
-    val FunElim : Sequent.name -> Syn.t -> (Sequent.name * Sequent.name) option -> tactic
-    val LamEq : Sequent.name option -> Level.t option -> tactic
-    val ApEq : Syn.t option -> tactic
-
-    val IsectEq : Sequent.name option -> tactic
-    val IsectIntro : Sequent.name option -> Level.t option -> tactic
-    val IsectElim : Sequent.name -> Syn.t -> (Sequent.name * Sequent.name) option -> tactic
-    val IsectMemberEq : Sequent.name option -> Level.t option -> tactic
-    val IsectMemberCaseEq : Syn.t option -> Syn.t -> tactic
-
-    val MemUnfold : tactic
-    val Witness : Syn.t -> tactic
-
-    val Assumption : tactic
-    val Hypothesis : Sequent.name -> tactic
-    val HypEq : tactic
-    val Lemma : Library.t -> tactic
-
-    val RewriteGoal : CoreConv.conv -> tactic
-    val RewriteEq : Syn.t -> tactic
-
-    datatype DIR = LEFT | RIGHT
-    val RewriteHyp : DIR -> Sequent.name -> tactic
-  end
-
-  structure DerivedTactics :
-  sig
-    val Auto : tactic
-  end
-
-  structure Conversions :
-  sig
-    val ApBeta : CoreConv.conv
-    val SpreadBeta : CoreConv.conv
-  end
-end =
+     where type name = Context.name
+     where type context = Syntax.t Context.context
+     where type term = Syntax.t
+   structure RefinerTypes : REFINER_TYPES
+     where type goal = Sequent.sequent
+     where type evidence = Syntax.t
+   structure ConvTypes : CONV_TYPES
+     where Syntax = Syntax
+   structure Library : LIBRARY
+     where type goal = RefinerTypes.goal
+     where type evidence = RefinerTypes.evidence) : CTT =
 struct
-  structure Context = Sequent.Context
+  type tactic = RefinerTypes.tactic
+  type conv = ConvTypes.conv
+  type name = Sequent.name
+  type term = Syntax.t
+  type lemma = Library.t
+  type goal = Sequent.sequent
 
-  type context = Sequent.context
+  structure Conversionals = Conversionals
+    (structure Syntax = Syntax
+     structure ConvTypes = ConvTypes)
 
-  fun ctx_subst (H : context) (m : Syn.t) (x : Context.name) =
-    Context.map_after x (Syn.subst m x) H
-
-  structure RefinerTypes =
-    RefinerTypes
-      (structure Sequent = Sequent
-       type evidence = Syn.t)
-
-  structure ConvTypes = ConvTypes(Syn)
-  open RefinerTypes ConvTypes
-
-  open Operator Syn
+  open Operator Syntax
   infix $ \
   infix 8 $$ // \\
 
-  fun ctx_unbind (H : context, A : Syn.t, xE : Syn.t) =
-    let
-      val (x, E) = unbind xE
-      val x' = Context.fresh (H, x)
-      val H' = Context.insert H x' Visibility.Visible A
-      val E' = subst (``x') x E
-    in
-      (H', x', E')
-    end
-
-  structure CoreTactics = CoreTactics(RefinerTypes)
-  structure CoreConv = CoreConv(ConvTypes)
-  structure Library = Library(RefinerTypes)
-
-  structure InferenceRules =
+  structure Rules =
   struct
     exception Refine
-    structure Context' = Context
     open Sequent
-    structure Context = Context'
     infix >>
+
+    fun ctx_subst (H : context) (m : Syntax.t) (x : Context.name) =
+      Context.map_after x (Syntax.subst m x) H
+
+    fun ctx_unbind (H : context, A : Syntax.t, xE : Syntax.t) =
+      let
+        val (x, E) = unbind xE
+        val x' = Context.fresh (H, x)
+        val H' = Context.insert H x' Visibility.Visible A
+        val E' = subst (``x') x E
+      in
+        (H', x', E')
+      end
 
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
-        fun fail () = raise Fail (name ^ "| " ^ goal_to_string print_mode goal)
+        fun fail () = raise Fail (name ^ "| " ^ RefinerTypes.goal_to_string PrintMode.User goal)
         val (subgoals, validation) = tac goal handle Refine => fail ()
       in
         (subgoals, fn Ds => validation Ds handle Refine => fail ())
@@ -203,7 +83,7 @@ struct
          | _ => raise Refine
 
     fun unify M N =
-      if Syn.eq (M, N) then M else raise Refine
+      if Syntax.eq (M, N) then M else raise Refine
 
     fun operator_irrelevant O =
       case O of
@@ -741,7 +621,7 @@ struct
 
     val Assumption : tactic =
       named "Assumption" (fn (H >> P) =>
-        case Context.search H (fn x => Syn.eq (P, x)) of
+        case Context.search H (fn x => Syntax.eq (P, x)) of
              SOME (x, _) => Hypothesis x (H >> P)
            | NONE => raise Refine)
 
@@ -750,7 +630,7 @@ struct
         let
           val (H' >> P') = Library.goal lem
         in
-          if Context.subcontext Syn.eq (H', H) andalso Syn.eq (P, P')
+          if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
           then [] BY (fn _ => Library.validate lem)
           else raise Refine
         end)
@@ -766,7 +646,7 @@ struct
     datatype DIR = LEFT | RIGHT
 
     local
-      open CoreConv
+      open Conversionals
       fun rw (M, N) = CDEEP (fn X =>
         let
           val _ = unify X M
@@ -797,7 +677,7 @@ struct
 
   structure Conversions =
   struct
-    open CoreConv
+    open Conversionals ConvTypes
 
     val ApBeta : conv = reduction_rule
       (fn AP $ #[LAM $ #[xE], N] => xE // into N
@@ -807,48 +687,12 @@ struct
       (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
         | _ => raise Conv)
   end
-
-  structure DerivedTactics =
-  struct
-    open CoreTactics InferenceRules
-    infix ORELSE ORELSE_LAZY THEN
-
-    local
-      val EqAuto =
-        AxEq
-        ORELSE SquashEq
-        ORELSE FunEq NONE
-        ORELSE IsectEq NONE
-        ORELSE PairEq NONE NONE
-        ORELSE LamEq NONE NONE
-        ORELSE UnitEq
-        ORELSE ProdEq NONE
-        ORELSE VoidEq
-        ORELSE UnivEq
-        ORELSE SquashEq
-        ORELSE HypEq
-        ORELSE Cum NONE
-
-      val intro_rules =
-        MemUnfold
-        ORELSE EqAuto
-        ORELSE Assumption
-        ORELSE FunIntro NONE NONE
-        ORELSE IsectIntro NONE NONE
-        ORELSE UnitIntro
-        ORELSE SquashIntro
-
-      val elim_rules =
-        ApEq NONE
-        ORELSE SpreadEq NONE NONE NONE
-
-      open Conversions
-      infix CORELSE
-
-      val whnf = ApBeta CORELSE SpreadBeta
-    in
-      val Auto = REPEAT (intro_rules ORELSE elim_rules ORELSE RewriteGoal whnf)
-    end
-  end
 end
 
+structure Ctt = Ctt
+  (structure Syntax = Syntax
+   structure Context = Context
+   structure RefinerTypes = RefinerTypes
+   structure ConvTypes = ConvTypes
+   structure Sequent = Sequent
+   structure Library = Library)

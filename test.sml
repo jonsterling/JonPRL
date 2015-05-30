@@ -2,24 +2,11 @@ structure Test =
 struct
   val print_mode = PrintMode.Debug
 
-  structure Var = StringVariable
-  structure Syn = Syntax
+  structure Extract = Extract(Syntax)
+  structure Var = Syntax.Variable
 
- structure Sequent =
-   Sequent
-     (structure Context = Context(Syn.Variable)
-      structure Syntax = Syn)
-
-  structure Refiner =
-    Refiner
-      (structure Syn = Syn
-       structure Sequent = Sequent
-       val print_mode = print_mode)
-
-  structure Extract = Extract(Syn)
-
-  open Operator Syn Refiner
-  open CoreTactics DerivedTactics InferenceRules Sequent CoreConv Conversions
+  open Operator Syntax Tacticals Conversionals CttUtil Sequent
+  open Rules Conversions
 
   infix 2 >>
   infix 7 $$
@@ -158,8 +145,8 @@ struct
       print ("\n" ^ Library.name lemma ^ "\n");
       print "----------------------------------------\n";
       print ("Goal: " ^ Sequent.to_string print_mode gl ^ "\n");
-      print ("Evidence: " ^ Syn.to_string print_mode evidence ^ "\n");
-      print ("Extract: " ^ Syn.to_string print_mode (Extract.extract evidence) ^ "\n\n")
+      print ("Evidence: " ^ Syntax.to_string print_mode evidence ^ "\n");
+      print ("Extract: " ^ Syntax.to_string print_mode (Extract.extract evidence) ^ "\n\n")
     end
 
   val _ =

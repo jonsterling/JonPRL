@@ -1,6 +1,4 @@
-functor Sequent
-  (structure Syntax : ABT_UTIL
-   structure Context : CONTEXT) : SEQUENT =
+functor Sequent (structure Context : CONTEXT) : SEQUENT =
 struct
   type term = Syntax.t
 
@@ -21,3 +19,4 @@ struct
     end
 end
 
+structure Sequent = Sequent (structure Context = Context)

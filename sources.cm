@@ -11,8 +11,8 @@ group is
 
   conv_types.sig
   conv_types.fun
-  core_conv.sig
-  core_conv.fun
+  conversionals.sig
+  conversionals.fun
 
   list_util.sml
 
@@ -30,12 +30,15 @@ group is
   refiner_types.sig
   refiner_types.fun
 
-  core_tactics.sig
-  core_tactics.fun
+  tacticals.sig
+  tacticals.fun
 
   level.sig
   level.sml
-  refiner.fun
+  ctt.sig
+  ctt.fun
+  ctt_util.sig
+  ctt_util.fun
 
   test.sml
 
