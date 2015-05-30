@@ -664,6 +664,9 @@ struct
             ] BY (fn [D] => REWRITE_EQ $$ #[E,D] | _ => raise Refine)
           end)
 
+      (* TODO !!! THIS IS UNSOUND !!!!
+       * We need to make sure that the rewrite is well-typed
+       *)
       fun RewriteHyp dir z : tactic =
         named "RewriteHyp" (fn (H >> P) =>
           let
