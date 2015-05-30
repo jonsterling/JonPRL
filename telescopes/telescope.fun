@@ -109,10 +109,6 @@ struct
             Snoc (tail, last, Dict.lookup vals last)
           end
 
-    fun out_after NONE lbl = Empty
-      | out_after (SOME {first,last,preds,nexts,vals}) lbl =
-         out (SOME {first = first, last = lbl, preds = preds, nexts = nexts, vals = vals})
-
     fun into Empty = empty
       | into (Snoc (tel, lbl, a)) = snoc tel (lbl, a)
   end
@@ -136,6 +132,10 @@ struct
           in
             Cons (first, Dict.lookup vals first, tail)
           end
+
+    fun out_after NONE lbl = Empty
+      | out_after (SOME {first,last,preds,nexts,vals}) lbl =
+         out (SOME {first = lbl, last = last, preds = preds, nexts = nexts, vals = vals})
 
     fun into Empty = empty
       | into (Cons (tel, lbl, a)) = raise Fail "hole"

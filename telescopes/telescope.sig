@@ -8,7 +8,6 @@ sig
      | Snoc of 'r * label * 'a
 
   val out : 'a telescope -> ('a, 'a telescope) view
-  val out_after : 'a telescope -> label -> ('a, 'a telescope) view
   val into : ('a, 'a telescope) view -> 'a telescope
 end
 
@@ -22,6 +21,7 @@ sig
      | Cons of label * 'a * 'r
 
   val out : 'a telescope -> ('a, 'a telescope) view
+  val out_after : 'a telescope -> label -> ('a, 'a telescope) view
   val into : ('a, 'a telescope) view -> 'a telescope
 end
 
