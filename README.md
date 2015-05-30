@@ -10,6 +10,7 @@ First make sure you have SML/NJ and Smackage set up properly. Then, install
 JonPRL's dependencies:
 
 ```sh
+git submodule sync
 smackage get parcom
 ```
 

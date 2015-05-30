@@ -2,7 +2,7 @@ group is
   $SMACKAGE/cmlib/v1/cmlib.cm
   abt-lib/abt-lib.cm
   telescopes/telescopes.cm
-  lcf/lcf.cm
+  sml-lcf/lcf.cm
 
   operator.sml
   syntax.sml
