@@ -7,16 +7,16 @@ functor Ctt
      where type name = Context.name
      where type context = Syntax.t Context.context
      where type term = Syntax.t
-   structure RefinerTypes : REFINER_TYPES
+   structure Lcf : LCF
      where type goal = Sequent.sequent
      where type evidence = Syntax.t
    structure ConvTypes : CONV_TYPES
      where Syntax = Syntax
    structure Library : LIBRARY
-     where type goal = RefinerTypes.goal
-     where type evidence = RefinerTypes.evidence) : CTT =
+     where type goal = Lcf.goal
+     where type evidence = Lcf.evidence) : CTT =
 struct
-  type tactic = RefinerTypes.tactic
+  type tactic = Lcf.tactic
   type conv = ConvTypes.conv
   type name = Sequent.name
   type term = Syntax.t
@@ -52,7 +52,7 @@ struct
 
     fun named name (tac : tactic) : tactic = fn (goal : goal) =>
       let
-        fun fail () = raise Fail (name ^ "| " ^ RefinerTypes.goal_to_string PrintMode.User goal)
+        fun fail () = raise Fail (name ^ "| " ^ Lcf.goal_to_string goal)
         val (subgoals, validation) = tac goal handle Refine => fail ()
       in
         (subgoals, fn Ds => validation Ds handle Refine => fail ())
@@ -692,7 +692,7 @@ end
 structure Ctt = Ctt
   (structure Syntax = Syntax
    structure Context = Context
-   structure RefinerTypes = RefinerTypes
+   structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Sequent = Sequent
    structure Library = Library)

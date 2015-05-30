@@ -1,0 +1,10 @@
+Library
+  signature LCF
+  signature TACTICALS
+  functor Tacticals
+is
+  $SMACKAGE/cmlib/v1/cmlib.cm
+  lcf.sig
+  tacticals.sig
+  tacticals.fun
+  list_util.sml
