@@ -39,5 +39,7 @@ group is
   tactic_script.sig
   tactic_script.fun
 
+  ctt_rule_parser.fun
+
   test.sml
 
