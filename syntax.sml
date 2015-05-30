@@ -1,4 +1,4 @@
-structure Syntax : ABT_UTIL =
+structure Syntax : PARSE_ABT =
 struct
   structure V = StringVariable
   structure Abt = Abt
@@ -6,8 +6,10 @@ struct
      structure Variable = V)
 
   structure MyOp = Operator
-  structure AbtUtil = AbtUtil(Abt)
-  open AbtUtil
+  structure ParseAbt = ParseAbt
+    (structure Syntax = AbtUtil(Abt)
+     structure Operator = Operator)
+  open ParseAbt
 
   local
     infix $ \

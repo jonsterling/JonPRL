@@ -1,5 +1,6 @@
 group is
   $SMACKAGE/cmlib/v1/cmlib.cm
+  $SMACKAGE/parcom/v1/parcom.cm
   abt-lib/abt-lib.cm
   telescopes/telescopes.cm
   sml-lcf/lcf.cm

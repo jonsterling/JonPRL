@@ -127,10 +127,10 @@ struct
        | VOID => "void"
        | UNIT => "unit"
        | AX => "⬧"
-       | PROD => "prod"
+       | PROD => "Σ"
        | PAIR => "pair"
        | SPREAD => "spread"
-       | FUN => "∏"
+       | FUN => "Π"
        | LAM => "λ"
        | AP => "ap"
        | ISECT => "∩"
@@ -138,4 +138,35 @@ struct
        | MEM => "∈"
 
        | SQUASH => "↓"
+
+  local
+    open ParserCombinators CharParser
+    infix 2 return wth suchthat return guard when
+    infixr 1 ||
+    infixr 4 << >>
+  in
+    val parse_int =
+      repeat1 digit wth valOf o Int.fromString o String.implode
+
+    val parse_univ =
+      string "U<" >> parse_int << string ">" wth UNIV
+
+    val parse_operator =
+      parse_univ
+        || string "void" return VOID
+        || string "unit" return UNIT
+        || string "<>" return AX
+        || string "Σ" return PROD
+        || string "pair" return PAIR
+        || string "spread" return SPREAD
+        || string "Π" return FUN
+        || string "λ" return LAM
+        || string "ap" return AP
+        || string "∀" return ISECT
+        || string "⋂" return ISECT
+        || string "=" return EQ
+        || string "∈" return MEM
+        || string "!" return SQUASH
+        || string "↓" return SQUASH
+  end
 end
