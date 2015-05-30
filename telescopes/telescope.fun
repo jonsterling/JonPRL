@@ -154,6 +154,15 @@ struct
           in
             SOME {first = first, last = last, preds = preds, nexts = nexts, vals = go (out (SOME tele)) vals}
           end
+
+    fun to_string pretty tele =
+      let
+        fun go Empty r = r
+          | go (Cons (lbl, a, tele')) r =
+              go (out tele') (r ^ ", " ^ L.to_string lbl ^ " : " ^ pretty a)
+      in
+        go (out tele) "·"
+      end
   end
 
   local
@@ -186,15 +195,6 @@ struct
     fun eq test (t1, t2) =
       subtelescope test (t1, t2)
         andalso subtelescope test (t2, t1)
-
-    fun to_string pretty tele =
-      let
-        fun go Empty r = r
-          | go (Snoc (tele', lbl, a)) r =
-              go (out tele') (r ^ ", " ^ L.to_string lbl ^ " : " ^ pretty a)
-      in
-        go (out tele) "·"
-      end
   end
 end
 

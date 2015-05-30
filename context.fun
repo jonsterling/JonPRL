@@ -30,11 +30,11 @@ struct
 
   fun list_items ctx =
     let
-      open Tel.ConsView
+      open Tel.SnocView
       fun go Empty r = r
-        | go (Cons (lbl, (a, vis), tele')) r = go (out tele') ((lbl, vis, a) :: r)
+        | go (Snoc (tele', lbl, (a, vis))) r = go (out tele') ((lbl, vis, a) :: r)
     in
-      rev (go (out ctx) [])
+      go (out ctx) []
     end
 
   fun map f ctx =
