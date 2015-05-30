@@ -36,5 +36,10 @@ group is
   ctt_util.sig
   ctt_util.fun
 
+  tactic_script.sig
+  tactic_script.fun
+
+  ctt_rule_parser.fun
+
   test.sml
 

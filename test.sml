@@ -12,11 +12,13 @@ struct
   infix \\ THEN THENL ORELSE
 
   val % = Sum.outR o CharParser.parseString Syntax.parse_abt
+  val %% = Sum.outR o CharParser.parseString CttScript.parse
+  val %! = Sum.outL o CharParser.parseString CttScript.parse
   val Emp = Context.empty
 
   val test1 =
     Library.save "test1" (Emp >> %"Σ(unit; _. Σ(unit; _. unit))")
-      (ProdIntro (%"<>") THEN (TRY (ProdIntro (%"<>"))) THEN Auto)
+      (%%"prod-intro ⌊<>⌋; ?{prod-intro ⌊<>⌋}; auto.")
 
   val test1' =
     Library.save "test1'" (Emp >> %"Σ(unit; _. Σ(unit; _. unit))")
@@ -24,41 +26,39 @@ struct
 
   val test2 =
     Library.save "test2" (Emp >> %"Π(unit; _. Σ(unit; _. unit))")
-      (FunIntro NONE NONE THEN Auto THEN ProdIntro (%"<>") THEN Auto)
+      (%%"fun-intro; auto; prod-intro ⌊<>⌋; auto.")
 
   val test3 =
     Library.save "test3" (Emp >> %"∈(λ(x. x); Π(unit; _. unit))")
-      Auto
+      (%%"auto.")
 
   val test4 =
     Library.save "test4" (Emp >> %"∈(λ(x.pair(x;x)); Π(void;_.void))")
-      (MemUnfold THEN LamEq NONE NONE THEN Auto THEN VoidElim THEN Auto)
+      (%%"auto; void-elim; auto.")
 
   val test5 =
     Library.save "test5" (Emp >> %"Π(void; _. Σ(unit; _.unit))")
-      (FunIntro NONE NONE THEN Auto THEN VoidElim THEN Auto)
+      (%%"fun-intro; auto; void-elim; auto.")
 
   val test6 =
     Library.save "test6" (Emp >> %"Π(unit; _. Σ(unit; _.unit))")
-      (Witness (%"λ(x. pair(x;x)))")
-       THEN Auto
-       THEN PairEq NONE NONE)
+      (%%"witness ⌊λ(x. pair(x;x))⌋; auto.")
 
   val test7 =
     Library.save "test7" (Emp >> %"Π(Σ(void;_.unit); _. void)")
-      (FunIntro (SOME "z") NONE THEN Auto THEN ProdElim "z" NONE THEN Auto)
+      (%%"fun-intro <z>; auto; prod-elim <z>; auto.")
 
   val test8 =
     Library.save "test8" (Emp >> %"∈(U<0>; U<2>)")
-      Auto
+      (%%"auto.")
 
   val test9 =
     Library.save "test9" (Emp >> %"∈(Σ(U<0>; _.unit); U<1>)")
-      Auto
+      (%%"auto.")
 
   val squash_test =
     Library.save "squash_test" (Emp >> %"!(Σ(unit;_.unit))")
-      (Auto THEN ProdIntro (%"<>") THEN Auto)
+      (%%"auto; prod-intro ⌊<>⌋; auto.")
 
   local
     val ac_prop =
@@ -66,17 +66,11 @@ struct
   in
     val _ =
       Library.save "ac" (Emp >> ac_prop)
-        (Auto
-         THEN ProdIntro (%"λ(w. spread(ap(φ;w); x. y. x))") THEN Auto
-         THEN FunElim "φ" (%"a") NONE THEN Auto
-         THEN
-           EqSubst
-            (%"=(ap(φ;a); y; Σ(B;b. ap(ap(Q;a);b)))")
-            (%"z. ap(ap(Q;a); spread(z; x.y.x))")
-            NONE
-         THEN (TRY EqSym) THEN Auto
-         THEN ProdElim "y" NONE
-         THEN Auto)
+        (%%"auto; prod-intro ⌊λ(w. spread(ap(φ;w); x.y.x))⌋; auto; \
+          \ fun-elim <φ> ⌊a⌋; auto; \
+          \ subst ⌊=(ap(φ;a); y; Σ(B;b. ap(ap(Q;a);b)))⌋ ⌊z. ap(ap(Q;a); spread(z; x.y.x))⌋; \
+          \ ?{ symmetry }; auto; \
+          \ prod-elim <y>; auto.")
   end
 
   fun print_lemma lemma =
