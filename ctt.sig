@@ -96,10 +96,9 @@ sig
     val Lemma : lemma -> tactic
 
     val RewriteGoal : conv -> tactic
-    val RewriteEq : term -> tactic
 
-    datatype DIR = LEFT | RIGHT
-    val RewriteHyp : DIR -> name -> tactic
+    val EqSubst : term -> term -> Level.t option -> tactic
+    val EqSym : tactic
   end
 
   structure Conversions :

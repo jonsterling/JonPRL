@@ -643,39 +643,29 @@ struct
       named "RewriteGoal" (fn (H >> P) =>
         [ H >> c P ] BY (fn [D] => D | _ => raise Refine))
 
-    datatype DIR = LEFT | RIGHT
-
-    local
-      open Conversionals
-      fun rw (M, N) = CDEEP (fn X =>
+    val EqSym : tactic =
+      named "EqSym" (fn (H >> P) =>
         let
-          val _ = unify X M
+          val #[M,N,A] = P ^! EQ
         in
-          N
+          [ H >> EQ $$ #[N,M,A]
+          ] BY mk_evidence EQ_SYM
         end)
-    in
-      fun RewriteEq E : tactic =
-        named "RewriteEq" (fn (H >> P) =>
-          let
-            val #[M,N,_] = E ^! EQ
-          in
-            [ H >> E
-            , H >> rw (M,N) P
-            ] BY (fn [D] => REWRITE_EQ $$ #[E,D] | _ => raise Refine)
-          end)
 
-      (* TODO !!! THIS IS UNSOUND !!!!
-       * We need to make sure that the rewrite is well-typed
-       *)
-      fun RewriteHyp dir z : tactic =
-        named "RewriteHyp" (fn (H >> P) =>
-          let
-            val #[M,N,_] = Context.lookup H z ^! EQ
-          in
-            [ H >> (case dir of RIGHT => rw (M,N) P | LEFT => rw (N, M) P)
-            ] BY (fn [D] => REWRITE_EQ $$ #[``z,D] | _ => raise Refine)
-          end)
-    end
+    fun EqSubst eq xC ok : tactic =
+      named "EqSubst" (fn (H >> P) =>
+        let
+          val #[M,N,A] = eq ^! EQ
+          val (H', z, C) = ctx_unbind (H, A, xC)
+          val P' = unify P (xC // M)
+          val k = case ok of SOME k => k | NONE => infer_level (H', C)
+        in
+          [ H >> eq
+          , H >> xC // N
+          , H' >> MEM $$ #[C, UNIV k $$ #[]]
+          ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, z \\ F]
+                 | _ => raise Refine)
+        end)
   end
 
   structure Conversions =

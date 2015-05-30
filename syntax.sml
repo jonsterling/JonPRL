@@ -170,8 +170,11 @@ struct
            | HYP_EQ $ #[x] =>
                display x ^ "⁼"
 
-           | REWRITE_EQ $ #[D, E] =>
-               "rewrite " ^ display D ^ " in " ^ display E
+           | EQ_SUBST $ #[D, E, xF] =>
+               "rewrite " ^ display D ^ " at " ^ display xF ^ " in " ^ display E
+
+           | EQ_SYM $ #[D] =>
+               "sym " ^ display D
 
            | WITNESS $ #[M, D] =>
                "⸤" ^ display M ^ "⸥ by " ^ display D

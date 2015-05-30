@@ -70,7 +70,12 @@ struct
          THEN ProdIntro (%"λ(w. spread(ap(φ;w); x. y. x))") THEN Auto
          THEN RewriteGoal (CDEEP ApBeta)
          THEN FunElim "φ" (%"a") NONE THEN Auto
-         THEN RewriteHyp LEFT "z"
+         THEN
+           EqSubst
+            (%"=(ap(φ;a); y; Σ(B;b. ap(ap(Q;a);b)))")
+            (%"z. ap(ap(Q;a); spread(z; x.y.x))")
+            NONE
+         THEN (TRY EqSym) THEN Auto
          THEN ProdElim "y" NONE
          THEN RewriteGoal (CDEEP SpreadBeta)
          THEN Auto)
