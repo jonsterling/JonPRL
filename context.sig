@@ -21,7 +21,7 @@ sig
   val map_after : name -> ('a -> 'a) -> 'a context -> 'a context
   val list_items : 'a context -> (name * Visibility.t * 'a) list
 
-  val to_string : PrintMode.t * (PrintMode.t -> 'a -> string) -> 'a context -> string
+  val to_string : ('a -> string) -> 'a context -> string
 
   val eq : ('a * 'a -> bool) -> 'a context * 'a context -> bool
   val subcontext : ('a * 'a -> bool) -> 'a context * 'a context -> bool

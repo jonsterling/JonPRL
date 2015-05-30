@@ -5,7 +5,7 @@ struct
   structure O : PARSE_OPERATOR =
   struct
     type t = oper
-    fun eq x (y : oper) = x = y
+    val eq = op=
     fun arity LAM = #[1]
       | arity AX = #[]
       | arity AP = #[0,0]
@@ -26,7 +26,7 @@ struct
   structure Syn = AbtUtil(Abt(structure Operator = O and Variable = Variable()))
   structure ParseSyn = ParseAbt(structure Syntax = Syn and Operator = O)
 
-  fun print_res pr = print (Sum.sumR (fn b => Syn.to_string PrintMode.Debug b ^ "\n") pr)
+  fun print_res pr = print (Sum.sumR (fn b => Syn.to_string b ^ "\n") pr)
   fun doit s = print_res (CharParser.parseString ParseSyn.parse_abt s)
 
   val _ =
@@ -34,5 +34,3 @@ struct
      doit "ap(λ(x.x);x)";
      doit "ap(ap(x;x);λ(x.x))")
 end
-
-structure T  = ParseAbtTest ()

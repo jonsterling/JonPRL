@@ -6,7 +6,7 @@ Library
   signature ABT
   signature ABT_UTIL
   signature PARSE_ABT
-  signature VECTORUTIL
+  signature VECTOR_UTIL
 
   functor Abt
   functor AbtUtil
@@ -14,7 +14,6 @@ Library
   structure StringVariable
   functor ParseAbt
   structure VectorUtil
-  structure PrintMode
 
   (* examples *)
   functor ParseAbtTest
@@ -23,7 +22,7 @@ is
   operator.sig
   parse_operator.sig
 
-  vectorutil.sig
+  vector_util.sig
 
   abt.sig
   abt_util.sig
@@ -31,8 +30,7 @@ is
   abt_util.fun
   parse_abt.sig
   parse_abt.fun
-  vectorutil.sml
-  print_mode.sml
+  vector_util.sml
   variable.fun
 
   parse_abt_test.fun

@@ -1,4 +1,4 @@
-structure VectorUtil :> VECTORUTIL =
+structure VectorUtil :> VECTOR_UTIL =
 struct
 
   open Vector
@@ -10,10 +10,10 @@ struct
       tabulate (len, fn n => (Vector.sub (v1, n), Vector.sub (v2, n)))
     end
 
-  fun pair_all f v1 v2 =
+  fun pair_all f (v1, v2) =
     foldl (fn (x,b) => b andalso f x) true (zip v1 v2)
 
-  fun pair_all_eq f v1 v2 =
+  fun pair_all_eq f (v1, v2) =
     Vector.length v1 = Vector.length v2 andalso
     foldl (fn (x,b) => b andalso f x) true (zip v1 v2)
 

@@ -23,9 +23,7 @@ struct
     | EQ | MEM
     | SQUASH
 
-  fun eq O1 (O2 : t) = O1 = O2
-
-  exception Hole
+  val eq = op=
 
   fun arity O =
     case O of

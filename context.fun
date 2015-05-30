@@ -1,18 +1,8 @@
 functor Context (V : VARIABLE) :> CONTEXT where type name = V.t =
 struct
 
-  structure Label =
-  struct
-    type t = V.t
-    val compare = V.compare
-    fun eq (x,y) = V.eq x y
-    val to_string = V.to_string PrintMode.User
-    val prime = V.prime
-  end
-
-  structure Tel = Telescope (Label)
-  structure Name = V
-  type name = Name.t
+  structure Tel = Telescope (V)
+  type name = V.t
 
   type 'a context = ('a * Visibility.t) Tel.telescope
 
@@ -21,7 +11,6 @@ struct
     Tel.snoc H (k, (v, vis))
 
   val interpose_after = Tel.interpose_after
-
   val fresh = Tel.fresh
 
   exception NotFound of name
@@ -54,7 +43,7 @@ struct
   fun map_after k f ctx =
     Tel.map_after ctx (k, fn (a, vis) => (f a, vis))
 
-  fun to_string (pm : PrintMode.t, f) ctx = Tel.to_string (fn (x, _) => f pm x) ctx
+  fun to_string f ctx = Tel.to_string (fn (x, _) => f x) ctx
 
   fun eq test =
     Tel.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))

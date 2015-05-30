@@ -73,7 +73,7 @@ struct
 
     fun ^! (M, O) =
       case out M of
-           O' $ ES => if Operator.eq O O' then ES else raise Refine
+           O' $ ES => if Operator.eq (O, O') then ES else raise Refine
          | _ => raise Refine
     infix ^!
 

@@ -14,7 +14,7 @@ struct
     infix 8 $$ // \\
     open MyOp
   in
-    fun to_string pm =
+    val to_string =
     let
       fun enclose E =
         case out E of
@@ -28,7 +28,7 @@ struct
                let
                  val (x, B) = unbind xB
                in
-                 "⋂" ^ Variable.to_string pm x ^ " ∈ " ^ display A ^ ". " ^ display B
+                 "⋂" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
                end
 
            | FUN $ #[A, xB] =>
@@ -36,7 +36,7 @@ struct
                  val (x, B) = unbind xB
                in
                  if has_free (B, x) then
-                   "Π" ^ Variable.to_string pm x ^ " ∈ " ^ display A ^ ". " ^ display B
+                   "Π" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
                  else
                    enclose A ^ " => " ^ display B
                end
@@ -46,7 +46,7 @@ struct
                  val (x, B) = unbind xB
                in
                  if has_free (B, x) then
-                   "Σ" ^ Variable.to_string pm x ^ " ∈ " ^ display A ^ ". " ^ display B
+                   "Σ" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
                  else
                    enclose A ^ " × " ^ display B
                end
@@ -92,7 +92,7 @@ struct
                  val (x, E) = unbind xE
                in
                  if has_free (E, x) then
-                   "Σ⁼" ^ Variable.to_string pm x ^ " ∈ " ^ display D ^ ". " ^ display E
+                   "Σ⁼" ^ Variable.to_string x ^ " ∈ " ^ display D ^ ". " ^ display E
                  else
                    enclose D ^ " ×⁼ " ^ display E
                end
@@ -125,7 +125,7 @@ struct
                  val (x, E) = unbind xE
                in
                  if has_free (E, x) then
-                   "Π⁼" ^ Variable.to_string pm x ^ " ∈ " ^ display D ^ ". " ^ display E
+                   "Π⁼" ^ Variable.to_string x ^ " ∈ " ^ display D ^ ". " ^ display E
                  else
                    enclose D ^ " =>⁼ " ^ display E
                end
@@ -177,11 +177,10 @@ struct
            | CUM $ #[D] =>
                "cumulativity " ^ display D
 
-           | _ =>
-               to_string_open to_string pm E
+           | _ => to_string_open display E
 
       and dvar (x, E) =
-        if has_free (E, x) then Variable.to_string pm x else "_"
+        if has_free (E, x) then Variable.to_string x else "_"
 
       and subscript i =
         case i of

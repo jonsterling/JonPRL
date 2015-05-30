@@ -23,7 +23,7 @@ struct
     | map f (v \ e') = v \ f e'
     | map f (p $ es) = p $ Vector.map f es
 
-  fun shiftvar v n (FREE v') = if Variable.eq v v' then BOUND n else (FREE v')
+  fun shiftvar v n (FREE v') = if Variable.eq (v, v') then BOUND n else (FREE v')
     | shiftvar v n (BOUND m) = BOUND m
     | shiftvar v n (ABS (x, e')) = ABS (x, shiftvar v (n + 1) e')
     | shiftvar v n (APP (p, es)) = APP (p, Vector.map (shiftvar v n) es)
@@ -36,7 +36,7 @@ struct
   exception Malformed of string
 
   fun doapp (oper, es) =
-    if VectorUtil.pair_all_eq match_arity (Operator.arity oper) es
+    if VectorUtil.pair_all_eq match_arity (Operator.arity oper, es)
     then APP (oper, es)
     else raise Malformed "Bad arity"
 
@@ -61,10 +61,11 @@ struct
       end
     | APP (p, es) => p $ es
 
-  fun eq (FREE v1, FREE v2) = Variable.eq v1 v2
+  fun eq (FREE v1, FREE v2) = Variable.eq (v1, v2)
     | eq (BOUND m, BOUND n) = m = n
     | eq (ABS (_, e1), ABS (_, e2)) = eq (e1, e2)
-    | eq (APP (p1, es1), APP (p2, es2)) = Operator.eq p1 p2 andalso VectorUtil.pair_all_eq eq es1 es2
+    | eq (APP (p1, es1), APP (p2, es2)) =
+        Operator.eq (p1, p2) andalso VectorUtil.pair_all_eq eq (es1, es2)
     | eq (_, _) = false
 
 end

@@ -10,10 +10,10 @@ struct
 
   infix >>
 
-  fun to_string print_mode (G >> P) =
+  fun to_string (G >> P) =
     let
-      val ctx = Context.to_string (print_mode, Syntax.to_string) G
-      val prop = Syntax.to_string print_mode P
+      val ctx = Context.to_string Syntax.to_string G
+      val prop = Syntax.to_string P
     in
       ctx ^ " ⊢ " ^ prop
     end

@@ -5,6 +5,6 @@ sig
   type context
 
   datatype sequent = >> of context * term
-  val to_string : PrintMode.t -> sequent -> string
+  val to_string : sequent -> string
 end
 

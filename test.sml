@@ -1,7 +1,5 @@
 structure Test =
 struct
-  val print_mode = PrintMode.Debug
-
   structure Extract = Extract(Syntax)
   structure Var = Syntax.Variable
   structure Tacticals = Tacticals(Lcf)
@@ -145,9 +143,9 @@ struct
     in
       print ("\n" ^ Library.name lemma ^ "\n");
       print "----------------------------------------\n";
-      print ("Goal: " ^ Sequent.to_string print_mode gl ^ "\n");
-      print ("Evidence: " ^ Syntax.to_string print_mode evidence ^ "\n");
-      print ("Extract: " ^ Syntax.to_string print_mode (Extract.extract evidence) ^ "\n\n")
+      print ("Goal: " ^ Sequent.to_string gl ^ "\n");
+      print ("Evidence: " ^ Syntax.to_string evidence ^ "\n");
+      print ("Extract: " ^ Syntax.to_string (Extract.extract evidence) ^ "\n\n")
     end
 
   val _ =

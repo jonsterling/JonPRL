@@ -24,7 +24,7 @@ struct
        | order => order)
     | compare ((_, n), (_,m)) = Int.compare (n,m)
 
-  fun eq (x : t) y = compare (x,y) = EQUAL
+  fun eq (x : t, y) = compare (x,y) = EQUAL
 
   fun clone (SOME s, _) = named s
     | clone _ = new ()
@@ -37,17 +37,10 @@ struct
     fun name (SOME s, x) = s
       | name (NONE, x) = "@" ^ print_num x
 
-    fun to_string mode (s, x) =
-      case mode of
-           PrintMode.User =>
-             (case s of
-                   NONE => "@" ^ print_num x
-                 | SOME s' => s')
-         | PrintMode.Debug =>
-             (case s of
-                   NONE => "@"
-                 | SOME s' => s')
-              ^ print_num x
+    fun to_string (s, x) =
+      case s of
+           NONE => "@" ^ print_num x
+         | SOME s' => s'
   end
 end
 
@@ -55,10 +48,10 @@ structure StringVariable : VARIABLE =
 struct
   type t = string
   fun named x = x
-  fun eq (x : string) y = x = y
+  val eq = op=
   val compare = String.compare
   fun name x = x
-  fun to_string _ x = x
+  fun to_string x = x
   fun clone x = x
   fun prime x = x ^ "'"
 end

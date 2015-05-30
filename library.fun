@@ -31,7 +31,7 @@ struct
     List.foldr (fn ((k, _, _), memo) => k :: memo) []
     (C.list_items (!  library))
 
-  val name = V.to_string PrintMode.User
+  val name = V.to_string
   fun lookup k = C.lookup (! library) k
   val goal = #goal o lookup
   val validate = Susp.force o #evidence o lookup

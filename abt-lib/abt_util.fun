@@ -12,7 +12,7 @@ struct
   fun p $$ es = into (p $ es)
 
   local
-    fun elem (X, x) = List.exists (Variable.eq x) X
+    fun elem (X, x) = List.exists (fn y => Variable.eq (x, y)) X
   in
     local
       fun go X Y M =
@@ -27,7 +27,7 @@ struct
     local
       fun go X r (M, x) =
         case out M of
-             ` y => if elem (X, y) then r else Variable.eq x y
+             ` y => if elem (X, y) then r else Variable.eq (x, y)
            | y \ E => go (y :: X) r (E, x)
            | p $ Es => Vector.foldl (fn (N,r') => r' orelse go X r' (N, x)) r Es
     in
@@ -38,28 +38,28 @@ struct
 
   fun subst e v e' =
     case out e' of
-      ` v' => if Variable.eq v v' then e else e'
-    | v' \ e'' => if Variable.eq v v' then e' else (v' \\ subst e v e'')
+      ` v' => if Variable.eq (v, v') then e else e'
+    | v' \ e'' => if Variable.eq (v, v') then e' else (v' \\ subst e v e'')
     | p $ es => p $$ Vector.map (subst e v) es
 
-  fun to_string_open F mode e =
+  fun to_string_open F e =
     case out e of
-      ` v => Variable.to_string mode v
+      ` v => Variable.to_string v
     | v \ e =>
         let
           val v_str =
             if has_free (e, v)
-            then Variable.to_string mode v
+            then Variable.to_string v
             else "_"
         in
-          v_str ^ "." ^ (F mode e)
+          v_str ^ "." ^ F e
         end
     | p $ es =>
         Operator.to_string p ^
           (if Vector.length es = 0 then ""
-             else VectorUtil.to_string (F mode) es)
+             else VectorUtil.to_string F es)
 
-  fun to_string mode e = to_string_open to_string mode e
+  fun to_string e = to_string_open to_string e
 
   exception ExpectedBinding of t
 
