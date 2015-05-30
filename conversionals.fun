@@ -1,18 +1,18 @@
 functor Conversionals
-  (structure Syntax : ABT_UTIL
+  (structure Syntax : ABT
    structure ConvTypes : CONV_TYPES) : CONVERSIONALS =
 struct
   open ConvTypes
   open Syntax
   infix $ \
-  infix 8 $$ // \\
+  infix 8 $$ \\
 
   fun CDEEP (c : conv) : conv = fn M =>
     c M handle _ =>
       case out M of
-           O $ ES => O $$ (Vector.map (fn N => CDEEP c N handle _ => N) ES)
-         | x \ E => x \\ CDEEP c E
-         | ` x => `` x
+           O $ ES => into (O $ (Vector.map (fn N => CDEEP c N handle _ => N) ES))
+         | x \ E => into (x \ CDEEP c E)
+         | ` x => into (` x)
 
   fun CTHEN (c1 : conv, c2 : conv) : conv = fn M =>
     c2 (c1 M)
