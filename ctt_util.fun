@@ -50,7 +50,7 @@ struct
 
     val whnf = ApBeta CORELSE SpreadBeta
   in
-    val Auto = REPEAT (intro_rules ORELSE elim_rules ORELSE RewriteGoal whnf)
+    val Auto = RewriteGoal (CDEEP whnf) THEN REPEAT (intro_rules ORELSE elim_rules)
   end
 end
 

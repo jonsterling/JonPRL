@@ -68,7 +68,6 @@ struct
       Library.save "ac" (Emp >> ac_prop)
         (Auto
          THEN ProdIntro (%"λ(w. spread(ap(φ;w); x. y. x))") THEN Auto
-         THEN RewriteGoal (CDEEP ApBeta)
          THEN FunElim "φ" (%"a") NONE THEN Auto
          THEN
            EqSubst
@@ -77,7 +76,6 @@ struct
             NONE
          THEN (TRY EqSym) THEN Auto
          THEN ProdElim "y" NONE
-         THEN RewriteGoal (CDEEP SpreadBeta)
          THEN Auto)
   end
 
