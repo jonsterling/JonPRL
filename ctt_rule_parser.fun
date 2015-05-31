@@ -3,10 +3,9 @@ functor CttRuleParser
    structure Syntax : PARSE_ABT
    structure Development : DEVELOPMENT where type label = string
    structure Ctt : CTT_UTIL
+    where Development = Development
     where type tactic = Lcf.tactic
     where type term = Syntax.t
-    where type lemma = Development.label
-    where type development = Development.t
     where type name = Syntax.Variable.t):
 sig
   structure Lcf : LCF

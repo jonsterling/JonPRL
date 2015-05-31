@@ -20,10 +20,9 @@ struct
   type conv = ConvTypes.conv
   type name = Sequent.name
   type term = Syntax.t
-  type lemma = Development.label
-  type development = Development.t
   type goal = Sequent.sequent
 
+  structure Development = Development
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure ConvTypes = ConvTypes)
@@ -690,5 +689,4 @@ structure Ctt = Ctt
    structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Sequent = Sequent
-   structure Development = Development
-   structure Library = Library)
+   structure Development = Development)

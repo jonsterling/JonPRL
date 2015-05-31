@@ -5,8 +5,7 @@ sig
   type name
   type term
 
-  type development
-  type lemma
+  structure Development : DEVELOPMENT
 
   structure Rules : sig
     (* Pretend you have got a proof. *)
@@ -95,7 +94,8 @@ sig
     val Assumption : tactic
     val Hypothesis : name -> tactic
     val HypEq : tactic
-    val Lemma : development * lemma -> tactic
+
+    val Lemma : Development.t * Development.label -> tactic
 
     val RewriteGoal : conv -> tactic
 
