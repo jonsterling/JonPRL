@@ -12,6 +12,7 @@ test:
 clean:
 	rm -f bin/.heapimg.*
 	rm -f bin/jonprl
+	rm -rf .cm
 
 install:
 	rm -f $(DESTDIR)/bin/jonprl.new
