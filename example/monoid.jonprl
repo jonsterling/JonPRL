@@ -1,0 +1,10 @@
+MonoidSig =def= [Σ(U<0>; A. Σ(A; zero. Π(A; m. Π(A; n. A))))].
+car =def= [λ(M. spread(M; x.y.x))].
+ze =def= [λ(M. spread(spread(M; x.y.y); x.y.x))].
+op =def= [λ(M. spread(spread(M; x.y.y); x.y.y))].
+
+Theorem UnitMonoidSig : [MonoidSig] {
+  unfold <MonoidSig>
+; prod-intro [unit] ; auto
+; prod-intro [<>] ; auto.
+}.
