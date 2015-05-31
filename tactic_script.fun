@@ -16,9 +16,9 @@ struct
   structure LangDef :> LANGUAGE_DEF =
   struct
     type scanner = char CharParser.charParser
-    val commentStart = NONE
-    val commentEnd = NONE
-    val commentLine = NONE
+    val commentStart = SOME "(*"
+    val commentEnd = SOME "*)"
+    val commentLine = SOME "|||"
     val nestedComments = false
 
     val identLetter = CharParser.letter
