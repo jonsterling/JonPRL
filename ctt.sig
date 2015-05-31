@@ -95,6 +95,7 @@ sig
     val Hypothesis : name -> tactic
     val HypEq : tactic
 
+    val Unfold : Development.t * Development.label -> tactic
     val Lemma : Development.t * Development.label -> tactic
 
     val RewriteGoal : conv -> tactic

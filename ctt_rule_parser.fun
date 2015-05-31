@@ -181,7 +181,12 @@ struct
       >> brackets identifier
       wth (fn x => fn st => Lemma (st, x))
 
-  fun extensional_parse () =
+  val parse_unfold =
+    symbol "unfold"
+      >> brackets identifier
+      wth (fn x => fn st => Unfold (st, x))
+
+  val extensional_parse =
     symbol "auto" return Auto
       || parse_cum
       || symbol "univ-eq" return UnivEq
@@ -204,7 +209,11 @@ struct
       || parse_witness
       || parse_eq_subst
 
-  val parse_rule = parse_lemma || $ extensional_parse wth (fn t => fn _ => t)
+  val intensional_parse =
+    parse_lemma
+      || parse_unfold
+
+  val parse_rule = intensional_parse || extensional_parse wth (fn t => fn _ => t)
 
 end
 

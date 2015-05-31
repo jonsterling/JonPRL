@@ -14,6 +14,7 @@ functor Ctt
      where Syntax = Syntax
    structure Development : DEVELOPMENT
      where Lcf = Lcf
+     where type label = string
      where type term = Syntax.t) : CTT =
 struct
   type tactic = Lcf.tactic
@@ -624,6 +625,17 @@ struct
         case Context.search H (fn x => Syntax.eq (P, x)) of
              SOME (x, _) => Hypothesis x (H >> P)
            | NONE => raise Refine)
+
+    fun Unfold (development, lem) : tactic =
+      named "Unfold" (fn (H >> P) =>
+        let
+          val definiens = Development.lookup_definition development lem
+          val rewrite = subst definiens (Variable.named lem)
+        in
+          [ Context.map rewrite H >> rewrite P
+          ] BY (fn [D] => D
+                 | _ => raise Refine)
+        end)
 
     fun Lemma (development, lem) : tactic =
       named "Lemma" (fn (H >> P) =>
