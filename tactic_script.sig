@@ -1,5 +1,7 @@
 signature TACTIC_SCRIPT =
 sig
   structure Lcf : LCF
-  val parse : Lcf.tactic CharParser.charParser
+
+  type state
+  val parse : (state -> Lcf.tactic) CharParser.charParser
 end

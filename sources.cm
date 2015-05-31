@@ -26,9 +26,6 @@ group is
 
   lcf.fun
 
-  library.sig
-  library.fun
-
   level.sig
   level.sml
   ctt.sig
@@ -40,6 +37,14 @@ group is
   tactic_script.fun
 
   ctt_rule_parser.fun
+
+  development.sig
+  development.fun
+
+  development_parser.sig
+  development_parser.fun
+
+  ctt_frontend.sml
 
   test.sml
 

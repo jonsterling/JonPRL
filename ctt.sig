@@ -4,6 +4,8 @@ sig
   type conv
   type name
   type term
+
+  type development
   type lemma
 
   structure Rules : sig
@@ -93,7 +95,7 @@ sig
     val Assumption : tactic
     val Hypothesis : name -> tactic
     val HypEq : tactic
-    val Lemma : lemma -> tactic
+    val Lemma : development * lemma -> tactic
 
     val RewriteGoal : conv -> tactic
 
