@@ -21,6 +21,7 @@ struct
   datatype object =
       Definition of definition
     | Theorem of theorem
+    | Tactic of Lcf.tactic
 
   type t = object Telescope.telescope
   fun out t = t
@@ -44,14 +45,23 @@ struct
          | _ => raise RemainingSubgoals subgoals
     end
 
+  fun define_tactic T (lbl, tac) =
+    Telescope.snoc T (lbl, Tactic tac)
+
   fun lookup_definition T lbl =
     case Telescope.lookup T lbl of
          Definition {definiens} => definiens
        | Theorem {evidence,...} => Extract.extract (Susp.force evidence)
+       | _ => raise Subscript
 
   fun lookup_theorem T lbl =
     case Telescope.lookup T lbl of
          Theorem {statement,evidence,...} => {statement = statement, evidence = evidence}
+       | _ => raise Subscript
+
+  fun lookup_tactic T lbl =
+    case Telescope.lookup T lbl of
+         Tactic tac => tac
        | _ => raise Subscript
 end
 

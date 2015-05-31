@@ -14,8 +14,9 @@ struct
               "Theorem " ^ lbl ^ " : ⌊" ^ Lcf.goal_to_string statement ^ "⌋ {\n  "
                 ^ Syntax.to_string evidence' ^ "\n} ext {\n  "
                 ^ Syntax.to_string (Extract.extract evidence') ^ "\n}."
-
             end
+        | obj_to_string lbl (Development.Tactic _) =
+            "Tactic " ^ lbl ^ "."
       fun go ConsView.Empty = ()
         | go (ConsView.Cons (lbl, obj, tele)) = (print (obj_to_string lbl obj ^ "\n\n"); go (ConsView.out tele))
     in

@@ -1,7 +1,7 @@
 functor CttRuleParser
   (structure Lcf : LCF
    structure Syntax : PARSE_ABT
-   structure Development : DEVELOPMENT where type label = string
+   structure Development : DEVELOPMENT where type label = string and Lcf = Lcf
    structure Ctt : CTT_UTIL
     where Development = Development
     where type tactic = Lcf.tactic
@@ -179,12 +179,17 @@ struct
   val parse_lemma =
     symbol "lemma"
       >> brackets identifier
-      wth (fn x => fn st => Lemma (st, x))
+      wth (fn lbl => fn st => Lemma (st, lbl))
 
   val parse_unfold =
     symbol "unfold"
       >> brackets identifier
-      wth (fn x => fn st => Unfold (st, x))
+      wth (fn lbl => fn st => Unfold (st, lbl))
+
+  val parse_custom_tactic =
+    symbol "refine"
+      >> brackets identifier
+      wth (fn lbl => fn st => Development.lookup_tactic st lbl)
 
   val extensional_parse =
     symbol "auto" return Auto
@@ -213,6 +218,7 @@ struct
   val intensional_parse =
     parse_lemma
       || parse_unfold
+      || parse_custom_tactic
 
   val parse_rule = intensional_parse || extensional_parse wth (fn t => fn _ => t)
 

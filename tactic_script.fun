@@ -25,7 +25,7 @@ struct
     val identStart = identLetter
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart
-    val reservedNames = []
+    val reservedNames = ["refine"]
     val reservedOpNames = []
     val caseSensitive = true
   end

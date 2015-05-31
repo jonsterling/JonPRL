@@ -18,6 +18,7 @@ sig
   datatype object =
       Definition of definition
     | Theorem of theorem
+    | Tactic of Lcf.tactic
 
   val out : t -> object Telescope.telescope
 
@@ -31,9 +32,15 @@ sig
   val prove : t -> label * Lcf.goal * Lcf.tactic -> t
   exception RemainingSubgoals of Lcf.goal list
 
+  (* extend a development with a custom tactic *)
+  val define_tactic : t -> label * Lcf.tactic -> t
+
   (* lookup the definiens *)
   val lookup_definition : t -> label -> term
 
   (* lookup the statement & evidence of a theorem *)
   val lookup_theorem : t -> label -> {statement : Lcf.goal, evidence : Lcf.evidence Susp.susp}
+
+  (* lookup a custom tactic *)
+  val lookup_tactic : t -> label -> Lcf.tactic
 end

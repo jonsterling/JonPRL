@@ -35,7 +35,7 @@ struct
     val identStart = identLetter
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart
-    val reservedNames = ["Theorem"]
+    val reservedNames = ["Theorem", "Tactic"]
     val reservedOpNames = []
     val caseSensitive = true
   end
@@ -60,8 +60,13 @@ struct
       wth (fn (thm, (M, tac)) => fn D =>
              Development.prove D (thm, Sequent.>> (Context.empty, M), tac D))
 
+  val parse_tactic =
+    reserved "Tactic" >> identifier
+      && braces TacticScript.parse
+      wth (fn (lbl, tac) => fn D => Development.define_tactic D (lbl, tac D))
+
   fun parse dev =
-    sepEnd (parse_definition || parse_theorem) dot << not any
+    sepEnd (parse_definition || parse_theorem || parse_tactic) dot << not any
       wth (foldl (fn (K, D) => K D) dev)
 
 end
