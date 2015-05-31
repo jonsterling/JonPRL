@@ -41,6 +41,5 @@ struct
       handle Development.RemainingSubgoals goals =>
         (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Lcf.goal_to_string g) "" goals ^ "\n\n");
         raise RefinementFailed)
-       | _ => raise RefinementFailed
     end
 end

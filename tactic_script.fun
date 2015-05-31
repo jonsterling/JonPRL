@@ -35,15 +35,13 @@ struct
 
   val parse_id : (state -> tactic) charParser = symbol "id" return (fn _ => ID)
   fun parse_script () : (state -> tactic) charParser =
-    separate1 ($ plain) semi
-    wth (foldr (fn (t1, t2) => fn s => THEN (t1 s, t2 s)) (fn _ => ID))
+    separate1 ((squares (commaSep ($ parse_script)) wth Sum.INL) <|> ($ plain wth Sum.INR)) semi
+    wth (foldl (fn (t1, t2) => fn s =>
+                   case t1 of
+                        Sum.INR t => THEN (t2 s, t s)
+                      | Sum.INL x => THENL (t2 s, map (fn t' => t' s) x)) (fn _ => ID))
 
   and plain () = parse_rule || $ parse_try || $ parse_repeat || parse_id
-
-  and parse_thenl () =
-    $ parse_script << semi
-      && squares (commaSep ($ parse_script))
-      wth (fn (t, ts) => fn s => THENL (t s, map (fn t' => t' s) ts))
 
   and parse_try () =
         middle (symbol "?{") ($ parse_script) (symbol "}")
