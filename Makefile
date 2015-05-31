@@ -6,6 +6,9 @@ smlnj:
 	sml go-nj.sml
 	bin/mkexec.sh `which sml` `pwd` jonprl
 
+test:
+	bin/jonprl example/test.jonprl
+
 clean:
 	rm -f bin/.heapimg.*
 	rm -f bin/jonprl
