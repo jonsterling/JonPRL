@@ -60,9 +60,9 @@ struct
       wth (fn (thm, (M, tac)) => fn D =>
              Development.prove D (thm, Sequent.>> (Context.empty, M), tac D))
 
-  val parse =
+  fun parse dev =
     sepEnd (parse_definition || parse_theorem) dot << not any
-      wth (foldl (fn (K, D) => K D) Development.empty)
+      wth (foldl (fn (K, D) => K D) dev)
 
 end
 

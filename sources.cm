@@ -45,4 +45,5 @@ group is
   development_parser.fun
 
   ctt_frontend.sml
+  main.sml
 
