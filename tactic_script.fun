@@ -1,8 +1,10 @@
 functor TacticScript
   (structure Lcf : LCF
-   val parse_rule : Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
+   type state
+   val parse_rule : (state -> Lcf.tactic) CharParser.charParser) : TACTIC_SCRIPT =
 struct
   structure Lcf = Lcf
+  type state = state
 
   structure Tacticals = Tacticals (Lcf)
   open Lcf Tacticals ParserCombinators CharParser
@@ -31,24 +33,26 @@ struct
   structure TP = TokenParser (LangDef)
   open TP
 
-  fun parse_script () = separate1 ($ plain) semi wth foldr THEN ID
+  val parse_id : (state -> tactic) charParser = symbol "id" return (fn _ => ID)
+  fun parse_script () : (state -> tactic) charParser =
+    separate1 ($ plain) semi
+    wth (foldr (fn (t1, t2) => fn s => THEN (t1 s, t2 s)) (fn _ => ID))
 
-  and plain () = parse_rule || $ parse_try || $ parse_repeat || $ parse_thenl
+  and plain () = parse_rule || $ parse_try || $ parse_repeat || parse_id
 
   and parse_thenl () =
     $ parse_script << semi
       && squares (commaSep ($ parse_script))
-      wth THENL
+      wth (fn (t, ts) => fn s => THENL (t s, map (fn t' => t' s) ts))
 
   and parse_try () =
         middle (symbol "?{") ($ parse_script) (symbol "}")
-          wth TRY
+          wth (fn t => TRY o t)
 
   and parse_repeat () =
         middle (symbol "*{") ($ parse_script) (symbol "}")
-          wth REPEAT
+          wth (fn t => REPEAT o t)
 
-  val parse = (not any return ID) || ($ parse_script << symbol ".")
-
+  val parse = (not any return (fn _ => ID)) || ($ parse_script << symbol ".")
 end
 

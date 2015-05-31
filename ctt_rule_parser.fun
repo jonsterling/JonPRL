@@ -1,13 +1,17 @@
 functor CttRuleParser
   (structure Lcf : LCF
    structure Syntax : PARSE_ABT
+   structure Development : DEVELOPMENT where type label = string
    structure Ctt : CTT_UTIL
     where type tactic = Lcf.tactic
     where type term = Syntax.t
+    where type lemma = Development.label
+    where type development = Development.t
     where type name = Syntax.Variable.t):
 sig
   structure Lcf : LCF
-  val parse_rule : Lcf.tactic CharParser.charParser
+  type state = Development.t
+  val parse_rule : (state -> Lcf.tactic) CharParser.charParser
 end =
 struct
   structure Lcf = Lcf
@@ -15,7 +19,7 @@ struct
   structure Tacticals = Tacticals (Lcf)
   open Ctt Lcf Tacticals ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
-  infixr 1 ||
+  infixr 1 || <|>
   infixr 3 &&
   infixr 4 << >>
 
@@ -27,7 +31,7 @@ struct
     val commentLine = NONE
     val nestedComments = false
 
-    val identLetter = CharParser.letter || CharParser.oneOf (String.explode "_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω")
+    val identLetter = CharParser.letter || CharParser.oneOf (String.explode "'_-ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω") || CharParser.digit
     val identStart = identLetter
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart
@@ -171,7 +175,14 @@ struct
       >> parse_tm && parse_tm && opt parse_level
       wth (fn (M, (N, k)) => EqSubst M N k)
 
-  fun parse () =
+  type state = Development.t
+
+  val parse_lemma =
+    symbol "lemma"
+      >> brackets identifier
+      wth (fn x => fn st => Lemma (st, x))
+
+  fun extensional_parse () =
     symbol "auto" return Auto
       || parse_cum
       || symbol "univ-eq" return UnivEq
@@ -194,12 +205,14 @@ struct
       || parse_witness
       || parse_eq_subst
 
-  val parse_rule = $ parse
+  val parse_rule = parse_lemma || $ extensional_parse wth (fn t => fn _ => t)
+
 end
 
 structure CttRuleParser = CttRuleParser
   (structure Ctt = CttUtil
    structure Lcf = Lcf
+   structure Development = Development
    structure Syntax = Syntax)
 
 structure CttScript = TacticScript (CttRuleParser)

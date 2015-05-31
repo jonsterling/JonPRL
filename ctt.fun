@@ -12,15 +12,16 @@ functor Ctt
      where type evidence = Syntax.t
    structure ConvTypes : CONV_TYPES
      where Syntax = Syntax
-   structure Library : LIBRARY
-     where type goal = Lcf.goal
-     where type evidence = Lcf.evidence) : CTT =
+   structure Development : DEVELOPMENT
+     where Lcf = Lcf
+     where type term = Syntax.t) : CTT =
 struct
   type tactic = Lcf.tactic
   type conv = ConvTypes.conv
   type name = Sequent.name
   type term = Syntax.t
-  type lemma = Library.t
+  type lemma = Development.label
+  type development = Development.t
   type goal = Sequent.sequent
 
   structure Conversionals = Conversionals
@@ -625,13 +626,14 @@ struct
              SOME (x, _) => Hypothesis x (H >> P)
            | NONE => raise Refine)
 
-    fun Lemma lem : tactic =
+    fun Lemma (development, lem) : tactic =
       named "Lemma" (fn (H >> P) =>
         let
-          val (H' >> P') = Library.goal lem
+          val {statement, evidence} = Development.lookup_theorem development lem
+          val H' >> P' = statement
         in
           if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
-          then [] BY (fn _ => Library.validate lem)
+          then [] BY (fn _ => Susp.force evidence)
           else raise Refine
         end)
 
@@ -688,4 +690,5 @@ structure Ctt = Ctt
    structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Sequent = Sequent
+   structure Development = Development
    structure Library = Library)

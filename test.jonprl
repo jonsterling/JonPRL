@@ -1,0 +1,49 @@
+welp =def= ⌊unit⌋.
+welp2 =def= ⌊unit⌋.
+
+Theorem test1 : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
+  *{ prod-intro ⌊<>⌋; auto }.
+}.
+
+||| Lemmas defined earlier in the development may be used later on.
+Theorem test1' : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
+  lemma <test1>.
+}.
+
+Theorem test2 : ⌊Π(unit; _. Σ(unit; _. unit))⌋ {
+  fun-intro;
+  auto;
+  prod-intro ⌊<>⌋;
+  auto.
+}.
+
+Theorem test3 : ⌊∈(λ(x. x); Π(unit; _. unit))⌋ {
+  auto.
+}.
+
+Theorem test4 : ⌊∈(λ(x.pair(x;x)); Π(void;_.void))⌋ {
+  auto; void-elim; auto.
+}.
+
+Theorem test5 : ⌊Π(void; _. Σ(unit; _.unit))⌋ {
+  fun-intro; auto; void-elim; auto.
+}.
+
+Theorem test6 : ⌊Π(unit; _. Σ(unit; _.unit))⌋ {
+  witness ⌊λ(x. pair(x;x))⌋; auto.
+}.
+
+Theorem test7 : ⌊Π(Σ(void;_.unit); z. void)⌋ {
+  auto;
+  prod-elim <z>;
+  void-elim;
+  auto.
+}.
+
+Theorem axiom-of-choice : ⌊∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))⌋ {
+  auto; prod-intro ⌊λ(w. spread(ap(φ;w); x.y.x))⌋; auto;
+  fun-elim <φ> ⌊a⌋; auto;
+  subst ⌊=(ap(φ;a); y; Σ(B;b. ap(ap(Q;a);b)))⌋ ⌊z. ap(ap(Q;a); spread(z; x.y.x))⌋; auto;
+  ?{ symmetry }; auto;
+  prod-elim <y>; auto.
+}.
