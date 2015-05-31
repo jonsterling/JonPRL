@@ -22,6 +22,12 @@ sig
     (* H >> Void = Void ∈ U{k} by VoidEq *)
     val VoidEq : tactic
 
+    (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
+     * 1. H >> A = A' ∈ U{k}
+     * 2. H >> M = M' ∈ A
+     * 3. H >> N = N' ∈ A *)
+    val EqEq : tactic
+
     (* H >> A by VoidElim
      * 1. H >> Void
      *)

@@ -3,6 +3,7 @@ struct
   datatype t
     = (* Derivations *)
       UNIV_EQ | CUM
+    | EQ_EQ
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
@@ -29,6 +30,7 @@ struct
     case O of
          UNIV_EQ => #[]
        | CUM => #[0]
+       | EQ_EQ => #[0,0,0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -92,6 +94,7 @@ struct
        | VOID_EQ => "void⁼"
        | VOID_ELIM => "void-elim"
 
+       | EQ_EQ => "eq="
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"

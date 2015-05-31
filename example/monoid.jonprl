@@ -3,8 +3,39 @@ car =def= [λ(M. spread(M; x.y.x))].
 ze =def= [λ(M. spread(spread(M; x.y.y); x.y.x))].
 op =def= [λ(M. spread(spread(M; x.y.y); x.y.y))].
 
-Theorem UnitMonoidSig : [MonoidSig] {
-  unfold <MonoidSig>
-; prod-intro [unit] ; auto
-; prod-intro [<>] ; auto.
+LeftUnit =def= [λ(M. ∀(ap(car;M); m. =(m; ap(ap(ap(op;M); ap(ze;M)); m) ;ap(car;M))))].
+RightUnit =def= [λ(M. ∀(ap(car;M); m. =(m; ap(m; ap(ap(op;M); ap(ze;M))) ;ap(car;M))))].
+
+Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
+  unfold <MonoidSig>; auto.
 }.
+
+Theorem car-wf : [∀(MonoidSig; M. ∈(ap(car;M); U<0>))] {
+  unfold <car>; unfold <MonoidSig>; auto;
+  prod-elim <M>; auto .
+}.
+
+Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U<0>))] {
+  unfold <LeftUnit>; auto; unfold <car>; unfold <MonoidSig>; unfold <op>; unfold <ze>;
+  auto; prod-elim <M>; auto .
+}.
+
+Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U<0>))] {
+  unfold <LeftUnit>; auto; unfold <car>; unfold <MonoidSig>; unfold <op>; unfold <ze>;
+  auto; prod-elim <M>; auto .
+}.
+
+Theorem UnitMonoidStruct : [MonoidSig] {
+  unfold <MonoidSig>;
+  prod-intro [unit]; auto;
+  prod-intro [<>] ; auto.
+}.
+
+Theorem UnitMonoid-LeftUnit : [ap(LeftUnit;UnitMonoidStruct)] {
+  unfold <UnitMonoidStruct>; unfold <LeftUnit>; unfold <car>; unfold <op>; *{auto}.
+}.
+
+Theorem UnitMonoid-RightUnit : [ap(LeftUnit;UnitMonoidStruct)] {
+  unfold <UnitMonoidStruct>; unfold <LeftUnit>; unfold <car>; unfold <op>; *{auto}.
+}.
+

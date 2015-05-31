@@ -19,6 +19,7 @@ struct
   local
     val EqAuto =
       AxEq
+      ORELSE EqEq
       ORELSE SquashEq
       ORELSE FunEq NONE
       ORELSE IsectEq NONE

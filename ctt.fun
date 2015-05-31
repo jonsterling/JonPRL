@@ -175,6 +175,20 @@ struct
           [] BY mk_evidence UNIV_EQ
         end)
 
+    val EqEq : tactic =
+      named "EqEq" (fn (H >> P) =>
+        let
+          val #[E1, E2, univ] = P ^! EQ
+          val (UNIV k, #[]) = as_app univ
+          val #[M,N,A] = E1 ^! EQ
+          val #[M',N',A'] = E2 ^! EQ
+        in
+          [ H >> EQ $$ #[A,A',univ]
+          , H >> EQ $$ #[M,M',A]
+          , H >> EQ $$ #[N,N',A]
+          ] BY mk_evidence EQ_EQ
+        end)
+
     val UnitIntro : tactic =
       named "UnitIntro" (fn (H >> P) =>
         let
@@ -654,7 +668,7 @@ struct
 
     fun RewriteGoal (c : conv) : tactic =
       named "RewriteGoal" (fn (H >> P) =>
-        [ H >> c P ] BY (fn [D] => D | _ => raise Refine))
+        [ Context.map c H >> c P ] BY (fn [D] => D | _ => raise Refine))
 
     val EqSym : tactic =
       named "EqSym" (fn (H >> P) =>

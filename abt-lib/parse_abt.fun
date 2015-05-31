@@ -26,7 +26,7 @@ struct
 
     val identLetter =
       CharParser.letter
-        || CharParser.oneOf (String.explode "_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω")
+        || CharParser.oneOf (String.explode "_'ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω")
     val identStart = identLetter
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart

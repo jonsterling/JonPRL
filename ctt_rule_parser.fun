@@ -189,6 +189,7 @@ struct
   val extensional_parse =
     symbol "auto" return Auto
       || parse_cum
+      || symbol "eq-eq" return EqEq
       || symbol "univ-eq" return UnivEq
       || symbol "void-eq" return VoidEq
       || symbol "void-elim" return VoidElim

@@ -17,6 +17,7 @@ struct
        | VOID_ELIM $ _ => ax
        | CUM $ _ => ax
 
+       | EQ_EQ $ _ => ax
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
        | UNIT_ELIM $ #[R, E] => extract (E // ax)
@@ -60,3 +61,5 @@ struct
 
        | _ => raise MalformedEvidence E
 end
+
+structure Extract = Extract(Syntax)

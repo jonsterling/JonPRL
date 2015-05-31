@@ -1,6 +1,9 @@
 functor Development
   (structure Syntax : ABT_UTIL
    structure Lcf : LCF
+   structure Extract : EXTRACT
+    where type evidence = Lcf.evidence
+    where type term = Syntax.t
    structure Telescope : TELESCOPE) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -44,7 +47,7 @@ struct
   fun lookup_definition T lbl =
     case Telescope.lookup T lbl of
          Definition {definiens} => definiens
-       | _ => raise Subscript
+       | Theorem {evidence,...} => Extract.extract (Susp.force evidence)
 
   fun lookup_theorem T lbl =
     case Telescope.lookup T lbl of
@@ -54,5 +57,6 @@ end
 
 structure Development : DEVELOPMENT = Development
   (structure Syntax = Syntax
+   structure Extract = Extract
    structure Telescope = Telescope(StringVariable)
    structure Lcf = Lcf)
