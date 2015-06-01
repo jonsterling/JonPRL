@@ -1,11 +1,10 @@
 signature DEVELOPMENT =
 sig
-  type label
   type term
 
   structure Lcf : LCF
-
   structure Telescope : TELESCOPE
+  type label = Telescope.label
 
   type definition = {definiens : term}
   type theorem =

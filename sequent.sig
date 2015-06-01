@@ -1,8 +1,10 @@
 signature SEQUENT =
 sig
   type term
-  type name
-  type context
+
+  structure Context : CONTEXT
+  type name = Context.name
+  type context = term Context.context
 
   datatype sequent = >> of context * term
 

@@ -1,6 +1,7 @@
-functor Telescope (L : LABEL) :> TELESCOPE where type label = L.t =
+functor Telescope (L : LABEL) :> TELESCOPE where Label = L =
 struct
   type label = L.t
+  structure Label = L
 
   structure Dict = SplayDict(structure Key = L)
 

@@ -1,19 +1,17 @@
 functor CttRuleParser
   (structure Lcf : LCF
    structure Syntax : PARSE_ABT
-   structure Development : DEVELOPMENT where type label = string and Lcf = Lcf
    structure Ctt : CTT_UTIL
-    where Development = Development
-    where type tactic = Lcf.tactic
-    where type term = Syntax.t
-    where type name = Syntax.Variable.t):
+    where Lcf = Lcf
+    where Syntax = Syntax):
 sig
   structure Lcf : LCF
-  type state = Development.t
+  type state = Ctt.Development.t
   val parse_rule : (state -> Lcf.tactic) CharParser.charParser
 end =
 struct
   structure Lcf = Lcf
+  structure ParseSyntax = Syntax
 
   structure Tacticals = Tacticals (Lcf)
   open Ctt Lcf Tacticals ParserCombinators CharParser
@@ -63,8 +61,8 @@ struct
       wth Cum
 
   val parse_tm =
-    middle (symbol "[") Syntax.parse_abt (symbol "]")
-      || middle (symbol "⌊") Syntax.parse_abt (symbol "⌋")
+    middle (symbol "[") ParseSyntax.parse_abt (symbol "]")
+      || middle (symbol "⌊") ParseSyntax.parse_abt (symbol "⌋")
 
   val parse_unit_elim =
     symbol "unit-elim"
@@ -178,17 +176,17 @@ struct
 
   val parse_lemma =
     symbol "lemma"
-      >> brackets identifier
+      >> brackets parse_name
       wth (fn lbl => fn st => Lemma (st, lbl))
 
   val parse_unfold =
     symbol "unfold"
-      >> brackets identifier
+      >> brackets parse_name
       wth (fn lbl => fn st => Unfold (st, lbl))
 
   val parse_custom_tactic =
     symbol "refine"
-      >> brackets identifier
+      >> brackets parse_name
       wth (fn lbl => fn st => Development.lookup_tactic st lbl)
 
   val extensional_parse =

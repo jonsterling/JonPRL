@@ -1,5 +1,5 @@
 signature CTT_UTIL =
 sig
   include CTT
-  val Auto : tactic
+  val Auto : Lcf.tactic
 end

@@ -36,7 +36,9 @@ end
 signature TELESCOPE =
 sig
   type 'a telescope
-  type label
+
+  structure Label : LABEL
+  type label = Label.t
 
   exception LabelExists
 

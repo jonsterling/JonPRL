@@ -1,19 +1,16 @@
 functor CttUtil
   (structure Lcf : LCF_APART
-   structure Ctt : CTT
-     where type tactic = Lcf.tactic
-     where type conv = ConvTypes.conv
-   structure ConvTypes : CONV_TYPES where Syntax = Syntax) : CTT_UTIL =
+   structure Ctt : CTT where Lcf = Lcf) : CTT_UTIL =
 struct
-  open Ctt
-
+  structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
+  open Ctt Ctt.ConvTypes
+
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure ConvTypes = ConvTypes)
 
   open Tacticals Rules
-  open Rules
   infix ORELSE ORELSE_LAZY THEN
 
   local
@@ -59,6 +56,4 @@ struct
 end
 
 structure CttUtil = CttUtil
-  (structure Lcf = Lcf
-   structure ConvTypes = ConvTypes
-   structure Ctt = Ctt)
+  (structure Lcf = Lcf and Ctt = Ctt)

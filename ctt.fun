@@ -1,12 +1,9 @@
 functor Ctt
   (structure Syntax : ABT_UTIL
      where Operator = Operator
-   structure Context : CONTEXT
-     where type name = Syntax.Variable.t
    structure Sequent : SEQUENT
-     where type name = Context.name
-     where type context = Syntax.t Context.context
      where type term = Syntax.t
+     where type Context.name = Syntax.Variable.t
    structure Lcf : LCF
      where type goal = Sequent.sequent
      where type evidence = Syntax.t
@@ -14,9 +11,13 @@ functor Ctt
      where Syntax = Syntax
    structure Development : DEVELOPMENT
      where Lcf = Lcf
-     where type label = string
+     where Telescope.Label = Syntax.Variable
      where type term = Syntax.t) : CTT =
 struct
+  structure Lcf = Lcf
+  structure ConvTypes = ConvTypes
+  structure Syntax = Syntax
+
   type tactic = Lcf.tactic
   type conv = ConvTypes.conv
   type name = Sequent.name
@@ -644,7 +645,7 @@ struct
       named "Unfold" (fn (H >> P) =>
         let
           val definiens = Development.lookup_definition development lem
-          val rewrite = subst definiens (Variable.named lem)
+          val rewrite = subst definiens lem
         in
           [ Context.map rewrite H >> rewrite P
           ] BY (fn [D] => D
@@ -711,7 +712,6 @@ end
 
 structure Ctt = Ctt
   (structure Syntax = Syntax
-   structure Context = Context
    structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Sequent = Sequent

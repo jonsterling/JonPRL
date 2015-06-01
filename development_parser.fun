@@ -1,21 +1,18 @@
 functor DevelopmentParser
   (structure Syntax : PARSE_ABT
    structure Development : DEVELOPMENT
-     where type label = string
-     where type term = Syntax.t
-   structure Context : CONTEXT
    structure Sequent : SEQUENT
-     where type term = Syntax.t
-     where type context = Syntax.t Context.context
    structure TacticScript : TACTIC_SCRIPT
+
+   sharing Development.Telescope.Label = Syntax.Variable
    sharing TacticScript.Lcf = Development.Lcf
+   sharing type Development.term = Syntax.t
+   sharing type Sequent.term = Development.term
    sharing type TacticScript.state = Development.t
    sharing type TacticScript.Lcf.goal = Sequent.sequent
   ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
-
-  exception Hole
 
   open ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
@@ -47,21 +44,25 @@ struct
     middle (symbol "[") Syntax.parse_abt (symbol "]")
       || middle (symbol "⌊") Syntax.parse_abt (symbol "⌋")
 
+  val parse_name =
+    identifier
+      wth Syntax.Variable.named
+
   val parse_definition =
-    identifier << symbol "=def="
+    parse_name << symbol "=def="
       && parse_tm
       wth (fn (definiendum, definiens) => fn D =>
              Development.define D (definiendum, definiens))
 
   val parse_theorem =
-    reserved "Theorem" >> identifier << symbol ":"
+    reserved "Theorem" >> parse_name << symbol ":"
       && parse_tm
       && braces TacticScript.parse
       wth (fn (thm, (M, tac)) => fn D =>
-             Development.prove D (thm, Sequent.>> (Context.empty, M), tac D))
+             Development.prove D (thm, Sequent.>> (Sequent.Context.empty, M), tac D))
 
   val parse_tactic =
-    reserved "Tactic" >> identifier
+    reserved "Tactic" >> parse_name
       && braces TacticScript.parse
       wth (fn (lbl, tac) => fn D => Development.define_tactic D (lbl, tac D))
 
@@ -74,6 +75,5 @@ end
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
    structure Development = Development
-   structure Context = Context
    structure Sequent = Sequent
    structure TacticScript = CttScript)

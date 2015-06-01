@@ -4,7 +4,6 @@ struct
 
   structure Context = Context
   type name = Context.name
-
   type context = term Context.context
   datatype sequent = >> of context * term
 
