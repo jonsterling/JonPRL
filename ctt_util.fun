@@ -54,7 +54,7 @@ struct
     val IntroElim = intro_rules ORELSE elim_rules
   in
     val Auto =
-      REPEAT (IntroElim ORELSE PROGRESS DeepReduce)
+      LIMIT (IntroElim ORELSE PROGRESS DeepReduce)
   end
 end
 
