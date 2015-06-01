@@ -86,8 +86,15 @@ struct
                  "let " ^ dvar (x, yN) ^ "," ^ dvar (y, N) ^ " = " ^ display M ^ " in " ^ display N
                end
 
+
+           | EQ_EQ $ #[A,M,N] =>
+               display M ^ " =⁼ " ^ display N ^ " ∈⁼ " ^ display A
+
            | UNIT_INTRO $ #[] =>
               "⬧"
+
+           | UNIT_ELIM $ #[x,D] =>
+               "let " ^ display x ^ " = ⬧ in " ^ display D
 
            | PROD_EQ $ #[D, xE] =>
                let
@@ -145,6 +152,13 @@ struct
                  val (z, E) = unbind zE
                in
                  "let " ^ dvar (y, zE) ^ " = " ^ enclose f ^ "[" ^ display s ^ " : " ^ display D ^ "] by " ^ dvar (z, E) ^ " in " ^ display E
+               end
+
+           | ISECT_EQ $ #[D, xE] =>
+               let
+                 val (x, E) = unbind xE
+               in
+                 "⋂⁼" ^ Variable.to_string x ^ " ∈ " ^ display D ^ ". " ^ display E
                end
 
            | LAM_EQ $ #[xD, E] =>
