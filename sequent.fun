@@ -10,13 +10,17 @@ struct
 
   infix >>
 
-  fun to_string (G >> P) =
+  fun to_string (H >> P) =
     let
-      val ctx = Context.to_string Syntax.to_string G
+      val ctx = Context.to_string Syntax.to_string H
       val prop = Syntax.to_string P
     in
       ctx ^ " ⊢ " ^ prop
     end
+
+  fun eq (H >> P, H' >> P') =
+    Context.eq Syntax.eq (H, H') andalso Syntax.eq (P, P')
+
 end
 
 structure Sequent = Sequent (structure Context = Context)

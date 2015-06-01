@@ -1,13 +1,13 @@
 functor CttUtil
-  (structure Lcf : LCF
-   structure ConvTypes : CONV_TYPES
+  (structure Lcf : LCF_APART
    structure Ctt : CTT
      where type tactic = Lcf.tactic
-     where type conv = ConvTypes.conv) : CTT_UTIL =
+     where type conv = ConvTypes.conv
+   structure ConvTypes : CONV_TYPES where Syntax = Syntax) : CTT_UTIL =
 struct
   open Ctt
 
-  structure Tacticals = Tacticals(Lcf)
+  structure Tacticals = ProgressTacticals(Lcf)
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure ConvTypes = ConvTypes)
@@ -50,8 +50,11 @@ struct
     infix CORELSE
 
     val whnf = ApBeta CORELSE SpreadBeta
+    val DeepReduce = RewriteGoal (CDEEP whnf)
+    val IntroElim = intro_rules ORELSE elim_rules
   in
-    val Auto = RewriteGoal (CDEEP whnf) THEN REPEAT (intro_rules ORELSE elim_rules)
+    val Auto =
+      REPEAT (IntroElim ORELSE PROGRESS DeepReduce)
   end
 end
 

@@ -35,15 +35,12 @@ Theorem UnitMonoidStruct : [MonoidSig] {
   prod-intro [<>] ; auto.
 }.
 
-Tactic UnitMonoidTactic {
-  unfold <UnitMonoidStruct>; unfold <LeftUnit>; refine <monoid-unfold>; *{auto}.
-}.
-
 Theorem UnitMonoid-LeftUnit : [ap(LeftUnit;UnitMonoidStruct)] {
-  refine <UnitMonoidTactic>.
+  unfold <UnitMonoidStruct>; unfold <LeftUnit>; refine <monoid-unfold>; auto.
 }.
 
-Theorem UnitMonoid-RightUnit : [ap(LeftUnit;UnitMonoidStruct)] {
-  refine <UnitMonoidTactic>.
-}.
 
+Theorem UnitMonoid-RightUnit : [ap(RightUnit;UnitMonoidStruct)] {
+  unfold <UnitMonoidStruct>; unfold <RightUnit>; refine <monoid-unfold>; auto;
+  unit-elim <m>; auto.
+}.
