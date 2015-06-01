@@ -12,6 +12,8 @@ struct
     in
       case D of
            NONE => 1
-         | SOME development => (CttFrontend.print_development development; 0)
+         | SOME development =>
+              (CttFrontend.print_development development; 0)
+              handle e => (print ("Error: " ^ exnMessage e ^ "\n");1)
     end
 end

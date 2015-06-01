@@ -20,7 +20,7 @@ struct
        | EQ_EQ $ _ => ax
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
-       | UNIT_ELIM $ #[R, E] => extract (E // ax)
+       | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => AX $$ #[]
 
        | PROD_EQ $ _ => ax
