@@ -24,10 +24,10 @@ struct
     val commentLine = NONE
     val nestedComments = false
 
-    val identLetter =
+    val identStart =
       CharParser.letter
         || CharParser.oneOf (String.explode "_'ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω")
-    val identStart = identLetter
+    val identLetter = identStart || CharParser.digit
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart
     val reservedNames = []
