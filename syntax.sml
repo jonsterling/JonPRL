@@ -94,7 +94,7 @@ struct
               "⬧"
 
            | UNIT_ELIM $ #[x,D] =>
-               "let " ^ display x ^ " = ⬧ in " ^ display D
+               "let ⬧ = "  ^ display x ^ " in " ^ display D
 
            | PROD_EQ $ #[D, xE] =>
                let
