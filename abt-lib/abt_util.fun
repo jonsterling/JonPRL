@@ -15,11 +15,14 @@ struct
     fun elem (X, x) = List.exists (fn y => Variable.eq (x, y)) X
   in
     local
+      fun union ([], Y) = Y
+        | union (x :: X, Y) = if elem (Y, x) then union (X, Y) else x :: (union (X,  Y))
+
       fun go X Y M =
         case out M of
-             ` x => if elem (X, x) then Y else (x :: Y)
+             ` x => if elem (X, x) orelse elem (Y,x) then Y else (x :: Y)
            | x \ E => go (x :: X) Y E
-           | p $ Es => Vector.foldl (op @) Y (Vector.map (go X []) Es)
+           | p $ Es => Vector.foldl union Y (Vector.map (go X []) Es)
     in
       fun free_variables M = go [] [] M
     end
