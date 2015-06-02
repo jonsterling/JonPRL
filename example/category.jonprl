@@ -31,7 +31,7 @@ Theorem hom_wf : [
   ∀(ap(obj; RC); B.
     ∈(ap(ap(ap(hom; RC); A); B); U<0>))))
 ] {
-  ||| revisit once naming capture issue is resolved
+  unfold <RawCatSig>; unfold <hom>; unfold <obj>;
   auto.
 }.
 
