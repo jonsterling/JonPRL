@@ -519,14 +519,21 @@ struct
                  | _ => raise Refine)
         end)
 
-    fun ProdIntro w : tactic =
+    fun ProdIntro w oz ok : tactic =
       named "ProdIntro" (fn (H >> P) =>
         let
           val #[P1, xP2] = P ^! PROD
+          val k = case ok of SOME k => k | NONE => infer_level (H, P)
+          val z =
+            Context.fresh (H,
+              case oz of
+                   SOME z => z
+                 | NONE => #1 (unbind xP2))
         in
           [ H >> MEM $$ #[ w, P1]
           , H >> xP2 // w
-          ] BY (fn [D, E] => PROD_INTRO $$ #[w, D, E]
+          , H @@ (z, P1) >> MEM $$ #[xP2 // ``z, UNIV k $$ #[]]
+          ] BY (fn [D, E, F] => PROD_INTRO $$ #[w, D, E, z \\ F]
                  | _ => raise Refine)
         end)
 

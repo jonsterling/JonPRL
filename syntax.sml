@@ -106,8 +106,20 @@ struct
                    enclose D ^ " ×⁼ " ^ display E
                end
 
-           | PROD_INTRO $ #[M, D, E] =>
-               "⟨⸤" ^ display M ^ "⸥ by " ^ display D ^ ", " ^ display E ^ "⟩"
+           | PROD_INTRO $ #[M, D, E, xF] =>
+               let
+                 val (x, F) = unbind xF
+               in
+                 "⟨⸤" ^ display M ^ "⸥ by "
+                  ^ display D
+                  ^ ", " ^ display E
+                  ^ " : "
+                  ^ (if has_free (F, x) then
+                      "[" ^ display M ^ "/" ^ dvar (x, F) ^ "]("^ display xF ^ ")"
+                    else
+                      display F)
+                  ^ "⟩"
+               end
 
            | PROD_ELIM $ #[D, xyE] =>
                let

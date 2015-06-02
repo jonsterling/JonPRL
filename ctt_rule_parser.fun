@@ -82,7 +82,9 @@ struct
   val parse_prod_intro =
     symbol "prod-intro"
       >> parse_tm
-      wth ProdIntro
+      && opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (M, (k, z)) => ProdIntro M k z)
 
   val parse_prod_elim =
     symbol "prod-elim"

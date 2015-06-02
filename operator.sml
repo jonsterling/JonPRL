@@ -40,7 +40,7 @@ struct
        | AX_EQ => #[]
 
        | PROD_EQ => #[0,1]
-       | PROD_INTRO => #[0,0,0]
+       | PROD_INTRO => #[0,0,0,1]
        | PROD_ELIM => #[0,2]
        | PAIR_EQ => #[0,0,1]
        | SPREAD_EQ => #[0,3]

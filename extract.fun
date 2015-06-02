@@ -24,7 +24,7 @@ struct
        | AX_EQ $ _ => AX $$ #[]
 
        | PROD_EQ $ _ => ax
-       | PROD_INTRO $ #[W, D, E] => PAIR $$ #[W, extract E]
+       | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
        | PROD_ELIM $ #[R, xyD] => SPREAD $$ #[R, extract xyD]
        | PAIR_EQ $ _ => ax
        | SPREAD_EQ $ _ => ax

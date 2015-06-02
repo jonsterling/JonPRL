@@ -76,8 +76,9 @@ sig
     (* H >> (Σx:A)B[x] by ProdIntro M
      * 1. H >> M ∈ A
      * 2. H >> B[M]
+     * 3. H, x:A >> B[x] ∈ U{k}
      *)
-    val ProdIntro : term -> Lcf.tactic
+    val ProdIntro : term -> name option -> Level.t option -> Lcf.tactic
 
     (* H, z : (Σx:A)B[x], H'[z] >> P[z] by ProdElim z (s, t)
      * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
