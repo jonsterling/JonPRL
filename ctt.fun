@@ -147,8 +147,11 @@ struct
                val #[A, xB] = infer_type (H, X) ^! PROD
                val (H', u, vE) = ctx_unbind (H, A, uvE)
                val (H'', v, E) = ctx_unbind (H', xB // ``u, vE)
+
+               val uval = SPREAD $$ #[X, u \\ (v \\ (``u))]
+               val vval = SPREAD $$ #[X, u \\ (v \\ (``v))]
              in
-               infer_type (H'', E)
+               subst uval u (subst vval v (infer_type (H'', E)))
              end
          | ` x => Context.lookup H x
          | _ => raise Refine
