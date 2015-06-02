@@ -6,9 +6,7 @@ struct
 
       val D =
         SOME (foldl load_file Development.empty files)
-        handle
-            e as Fail str => (print str; NONE)
-          | RefinementFailed => (print "Refinement failed"; NONE)
+        handle e => (print (exnMessage e); NONE)
     in
       case D of
            NONE => 1
