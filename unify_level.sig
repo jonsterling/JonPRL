@@ -5,6 +5,9 @@ sig
 
   type constraint
   type substitution
+
+  val yank : Level.t -> substitution
+
   exception UnifyLevel
 
   val unify_level : term * term -> constraint list

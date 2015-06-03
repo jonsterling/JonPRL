@@ -709,22 +709,26 @@ struct
              SOME (x, _) => Hypothesis x (H >> P)
            | NONE => raise Refine)
 
-    fun Unfold (development, lem) : tactic =
-      named "Unfold" (fn (H >> P) =>
-        let
-          val definiens = Development.lookup_definition development lem
-          val rewrite = subst definiens lem
-        in
-          [ Context.map rewrite H >> rewrite P
-          ] BY (fn [D] => D
-                 | _ => raise Refine)
-        end)
 
     structure UnifyLevel = UnifyLevel (SyntaxWithUniverses(Syntax))
     structure UnifyLevelSequent = UnifyLevelSequent
       (structure Unify = UnifyLevel
        structure Abt = Syntax
        structure Sequent = Sequent)
+
+    fun Unfold (development, lem) ok : tactic =
+      named "Unfold" (fn (H >> P) =>
+        let
+          val k = case ok of SOME k => k | NONE => 0
+          val definiens =
+            UnifyLevel.subst (UnifyLevel.yank k)
+              (Development.lookup_definition development lem)
+          val rewrite = subst definiens lem
+        in
+          [ Context.map rewrite H >> rewrite P
+          ] BY (fn [D] => D
+                 | _ => raise Refine)
+        end)
 
     fun Lemma (development, lem) : tactic =
       named "Lemma" (fn (H >> P) =>

@@ -1,4 +1,7 @@
-functor UnifyLevel (Syntax : SYNTAX_WITH_UNIVERSES where type Level.t = int) :> UNIFY_LEVEL where type term = Syntax.Abt.t =
+functor UnifyLevel (Syntax : SYNTAX_WITH_UNIVERSES where type Level.t = int) :>
+  UNIFY_LEVEL
+    where type term = Syntax.Abt.t
+    where Level = Syntax.Level =
 struct
   structure Syntax = Syntax
   open Syntax Syntax.Abt
@@ -8,6 +11,8 @@ struct
   type term = Syntax.Abt.t
   type constraint = int
   type substitution = Level.t -> Level.t
+
+  fun yank k l = k + l
 
   exception UnifyLevel
 

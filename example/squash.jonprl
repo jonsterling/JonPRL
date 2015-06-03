@@ -4,19 +4,7 @@ Theorem squash-wf : [∀(U<0>; A. ∈(ap(squash;A); U<0>))] {
   unfold <squash>; auto.
 }.
 
-Theorem squash-wf2 : [∀(U<10>; A. ∈(ap(squash;A); U<10>))] {
-  lemma <squash-wf>.
-}.
-
-Theorem squash-wf3 : [∀(U<0>; A. ∈(ap(squash;A); U<0>))] {
-  lemma <squash-wf>.
-}.
-
 Theorem squash-intro : [∀(U<0>; A. Π(A; M. ap(squash; A)))] {
   auto; unfold <squash>; auto;
   subset-intro [<>]; auto.
-}.
-
-Theorem obv : [∀(U<0>; A. ∈(A; U<1>))] {
-  auto.
 }.

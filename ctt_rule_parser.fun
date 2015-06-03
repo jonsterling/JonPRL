@@ -179,7 +179,8 @@ struct
   val parse_unfold =
     symbol "unfold"
       >> brackets parse_name
-      wth (fn lbl => fn st => Unfold (st, lbl))
+      && opt parse_level
+      wth (fn (lbl, k) => fn st => Unfold (st, lbl) k)
 
   val parse_custom_tactic =
     symbol "refine"

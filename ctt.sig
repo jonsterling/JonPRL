@@ -97,7 +97,7 @@ sig
     val Hypothesis : name -> Lcf.tactic
     val HypEq : Lcf.tactic
 
-    val Unfold : Development.t * Development.label -> Lcf.tactic
+    val Unfold : Development.t * Development.label -> Level.t option -> Lcf.tactic
     val Lemma : Development.t * Development.label -> Lcf.tactic
 
     val RewriteGoal : ConvTypes.conv -> Lcf.tactic
