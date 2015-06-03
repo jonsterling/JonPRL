@@ -15,13 +15,20 @@ hom =def= [λ(C. spread(spread(C; x.y.y); x.y.x))].
 idn =def= [λ(C. spread(spread(spread(C; x.y.y); x.y.y); x.y.x))].
 cmp =def= [λ(C. spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x))].
 
+Tactic rawcat_unfold {
+  unfold <RawCatSig>;
+  unfold <obj>;
+  unfold <hom>;
+  unfold <idn>;
+  unfold <cmp>.
+}.
+
 Theorem RawCatSig_wf : [∈(RawCatSig; U<1>)] {
-  unfold <RawCatSig>; auto.
+  refine <rawcat_unfold>; auto.
 }.
 
 Theorem obj_wf : [∀(RawCatSig; RC. ∈(ap(obj; RC); U<0>))] {
-  unfold <RawCatSig>; unfold <obj>;
-  auto.
+  refine <rawcat_unfold>; auto.
 }.
 
 Theorem hom_wf : [
@@ -30,8 +37,7 @@ Theorem hom_wf : [
   ∀(ap(obj; RC); B.
     ∈(ap(ap(ap(hom; RC); A); B); U<0>))))
 ] {
-  unfold <RawCatSig>; unfold <hom>; unfold <obj>;
-  auto.
+  refine <rawcat_unfold>; auto.
 }.
 
 LawCatSig =def= [
