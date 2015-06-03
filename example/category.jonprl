@@ -61,3 +61,11 @@ CatSig =def= [subset(RawCatSig; RC. ap(LawCatSig; RC))].
 law_idn_lhs =def= [λ(RC. spread(ap(LawCatSig; RC); x.y.x))].
 law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCatSig; RC); x.y.y); x.y.x))].
 law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCatSig; RC); x.y.y); x.y.y); x.y.x))].
+
+Theorem InitialRawCat : [RawCatSig] {
+  unfold <RawCatSig>;
+  prod-intro [void]; auto;
+  prod-intro [λ(A. λ(B. void))]; auto;
+  prod-intro [λ(A. A)]; auto;
+  prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. f)))))]; auto.
+}.
