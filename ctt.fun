@@ -176,9 +176,10 @@ struct
           val (UNIV l, #[]) = as_app univ1
           val (UNIV l', #[]) = as_app univ2
           val (UNIV k, #[]) = as_app univ3
-          val _ = Level.assert_lt (Level.unify (l, l'), k)
+          val l'' = Level.unify (l, l')
+          val _ = Level.assert_lt (l'', k)
         in
-          [] BY mk_evidence UNIV_EQ
+          [] BY mk_evidence (UNIV_EQ l'')
         end)
 
     val EqEq : tactic =
@@ -719,15 +720,21 @@ struct
                  | _ => raise Refine)
         end)
 
+    structure UnifyLevel = UnifyLevel (SyntaxWithUniverses(Syntax))
+    structure UnifyLevelSequent = UnifyLevelSequent
+      (structure Unify = UnifyLevel
+       structure Abt = Syntax
+       structure Sequent = Sequent)
+
     fun Lemma (development, lem) : tactic =
       named "Lemma" (fn (H >> P) =>
         let
           val {statement, evidence} = Development.lookup_theorem development lem
           val H' >> P' = statement
+          val constraints = UnifyLevelSequent.unify_level (statement, H >> P)
+          val substitution = UnifyLevelSequent.resolve constraints
         in
-          if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
-          then [] BY (fn _ => Susp.force evidence)
-          else raise Refine
+          [] BY (fn _ => UnifyLevel.subst substitution (Susp.force evidence))
         end)
 
     val Admit : tactic =

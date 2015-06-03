@@ -94,6 +94,8 @@ struct
                  "let " ^ dvar (x, yN) ^ "," ^ dvar (y, N) ^ " = " ^ display M ^ " in " ^ display N
                end
 
+           | UNIV_EQ i $ #[] =>
+               "U⁼" ^ subscript i
 
            | EQ_EQ $ #[A,M,N] =>
                display M ^ " =⁼ " ^ display N ^ " ∈⁼ " ^ display A

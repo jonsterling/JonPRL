@@ -12,7 +12,7 @@ struct
 
   fun extract E =
     case out E of
-         UNIV_EQ $ _ => ax
+         UNIV_EQ _ $ _ => ax
        | VOID_EQ $ _ => ax
        | VOID_ELIM $ _ => ax
        | CUM $ _ => ax

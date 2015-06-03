@@ -1,7 +1,11 @@
 signature CONTEXT =
 sig
   type name
-  type 'a context
+
+  structure Telescope : TELESCOPE
+    where type Label.t = name
+
+  type 'a context = ('a * Visibility.t) Telescope.telescope
 
   val fresh : 'a context * name -> name
 

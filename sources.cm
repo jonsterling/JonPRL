@@ -28,6 +28,10 @@ group is
 
   level.sig
   level.sml
+
+  unify_level.sig
+  unify_level.fun
+
   ctt.sig
   ctt.fun
   ctt_util.sig
