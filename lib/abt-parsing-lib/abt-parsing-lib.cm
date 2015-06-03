@@ -1,0 +1,16 @@
+Library
+  signature PARSE_OPERATOR
+  signature PARSE_ABT
+
+  functor ParseAbt
+  (* examples *)
+  functor ParseAbtTest
+is
+  parse_operator.sig
+  parse_abt.sig
+  parse_abt.fun
+  parse_abt_test.fun
+
+  ../abt-lib/abt-lib.cm
+  ../cmlib/cmlib.cm
+  ../parcom.cm

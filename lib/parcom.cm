@@ -1,0 +1,35 @@
+(* parcom -- combinator parsing *)
+
+(* This CM file is just here in order to hook up Parcom with the cmlib which we
+have as a submodule, rather than using smackage. *)
+library
+
+  signature PARSER_COMBINATORS
+  signature CHAR_PARSER
+  signature MINI_LANGUAGE_DEF
+  signature LANGUAGE_DEF
+  signature TOKEN_PARSER
+
+  structure ParserCombinators
+  structure CharParser
+
+  functor   TokenParser
+  functor   SimpleStyle
+  functor   JavaStyle
+  functor   MLStyle
+
+is
+
+
+  cmlib/cmlib.cm
+
+  (* parcom proper *)
+  parcom/src/parse.sig
+  parcom/src/parse.sml
+
+  parcom/src/charparse.sig
+  parcom/src/charparse.sml
+
+  parcom/src/tokparse.sig
+  parcom/src/tokparse.sml
+  parcom/src/langparse.sml
