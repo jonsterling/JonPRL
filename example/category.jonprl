@@ -37,19 +37,19 @@ Theorem hom_wf : [
 LawCatSig =def= [
   Σ(RawCatSig; RC.
   Σ(Π(ap(obj; RC); A.
-    Π(ap(ap(ap(Hom; RC); A); A); f.
+    Π(ap(ap(ap(hom; RC); A); A); f.
       =(ap(ap(ap(cmp; RC); ap(idn; RC)); f);
         f;
         ap(ap(ap(hom; RC); A); A)))); law_idn_lhs.
   Σ(Π(ap(obj; RC); A.
     Π(ap(ap(ap(hom; RC); A); A); f.
-      =(ap(f; ap(ap(cmp; RC); ap(idn; RC)));
+      =(ap(ap(ap(cmp; RC); f); ap(idn; RC));
         f;
         ap(ap(ap(hom; RC); A); A)))); law_idn_rhs.
-  Σ(Π(Obj; A. Π(Obj; B. Π(Obj; C. Π(Obj; D.
-    Π(ap(ap(Hom; A); B); f.
-    Π(ap(ap(Hom; B); C); g.
-    Π(ap(ap(Hom; C); D); h.
+  Σ(Π(ap(obj; RC); A. Π(ap(obj; RC); B. Π(ap(obj; RC); C. Π(ap(obj; RC); D.
+    Π(ap(ap(ap(hom; RC); A); B); f.
+    Π(ap(ap(ap(hom; RC); B); C); g.
+    Π(ap(ap(ap(hom; RC); C); D); h.
       =(ap(ap(ap(cmp; RC); ap(ap(ap(cmp; RC); h); g)); f);
         ap(ap(ap(cmp; RC); h); ap(ap(ap(cmp; RC); g); f));
         ap(ap(ap(hom; RC); A); D))))))))); law_cmp_ass.
