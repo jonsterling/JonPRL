@@ -3,6 +3,6 @@ Library
   functor Telescope
   functor TelescopeNotation
 is
-  $SMACKAGE/cmlib/v1/cmlib.cm
+  ../cmlib/cmlib.cm
   telescope.sig
   telescope.fun
