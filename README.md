@@ -33,6 +33,11 @@ This puts a binary in `./bin/jonprl`. Optionally, you may install JonPRL globall
 sudo make install
 ```
 
+#### Emacs Mode
+
+Optionally, you may install the [JonPRL Mode for
+Emacs](https://github.com/david-christiansen/jonprl-mode).
+
 ### Running JonPRL
 
 To run JonPRL, simply direct it at your development:
