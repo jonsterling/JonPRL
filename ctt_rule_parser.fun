@@ -191,6 +191,30 @@ struct
       >> brackets parse_name
       wth (fn lbl => fn st => Development.lookup_tactic st lbl)
 
+  val parse_subset_eq =
+    symbol "subset-eq"
+      >> opt (brackets parse_name)
+      wth SubsetEq
+
+  val parse_subset_intro =
+    symbol "subset-intro"
+      >> parse_tm
+      && opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (M, (z, k)) => SubsetIntro M z k)
+
+  val parse_subset_elim =
+    symbol "subset-elim"
+      >> brackets parse_name
+      && opt (brackets (parse_name << comma && parse_name))
+      wth (fn (z, st) => SubsetElim z st)
+
+  val parse_subset_member_eq =
+    symbol "subset-member-eq"
+      >> opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (z, k) => SubsetMemberEq z k)
+
   val extensional_parse =
     symbol "auto" return Auto
       || parse_cum
@@ -214,6 +238,10 @@ struct
       || symbol "hyp-eq" return HypEq
       || parse_witness
       || parse_eq_subst
+      || parse_subset_eq
+      || parse_subset_intro
+      || parse_subset_elim
+      || parse_subset_member_eq
 
   val intensional_parse =
     parse_lemma

@@ -100,6 +100,11 @@ sig
     val IsectMemberEq : name option -> Level.t option -> Lcf.tactic
     val IsectMemberCaseEq : term option -> term -> Lcf.tactic
 
+    val SubsetEq : name option -> Lcf.tactic
+    val SubsetIntro : term -> name option -> Level.t option -> Lcf.tactic
+    val SubsetElim : name -> (name * name) option -> Lcf.tactic
+    val SubsetMemberEq : name option -> Level.t option -> Lcf.tactic
+
     val MemUnfold : Lcf.tactic
     val Witness : term -> Lcf.tactic
 

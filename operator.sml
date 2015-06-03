@@ -11,6 +11,7 @@ struct
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
+    | SUBSET_EQ | SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
 
     | ADMIT
 
@@ -23,6 +24,7 @@ struct
     | ISECT
     | EQ | MEM
     | SQUASH
+    | SUBSET
 
   val eq = op=
 
@@ -66,6 +68,11 @@ struct
        | SQUASH_INTRO => #[0]
        | SQUASH_ELIM => #[0]
 
+       | SUBSET_EQ => #[0,1]
+       | SUBSET_INTRO => #[0,0,0,1]
+       | SUBSET_ELIM => #[0,2]
+       | SUBSET_MEMBER_EQ => #[0,0,1]
+
        | ADMIT => #[]
 
 
@@ -86,6 +93,7 @@ struct
        | MEM => #[0,0]
 
        | SQUASH => #[0]
+       | SUBSET => #[0,1]
 
   fun to_string O =
     case O of
@@ -128,6 +136,11 @@ struct
        | SQUASH_INTRO => "squash-intro"
        | SQUASH_ELIM => "squash-elim"
 
+       | SUBSET_EQ => "subset⁼"
+       | SUBSET_INTRO => "subset-intro"
+       | SUBSET_ELIM => "subset-elim"
+       | SUBSET_MEMBER_EQ => "subset-member-eq"
+
        | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
@@ -143,6 +156,7 @@ struct
        | MEM => "∈"
 
        | SQUASH => "↓"
+       | SUBSET => "subset"
 
   local
     open ParserCombinators CharParser
@@ -173,5 +187,6 @@ struct
         || string "∈" return MEM
         || string "!" return SQUASH
         || string "↓" return SQUASH
+        || string "subset" return SUBSET
   end
 end
