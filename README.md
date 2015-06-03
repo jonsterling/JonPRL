@@ -15,7 +15,8 @@ First make sure you have SML/NJ and Smackage set up properly. Then, install
 JonPRL's dependencies:
 
 ```sh
-git submodule sync
+git submodule init
+git submodule update
 smackage get parcom
 ```
 
