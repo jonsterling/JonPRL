@@ -9,6 +9,6 @@ Theorem squash-intro : [∀(U{i}; A. Π(A; M. ap(squash; A)))] {
   subset-intro [<>]; auto.
 }.
 
-Theorem sq-test : [∀(U{i}; A. ∈(ap(squash;A);U{i'}))] {
+Theorem sq-test : [∀(U{i'}; A. ∈(ap(squash;A);U{i'}))] {
   lemma <squash-wf>.
 }.

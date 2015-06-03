@@ -25,18 +25,14 @@ struct
   end
 
   local
-    fun go [] R = R
-      | go (0 :: xs) R = go xs R
-      | go (x :: xs) 0 = go xs x
-      | go (x :: xs) R =
-          if (x > 0) andalso (R > 0) then
-            go xs (Int.max (x, R))
-          else if (x < 0) andalso (R < 0) then
-            go xs (Int.min (x, R))
+    fun go [] = 0
+      | go (x :: xs) =
+          if (foldl (fn (y, b) => b andalso x = y) true xs) then
+            x
           else
             raise LevelError
   in
-    fun resolve xs = fn x => x + go xs 0
+    fun resolve xs = fn x => x + go xs
   end
 
   fun subst f x = f x

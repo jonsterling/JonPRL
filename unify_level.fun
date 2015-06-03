@@ -28,7 +28,6 @@ struct
       | go H (O1 $ ES1, O2 $ ES2) R =
           (case (View.out O1, View.out O2) of
                 (View.UNIV k, View.UNIV l) => goes H (ES1, ES2) (Level.unify (k,l) :: R)
-                (* (l - k) :: R*)
               | (View.OTHER O1', View.OTHER O2') =>
                   if Operator.eq (O1', O2') then
                     goes H (ES1, ES2) R
