@@ -82,3 +82,14 @@ Theorem TerminalRawCat : [RawCat] {
   prod-intro [λ(A. <>)]; auto;
   prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))]; auto.
 }.
+
+RawFun =def= [
+  λ(RawCat; RC.
+  λ(RawCat; RD.
+  Σ(Π(ap(obj; RC); _. ap(obj; RD)); fun_obj.
+  Σ(Π(ap(obj; RC); A.
+    Π(ap(obj; RC); B.
+    Π(ap(ap(ap(hom; RC); A); B); _.
+    Π(ap(ap(ap(hom; RD); ap(fun_obj; A)); ap(fun_obj; B)); _. _)))); fun_hom.
+  unit))))
+].
