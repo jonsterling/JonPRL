@@ -1,3 +1,3 @@
 [submodule "sml-lcf"]
-	path = sml-lcf
+	path = lib/sml-lcf
 	url = git@github.com:jonsterling/sml-lcf.git

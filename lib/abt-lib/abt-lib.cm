@@ -1,26 +1,17 @@
 Library
   signature VARIABLE
   signature OPERATOR
-  signature PARSE_OPERATOR
 
   signature ABT
   signature ABT_UTIL
-  signature PARSE_ABT
-  signature VECTOR_UTIL
 
   functor Abt
   functor AbtUtil
   functor Variable
   structure StringVariable
-  functor ParseAbt
-  structure VectorUtil
-
-  (* examples *)
-  functor ParseAbtTest
 is
   variable.sig
   operator.sig
-  parse_operator.sig
 
   vector_util.sig
 
@@ -28,12 +19,7 @@ is
   abt_util.sig
   abt.fun
   abt_util.fun
-  parse_abt.sig
-  parse_abt.fun
   vector_util.sml
   variable.fun
 
-  parse_abt_test.fun
-
-  $SMACKAGE/parcom/v1/parcom.cm
-  $SMACKAGE/cmlib/v1/cmlib.cm
+  $/basis.cm
