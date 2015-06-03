@@ -25,6 +25,8 @@ struct
       ORELSE ProdEq NONE
       ORELSE VoidEq
       ORELSE UnivEq
+      ORELSE AtomEq
+      ORELSE TokenEq
       ORELSE HypEq
       ORELSE ApEq NONE
       ORELSE SpreadEq NONE NONE NONE
@@ -42,7 +44,7 @@ struct
     open Conversions Conversionals
     infix CORELSE
 
-    val Reduce = ApBeta CORELSE SpreadBeta
+    val Reduce = ApBeta CORELSE SpreadBeta CORELSE TokenMatchBeta
     val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
     val Auto =

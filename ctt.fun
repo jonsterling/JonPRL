@@ -690,6 +690,46 @@ struct
                   | _ => raise Refine)
         end)
 
+    val AtomEq : tactic =
+      named "AtomEq" (fn (H >> P) =>
+        let
+          val #[atm1, atm2, univ] = P ^! EQ
+          val #[] = atm1 ^! ATOM
+          val #[] = atm2 ^! ATOM
+        in
+          [] BY mk_evidence ATOM_EQ
+        end)
+
+    val TokenEq : tactic =
+      named "TokenEq" (fn (H >> P) =>
+        let
+          val #[tok1, tok2, atm] = P ^! EQ
+          val #[] = atm ^! ATOM
+          val (TOKEN s, #[]) = as_app tok1
+          val (TOKEN s', #[]) = as_app tok2
+          val _ = if s = s' then () else raise Refine
+        in
+          [] BY mk_evidence TOKEN_EQ
+        end)
+
+    fun TokenMatchEq oz : tactic =
+      named "TokenMatchEq" (fn (H >> P) =>
+        let
+          val #[match1, match2, T] = P ^! EQ
+          val #[u1, v1, s1, t1] = match1 ^! TOKEN_MATCH
+          val #[u2, v2, s2, t2] = match2 ^! TOKEN_MATCH
+          val z = Context.fresh (H, case oz of NONE => Variable.named "z" | SOME z => z)
+          val u1v1 = EQ $$ #[u1, v1, ATOM $$ #[]]
+          val u1v1' = FUN $$ #[u1v1, Variable.named "_" \\ (VOID $$ #[])]
+        in
+          [ H >> EQ $$ #[u1, u2, ATOM $$ #[]]
+          , H >> EQ $$ #[v1, v2, ATOM $$ #[]]
+          , H @@ (z, u1v1) >> EQ $$ #[s1, s2, T]
+          , H @@ (z, u1v1') >> EQ $$ #[t1, t2, T]
+          ] BY (fn [D,E,F,G] => TOKEN_MATCH_EQ $$ #[D,E,z \\ F, z \\ G]
+                 | _ => raise Refine)
+        end)
+
     fun Hypothesis x : tactic =
       named "Hypothesis" (fn (H >> P) =>
         let
@@ -774,6 +814,11 @@ struct
     val SpreadBeta : conv = reduction_rule
       (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
         | _ => raise Conv)
+
+    val TokenMatchBeta : conv = reduction_rule
+      (fn TOKEN_MATCH $ #[TOKEN s $ #[], TOKEN t $ #[], M, N] => into (if s = t then M else N)
+        | _ => raise Conv)
+
   end
 end
 

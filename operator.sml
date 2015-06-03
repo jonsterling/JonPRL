@@ -11,6 +11,7 @@ struct
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
+    | ATOM_EQ | TOKEN_EQ | TOKEN_MATCH_EQ
 
     | ADMIT
 
@@ -23,6 +24,8 @@ struct
     | ISECT
     | EQ | MEM
     | SUBSET
+
+    | ATOM | TOKEN of string | TOKEN_MATCH
 
   val eq = op=
 
@@ -67,8 +70,11 @@ struct
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
-       | ADMIT => #[]
+       | ATOM_EQ => #[]
+       | TOKEN_EQ => #[]
+       | TOKEN_MATCH_EQ => #[0,0,1,1]
 
+       | ADMIT => #[]
 
        | UNIV i => #[]
        | VOID => #[]
@@ -87,6 +93,10 @@ struct
        | MEM => #[0,0]
 
        | SUBSET => #[0,1]
+
+       | ATOM => #[]
+       | TOKEN _ => #[]
+       | TOKEN_MATCH => #[0,0,0,0]
 
   fun to_string O =
     case O of
@@ -130,6 +140,10 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
+       | ATOM_EQ => "atom="
+       | TOKEN_EQ => "token="
+       | TOKEN_MATCH_EQ => "match="
+
        | UNIV i => "U<" ^ Level.to_string i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
@@ -146,6 +160,10 @@ struct
 
        | SUBSET => "subset"
 
+       | ATOM => "atom"
+       | TOKEN tok => "#" ^ tok
+       | TOKEN_MATCH => "match"
+
   local
     open ParserCombinators CharParser
     infix 2 return wth suchthat return guard when
@@ -157,6 +175,15 @@ struct
 
     val parse_univ =
       string "U<" >> parse_int << string ">" wth UNIV
+
+    val identifier =
+      repeat (letter || oneOf (String.explode "_'ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω"))
+        wth String.implode
+
+    val parse_token =
+      char #"#"
+        >> identifier
+        wth TOKEN
 
     val parse_operator =
       parse_univ
@@ -174,5 +201,8 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
+        || string "atom" return ATOM
+        || parse_token
+        || string "match" return TOKEN_MATCH
   end
 end

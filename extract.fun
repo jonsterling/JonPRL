@@ -55,6 +55,10 @@ struct
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
 
+       | ATOM_EQ $ _ => ax
+       | TOKEN_EQ $ _ => ax
+       | TOKEN_MATCH_EQ $ _ => ax
+
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 
        | ` x => `` x

@@ -90,6 +90,10 @@ sig
     val SubsetElim : name -> (name * name) option -> Lcf.tactic
     val SubsetMemberEq : name option -> Level.t option -> Lcf.tactic
 
+    val AtomEq : Lcf.tactic
+    val TokenEq : Lcf.tactic
+    val TokenMatchEq : name option -> Lcf.tactic
+
     val MemUnfold : Lcf.tactic
     val Witness : term -> Lcf.tactic
 
@@ -110,5 +114,6 @@ sig
   sig
     val ApBeta : ConvTypes.conv
     val SpreadBeta : ConvTypes.conv
+    val TokenMatchBeta : ConvTypes.conv
   end
 end

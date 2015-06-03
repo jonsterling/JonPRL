@@ -169,6 +169,11 @@ struct
       >> parse_tm && parse_tm && opt parse_level
       wth (fn (M, (N, k)) => EqSubst M N k)
 
+  val parse_token_match_eq =
+    symbol "token-match-eq"
+      >> opt (brackets parse_name)
+      wth TokenMatchEq
+
   type state = Development.t
 
   val parse_lemma =
@@ -224,10 +229,13 @@ struct
       || parse_prod_eq || parse_prod_intro || parse_prod_elim || parse_pair_eq || parse_spread_eq
       || parse_fun_eq || parse_fun_intro || parse_fun_elim || parse_lam_eq || parse_ap_eq
       || parse_isect_eq || parse_isect_intro || parse_isect_elim || parse_isect_member_eq || parse_isect_member_case_eq
+      || symbol "atom-eq" return AtomEq
+      || symbol "token-eq" return TokenEq
       || symbol "mem-unfold" return MemUnfold
       || symbol "assumption" return Assumption
       || symbol "symmetry" return EqSym
       || symbol "hyp-eq" return HypEq
+      || parse_token_match_eq
       || parse_witness
       || parse_eq_subst
       || parse_subset_eq
