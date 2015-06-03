@@ -1,3 +1,9 @@
 [submodule "sml-lcf"]
 	path = lib/sml-lcf
 	url = git@github.com:jonsterling/sml-lcf.git
+[submodule "lib/cmlib"]
+	path = lib/cmlib
+	url = git@github.com:standardml/cmlib.git
+[submodule "lib/parcom"]
+	path = lib/parcom
+	url = git@github.com:standardml/parcom.git

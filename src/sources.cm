@@ -1,10 +1,10 @@
 group is
-  $SMACKAGE/cmlib/v1/cmlib.cm
-  $SMACKAGE/parcom/v1/parcom.cm
   ../lib/abt-lib/abt-lib.cm
   ../lib/abt-parsing-lib/abt-parsing-lib.cm
   ../lib/telescopes/telescopes.cm
   ../lib/sml-lcf/lcf.cm
+  ../lib/cmlib/cmlib.cm
+  ../lib/parcom.cm
 
   operator.sml
   syntax.sml

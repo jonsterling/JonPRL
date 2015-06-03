@@ -5,19 +5,12 @@ from Allen, Bickford, Constable, Harper and many other names.
 
 ### Building & Installing JonPRL
 
-JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build, and
-[Smackage](https://github.com/standardml/smackage) for its dependencies.
-(JonPRL is likely compatible with other SML implementations, but I currently
-rely on CM and don't have the engineering bandwidth to test it with other
-implementations and build systems.)
-
-First make sure you have SML/NJ and Smackage set up properly. Then, install
-JonPRL's dependencies:
+JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build.  First
+make sure you have SML/NJ set up properly. Then, install JonPRL's dependencies:
 
 ```sh
 git submodule init
 git submodule update
-smackage get parcom
 ```
 
 Then, JonPRL may be built using its `Makefile`:

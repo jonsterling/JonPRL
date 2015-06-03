@@ -12,5 +12,5 @@ is
   parse_abt_test.fun
 
   ../abt-lib/abt-lib.cm
-  $SMACKAGE/parcom/v1/parcom.cm
-  $SMACKAGE/cmlib/v1/cmlib.cm
+  ../cmlib/cmlib.cm
+  ../parcom.cm
