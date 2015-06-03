@@ -11,6 +11,6 @@ is
   parse_abt.fun
   parse_abt_test.fun
 
-  ../abt-lib/abt-lib.cm
+  ../sml-abt/abt.cm
   ../cmlib/cmlib.cm
   ../parcom.cm
