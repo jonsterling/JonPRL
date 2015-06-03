@@ -53,6 +53,17 @@ struct
                    enclose A ^ " × " ^ display B
                end
 
+           | SUBSET $ #[A, xB] =>
+               let
+                 val (x, B) = unbind xB
+               in
+                 if has_free (B, x) then
+                   "{" ^ Variable.to_string x ^ " ∈ " ^ display A ^ " | " ^ display B ^ "}"
+                 else
+                   "{" ^ display A ^ " | " ^ display B ^ "}"
+               end
+
+
            | LAM $ #[xE] =>
                let
                  val (x, E) = unbind xE
@@ -65,9 +76,6 @@ struct
 
            | PAIR $ #[M, N] =>
                "⟨" ^ display M ^ ", " ^ display N ^ "⟩"
-
-           | SQUASH $ #[A] =>
-               "‖" ^ display A ^ "‖"
 
            | MEM $ #[M, A] =>
                display M ^ " ∈ " ^ display A
@@ -137,9 +145,6 @@ struct
                in
                  "let⁼ " ^ dvar (x, yzE) ^ "," ^ dvar (y, zE) ^ " = " ^ display D ^ " by " ^ dvar (z, E) ^ " in " ^ display E
                end
-
-           | SQUASH_INTRO $ #[M] =>
-               "[" ^ display M ^ "]"
 
            | FUN_EQ $ #[D, xE] =>
                let

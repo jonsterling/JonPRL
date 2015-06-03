@@ -52,21 +52,6 @@ sig
     (* H >> Ax = Ax ∈ Unit *)
     val AxEq : Lcf.tactic
 
-    (* H >> !A = !B ∈ U{k} by SquashEq
-     * 1. H >> A = B ∈ U{k}
-     *)
-    val SquashEq : Lcf.tactic
-
-    (* H >> !A by SquashIntro
-     * 1. H >> A
-     *)
-    val SquashIntro : Lcf.tactic
-
-    (* H, x : !A, H'[x] >> P[x] by SquashElim x
-     * 1. H, x : !A, H'[Ax] >> P[Ax]
-     *)
-    val SquashElim : name -> Lcf.tactic
-
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}
      * 2. H, z : A >> B[z] = B'[z] ∈ U{k}
@@ -99,6 +84,11 @@ sig
     val IsectElim : name -> term -> (name * name) option -> Lcf.tactic
     val IsectMemberEq : name option -> Level.t option -> Lcf.tactic
     val IsectMemberCaseEq : term option -> term -> Lcf.tactic
+
+    val SubsetEq : name option -> Lcf.tactic
+    val SubsetIntro : term -> name option -> Level.t option -> Lcf.tactic
+    val SubsetElim : name -> (name * name) option -> Lcf.tactic
+    val SubsetMemberEq : name option -> Level.t option -> Lcf.tactic
 
     val MemUnfold : Lcf.tactic
     val Witness : term -> Lcf.tactic

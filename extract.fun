@@ -46,13 +46,14 @@ struct
        | ISECT_MEMBER_EQ $ _ => ax
        | ISECT_MEMBER_CASE_EQ $ _ => ax
 
+       | SUBSET_EQ $ _ => ax
+       | SUBSET_INTRO $ #[w,_,_,_] => w
+       | SUBSET_ELIM $ #[R, stD] => extract (stD // R) // ax
+       | SUBSET_MEMBER_EQ $ _ => ax
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
-
-       | SQUASH_EQ $ _ => ax
-       | SQUASH_INTRO $ _ => ax
-       | SQUASH_ELIM $ _ => ax
 
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 

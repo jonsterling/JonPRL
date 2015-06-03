@@ -69,11 +69,6 @@ struct
       >> brackets parse_name
       wth UnitElim
 
-  val parse_squash_elim =
-    symbol "squash-elim"
-      >> brackets parse_name
-      wth SquashElim
-
   val parse_prod_eq =
     symbol "prod-eq"
       >> opt (brackets parse_name)
@@ -191,6 +186,30 @@ struct
       >> brackets parse_name
       wth (fn lbl => fn st => Development.lookup_tactic st lbl)
 
+  val parse_subset_eq =
+    symbol "subset-eq"
+      >> opt (brackets parse_name)
+      wth SubsetEq
+
+  val parse_subset_intro =
+    symbol "subset-intro"
+      >> parse_tm
+      && opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (M, (z, k)) => SubsetIntro M z k)
+
+  val parse_subset_elim =
+    symbol "subset-elim"
+      >> brackets parse_name
+      && opt (brackets (parse_name << comma && parse_name))
+      wth (fn (z, st) => SubsetElim z st)
+
+  val parse_subset_member_eq =
+    symbol "subset-member-eq"
+      >> opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (z, k) => SubsetMemberEq z k)
+
   val extensional_parse =
     symbol "auto" return Auto
       || parse_cum
@@ -202,9 +221,6 @@ struct
       || symbol "unit-intro" return UnitIntro
       || parse_unit_elim
       || symbol "ax-eq" return AxEq
-      || symbol "squash-eq" return SquashEq
-      || symbol "squash-intro" return SquashIntro
-      || parse_squash_elim
       || parse_prod_eq || parse_prod_intro || parse_prod_elim || parse_pair_eq || parse_spread_eq
       || parse_fun_eq || parse_fun_intro || parse_fun_elim || parse_lam_eq || parse_ap_eq
       || parse_isect_eq || parse_isect_intro || parse_isect_elim || parse_isect_member_eq || parse_isect_member_case_eq
@@ -214,6 +230,10 @@ struct
       || symbol "hyp-eq" return HypEq
       || parse_witness
       || parse_eq_subst
+      || parse_subset_eq
+      || parse_subset_intro
+      || parse_subset_elim
+      || parse_subset_member_eq
 
   val intensional_parse =
     parse_lemma

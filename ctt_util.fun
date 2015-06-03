@@ -14,10 +14,9 @@ struct
   infix ORELSE ORELSE_LAZY THEN
 
   local
-    val EqAuto =
+    val EqRules =
       AxEq
       ORELSE EqEq
-      ORELSE SquashEq
       ORELSE FunEq NONE
       ORELSE IsectEq NONE
       ORELSE PairEq NONE NONE
@@ -26,32 +25,28 @@ struct
       ORELSE ProdEq NONE
       ORELSE VoidEq
       ORELSE UnivEq
-      ORELSE SquashEq
       ORELSE HypEq
+      ORELSE ApEq NONE
+      ORELSE SpreadEq NONE NONE NONE
       ORELSE Cum NONE
+      ORELSE SubsetEq NONE
+      ORELSE SubsetMemberEq NONE NONE
 
-    val intro_rules =
+    val IntroRules =
       MemUnfold
-      ORELSE EqAuto
       ORELSE Assumption
       ORELSE FunIntro NONE NONE
       ORELSE IsectIntro NONE NONE
       ORELSE UnitIntro
-      ORELSE SquashIntro
-
-    val elim_rules =
-      ApEq NONE
-      ORELSE SpreadEq NONE NONE NONE
 
     open Conversions Conversionals
     infix CORELSE
 
-    val whnf = ApBeta CORELSE SpreadBeta
-    val DeepReduce = RewriteGoal (CDEEP whnf)
-    val IntroElim = intro_rules ORELSE elim_rules
+    val Reduce = ApBeta CORELSE SpreadBeta
+    val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
     val Auto =
-      LIMIT (IntroElim ORELSE PROGRESS DeepReduce)
+      LIMIT (IntroRules ORELSE EqRules ORELSE PROGRESS DeepReduce)
   end
 end
 

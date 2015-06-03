@@ -91,7 +91,6 @@ struct
       case O of
            EQ => true
          | MEM => true
-         | SQUASH => true
          | UNIT => true
          | _ => false
 
@@ -121,8 +120,12 @@ struct
            in
              Level.max (infer_level (H, A), infer_level (H', B))
            end
-
-         | SQUASH $ #[A] => infer_level (H, A)
+         | SUBSET $ #[A, xB] =>
+           let
+             val (H', x, B) = ctx_unbind (H, A, xB)
+           in
+             Level.max (infer_level (H, A), infer_level (H', B))
+           end
          | ` x =>
             let
               val X = Context.lookup H x
@@ -135,7 +138,6 @@ struct
     fun infer_type (H, M) =
       case out M of
            UNIV l $ _ => UNIV (l + 1) $$ #[]
-         | SQUASH $ #[A] => infer_type (H, A)
          | AP $ #[F, N] =>
              let
                val #[A, xB] = infer_type (H, F) ^! FUN
@@ -250,42 +252,6 @@ struct
           val #[] = unit ^! UNIT
         in
           [] BY mk_evidence AX_EQ
-        end)
-
-    val SquashEq : tactic =
-      named "SquashEq" (fn (H >> P) =>
-        let
-          val #[sq1, sq2, univ] = P ^! EQ
-          val #[P1] = sq1 ^! SQUASH
-          val #[P2] = sq2 ^! SQUASH
-          val (UNIV _, #[]) = as_app univ
-        in
-          [ H >> EQ $$ #[P1, P2, univ]
-          ] BY mk_evidence SQUASH_EQ
-        end)
-
-    val SquashIntro : tactic =
-      named "SquashIntro" (fn (H >> P) =>
-        let
-          val #[P'] = P ^! SQUASH
-        in
-          [ H >> P'
-          ] BY mk_evidence SQUASH_INTRO
-        end)
-
-    fun SquashElim z : tactic =
-      named "SquashElim" (fn (H >> P) =>
-        let
-          val #[M, N, A] = P ^! EQ
-
-          fun unsquash Z =
-            let val #[Z'] = Z ^! SQUASH in Z' end
-
-          val ax = AX $$ #[]
-          val H' = ctx_subst (Context.modify H z unsquash) ax z
-        in
-          [ H' >> subst ax z P
-          ] BY mk_evidence SQUASH_ELIM
         end)
 
     fun FunEq oz : tactic =
@@ -477,6 +443,84 @@ struct
           ] BY mk_evidence ISECT_MEMBER_CASE_EQ
         end)
 
+    fun SubsetEq oz : tactic =
+      named "SubsetEq" (fn (H >> P) =>
+        let
+          val #[subset1, subset2, univ] = P ^! EQ
+          val (UNIV k, #[]) = as_app univ
+          val #[A,xB] = subset1 ^! SUBSET
+          val #[A',yB'] = subset2 ^! SUBSET
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xB)
+                 | SOME z => z)
+        in
+          [ H >> EQ $$ #[A,A',univ]
+          , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
+          ] BY (fn [D, E] => SUBSET_EQ $$ #[D, z \\ E]
+                 | _ => raise Refine)
+        end)
+
+    fun SubsetIntro w oz ok : tactic =
+      named "SubsetIntro" (fn (H >> P) =>
+        let
+          val #[P1, xP2] = P ^! SUBSET
+          val k = case ok of SOME k => k | NONE => infer_level (H, P)
+          val z =
+            Context.fresh (H,
+              case oz of
+                   SOME z => z
+                 | NONE => #1 (unbind xP2))
+        in
+          [ H >> MEM $$ #[ w, P1]
+          , H >> xP2 // w
+          , H @@ (z, P1) >> MEM $$ #[xP2 // ``z, UNIV k $$ #[]]
+          ] BY (fn [D, E, F] => SUBSET_INTRO $$ #[w, D, E, z \\ F]
+                 | _ => raise Refine)
+        end)
+
+    fun SubsetElim z onames : tactic =
+      named "SubsetElim" (fn (H >> P) =>
+        let
+          val #[S, xT] = Context.lookup H z ^! SUBSET
+          val (s, t) =
+            case onames of
+                 SOME names => names
+               | NONE =>
+                   (Context.fresh (H, #1 (unbind xT)),
+                    Context.fresh (H, Variable.named "t"))
+
+          val G = Context.empty @@ (s, S)
+          val G' = Context.insert G t Visibility.Hidden (xT // ``s)
+          val H' = ctx_subst (Context.interpose_after H (z, G')) (``s) z
+          val P' = subst (``s) z P
+        in
+          [ H' >> P'
+          ] BY (fn [D] => SUBSET_ELIM $$ #[``z, s \\ (t \\ D)]
+                 | _ => raise Refine)
+        end)
+
+    fun SubsetMemberEq oz ok : tactic =
+      named "SubsetMemberEq" (fn (H >> P) =>
+        let
+          val #[s,t,subset] = P ^! EQ
+          val #[S,xT] = subset ^! SUBSET
+          val z =
+            Context.fresh (H,
+              case oz of
+                   NONE => #1 (unbind xT)
+                 | SOME z => z)
+          val k = case ok of SOME k => k | NONE => infer_level (H, subset)
+        in
+          [ H >> EQ $$ #[s,t,S]
+          , H >> xT // s
+          , H @@ (z,S) >> MEM $$ #[xT // ``z, UNIV k $$ #[]]
+          ] BY (fn [D, E, F] => SUBSET_MEMBER_EQ $$ #[D, E, z \\ F]
+                 | _ => raise Refine)
+        end)
+
+
     val MemUnfold : tactic =
       named "MemUnfold" (fn (H >> P) =>
         let
@@ -489,9 +533,22 @@ struct
 
     fun Witness M : tactic =
       named "Witness" (fn (H >> P) =>
-        [ H >> MEM $$ #[M, P]
-        ] BY (fn [D] => WITNESS $$ #[M, D]
-               | _ => raise Refine))
+        let
+          val has_hidden_variables =
+            foldl
+              (fn (x, b) => b orelse #2 (Context.lookup_visibility H x) = Visibility.Hidden)
+              false
+              (free_variables M)
+          val _ =
+            if has_hidden_variables then
+              assert_irrelevant (H, P)
+            else
+              ()
+        in
+          [ H >> MEM $$ #[M, P]
+          ] BY (fn [D] => WITNESS $$ #[M, D]
+                 | _ => raise Refine)
+        end)
 
     val HypEq : tactic =
       named "HypEq" (fn (H >> P) =>
