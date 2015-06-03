@@ -10,7 +10,6 @@ struct
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
-    | SQUASH_EQ | SQUASH_INTRO | SQUASH_ELIM
     | SUBSET_EQ | SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
 
     | ADMIT
@@ -23,7 +22,6 @@ struct
     | FUN | LAM | AP
     | ISECT
     | EQ | MEM
-    | SQUASH
     | SUBSET
 
   val eq = op=
@@ -64,10 +62,6 @@ struct
        | EQ_SUBST => #[0,0,1]
        | EQ_SYM => #[0]
 
-       | SQUASH_EQ => #[0]
-       | SQUASH_INTRO => #[0]
-       | SQUASH_ELIM => #[0]
-
        | SUBSET_EQ => #[0,1]
        | SUBSET_INTRO => #[0,0,0,1]
        | SUBSET_ELIM => #[0,2]
@@ -92,7 +86,6 @@ struct
        | EQ => #[0,0,0]
        | MEM => #[0,0]
 
-       | SQUASH => #[0]
        | SUBSET => #[0,1]
 
   fun to_string O =
@@ -132,10 +125,6 @@ struct
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
 
-       | SQUASH_EQ => "squash="
-       | SQUASH_INTRO => "squash-intro"
-       | SQUASH_ELIM => "squash-elim"
-
        | SUBSET_EQ => "subset⁼"
        | SUBSET_INTRO => "subset-intro"
        | SUBSET_ELIM => "subset-elim"
@@ -155,7 +144,6 @@ struct
        | EQ => "="
        | MEM => "∈"
 
-       | SQUASH => "↓"
        | SUBSET => "subset"
 
   local
@@ -185,8 +173,6 @@ struct
         || string "⋂" return ISECT
         || string "=" return EQ
         || string "∈" return MEM
-        || string "!" return SQUASH
-        || string "↓" return SQUASH
         || string "subset" return SUBSET
   end
 end

@@ -17,7 +17,6 @@ struct
     val EqRules =
       AxEq
       ORELSE EqEq
-      ORELSE SquashEq
       ORELSE FunEq NONE
       ORELSE IsectEq NONE
       ORELSE PairEq NONE NONE
@@ -26,7 +25,6 @@ struct
       ORELSE ProdEq NONE
       ORELSE VoidEq
       ORELSE UnivEq
-      ORELSE SquashEq
       ORELSE HypEq
       ORELSE ApEq NONE
       ORELSE SpreadEq NONE NONE NONE
@@ -40,7 +38,6 @@ struct
       ORELSE FunIntro NONE NONE
       ORELSE IsectIntro NONE NONE
       ORELSE UnitIntro
-      ORELSE SquashIntro
 
     open Conversions Conversionals
     infix CORELSE

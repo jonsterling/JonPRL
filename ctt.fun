@@ -91,7 +91,6 @@ struct
       case O of
            EQ => true
          | MEM => true
-         | SQUASH => true
          | UNIT => true
          | _ => false
 
@@ -127,7 +126,6 @@ struct
            in
              Level.max (infer_level (H, A), infer_level (H', B))
            end
-         | SQUASH $ #[A] => infer_level (H, A)
          | ` x =>
             let
               val X = Context.lookup H x
@@ -140,7 +138,6 @@ struct
     fun infer_type (H, M) =
       case out M of
            UNIV l $ _ => UNIV (l + 1) $$ #[]
-         | SQUASH $ #[A] => infer_type (H, A)
          | AP $ #[F, N] =>
              let
                val #[A, xB] = infer_type (H, F) ^! FUN
@@ -255,42 +252,6 @@ struct
           val #[] = unit ^! UNIT
         in
           [] BY mk_evidence AX_EQ
-        end)
-
-    val SquashEq : tactic =
-      named "SquashEq" (fn (H >> P) =>
-        let
-          val #[sq1, sq2, univ] = P ^! EQ
-          val #[P1] = sq1 ^! SQUASH
-          val #[P2] = sq2 ^! SQUASH
-          val (UNIV _, #[]) = as_app univ
-        in
-          [ H >> EQ $$ #[P1, P2, univ]
-          ] BY mk_evidence SQUASH_EQ
-        end)
-
-    val SquashIntro : tactic =
-      named "SquashIntro" (fn (H >> P) =>
-        let
-          val #[P'] = P ^! SQUASH
-        in
-          [ H >> P'
-          ] BY mk_evidence SQUASH_INTRO
-        end)
-
-    fun SquashElim z : tactic =
-      named "SquashElim" (fn (H >> P) =>
-        let
-          val #[M, N, A] = P ^! EQ
-
-          fun unsquash Z =
-            let val #[Z'] = Z ^! SQUASH in Z' end
-
-          val ax = AX $$ #[]
-          val H' = ctx_subst (Context.modify H z unsquash) ax z
-        in
-          [ H' >> subst ax z P
-          ] BY mk_evidence SQUASH_ELIM
         end)
 
     fun FunEq oz : tactic =

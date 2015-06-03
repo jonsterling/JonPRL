@@ -55,10 +55,6 @@ struct
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
 
-       | SQUASH_EQ $ _ => ax
-       | SQUASH_INTRO $ _ => ax
-       | SQUASH_ELIM $ _ => ax
-
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 
        | ` x => `` x

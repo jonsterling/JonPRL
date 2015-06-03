@@ -69,11 +69,6 @@ struct
       >> brackets parse_name
       wth UnitElim
 
-  val parse_squash_elim =
-    symbol "squash-elim"
-      >> brackets parse_name
-      wth SquashElim
-
   val parse_prod_eq =
     symbol "prod-eq"
       >> opt (brackets parse_name)
@@ -226,9 +221,6 @@ struct
       || symbol "unit-intro" return UnitIntro
       || parse_unit_elim
       || symbol "ax-eq" return AxEq
-      || symbol "squash-eq" return SquashEq
-      || symbol "squash-intro" return SquashIntro
-      || parse_squash_elim
       || parse_prod_eq || parse_prod_intro || parse_prod_elim || parse_pair_eq || parse_spread_eq
       || parse_fun_eq || parse_fun_intro || parse_fun_elim || parse_lam_eq || parse_ap_eq
       || parse_isect_eq || parse_isect_intro || parse_isect_elim || parse_isect_member_eq || parse_isect_member_case_eq

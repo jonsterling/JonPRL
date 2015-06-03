@@ -52,21 +52,6 @@ sig
     (* H >> Ax = Ax ∈ Unit *)
     val AxEq : Lcf.tactic
 
-    (* H >> !A = !B ∈ U{k} by SquashEq
-     * 1. H >> A = B ∈ U{k}
-     *)
-    val SquashEq : Lcf.tactic
-
-    (* H >> !A by SquashIntro
-     * 1. H >> A
-     *)
-    val SquashIntro : Lcf.tactic
-
-    (* H, x : !A, H'[x] >> P[x] by SquashElim x
-     * 1. H, x : !A, H'[Ax] >> P[Ax]
-     *)
-    val SquashElim : name -> Lcf.tactic
-
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}
      * 2. H, z : A >> B[z] = B'[z] ∈ U{k}
