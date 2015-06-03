@@ -43,7 +43,22 @@ struct
   fun map_after k f ctx =
     Tel.map_after ctx (k, fn (a, vis) => (f a, vis))
 
-  fun to_string f ctx = Tel.to_string (fn (x, _) => f x) ctx
+  fun to_string f tele =
+    let
+      open Tel.ConsView
+      fun go Empty r = r
+        | go (Cons (lbl, (a, vis), tele')) r =
+            let
+              val pretty_lbl =
+                case vis of
+                     Visibility.Visible => V.to_string lbl
+                   | Visibility.Hidden => "[" ^ V.to_string lbl ^ "]"
+            in
+              go (out tele') (r ^ ", " ^ pretty_lbl ^ " : " ^ f a)
+            end
+    in
+      go (out tele) "·"
+    end
 
   fun eq test =
     Tel.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso test (a, b))
