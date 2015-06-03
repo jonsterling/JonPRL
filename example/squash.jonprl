@@ -1,0 +1,10 @@
+squash =def= [λ(A. subset(unit; _. A))].
+
+Theorem squash-wf : [∀(U<0>; A. ∈(ap(squash;A); U<0>))] {
+  unfold <squash>; auto.
+}.
+
+Theorem squash-intro : [∀(U<0>; A. Π(A; M. ap(squash; A)))] {
+  auto; unfold <squash>; auto;
+  subset-intro [<>]; auto.
+}.
