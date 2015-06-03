@@ -35,7 +35,7 @@ Theorem hom_wf : [
 }.
 
 LawCatSig =def= [
-  Σ(RawCatSig; RC.
+  λ(RC.
   Σ(Π(ap(obj; RC); A.
     Π(ap(ap(ap(hom; RC); A); A); f.
       =(ap(ap(ap(cmp; RC); ap(idn; RC)); f);
@@ -56,6 +56,8 @@ LawCatSig =def= [
    unit))))
 ].
 
-law_idn_lhs =def= [λ(C. spread(spread(C; x.y.y); x.y.x))].
-law_idn_rhs =def= [λ(C. spread(spread(spread(C; x.y.y); x.y.y); x.y.x))].
-law_cmp_ass =def= [λ(C. spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x))].
+CatSig =def= [subset(RawCatSig; RC. ap(LawCatSig; RC))].
+
+law_idn_lhs =def= [λ(RC. spread(ap(LawCatSig; RC); x.y.x))].
+law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCatSig; RC); x.y.y); x.y.x))].
+law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCatSig; RC); x.y.y); x.y.y); x.y.x))].
