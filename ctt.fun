@@ -531,6 +531,8 @@ struct
                  | _ => raise Refine)
         end)
 
+    (* !!! TODO !!! This can be used to use an irrelevant/hidden hypothesis in a
+     * relevant position. FIX!!! *)
     fun Witness M : tactic =
       named "Witness" (fn (H >> P) =>
         [ H >> MEM $$ #[M, P]
