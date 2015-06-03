@@ -43,3 +43,21 @@ jonprl example/test.jonprl
 
 You may specify as many files as you like in this command; they will be refined
 in order, in case of any dependencies.
+
+### Basic Syntax
+
+JonPRL has a two-level syntax. There is the syntax of terms in the
+underlying lambda calculus (the object language) and the syntax of
+tactics and definitions in the metalanguage. Terms from the underlying
+lambda calculus are embedded into the metalanguage using either square
+brackets ('[' and ']') or floor brackets ('⌊' and '⌋'). When referring
+to names from the object language in the metalanguage, they are quoted
+in angle brackets ('<' and '>').
+
+The syntax of the object language represents all binders in a
+consistent manner. The variables to be bound in a subterm are written
+before it with a dot. For example, the identity function is written
+`λ(x.x)` where the first `x` indicates the bound name and the second
+refers back to it, and the first projection of a pair `P` is written
+`spread(P; x.y.x)`. The semicolon separates arguments to `spread`.
+
