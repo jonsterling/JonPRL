@@ -66,6 +66,5 @@ Theorem InitialRawCat : [RawCatSig] {
   unfold <RawCatSig>;
   prod-intro [void]; auto;
   prod-intro [λ(A. λ(B. void))]; auto;
-  prod-intro [λ(A. A)]; auto;
-  prod-intro [λ(A. <>)]; auto; void-elim; auto.
+  witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto; void-elim; auto.
 }.
