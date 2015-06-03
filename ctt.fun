@@ -531,13 +531,24 @@ struct
                  | _ => raise Refine)
         end)
 
-    (* !!! TODO !!! This can be used to use an irrelevant/hidden hypothesis in a
-     * relevant position. FIX!!! *)
     fun Witness M : tactic =
       named "Witness" (fn (H >> P) =>
-        [ H >> MEM $$ #[M, P]
-        ] BY (fn [D] => WITNESS $$ #[M, D]
-               | _ => raise Refine))
+        let
+          val has_hidden_variables =
+            foldl
+              (fn (x, b) => b orelse #2 (Context.lookup_visibility H x) = Visibility.Hidden)
+              false
+              (free_variables M)
+          val _ =
+            if has_hidden_variables then
+              assert_irrelevant (H, P)
+            else
+              ()
+        in
+          [ H >> MEM $$ #[M, P]
+          ] BY (fn [D] => WITNESS $$ #[M, D]
+                 | _ => raise Refine)
+        end)
 
     val HypEq : tactic =
       named "HypEq" (fn (H >> P) =>
