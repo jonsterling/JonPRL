@@ -3,16 +3,10 @@ sig
   structure Level : LEVEL
   type term
 
-  type constraint
-  type substitution
-
-  val yank : Level.t -> substitution
-
   exception UnifyLevel
 
-  val unify_level : term * term -> constraint list
-  val resolve : constraint list -> substitution
-  val subst : substitution -> term -> term
+  val unify_level : term * term -> Level.constraint list
+  val subst : Level.substitution -> term -> term
 end
 
 signature SYNTAX_WITH_UNIVERSES =
@@ -20,7 +14,7 @@ sig
   structure Level : LEVEL
   structure Abt : ABT
 
-  val map_level : (Level.t -> Level.t) -> Abt.Operator.t -> Abt.Operator.t
+  val map_level : Level.substitution -> Abt.Operator.t -> Abt.Operator.t
 
   structure View :
   sig

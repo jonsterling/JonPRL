@@ -84,7 +84,7 @@ struct
                display M ^ " = " ^ display N ^ " ∈ " ^ display A
 
            | UNIV i $ #[] =>
-               "U" ^ subscript i
+               "U{" ^ Level.to_string i ^ "}"
 
            | SPREAD $ #[M, xyN] =>
                let
@@ -95,7 +95,7 @@ struct
                end
 
            | UNIV_EQ i $ #[] =>
-               "U⁼" ^ subscript i
+               "U⁼{" ^ Level.to_string i ^ "}"
 
            | EQ_EQ $ #[A,M,N] =>
                display M ^ " =⁼ " ^ display N ^ " ∈⁼ " ^ display A
@@ -219,20 +219,6 @@ struct
 
       and dvar (x, E) =
         if has_free (E, x) then Variable.to_string x else "_"
-
-      and subscript i =
-        case i of
-             0 => "₀"
-           | 1 => "₁"
-           | 2 => "₂"
-           | 3 => "₃"
-           | 4 => "₄"
-           | 5 => "₅"
-           | 6 => "₆"
-           | 7 => "₇"
-           | 8 => "₈"
-           | 9 => "₉"
-           | _ => let val m = i mod 10 in subscript ((i - m) div 10) ^ subscript m end
     in
       display
     end

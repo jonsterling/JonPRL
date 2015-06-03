@@ -101,7 +101,7 @@ struct
 
     fun infer_level (H, P) =
       case out P of
-           UNIV l $ _ => l + 1
+           UNIV l $ _ => Level.prime l
          | FUN $ #[A, xB] =>
            let
              val (H', x, B) = ctx_unbind (H, A, xB)
@@ -131,13 +131,13 @@ struct
               val X = Context.lookup H x
               val k = infer_level (H, X)
             in
-              k - 1
+              Level.pred k
             end
-         | _ => 0
+         | _ => Level.base
 
     fun infer_type (H, M) =
       case out M of
-           UNIV l $ _ => UNIV (l + 1) $$ #[]
+           UNIV l $ _ => UNIV (Level.prime l) $$ #[]
          | AP $ #[F, N] =>
              let
                val #[A, xB] = infer_type (H, F) ^! FUN
@@ -176,7 +176,7 @@ struct
           val (UNIV l, #[]) = as_app univ1
           val (UNIV l', #[]) = as_app univ2
           val (UNIV k, #[]) = as_app univ3
-          val l'' = Level.unify (l, l')
+          val l'' = Level.assert_eq (l, l')
           val _ = Level.assert_lt (l'', k)
         in
           [] BY mk_evidence (UNIV_EQ l'')
@@ -719,9 +719,9 @@ struct
     fun Unfold (development, lem) ok : tactic =
       named "Unfold" (fn (H >> P) =>
         let
-          val k = case ok of SOME k => k | NONE => 0
+          val k = case ok of SOME k => k | NONE => Level.base
           val definiens =
-            UnifyLevel.subst (UnifyLevel.yank k)
+            UnifyLevel.subst (Level.yank k)
               (Development.lookup_definition development lem)
           val rewrite = subst definiens lem
         in
@@ -736,7 +736,7 @@ struct
           val {statement, evidence} = Development.lookup_theorem development lem
           val H' >> P' = statement
           val constraints = UnifyLevelSequent.unify_level (statement, H >> P)
-          val substitution = UnifyLevelSequent.resolve constraints
+          val substitution = Level.resolve constraints
         in
           [] BY (fn _ => UnifyLevel.subst substitution (Susp.force evidence))
         end)

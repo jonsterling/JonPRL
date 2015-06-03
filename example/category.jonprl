@@ -1,6 +1,6 @@
 RawCatSig =def= [
-  Σ(U<0>; Obj.
-  Σ(Π(Obj; A. Π(Obj; B. U<0>)); Hom.
+  Σ(U{i}; Obj.
+  Σ(Π(Obj; A. Π(Obj; B. U{i})); Hom.
   Σ(Π(Obj; A.
     ap(ap(Hom; A); A)); idn.
   Σ(Π(Obj; A. Π(Obj; B. Π(Obj; C.
@@ -15,11 +15,11 @@ hom =def= [λ(C. spread(spread(C; x.y.y); x.y.x))].
 idn =def= [λ(C. spread(spread(spread(C; x.y.y); x.y.y); x.y.x))].
 cmp =def= [λ(C. spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x))].
 
-Theorem RawCatSig_wf : [∈(RawCatSig; U<1>)] {
+Theorem RawCatSig_wf : [∈(RawCatSig; U{i'})] {
   unfold <RawCatSig>; auto.
 }.
 
-Theorem obj_wf : [∀(RawCatSig; RC. ∈(ap(obj; RC); U<0>))] {
+Theorem obj_wf : [∀(RawCatSig; RC. ∈(ap(obj; RC); U{i}))] {
   unfold <RawCatSig>; unfold <obj>;
   auto.
 }.
@@ -28,7 +28,7 @@ Theorem hom_wf : [
   ∀(RawCatSig; RC.
   ∀(ap(obj; RC); A.
   ∀(ap(obj; RC); B.
-    ∈(ap(ap(ap(hom; RC); A); B); U<0>))))
+    ∈(ap(ap(ap(hom; RC); A); B); U{i}))))
 ] {
   unfold <RawCatSig>; unfold <hom>; unfold <obj>;
   auto.

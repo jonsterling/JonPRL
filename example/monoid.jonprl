@@ -1,4 +1,4 @@
-MonoidSig =def= [Σ(U<0>; A. Σ(A; zero. Π(A; m. Π(A; n. A))))].
+MonoidSig =def= [Σ(U{i}; A. Σ(A; zero. Π(A; m. Π(A; n. A))))].
 car =def= [λ(M. spread(M; x.y.x))].
 ze =def= [λ(M. spread(spread(M; x.y.y); x.y.x))].
 op =def= [λ(M. spread(spread(M; x.y.y); x.y.y))].
@@ -10,21 +10,21 @@ Tactic monoid-unfold {
   unfold <MonoidSig>; unfold <car>; unfold <op>; unfold <ze>.
 }.
 
-Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
+Theorem MonoidSig-wf : [∈(MonoidSig; U{i'})] {
   refine <monoid-unfold>; auto.
 }.
 
-Theorem car-wf : [∀(MonoidSig; M. ∈(ap(car;M); U<0>))] {
+Theorem car-wf : [∀(MonoidSig; M. ∈(ap(car;M); U{i}))] {
   refine <monoid-unfold>; auto;
   prod-elim <M>; auto.
 }.
 
-Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U<0>))] {
+Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U{i}))] {
   unfold <LeftUnit>; auto; refine <monoid-unfold>;
   auto; prod-elim <M>; auto .
 }.
 
-Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(ap(RightUnit;M);U<0>))] {
+Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(ap(RightUnit;M);U{i}))] {
   unfold <RightUnit>; auto; refine <monoid-unfold>;
   auto; prod-elim <M>; auto .
 }.

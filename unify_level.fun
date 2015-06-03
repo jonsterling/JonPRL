@@ -1,4 +1,4 @@
-functor UnifyLevel (Syntax : SYNTAX_WITH_UNIVERSES where type Level.t = int) :>
+functor UnifyLevel (Syntax : SYNTAX_WITH_UNIVERSES) :>
   UNIFY_LEVEL
     where type term = Syntax.Abt.t
     where Level = Syntax.Level =
@@ -9,11 +9,6 @@ struct
   infix $ \
 
   type term = Syntax.Abt.t
-  type constraint = int
-  type substitution = Level.t -> Level.t
-
-  fun yank k l = k + l
-
   exception UnifyLevel
 
   local
@@ -32,7 +27,8 @@ struct
       | go H (x \ E, y \ F) R = go (insert H x y) (out E, out F) R
       | go H (O1 $ ES1, O2 $ ES2) R =
           (case (View.out O1, View.out O2) of
-                (View.UNIV k, View.UNIV l) => goes H (ES1, ES2) ((l - k) :: R)
+                (View.UNIV k, View.UNIV l) => goes H (ES1, ES2) (Level.unify (k,l) :: R)
+                (* (l - k) :: R*)
               | (View.OTHER O1', View.OTHER O2') =>
                   if Operator.eq (O1', O2') then
                     goes H (ES1, ES2) R
@@ -50,21 +46,6 @@ struct
           end
   in
     fun unify_level (M, N) = go empty (out M, out N) []
-  end
-
-  local
-    fun go [] R = R
-      | go (0 :: xs) R = go xs R
-      | go (x :: xs) 0 = go xs x
-      | go (x :: xs) R =
-          if (x > 0) andalso (R > 0) then
-            go xs (Int.max (x, R))
-          else if (x < 0) andalso (R < 0) then
-            go xs (Int.min (x, R))
-          else
-            raise UnifyLevel
-  in
-    fun resolve xs = fn x => x + go xs 0
   end
 
   fun subst f M =
@@ -119,8 +100,8 @@ struct
 
   fun map_level f O =
     case O of
-         Operator.UNIV k => Operator.UNIV (f k)
-       | Operator.UNIV_EQ k => Operator.UNIV_EQ (f k)
+         Operator.UNIV k => Operator.UNIV (Level.subst f k)
+       | Operator.UNIV_EQ k => Operator.UNIV_EQ (Level.subst f k)
        | _ => O
 
   structure View =

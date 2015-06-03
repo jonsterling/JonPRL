@@ -90,7 +90,7 @@ struct
 
   fun to_string O =
     case O of
-         UNIV_EQ i => "U⁼<" ^ Int.toString i ^ ">"
+         UNIV_EQ i => "U⁼<" ^ Level.to_string i ^ ">"
        | CUM => "cum"
        | VOID_EQ => "void⁼"
        | VOID_ELIM => "void-elim"
@@ -152,11 +152,8 @@ struct
     infixr 1 ||
     infixr 4 << >>
   in
-    val parse_int =
-      repeat1 digit wth valOf o Int.fromString o String.implode
-
     val parse_univ =
-      string "U<" >> parse_int << string ">" wth UNIV
+      string "U{" >> Level.parse << string "}" wth UNIV
 
     val parse_operator =
       parse_univ

@@ -43,10 +43,10 @@ struct
     infix CORELSE
 
     val Reduce = ApBeta CORELSE SpreadBeta
-    val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
+    val DeepReduce = RewriteGoal (CDEEP Reduce)
     val Auto =
-      LIMIT (IntroRules ORELSE EqRules ORELSE PROGRESS DeepReduce)
+      LIMIT (PROGRESS DeepReduce ORELSE IntroRules ORELSE EqRules)
   end
 end
 

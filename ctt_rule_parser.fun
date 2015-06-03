@@ -42,10 +42,9 @@ struct
 
   exception XXX
 
-  val parse_level =
+  val parse_level_ann =
     symbol "@"
-      >> repeat1 digit
-        wth valOf o Int.fromString o String.implode
+      >> braces Level.parse
 
   fun parse_opt p =
     symbol "_" return NONE
@@ -57,7 +56,7 @@ struct
 
   val parse_cum =
     symbol "cum"
-      >> opt parse_level
+      >> opt parse_level_ann
       wth Cum
 
   val parse_tm =
@@ -78,7 +77,7 @@ struct
     symbol "prod-intro"
       >> parse_tm
       && opt (brackets parse_name)
-      && opt parse_level
+      && opt parse_level_ann
       wth (fn (M, (k, z)) => ProdIntro M k z)
 
   val parse_prod_elim =
@@ -88,7 +87,7 @@ struct
 
   val parse_pair_eq =
     symbol "pair-eq"
-      >> opt (brackets parse_name) && opt parse_level
+      >> opt (brackets parse_name) && opt parse_level_ann
       wth (fn (z, k) => PairEq z k)
 
   val parse_spread_eq =
@@ -105,7 +104,7 @@ struct
 
   val parse_fun_intro =
     symbol "fun-intro"
-      >> opt (brackets parse_name) && opt parse_level
+      >> opt (brackets parse_name) && opt parse_level_ann
       wth (fn (z,k) => FunIntro z k)
 
   val parse_fun_elim =
@@ -118,7 +117,7 @@ struct
   val parse_lam_eq =
     symbol "lam-eq"
       >> opt (brackets parse_name)
-         && opt parse_level
+         && opt parse_level_ann
       wth (fn (z,k) => LamEq z k)
 
   val parse_ap_eq =
@@ -133,7 +132,7 @@ struct
 
   val parse_isect_intro =
     symbol "isect-intro"
-      >> opt (brackets parse_name) && opt parse_level
+      >> opt (brackets parse_name) && opt parse_level_ann
       wth (fn (z,k) => IsectIntro z k)
 
   val parse_isect_elim =
@@ -145,7 +144,7 @@ struct
 
   val parse_isect_member_eq =
     symbol "isect-member-eq"
-      >> opt (brackets parse_name) && opt parse_level
+      >> opt (brackets parse_name) && opt parse_level_ann
       wth (fn (z,k) => IsectMemberEq z k)
 
   val parse_isect_member_case_eq =
@@ -166,7 +165,7 @@ struct
 
   val parse_eq_subst =
     symbol "subst"
-      >> parse_tm && parse_tm && opt parse_level
+      >> parse_tm && parse_tm && opt parse_level_ann
       wth (fn (M, (N, k)) => EqSubst M N k)
 
   type state = Development.t
@@ -179,7 +178,7 @@ struct
   val parse_unfold =
     symbol "unfold"
       >> brackets parse_name
-      && opt parse_level
+      && opt parse_level_ann
       wth (fn (lbl, k) => fn st => Unfold (st, lbl) k)
 
   val parse_custom_tactic =
@@ -196,7 +195,7 @@ struct
     symbol "subset-intro"
       >> parse_tm
       && opt (brackets parse_name)
-      && opt parse_level
+      && opt parse_level_ann
       wth (fn (M, (z, k)) => SubsetIntro M z k)
 
   val parse_subset_elim =
@@ -208,11 +207,12 @@ struct
   val parse_subset_member_eq =
     symbol "subset-member-eq"
       >> opt (brackets parse_name)
-      && opt parse_level
+      && opt parse_level_ann
       wth (fn (z, k) => SubsetMemberEq z k)
 
   val extensional_parse =
     symbol "auto" return Auto
+      || symbol "reduce" return DeepReduce
       || parse_cum
       || symbol "eq-eq" return EqEq
       || symbol "univ-eq" return UnivEq

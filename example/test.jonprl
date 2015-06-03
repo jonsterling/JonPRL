@@ -41,7 +41,7 @@ Theorem test7 : ⌊Π(Σ(void;_.unit); z. void)⌋ {
   auto.
 }.
 
-Theorem axiom-of-choice : ⌊∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))⌋ {
+Theorem axiom-of-choice : ⌊∀(U{i}; A. ∀(U{i}; B. ∀(Π(A; _. Π(B; _. U{i})); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))⌋ {
   auto; prod-intro ⌊λ(w. spread(ap(φ;w); x.y.x))⌋; auto;
   fun-elim <φ> ⌊a⌋; auto;
   subst ⌊=(ap(φ;a); y; Σ(B;b. ap(ap(Q;a);b)))⌋ ⌊z. ap(ap(Q;a); spread(z; x.y.x))⌋; auto;
