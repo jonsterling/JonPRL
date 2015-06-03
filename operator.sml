@@ -94,7 +94,7 @@ struct
        | VOID_EQ => "void⁼"
        | VOID_ELIM => "void-elim"
 
-       | EQ_EQ => "eq="
+       | EQ_EQ => "eq⁼"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
@@ -112,14 +112,14 @@ struct
        | LAM_EQ => "lam⁼"
        | AP_EQ => "ap⁼"
 
-       | ISECT_EQ => "isect="
+       | ISECT_EQ => "isect⁼"
        | ISECT_INTRO => "isect-intro"
        | ISECT_ELIM => "isect-elim"
-       | ISECT_MEMBER_EQ => "isect-mem="
-       | ISECT_MEMBER_CASE_EQ => "isect-mem-case="
+       | ISECT_MEMBER_EQ => "isect-mem⁼"
+       | ISECT_MEMBER_CASE_EQ => "isect-mem-case⁼"
 
        | WITNESS => "witness"
-       | HYP_EQ => "hyp="
+       | HYP_EQ => "hyp⁼"
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
