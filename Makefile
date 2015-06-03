@@ -3,8 +3,8 @@ BIN=bin
 all: smlnj
 
 smlnj:
-	sml go-nj.sml
-	bin/mkexec.sh `which sml` `pwd` jonprl
+	sml build/go-nj.sml
+	build/mkexec.sh `which sml` `pwd` jonprl
 
 test:
 	bin/jonprl example/test.jonprl example/monoid.jonprl example/squash.jonprl
