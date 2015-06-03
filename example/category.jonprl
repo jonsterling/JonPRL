@@ -74,3 +74,11 @@ Theorem InitialRawCat : [RawCatSig] {
   prod-intro [λ(A. λ(B. void))]; auto;
   witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto; void-elim; auto.
 }.
+
+Theorem TerminalRawCat : [RawCatSig] {
+  unfold <RawCatSig>;
+  prod-intro [unit]; auto;
+  prod-intro [λ(A. λ(B. unit))]; auto;
+  prod-intro [λ(A. <>)]; auto;
+  prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))]; auto.
+}.
