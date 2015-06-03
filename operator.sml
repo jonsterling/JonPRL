@@ -138,7 +138,7 @@ struct
        | FUN => "Π"
        | LAM => "λ"
        | AP => "ap"
-       | ISECT => "∩"
+       | ISECT => "⋂"
        | EQ => "="
        | MEM => "∈"
 
