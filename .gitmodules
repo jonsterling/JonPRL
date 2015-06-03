@@ -7,6 +7,7 @@
 [submodule "lib/parcom"]
 	path = lib/parcom
 	url = git@github.com:standardml/parcom.git
+  ignore = untracked
 [submodule "lib/sml-abt"]
 	path = lib/sml-abt
 	url = git@github.com:jonsterling/sml-abt.git
