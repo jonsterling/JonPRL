@@ -1,4 +1,4 @@
-RawCatSig =def= [
+RawCat =def= [
   Σ(U<0>; Obj.
   Σ(Π(Obj; A. Π(Obj; B. U<0>)); Hom.
   Σ(Π(Obj; A.
@@ -16,23 +16,23 @@ idn =def= [λ(C. spread(spread(spread(C; x.y.y); x.y.y); x.y.x))].
 cmp =def= [λ(C. spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x))].
 
 Tactic rawcat_unfold {
-  unfold <RawCatSig>;
+  unfold <RawCat>;
   unfold <obj>;
   unfold <hom>;
   unfold <idn>;
   unfold <cmp>.
 }.
 
-Theorem RawCatSig_wf : [∈(RawCatSig; U<1>)] {
+Theorem RawCat_wf : [∈(RawCat; U<1>)] {
   refine <rawcat_unfold>; auto.
 }.
 
-Theorem obj_wf : [∀(RawCatSig; RC. ∈(ap(obj; RC); U<0>))] {
+Theorem obj_wf : [∀(RawCat; RC. ∈(ap(obj; RC); U<0>))] {
   refine <rawcat_unfold>; auto.
 }.
 
 Theorem hom_wf : [
-  ∀(RawCatSig; RC.
+  ∀(RawCat; RC.
   ∀(ap(obj; RC); A.
   ∀(ap(obj; RC); B.
     ∈(ap(ap(ap(hom; RC); A); B); U<0>))))
@@ -40,7 +40,7 @@ Theorem hom_wf : [
   refine <rawcat_unfold>; auto.
 }.
 
-LawCatSig =def= [
+LawCat =def= [
   λ(RC.
   Σ(Π(ap(obj; RC); A.
     Π(ap(ap(ap(hom; RC); A); A); f.
@@ -62,21 +62,21 @@ LawCatSig =def= [
    unit))))
 ].
 
-CatSig =def= [subset(RawCatSig; RC. ap(LawCatSig; RC))].
+Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
 
-law_idn_lhs =def= [λ(RC. spread(ap(LawCatSig; RC); x.y.x))].
-law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCatSig; RC); x.y.y); x.y.x))].
-law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCatSig; RC); x.y.y); x.y.y); x.y.x))].
+law_idn_lhs =def= [λ(RC. spread(ap(LawCat; RC); x.y.x))].
+law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCat; RC); x.y.y); x.y.x))].
+law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCat; RC); x.y.y); x.y.y); x.y.x))].
 
-Theorem InitialRawCat : [RawCatSig] {
-  unfold <RawCatSig>;
+Theorem InitialRawCat : [RawCat] {
+  unfold <RawCat>;
   prod-intro [void]; auto;
   prod-intro [λ(A. λ(B. void))]; auto;
   witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto; void-elim; auto.
 }.
 
-Theorem TerminalRawCat : [RawCatSig] {
-  unfold <RawCatSig>;
+Theorem TerminalRawCat : [RawCat] {
+  unfold <RawCat>;
   prod-intro [unit]; auto;
   prod-intro [λ(A. λ(B. unit))]; auto;
   prod-intro [λ(A. <>)]; auto;
