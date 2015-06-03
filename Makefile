@@ -3,6 +3,7 @@ BIN=bin
 all: smlnj
 
 smlnj:
+	mkdir -p bin
 	sml build/go-nj.sml
 	build/mkexec.sh `which sml` `pwd` jonprl
 
