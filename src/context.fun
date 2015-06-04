@@ -54,7 +54,7 @@ struct
                      Visibility.Visible => V.to_string lbl
                    | Visibility.Hidden => "[" ^ V.to_string lbl ^ "]"
             in
-              go (out tele') (r ^ ", " ^ pretty_lbl ^ " : " ^ f a)
+              go (out tele') (r ^ "\n" ^ pretty_lbl ^ " : " ^ f a)
             end
     in
       go (out tele) "·"
