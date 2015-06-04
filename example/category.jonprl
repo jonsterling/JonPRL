@@ -84,8 +84,8 @@ Theorem TerminalRawCat : [RawCat] {
 }.
 
 RawFun =def= [
-  λ(RawCat; RC.
-  λ(RawCat; RD.
+  λ(RC.
+  λ(RD.
   Σ(Π(ap(obj; RC); _. ap(obj; RD)); fun_obj.
   Σ(Π(ap(obj; RC); A.
     Π(ap(obj; RC); B.
