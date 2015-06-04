@@ -62,6 +62,19 @@ LawCat =def= [
    unit))))
 ].
 
+Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
+  isect-intro @1;
+  [ unfold <LawCat>; auto; refine <rawcat_unfold>; auto;
+    prod-elim <RC>; auto; prod-elim <t>; auto; prod-elim <t'>; auto; prod-elim <t''>; auto;
+    [ id
+    , id
+    , id
+    , id
+    ]
+  , lemma <RawCat_wf>
+  ].
+}.
+
 Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
 
 law_idn_lhs =def= [λ(RC. spread(ap(LawCat; RC); x.y.x))].
@@ -80,7 +93,8 @@ Theorem TerminalRawCat : [RawCat] {
   prod-intro [unit]; auto;
   prod-intro [λ(A. λ(B. unit))]; auto;
   prod-intro [λ(A. <>)]; auto;
-  prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))]; auto.
+  prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
+  auto.
 }.
 
 RawFun =def= [
