@@ -51,6 +51,6 @@ struct
         middle (symbol "*{") ($ parse_script) (symbol "}")
           wth (fn t => REPEAT o t)
 
-  val parse = (not any return (fn _ => ID)) || ($ parse_script << symbol ".")
+  val parse = $ parse_script << opt (dot || semi)
 end
 
