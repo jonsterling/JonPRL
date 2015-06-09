@@ -90,7 +90,7 @@ sig
     val SubsetElim : name * (name * name) option -> Lcf.tactic
     val SubsetMemberEq : name option * Level.t option -> Lcf.tactic
 
-    val MemUnfold : Lcf.tactic
+    val MemCD : Lcf.tactic
     val Witness : term -> Lcf.tactic
 
     val Assumption : Lcf.tactic

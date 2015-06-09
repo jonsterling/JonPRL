@@ -225,8 +225,8 @@ struct
       end
 
     fun VoidElim (H >> P) =
-        [ H >> VOID $$ #[]
-        ] BY mk_evidence VOID_ELIM
+      [ H >> VOID $$ #[]
+      ] BY mk_evidence VOID_ELIM
 
     fun AxEq (H >> P) =
       let
@@ -458,7 +458,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun MemUnfold (H >> P) =
+    fun MemCD (H >> P) =
       let
         val #[M, A] = P ^! MEM
       in

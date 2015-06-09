@@ -235,8 +235,37 @@ struct
       && opt parse_level
       astac SubsetMemberEq
 
+  val parse_intro_args =
+    opt parse_tm
+      && opt (brackets parse_name)
+      && opt parse_level
+      wth (fn (tm, (z, k)) => {term = tm, fresh_variable = z, level = k})
+
+  val parse_intro =
+    symbol "intro"
+      && parse_intro_args
+      astac Intro
+
+  val parse_names =
+    opt (brackets (commaSep1 parse_name))
+    wth (fn SOME xs => xs
+          | NONE => [])
+
+  val parse_elim_args =
+    brackets parse_name
+      && opt parse_tm
+      && parse_names
+      wth (fn (z, (M, names)) => {target = z, term = M, names = names})
+
+  val parse_elim =
+    symbol "elim"
+      && parse_elim_args
+      astac Elim
+
   val extensional_parse =
     symbol "auto" astac_ Auto
+      || parse_intro
+      || parse_elim
       || parse_cum
       || symbol "eq-eq" astac_ EqEq
       || symbol "univ-eq" astac_ UnivEq
@@ -249,7 +278,7 @@ struct
       || parse_prod_eq || parse_prod_intro || parse_prod_elim || parse_pair_eq || parse_spread_eq
       || parse_fun_eq || parse_fun_intro || parse_fun_elim || parse_lam_eq || parse_ap_eq
       || parse_isect_eq || parse_isect_intro || parse_isect_elim || parse_isect_member_eq || parse_isect_member_case_eq
-      || symbol "mem-unfold" astac_ MemUnfold
+      || symbol "mem-cd" astac_ MemCD
       || symbol "assumption" astac_ Assumption
       || symbol "symmetry" astac_ EqSym
       || symbol "hyp-eq" astac_ HypEq

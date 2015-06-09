@@ -11,7 +11,37 @@ struct
      structure ConvTypes = ConvTypes)
 
   open Tacticals Rules
-  infix ORELSE THEN
+  infix ORELSE ORELSE_LAZY THEN
+
+  type intro_args =
+    {term : term option,
+     fresh_variable : name option,
+     level : Level.t option}
+
+  type elim_args =
+    {target : name,
+     names : name list,
+     term : term option}
+
+  fun Intro {term,fresh_variable,level} =
+     MemCD
+       ORELSE UnitIntro
+       ORELSE Assumption
+       ORELSE FunIntro (fresh_variable, level)
+       ORELSE IsectIntro (fresh_variable, level)
+       ORELSE_LAZY (fn _ => ProdIntro (valOf term, fresh_variable, level))
+       ORELSE_LAZY (fn _ => SubsetIntro (valOf term, fresh_variable, level))
+
+  fun take2 (x::y::_) = SOME (x,y)
+    | take2 _ = NONE
+
+  fun Elim {target, names, term} =
+    (VoidElim THEN Hypothesis target)
+      ORELSE UnitElim target
+      ORELSE ProdElim (target, take2 names)
+      ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
+      ORELSE_LAZY (fn _ => IsectElim (target, valOf term, take2 names))
+      ORELSE SubsetElim (target, take2 names)
 
   local
     val EqRules =
@@ -33,12 +63,8 @@ struct
       ORELSE SubsetMemberEq (NONE, NONE)
       ORELSE IsectMemberEq (NONE, NONE)
 
-    val IntroRules =
-      MemUnfold
-      ORELSE Assumption
-      ORELSE FunIntro (NONE, NONE)
-      ORELSE IsectIntro (NONE, NONE)
-      ORELSE UnitIntro
+    val AutoVoidElim = VoidElim THEN Assumption
+    val AutoIntro = Intro {term = NONE, fresh_variable = NONE, level = NONE}
 
     open Conversions Conversionals
     infix CORELSE
@@ -47,7 +73,7 @@ struct
     val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
     val Auto =
-      LIMIT (IntroRules ORELSE EqRules ORELSE PROGRESS DeepReduce)
+      LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE EqRules ORELSE PROGRESS DeepReduce)
   end
 end
 
