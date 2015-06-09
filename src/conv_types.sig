@@ -9,3 +9,11 @@ sig
 
   exception Conv
 end
+
+signature CONV_COMPILER =
+sig
+  include CONV_TYPES
+
+  type rule = {input : Syntax.t, output : Syntax.t}
+  val compile : rule -> conv
+end
