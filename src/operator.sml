@@ -92,6 +92,7 @@ struct
     | eq (EQ, EQ) = true
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
+    | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
     | eq _ = false
 
   fun arity O =
