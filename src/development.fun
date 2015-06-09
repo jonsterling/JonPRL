@@ -15,19 +15,26 @@ struct
 
   structure Object =
   struct
-    type definition = {definiens : term}
+    type definition =
+      {definiens : term}
     type theorem =
       {statement : Lcf.goal,
        script : Lcf.tactic,
        evidence : Lcf.evidence Susp.susp}
+    type operator_decl =
+      {arity : int vector}
 
     datatype t =
         Definition of definition
       | Theorem of theorem
       | Tactic of Lcf.tactic
+      | Operator of operator_decl
+
+    fun arity_to_string v =
+      "(" ^ Vector.foldri (fn (i, s1, s2) => if i = (Vector.length v - 1) then s1 else s1 ^ "; " ^ s2) "" (Vector.map Int.toString v) ^ ")"
 
     fun to_string (lbl, Definition {definiens}) =
-              Telescope.Label.to_string lbl ^ " =def= ⌊" ^ Syntax.to_string definiens ^ "⌋."
+          Telescope.Label.to_string lbl ^ " =def= ⌊" ^ Syntax.to_string definiens ^ "⌋."
       | to_string (lbl, Theorem {statement, evidence,...}) =
           let
             val evidence' = Susp.force evidence
@@ -39,6 +46,10 @@ struct
           end
       | to_string (lbl, Tactic _) =
           "Tactic " ^ Telescope.Label.to_string lbl ^ "."
+      | to_string (lbl, Operator {arity}) =
+          "Operator " ^ Telescope.Label.to_string lbl
+            ^ " : " ^ arity_to_string arity
+            ^ "."
   end
 
   type object = Object.t
@@ -66,6 +77,9 @@ struct
 
   fun define_tactic T (lbl, tac) =
     Telescope.snoc T (lbl, Object.Tactic tac)
+
+  fun declare_operator T (lbl, arity) =
+    Telescope.snoc T (lbl, Object.Operator {arity = arity})
 
   fun lookup_definition T lbl =
     case Telescope.lookup T lbl of

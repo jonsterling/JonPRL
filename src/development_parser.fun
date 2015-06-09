@@ -32,7 +32,7 @@ struct
     val identStart = identLetter
     val opStart = fail "Operators not supported" : scanner
     val opLetter = opStart
-    val reservedNames = ["Theorem", "Tactic"]
+    val reservedNames = ["Theorem", "Tactic", "Operator"]
     val reservedOpNames = []
     val caseSensitive = true
   end
@@ -55,19 +55,31 @@ struct
              Development.define D (definiendum, definiens))
 
   val parse_theorem =
-    reserved "Theorem" >> parse_name << symbol ":"
+    reserved "Theorem" >> parse_name << colon
       && parse_tm
       && braces TacticScript.parse
       wth (fn (thm, (M, tac)) => fn D =>
              Development.prove D (thm, Sequent.>> (Sequent.Context.empty, M), tac D))
+
+  val parse_int =
+    repeat1 digit wth valOf o Int.fromString o String.implode
+
+  val parse_arity =
+    parens (semiSep parse_int)
+    wth Vector.fromList
 
   val parse_tactic =
     reserved "Tactic" >> parse_name
       && braces TacticScript.parse
       wth (fn (lbl, tac) => fn D => Development.define_tactic D (lbl, tac D))
 
+  val parse_operator_decl =
+    reserved "Operator" >> parse_name << colon
+      && parse_arity
+      wth (fn (lbl, arity) => fn D => Development.declare_operator D (lbl, arity))
+
   fun parse dev =
-    sepEnd (parse_definition || parse_theorem || parse_tactic) dot << not any
+    sepEnd (parse_definition || parse_theorem || parse_tactic || parse_operator_decl) dot << not any
       wth (foldl (fn (K, D) => K D) dev)
 
 end

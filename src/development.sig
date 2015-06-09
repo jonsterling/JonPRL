@@ -30,6 +30,9 @@ sig
   (* extend a development with a custom tactic *)
   val define_tactic : t -> label * Lcf.tactic -> t
 
+  (* extend a development with a new operator *)
+  val declare_operator : t -> label * int vector -> t
+
   (* lookup the definiens *)
   val lookup_definition : t -> label -> term
 
