@@ -2,6 +2,7 @@ signature PARSE_ABT =
 sig
   include ABT_UTIL
 
-  val parse_abt : t CharParser.charParser
+  type state
+  val parse_abt : (state -> t) CharParser.charParser
 end
 

@@ -4,6 +4,7 @@ functor ParseAbt
    sharing Syntax.Operator = Operator) : PARSE_ABT =
 struct
   structure ParseOp = Operator
+  type state = Operator.state
 
   val force = ParserCombinators.$
   open ParserCombinators CharParser Syntax
@@ -69,23 +70,31 @@ struct
   local
     val new_variable = identifier wth (fn x => (x, Variable.named x))
     fun var sigma = identifier wth (fn x => `` (SymbolTable.named sigma x))
+    fun konst x y = x
 
-    fun abt sigma () = force (app sigma) || force (abs sigma) || var sigma ?? "abt"
+    fun abt sigma () =
+      (force (app sigma)
+      || force (abs sigma)
+      || (var sigma wth konst)) ?? "abt"
     and app sigma () =
       ParseOp.parse_operator
         && opt (parens (force (args sigma)))
-        wth (fn (O, ES) => O $$ (getOpt (ES, #[]))) ?? "app"
+        wth (fn (O, ES) => fn st =>
+          let
+            fun ES' st = Vector.map (fn x => x st) (getOpt (ES, #[]))
+          in
+            O st $$ ES' st
+          end) ?? "app"
     and abs sigma () =
       (new_variable << spaces << symbol "." << spaces >>= (fn (n,v) =>
         let
           val sigma' = SymbolTable.bind sigma (n,v)
         in
-          force (abt sigma') wth (fn E => v \\ E)
+          force (abt sigma') wth (fn E => fn st => v \\ E st)
         end)) ?? "abs"
-
     and args sigma () = separate (force (abt sigma)) (symbol ";") wth Vector.fromList ?? "args"
 
   in
-    val parse_abt : t charParser = force (abt SymbolTable.empty)
+    val parse_abt : (state -> t) charParser = force (abt SymbolTable.empty)
   end
 end

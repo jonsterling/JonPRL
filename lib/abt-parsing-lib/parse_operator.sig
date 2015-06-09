@@ -2,5 +2,6 @@ signature PARSE_OPERATOR =
 sig
   include OPERATOR
 
-  val parse_operator : t CharParser.charParser
+  type state
+  val parse_operator : (state -> t) CharParser.charParser
 end
