@@ -159,8 +159,12 @@ struct
     val parse_int =
       repeat1 digit wth valOf o Int.fromString o String.implode
 
+  fun angles p =
+    middle (string "<") p (string ">")
+      || middle (string "〈") p  (string "〉")
+
     val parse_univ =
-      string "U<" >> parse_int << string ">" wth UNIV
+      string "U" >> angles parse_int wth UNIV
 
     val parse_operator =
       parse_univ

@@ -7,13 +7,12 @@ Theorem test1 : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
 
 ||| Lemmas defined earlier in the development may be used later on using the 'lemma' tactic.
 Theorem test1' : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
-  lemma <test1>.
+  lemma 〈test1〉.
 }.
 
 ||| Abstractions may be unfolded using the 'unfold' tactic.
 Theorem test2 : ⌊Π(unit; _. Σ(unit; _. welp))⌋ {
-  intro; auto; unfold <welp>;
-  intro; unfold <welp>; auto.
+  unfold 〈welp〉; auto
 }.
 
 Theorem test3 : ⌊∈(λ(x. x); Π(unit; _. unit))⌋ {
@@ -34,13 +33,13 @@ Theorem test6 : ⌊Π(unit; _. Σ(unit; _.unit))⌋ {
 
 Theorem test7 : ⌊Π(Σ(void;_.unit); z. void)⌋ {
   auto;
-  elim <z>;
+  elim 〈z〉;
   auto.
 }.
 
-Theorem axiom-of-choice : ⌊∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))⌋ {
+Theorem axiom-of-choice : ⌊∀(U〈0〉; A. ∀(U〈0〉; B. ∀(Π(A; _. Π(B; _. U〈0〉)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))⌋ {
   auto; intro ⌊λ(w. spread(ap(φ;w); x.y.x))⌋; auto;
-  elim <φ> ⌊a⌋; auto;
-  hyp-subst ← <z> ⌊z. ap(ap(Q;a); spread(z; x.y.x))⌋; auto;
-  elim <y>; auto.
+  elim 〈φ〉 ⌊a⌋; auto;
+  hyp-subst ← 〈z〉 ⌊z. ap(ap(Q;a); spread(z; x.y.x))⌋; auto;
+  elim 〈y〉; auto.
 }.

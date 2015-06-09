@@ -73,12 +73,16 @@ struct
       && opt parse_level
       astac Cum
 
-  fun quote_brackets p =
+  fun angles p =
+    brackets p
+      || middle (symbol "〈") p  (symbol "〉")
+
+  fun quote_squares p =
     middle (symbol "[") p (symbol "]")
       || middle (symbol "⌊") p (symbol "⌋")
 
   val parse_tm =
-    quote_brackets ParseSyntax.parse_abt
+    quote_squares ParseSyntax.parse_abt
 
   val parse_witness =
     symbol "witness"
@@ -87,7 +91,7 @@ struct
 
   val parse_hypothesis =
     symbol "hypothesis"
-      && brackets parse_name
+      && angles parse_name
       astac Hypothesis
 
   val parse_eq_subst =
@@ -102,31 +106,31 @@ struct
   val parse_hyp_subst =
     symbol "hyp-subst"
       && parse_dir
-      && brackets parse_name
+      && angles parse_name
       && parse_tm && opt parse_level
       astac (HypEqSubst o flat4)
 
   val parse_lemma =
     symbol "lemma"
-      && brackets parse_name
+      && angles parse_name
       wth (fn (name, lbl) => fn st => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Lemma (st, lbl)))
 
   val parse_unfold =
     symbol "unfold"
-      && brackets parse_name
+      && angles parse_name
       wth (fn (name, lbl) => fn st => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Unfold (st, lbl)))
 
   val parse_custom_tactic =
     symbol "refine"
-      >> brackets parse_name
+      >> angles parse_name
       wth (fn lbl => fn st => fn (pos : Pos.t) =>
             Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, Development.lookup_tactic st lbl))
 
   val parse_intro_args =
     opt parse_tm
-      && opt (brackets parse_name)
+      && opt (angles parse_name)
       && opt parse_level
       wth (fn (tm, (z, k)) => {term = tm, fresh_variable = z, level = k})
 
@@ -136,12 +140,12 @@ struct
       astac Intro
 
   val parse_names =
-    opt (brackets (commaSep1 parse_name))
+    opt (angles (commaSep1 parse_name))
     wth (fn SOME xs => xs
           | NONE => [])
 
   val parse_elim_args =
-    brackets parse_name
+    angles parse_name
       && opt parse_tm
       && parse_names
       wth (fn (z, (M, names)) => {target = z, term = M, names = names})
@@ -152,7 +156,7 @@ struct
       astac Elim
 
   val parse_terms =
-    opt (quote_brackets (commaSep1 ParseSyntax.parse_abt))
+    opt (quote_squares (commaSep1 ParseSyntax.parse_abt))
     wth (fn SOME xs => xs
           | NONE => [])
 
