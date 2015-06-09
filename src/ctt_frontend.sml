@@ -25,7 +25,6 @@ struct
 
   fun load_file (initial_development, name) : Development.t =
     let
-      exception RefinementFailed
       val instream = TextIO.openIn name
       val char_stream = Stream.fromProcess (fn () => TextIO.input1 instream)
       fun is_eol s =
@@ -39,8 +38,14 @@ struct
       (case (CharParser.parseChars (parse initial_development) coord_stream) of
            Sum.INL e => raise Fail e
          | Sum.INR x => x)
-      handle Development.RemainingSubgoals goals =>
-        (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Lcf.goal_to_string g ^ "\n") "" goals ^ "\n\n");
-        raise RefinementFailed)
+      handle
+          Development.RemainingSubgoals goals =>
+            (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Lcf.goal_to_string g ^ "\n") "" goals ^ "\n\n");
+            raise Development.RemainingSubgoals goals)
+        | AnnotatedLcf.RefinementFailed (exn as {error, goal, metadata as {name,pos}}) =>
+            (print
+              ("\n\n[" ^ Pos.toString pos
+                 ^ "]: tactic '" ^ name ^ "' failed with goal: \n" ^ Sequent.to_string goal ^ "\n\n");
+            raise AnnotatedLcf.RefinementFailed exn)
     end
 end

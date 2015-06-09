@@ -1,5 +1,5 @@
 functor TacticScript
-  (structure Lcf : LCF
+  (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
    type state
    val parse_rule : (state -> Lcf.tactic) CharParser.charParser) : TACTIC_SCRIPT =
 struct
@@ -33,7 +33,16 @@ struct
   structure TP = TokenParser (LangDef)
   open TP
 
-  val parse_id : (state -> tactic) charParser = symbol "id" return (fn _ => ID)
+  val pipe = symbol "|"
+
+  val parse_id : tactic charParser =
+    !! (symbol "id") wth (fn (name, pos) =>
+      Lcf.annotate ({name = name, pos = pos}, ID))
+
+  val parse_fail : tactic charParser =
+    !! (symbol "fail") wth (fn (name, pos) =>
+      Lcf.annotate ({name = name, pos = pos}, FAIL))
+
   fun parse_script () : (state -> tactic) charParser =
     separate1 ((squares (commaSep ($ parse_script)) wth Sum.INL) <|> ($ plain wth Sum.INR)) semi
     wth (foldl (fn (t1, t2) => fn s =>
@@ -41,7 +50,13 @@ struct
                         Sum.INR t => THEN (t2 s, t s)
                       | Sum.INL x => THENL (t2 s, map (fn t' => t' s) x)) (fn _ => ID))
 
-  and plain () = parse_rule || $ parse_try || $ parse_repeat || parse_id
+  and plain () =
+    parse_rule
+      || $ parse_try
+      || $ parse_repeat
+      || $ parse_orelse
+      || parse_id wth (fn tac => fn _ => tac)
+      || parse_fail wth (fn tac => fn _ => tac)
 
   and parse_try () =
         middle (symbol "?{") ($ parse_script) (symbol "}")
@@ -50,6 +65,10 @@ struct
   and parse_repeat () =
         middle (symbol "*{") ($ parse_script) (symbol "}")
           wth (fn t => REPEAT o t)
+
+  and parse_orelse () =
+        parens (separate1 ($ parse_script) pipe)
+        wth foldl (fn (t1, t2) => fn s => ORELSE (t1 s, t2 s)) (fn _ => FAIL)
 
   val parse = $ parse_script << opt (dot || semi)
 end

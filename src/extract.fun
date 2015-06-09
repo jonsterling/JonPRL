@@ -25,6 +25,7 @@ struct
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
+       | IND_PROD_INTRO $ #[D,E] => PAIR $$ #[extract D, extract E]
        | PROD_ELIM $ #[R, xyD] => SPREAD $$ #[R, extract xyD]
        | PAIR_EQ $ _ => ax
        | SPREAD_EQ $ _ => ax
@@ -48,6 +49,7 @@ struct
 
        | SUBSET_EQ $ _ => ax
        | SUBSET_INTRO $ #[w,_,_,_] => w
+       | IND_SUBSET_INTRO $ #[D, _] => extract D
        | SUBSET_ELIM $ #[R, stD] => extract (stD // R) // ax
        | SUBSET_MEMBER_EQ $ _ => ax
 

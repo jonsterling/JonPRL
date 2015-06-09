@@ -63,34 +63,36 @@ sig
      * 2. H >> B[M]
      * 3. H, x:A >> B[x] ∈ U{k}
      *)
-    val ProdIntro : term -> name option -> Level.t option -> Lcf.tactic
+    val ProdIntro : term * name option * Level.t option -> Lcf.tactic
+    val IndependentProdIntro : Lcf.tactic
 
     (* H, z : (Σx:A)B[x], H'[z] >> P[z] by ProdElim z (s, t)
      * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
      *)
-    val ProdElim : name -> (name * name) option -> Lcf.tactic
+    val ProdElim : name * (name * name) option -> Lcf.tactic
 
-    val PairEq : name option -> Level.t option -> Lcf.tactic
-    val SpreadEq : term option -> term option -> (name * name * name) option  -> Lcf.tactic
+    val PairEq : name option * Level.t option -> Lcf.tactic
+    val SpreadEq : term option * term option * (name * name * name) option -> Lcf.tactic
 
     val FunEq : name option -> Lcf.tactic
-    val FunIntro : name option -> Level.t option -> Lcf.tactic
-    val FunElim : name -> term -> (name * name) option -> Lcf.tactic
-    val LamEq : name option -> Level.t option -> Lcf.tactic
+    val FunIntro : name option * Level.t option -> Lcf.tactic
+    val FunElim : name * term * (name * name) option -> Lcf.tactic
+    val LamEq : name option * Level.t option -> Lcf.tactic
     val ApEq : term option -> Lcf.tactic
 
     val IsectEq : name option -> Lcf.tactic
-    val IsectIntro : name option -> Level.t option -> Lcf.tactic
-    val IsectElim : name -> term -> (name * name) option -> Lcf.tactic
-    val IsectMemberEq : name option -> Level.t option -> Lcf.tactic
-    val IsectMemberCaseEq : term option -> term -> Lcf.tactic
+    val IsectIntro : name option * Level.t option -> Lcf.tactic
+    val IsectElim : name * term * (name * name) option -> Lcf.tactic
+    val IsectMemberEq : name option * Level.t option -> Lcf.tactic
+    val IsectMemberCaseEq : term option * term -> Lcf.tactic
 
     val SubsetEq : name option -> Lcf.tactic
-    val SubsetIntro : term -> name option -> Level.t option -> Lcf.tactic
-    val SubsetElim : name -> (name * name) option -> Lcf.tactic
-    val SubsetMemberEq : name option -> Level.t option -> Lcf.tactic
+    val SubsetIntro : term * name option * Level.t option -> Lcf.tactic
+    val IndependentSubsetIntro : Lcf.tactic
+    val SubsetElim : name * (name * name) option -> Lcf.tactic
+    val SubsetMemberEq : name option * Level.t option -> Lcf.tactic
 
-    val MemUnfold : Lcf.tactic
+    val MemCD : Lcf.tactic
     val Witness : term -> Lcf.tactic
 
     val Assumption : Lcf.tactic
@@ -102,8 +104,11 @@ sig
 
     val RewriteGoal : ConvTypes.conv -> Lcf.tactic
 
-    val EqSubst : term -> term -> Level.t option -> Lcf.tactic
+    val EqSubst : term * term * Level.t option -> Lcf.tactic
     val EqSym : Lcf.tactic
+
+    datatype dir = LEFT | RIGHT
+    val HypEqSubst : dir * name * term * Level.t option -> Lcf.tactic
   end
 
   structure Conversions :

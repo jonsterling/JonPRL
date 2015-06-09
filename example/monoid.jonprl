@@ -1,46 +1,46 @@
-MonoidSig =def= [Σ(U<0>; A. Σ(A; zero. Π(A; m. Π(A; n. A))))].
-car =def= [λ(M. spread(M; x.y.x))].
-ze =def= [λ(M. spread(spread(M; x.y.y); x.y.x))].
-op =def= [λ(M. spread(spread(M; x.y.y); x.y.y))].
+MonoidSig =def= ⌊Σ(U〈0〉; A. Σ(A; zero. Π(A; m. Π(A; n. A))))⌋.
+car =def= ⌊λ(M. spread(M; x.y.x))⌋.
+ze =def= ⌊λ(M. spread(spread(M; x.y.y); x.y.x))⌋.
+op =def= ⌊λ(M. spread(spread(M; x.y.y); x.y.y))⌋.
 
-LeftUnit =def= [λ(M. ∀(ap(car;M); m. =(m; ap(ap(ap(op;M); ap(ze;M)); m) ;ap(car;M))))].
-RightUnit =def= [λ(M. ∀(ap(car;M); m. =(m; ap(ap(ap(op;M); m); ap(ze;M));ap(car;M))))].
+LeftUnit =def= ⌊λ(M. ∀(ap(car;M); m. =(m; ap(ap(ap(op;M); ap(ze;M)); m) ;ap(car;M))))⌋.
+RightUnit =def= ⌊λ(M. ∀(ap(car;M); m. =(m; ap(ap(ap(op;M); m); ap(ze;M));ap(car;M))))⌋.
 
 Tactic monoid-unfold {
-  unfold <MonoidSig>; unfold <car>; unfold <op>; unfold <ze>.
+  unfold 〈MonoidSig〉; unfold 〈car〉; unfold 〈op〉; unfold 〈ze〉.
 }.
 
-Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
-  refine <monoid-unfold>; auto.
+Theorem MonoidSig-wf : ⌊∈(MonoidSig; U〈1〉)⌋ {
+  refine 〈monoid-unfold〉; auto.
 }.
 
-Theorem car-wf : [∀(MonoidSig; M. ∈(ap(car;M); U<0>))] {
-  refine <monoid-unfold>; auto;
-  prod-elim <M>; auto.
+Theorem car-wf : ⌊∀(MonoidSig; M. ∈(ap(car;M); U〈0〉))⌋ {
+  refine 〈monoid-unfold〉; auto;
+  elim 〈M〉; auto.
 }.
 
-Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U<0>))] {
-  unfold <LeftUnit>; auto; refine <monoid-unfold>;
-  auto; prod-elim <M>; auto .
+Theorem LeftUnit-wf : ⌊∀(MonoidSig; M. ∈(ap(LeftUnit;M);U〈0〉))⌋ {
+  unfold 〈LeftUnit〉; auto; refine 〈monoid-unfold〉;
+  auto; elim 〈M〉; auto .
 }.
 
-Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(ap(RightUnit;M);U<0>))] {
-  unfold <RightUnit>; auto; refine <monoid-unfold>;
-  auto; prod-elim <M>; auto .
+Theorem RightUnit-wf : ⌊∀(MonoidSig; M. ∈(ap(RightUnit;M);U〈0〉))⌋ {
+  unfold 〈RightUnit〉; auto; refine 〈monoid-unfold〉;
+  auto; elim 〈M〉; auto .
 }.
 
-Theorem UnitMonoidStruct : [MonoidSig] {
-  unfold <MonoidSig>;
-  prod-intro [unit]; auto;
-  prod-intro [<>] ; auto.
+Theorem UnitMonoidStruct : ⌊MonoidSig⌋ {
+  unfold 〈MonoidSig〉;
+  intro ⌊unit⌋; auto;
+  intro ⌊<>⌋ ; auto.
 }.
 
-Theorem UnitMonoid-LeftUnit : [ap(LeftUnit;UnitMonoidStruct)] {
-  unfold <UnitMonoidStruct>; unfold <LeftUnit>; refine <monoid-unfold>; auto.
+Theorem UnitMonoid-LeftUnit : ⌊ap(LeftUnit;UnitMonoidStruct)⌋ {
+  unfold 〈UnitMonoidStruct〉; unfold 〈LeftUnit〉; refine 〈monoid-unfold〉; auto;
+  elim 〈m〉; auto.
 }.
 
-
-Theorem UnitMonoid-RightUnit : [ap(RightUnit;UnitMonoidStruct)] {
-  unfold <UnitMonoidStruct>; unfold <RightUnit>; refine <monoid-unfold>; auto;
-  unit-elim <m>; auto.
+Theorem UnitMonoid-RightUnit : ⌊ap(RightUnit;UnitMonoidStruct)⌋ {
+  unfold 〈UnitMonoidStruct〉; unfold 〈RightUnit〉; refine 〈monoid-unfold〉; auto;
+  elim 〈m〉; auto.
 }.

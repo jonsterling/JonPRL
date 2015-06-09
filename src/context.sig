@@ -6,6 +6,7 @@ sig
   val fresh : 'a context * name -> name
 
   val empty : 'a context
+  val is_empty : 'a context -> bool
 
   val insert : 'a context -> name -> Visibility.t -> 'a -> 'a context
   val interpose_after : 'a context -> name * 'a context -> 'a context
