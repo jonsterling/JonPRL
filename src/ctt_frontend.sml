@@ -45,7 +45,7 @@ struct
         | AnnotatedLcf.RefinementFailed (exn as {error, goal, metadata as {name,pos}}) =>
             (print
               ("\n\n[" ^ Pos.toString pos
-                 ^ "]: tactic '" ^ name ^ "' failed with goal: \n" ^ Sequent.to_string goal ^ "\n\n");
+                 ^ "]: tactic '" ^ name ^ "' failed (" ^ exnMessage error ^ ") with goal: \n" ^ Sequent.to_string goal ^ "\n\n");
             raise AnnotatedLcf.RefinementFailed exn)
     end
 end
