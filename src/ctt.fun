@@ -685,6 +685,28 @@ struct
         ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, z \\ F]
                | _ => raise Refine)
       end
+
+    datatype dir = LEFT | RIGHT
+    local
+      structure Tacticals = Tacticals (Lcf)
+      open Tacticals
+      infix THEN THENL
+    in
+      fun HypEqSubst (dir, z) xC ok (H >> P) =
+        let
+          val X = Context.lookup H z
+        in
+          case dir of
+               RIGHT => (EqSubst X xC ok THENL [Hypothesis z, ID, ID]) (H >> P)
+             | LEFT =>
+                 let
+                   val #[M,N,A] = X ^! EQ
+                 in
+                   (EqSubst (EQ $$ #[N,M,A]) xC ok
+                     THENL [EqSym THEN Hypothesis z, ID, ID]) (H >> P)
+                 end
+        end
+    end
   end
 
   structure Conversions =

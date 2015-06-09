@@ -182,6 +182,17 @@ struct
       && parse_tm && parse_tm && opt parse_level
       astac (fn (M, (N, k)) => EqSubst M N k)
 
+  val parse_dir =
+    (symbol "→" || symbol "->") return RIGHT
+      || (symbol "←" || symbol "<-") return LEFT
+
+  val parse_hyp_subst =
+    symbol "hyp-subst"
+      && parse_dir
+      && brackets parse_name
+      && parse_tm && opt parse_level
+      astac (fn (z, (dir, (xC, k))) => HypEqSubst (z,dir) xC k)
+
   val parse_lemma =
     symbol "lemma"
       && brackets parse_name
@@ -243,6 +254,7 @@ struct
       || symbol "symmetry" astac_ EqSym
       || symbol "hyp-eq" astac_ HypEq
       || parse_witness
+      || parse_hyp_subst
       || parse_eq_subst
       || parse_subset_eq
       || parse_subset_intro

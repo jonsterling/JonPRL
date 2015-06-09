@@ -104,6 +104,9 @@ sig
 
     val EqSubst : term -> term -> Level.t option -> Lcf.tactic
     val EqSym : Lcf.tactic
+
+    datatype dir = LEFT | RIGHT
+    val HypEqSubst : dir * name -> term -> Level.t option -> Lcf.tactic
   end
 
   structure Conversions :
