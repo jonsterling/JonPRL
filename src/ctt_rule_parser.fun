@@ -5,7 +5,7 @@ functor CttRuleParser
     where Lcf = Lcf
     where Syntax = Syntax):
 sig
-  structure Lcf : LCF
+  structure Lcf : ANNOTATED_LCF
   type state = Ctt.Development.t
   val parse_rule : (state -> Lcf.tactic) CharParser.charParser
 end =
