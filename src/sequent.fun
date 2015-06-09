@@ -14,7 +14,10 @@ struct
       val ctx = Context.to_string Syntax.to_string H
       val prop = Syntax.to_string P
     in
-      ctx ^ "\n⊢ " ^ prop
+      if Context.is_empty H then
+        "⊢ " ^ prop
+      else
+        Context.to_string Syntax.to_string H ^ "\n⊢ " ^ prop
     end
 
   fun eq (H >> P, H' >> P') =

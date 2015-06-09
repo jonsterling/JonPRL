@@ -13,6 +13,15 @@ struct
   val interpose_after = Tel.interpose_after
   val fresh = Tel.fresh
 
+  fun is_empty (ctx : 'a context) =
+    let
+      open Tel.SnocView
+    in
+      case out ctx of
+           Empty => true
+         | _ => false
+    end
+
   exception NotFound of name
 
   fun modify (ctx : 'a context) (k : V.t) f =
