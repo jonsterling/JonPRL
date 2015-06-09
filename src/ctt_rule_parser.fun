@@ -126,7 +126,8 @@ struct
     symbol "refine"
       >> angles parse_name
       wth (fn lbl => fn st => fn (pos : Pos.t) =>
-            Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, Development.lookup_tactic st lbl))
+            Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, fn goal =>
+              Development.lookup_tactic st lbl goal))
 
   val parse_intro_args =
     opt parse_tm
