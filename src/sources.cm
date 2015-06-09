@@ -6,18 +6,17 @@ group is
   ../lib/cmlib/cmlib.cm
   ../lib/parcom.cm
 
+  visibility.sml
   operator.sml
   syntax.sml
 
-  extract.sig
-  extract.fun
+  level.sig
+  level.sml
 
   conv_types.sig
   conv_types.fun
   conversionals.sig
   conversionals.fun
-
-  visibility.sml
 
   context.sig
   context.fun
@@ -26,21 +25,21 @@ group is
   sequent.fun
 
   lcf.fun
+  extract.sig
+  extract.fun
 
-  level.sig
-  level.sml
+  development.sig
+  development.fun
+
   ctt.sig
   ctt.fun
   ctt_util.sig
   ctt_util.fun
 
+  tactic_metadata.sml
   tactic_script.sig
   tactic_script.fun
-
   ctt_rule_parser.fun
-
-  development.sig
-  development.fun
 
   development_parser.sig
   development_parser.fun

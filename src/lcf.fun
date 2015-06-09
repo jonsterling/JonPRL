@@ -13,3 +13,7 @@ end
 structure Lcf = Lcf
   (structure Sequent = Sequent
    type evidence = Syntax.t)
+
+structure AnnotatedLcf = AnnotatedLcf
+  (structure Lcf = Lcf
+   type metadata = {name : string, pos : Pos.t})

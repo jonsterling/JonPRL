@@ -11,7 +11,7 @@ struct
      structure ConvTypes = ConvTypes)
 
   open Tacticals Rules
-  infix ORELSE ORELSE_LAZY THEN
+  infix ORELSE THEN
 
   local
     val EqRules =
