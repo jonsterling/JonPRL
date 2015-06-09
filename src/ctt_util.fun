@@ -19,24 +19,25 @@ struct
       ORELSE EqEq
       ORELSE FunEq NONE
       ORELSE IsectEq NONE
-      ORELSE PairEq NONE NONE
-      ORELSE LamEq NONE NONE
+      ORELSE PairEq (NONE, NONE)
+      ORELSE LamEq (NONE, NONE)
       ORELSE UnitEq
       ORELSE ProdEq NONE
       ORELSE VoidEq
       ORELSE UnivEq
       ORELSE HypEq
       ORELSE ApEq NONE
-      ORELSE SpreadEq NONE NONE NONE
+      ORELSE SpreadEq (NONE, NONE, NONE)
       ORELSE Cum NONE
       ORELSE SubsetEq NONE
-      ORELSE SubsetMemberEq NONE NONE
+      ORELSE SubsetMemberEq (NONE, NONE)
+      ORELSE IsectMemberEq (NONE, NONE)
 
     val IntroRules =
       MemUnfold
       ORELSE Assumption
-      ORELSE FunIntro NONE NONE
-      ORELSE IsectIntro NONE NONE
+      ORELSE FunIntro (NONE, NONE)
+      ORELSE IsectIntro (NONE, NONE)
       ORELSE UnitIntro
 
     open Conversions Conversionals

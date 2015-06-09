@@ -259,7 +259,7 @@ struct
 
     val FunEq = QuantifierEq (FUN, FUN_EQ)
 
-    fun FunIntro oz ok (H >> P) =
+    fun FunIntro (oz, ok) (H >> P) =
       let
         val #[P1, xP2] = P ^! FUN
         val z =
@@ -275,7 +275,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun FunElim f s onames (H >> P) =
+    fun FunElim (f, s, onames) (H >> P) =
       let
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
@@ -294,7 +294,7 @@ struct
                 | _ => raise Refine)
       end
 
-    fun LamEq oz ok (H >> P) =
+    fun LamEq (oz, ok) (H >> P) =
       let
         val #[lam, lam', func] = P ^! EQ
         val #[aE] = lam ^! LAM
@@ -330,26 +330,9 @@ struct
         ] BY mk_evidence AP_EQ
       end
 
-    fun IsectEq oz (H >> P) =
-      let
-        val #[isect1, isect2, univ] = P ^! EQ
-        val #[A, xB] = isect1 ^! ISECT
-        val #[A', yB'] = isect2 ^! ISECT
-        val (UNIV _, #[]) = as_app univ
+    val IsectEq = QuantifierEq (ISECT, ISECT_EQ)
 
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xB)
-               | SOME z => z)
-      in
-        [ H >> EQ $$ #[A,A',univ]
-        , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-        ] BY (fn [D, E] => ISECT_EQ $$ #[D, z \\ E]
-               | _ => raise Refine)
-      end
-
-    fun IsectIntro oz ok (H >> P) =
+    fun IsectIntro (oz, ok) (H >> P) =
       let
         val #[P1, xP2] = P ^! ISECT
         val z =
@@ -366,7 +349,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun IsectElim f s onames (H >> P) =
+    fun IsectElim (f, s, onames) (H >> P) =
       let
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
@@ -376,7 +359,6 @@ struct
              | NONE =>
                  (Context.fresh (H, Variable.named "y"),
                   Context.fresh (H, Variable.named "z"))
-
         val fsTs = EQ $$ #[``y, ``f, Ts]
       in
         [ H >> MEM $$ #[s, S]
@@ -385,7 +367,7 @@ struct
                 | _ => raise Refine)
       end
 
-    fun IsectMemberEq oz ok (H >> P) =
+    fun IsectMemberEq (oz, ok) (H >> P) =
       let
         val #[M,N,A] = P ^! EQ
         val #[P1, xP2] = A ^! ISECT
@@ -403,7 +385,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun IsectMemberCaseEq oisect t (H >> P) =
+    fun IsectMemberCaseEq (oisect, t) (H >> P) =
       let
         val #[F1,F2, Tt] = P ^! EQ
         val isect =
@@ -421,7 +403,7 @@ struct
 
     val SubsetEq = QuantifierEq (SUBSET, SUBSET_EQ)
 
-    fun SubsetIntro w oz ok (H >> P) =
+    fun SubsetIntro (w, oz, ok) (H >> P) =
       let
         val #[P1, xP2] = P ^! SUBSET
         val k = case ok of SOME k => k | NONE => infer_level (H, P)
@@ -438,7 +420,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun SubsetElim z onames (H >> P) =
+    fun SubsetElim (z, onames) (H >> P) =
       let
         val #[S, xT] = Context.lookup H z ^! SUBSET
         val (s, t) =
@@ -458,7 +440,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun SubsetMemberEq oz ok (H >> P) =
+    fun SubsetMemberEq (oz, ok) (H >> P) =
       let
         val #[s,t,subset] = P ^! EQ
         val #[S,xT] = subset ^! SUBSET
@@ -514,7 +496,7 @@ struct
 
     val ProdEq = QuantifierEq (PROD, PROD_EQ)
 
-    fun ProdIntro w oz ok : tactic =
+    fun ProdIntro (w, oz, ok) : tactic =
       fn (H >> P) =>
         let
           val #[P1, xP2] = P ^! PROD
@@ -532,7 +514,7 @@ struct
                  | _ => raise Refine)
         end
 
-    fun ProdElim z onames (H >> P) =
+    fun ProdElim (z, onames) (H >> P) =
       let
         val #[S, xT] = Context.lookup H z ^! PROD
         val (s, t) =
@@ -551,7 +533,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun PairEq oz ok (H >> P) =
+    fun PairEq (oz, ok) (H >> P) =
       let
         val #[pair, pair', prod] = P ^! EQ
         val #[M, N] = pair ^! PAIR
@@ -571,7 +553,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun SpreadEq ozC oprod onames (H >> P) =
+    fun SpreadEq (ozC, oprod, onames) (H >> P) =
       let
         val #[spread, spread', CE1] = P ^! EQ
         val #[E1, xyT1] = spread ^! SPREAD
@@ -672,7 +654,7 @@ struct
         ] BY mk_evidence EQ_SYM
       end
 
-    fun EqSubst eq xC ok (H >> P) =
+    fun EqSubst (eq, xC, ok) (H >> P) =
       let
         val #[M,N,A] = eq ^! EQ
         val (H', z, C) = ctx_unbind (H, A, xC)
@@ -692,17 +674,17 @@ struct
       open Tacticals
       infix THEN THENL
     in
-      fun HypEqSubst (dir, z) xC ok (H >> P) =
+      fun HypEqSubst (dir, z, xC, ok) (H >> P) =
         let
           val X = Context.lookup H z
         in
           case dir of
-               RIGHT => (EqSubst X xC ok THENL [Hypothesis z, ID, ID]) (H >> P)
+               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis z, ID, ID]) (H >> P)
              | LEFT =>
                  let
                    val #[M,N,A] = X ^! EQ
                  in
-                   (EqSubst (EQ $$ #[N,M,A]) xC ok
+                   (EqSubst (EQ $$ #[N,M,A], xC, ok)
                      THENL [EqSym THEN Hypothesis z, ID, ID]) (H >> P)
                  end
         end
