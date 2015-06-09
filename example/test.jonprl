@@ -2,7 +2,7 @@ welp =def= ⌊unit⌋.
 welp2 =def= ⌊unit⌋.
 
 Theorem test1 : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
-  *{ intro ⌊<>⌋; auto }.
+  *{ intro ⌊<>⌋ ; auto }.
 }.
 
 ||| Lemmas defined earlier in the development may be used later on using the 'lemma' tactic.
@@ -26,7 +26,7 @@ Theorem test4 : ⌊∈(λ(x.pair(x;x)); Π(void;_.void))⌋ {
 }.
 
 Theorem test5 : ⌊Π(void; _. Σ(unit; _.unit))⌋ {
-  fun-intro; auto.
+  intro; auto.
 }.
 
 Theorem test6 : ⌊Π(unit; _. Σ(unit; _.unit))⌋ {

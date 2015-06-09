@@ -13,7 +13,13 @@ sig
      names : name list,
      term : term option}
 
+  type eq_cd_args =
+    {names : name list,
+     level : Level.t option,
+     terms : term list}
+
   val Intro : intro_args -> Lcf.tactic
   val Elim : elim_args -> Lcf.tactic
+  val EqCD : eq_cd_args -> Lcf.tactic
 
 end

@@ -63,9 +63,9 @@ LawCat =def= [
 ].
 
 Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
-  isect-intro @1;
+  intro @1;
   [ unfold <LawCat>; auto; refine <rawcat_unfold>; auto;
-    prod-elim <RC>; auto; prod-elim <t>; auto; prod-elim <t'>; auto; prod-elim <t''>; auto;
+    elim <RC>; auto; elim <t>; auto; elim <t'>; auto; elim <t''>; auto;
     [ id
     , id
     , id
@@ -90,10 +90,10 @@ Theorem InitialRawCat : [RawCat] {
 
 Theorem TerminalRawCat : [RawCat] {
   unfold <RawCat>;
-  prod-intro [unit]; auto;
-  prod-intro [λ(A. λ(B. unit))]; auto;
-  prod-intro [λ(A. <>)]; auto;
-  prod-intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
+  intro [unit]; auto;
+  intro [λ(A. λ(B. unit))]; auto;
+  intro [λ(A. <>)]; auto;
+  intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
   auto.
 }.
 

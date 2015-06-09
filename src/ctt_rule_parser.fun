@@ -73,99 +73,12 @@ struct
       && opt parse_level
       astac Cum
 
+  fun quote_brackets p =
+    middle (symbol "[") p (symbol "]")
+      || middle (symbol "⌊") p (symbol "⌋")
+
   val parse_tm =
-    middle (symbol "[") ParseSyntax.parse_abt (symbol "]")
-      || middle (symbol "⌊") ParseSyntax.parse_abt (symbol "⌋")
-
-  val parse_unit_elim =
-    symbol "unit-elim"
-      && brackets parse_name
-      astac UnitElim
-
-  val parse_prod_eq =
-    symbol "prod-eq"
-      && opt (brackets parse_name)
-      astac ProdEq
-
-  val parse_prod_intro =
-    symbol "prod-intro"
-      && parse_tm
-      && opt (brackets parse_name)
-      && opt parse_level
-      astac (ProdIntro o flat3)
-
-  val parse_prod_elim =
-    symbol "prod-elim"
-      && brackets (parse_name && opt (comma >> parse_name << comma && parse_name))
-      astac ProdElim
-
-  val parse_pair_eq =
-    symbol "pair-eq"
-      && opt (brackets parse_name) && opt parse_level
-      astac PairEq
-
-  val parse_spread_eq =
-    symbol "spread-eq"
-      && opt parse_tm
-         && opt parse_tm
-         && opt (brackets (parse_name && parse_name && parse_name))
-      astac (fn (M, (N, names)) => SpreadEq (M, N, Option.map flat3 names))
-
-  val parse_fun_eq =
-    symbol "fun-eq"
-      && opt (brackets parse_name)
-      astac FunEq
-
-  val parse_fun_intro =
-    symbol "fun-intro"
-      && opt (brackets parse_name) && opt parse_level
-      astac FunIntro
-
-  val parse_fun_elim =
-    symbol "fun-elim"
-      && brackets parse_name
-         && parse_tm
-         && opt (brackets (comma >> parse_name << comma && parse_name))
-      astac (FunElim o flat3)
-
-  val parse_lam_eq =
-    symbol "lam-eq"
-      && opt (brackets parse_name)
-         && opt parse_level
-      astac LamEq
-
-  val parse_ap_eq =
-    symbol "ap-eq"
-      && opt parse_tm
-      astac ApEq
-
-  val parse_isect_eq =
-    symbol "isect-eq"
-      && opt (brackets parse_name)
-      astac IsectEq
-
-  val parse_isect_intro =
-    symbol "isect-intro"
-      && opt (brackets parse_name) && opt parse_level
-      astac IsectIntro
-
-  val parse_isect_elim =
-    symbol "isect-elim"
-      && brackets parse_name
-         && parse_tm
-         && opt (brackets (parse_name && parse_name))
-      astac (IsectElim o flat3)
-
-  val parse_isect_member_eq =
-    symbol "isect-member-eq"
-      && opt (brackets parse_name) && opt parse_level
-      astac IsectMemberEq
-
-  val parse_isect_member_case_eq =
-    symbol "isect-member-case-eq"
-      && ((parse_tm && parse_tm wth Sum.INL) || parse_tm wth Sum.INR)
-      astac (fn Sum.INL (M,N) => IsectMemberCaseEq (SOME M, N)
-              | Sum.INR M => IsectMemberCaseEq (NONE, M))
+    quote_brackets ParseSyntax.parse_abt
 
   val parse_witness =
     symbol "witness"
@@ -211,30 +124,6 @@ struct
       wth (fn lbl => fn st => fn (pos : Pos.t) =>
             Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, Development.lookup_tactic st lbl))
 
-  val parse_subset_eq =
-    symbol "subset-eq"
-      && opt (brackets parse_name)
-      astac SubsetEq
-
-  val parse_subset_intro =
-    symbol "subset-intro"
-      && parse_tm
-      && opt (brackets parse_name)
-      && opt parse_level
-      astac (SubsetIntro o flat3)
-
-  val parse_subset_elim =
-    symbol "subset-elim"
-      && brackets parse_name
-      && opt (brackets (parse_name << comma && parse_name))
-      astac SubsetElim
-
-  val parse_subset_member_eq =
-    symbol "subset-member-eq"
-      && opt (brackets parse_name)
-      && opt parse_level
-      astac SubsetMemberEq
-
   val parse_intro_args =
     opt parse_tm
       && opt (brackets parse_name)
@@ -262,33 +151,34 @@ struct
       && parse_elim_args
       astac Elim
 
+  val parse_terms =
+    opt (quote_brackets (commaSep1 ParseSyntax.parse_abt))
+    wth (fn SOME xs => xs
+          | NONE => [])
+
+  val parse_eq_cd_args =
+    parse_terms
+      && parse_names
+      && opt parse_level
+      wth (fn (Ms, (xs, k)) => {names = xs, terms = Ms, level = k})
+
+  val parse_eq_cd =
+    symbol "eq-cd"
+      && parse_eq_cd_args
+      astac EqCD
+
   val extensional_parse =
     symbol "auto" astac_ Auto
       || parse_intro
       || parse_elim
+      || parse_eq_cd
       || parse_cum
-      || symbol "eq-eq" astac_ EqEq
-      || symbol "univ-eq" astac_ UnivEq
-      || symbol "void-eq" astac_ VoidEq
-      || symbol "void-elim" astac_ VoidElim
-      || symbol "unit-eq" astac_ UnitEq
-      || symbol "unit-intro" astac_ UnitIntro
-      || parse_unit_elim
-      || symbol "ax-eq" astac_ AxEq
-      || parse_prod_eq || parse_prod_intro || parse_prod_elim || parse_pair_eq || parse_spread_eq
-      || parse_fun_eq || parse_fun_intro || parse_fun_elim || parse_lam_eq || parse_ap_eq
-      || parse_isect_eq || parse_isect_intro || parse_isect_elim || parse_isect_member_eq || parse_isect_member_case_eq
       || symbol "mem-cd" astac_ MemCD
       || symbol "assumption" astac_ Assumption
       || symbol "symmetry" astac_ EqSym
-      || symbol "hyp-eq" astac_ HypEq
       || parse_witness
       || parse_hyp_subst
       || parse_eq_subst
-      || parse_subset_eq
-      || parse_subset_intro
-      || parse_subset_elim
-      || parse_subset_member_eq
 
   val intensional_parse =
     parse_lemma

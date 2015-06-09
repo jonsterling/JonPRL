@@ -16,31 +16,32 @@ Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
 
 Theorem car-wf : [∀(MonoidSig; M. ∈(ap(car;M); U<0>))] {
   refine <monoid-unfold>; auto;
-  prod-elim <M>; auto.
+  elim <M>; auto.
 }.
 
 Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(ap(LeftUnit;M);U<0>))] {
   unfold <LeftUnit>; auto; refine <monoid-unfold>;
-  auto; prod-elim <M>; auto .
+  auto; elim <M>; auto .
 }.
 
 Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(ap(RightUnit;M);U<0>))] {
   unfold <RightUnit>; auto; refine <monoid-unfold>;
-  auto; prod-elim <M>; auto .
+  auto; elim <M>; auto .
 }.
 
 Theorem UnitMonoidStruct : [MonoidSig] {
   unfold <MonoidSig>;
-  prod-intro [unit]; auto;
-  prod-intro [<>] ; auto.
+  intro [unit]; auto;
+  intro [<>] ; auto.
 }.
 
 Theorem UnitMonoid-LeftUnit : [ap(LeftUnit;UnitMonoidStruct)] {
-  unfold <UnitMonoidStruct>; unfold <LeftUnit>; refine <monoid-unfold>; auto.
+  unfold <UnitMonoidStruct>; unfold <LeftUnit>; refine <monoid-unfold>; auto;
+  elim <m>; auto.
 }.
 
 
 Theorem UnitMonoid-RightUnit : [ap(RightUnit;UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>; unfold <RightUnit>; refine <monoid-unfold>; auto;
-  unit-elim <m>; auto.
+  elim <m>; auto.
 }.
