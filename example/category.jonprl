@@ -62,6 +62,7 @@ LawCat =def= [
    unit))))
 ].
 
+(*
 Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
   intro @1;
   [ unfold <LawCat>; auto; refine <rawcat_unfold>; auto;
@@ -74,6 +75,7 @@ Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
   , lemma <RawCat_wf>
   ].
 }.
+*)
 
 Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
 
