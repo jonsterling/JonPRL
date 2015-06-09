@@ -6,18 +6,14 @@ sig
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
-  type definition = {definiens : term}
-  type theorem =
-    {statement : Lcf.goal,
-     script : Lcf.tactic,
-     evidence : Lcf.evidence Susp.susp}
+  structure Object :
+  sig
+    type t
+    val to_string : label * t -> string
+  end
 
   type t
-
-  datatype object =
-      Definition of definition
-    | Theorem of theorem
-    | Tactic of Lcf.tactic
+  type object = Object.t
 
   val out : t -> object Telescope.telescope
 
