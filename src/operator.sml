@@ -6,11 +6,11 @@ struct
     | EQ_EQ
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
-    | PROD_EQ | PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
+    | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
-    | SUBSET_EQ | SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
+    | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
 
     | ADMIT
 
@@ -41,6 +41,7 @@ struct
 
        | PROD_EQ => #[0,1]
        | PROD_INTRO => #[0,0,0,1]
+       | IND_PROD_INTRO => #[0,0]
        | PROD_ELIM => #[0,2]
        | PAIR_EQ => #[0,0,1]
        | SPREAD_EQ => #[0,3]
@@ -64,6 +65,7 @@ struct
 
        | SUBSET_EQ => #[0,1]
        | SUBSET_INTRO => #[0,0,0,1]
+       | IND_SUBSET_INTRO => #[0,0]
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
@@ -103,6 +105,7 @@ struct
 
        | PROD_EQ => "prod⁼"
        | PROD_INTRO => "prod-intro"
+       | IND_PROD_INTRO => "independent-prod-intro"
        | PROD_ELIM => "prod-elim"
        | PAIR_EQ => "pair⁼"
        | SPREAD_EQ => "spread⁼"
@@ -127,6 +130,7 @@ struct
 
        | SUBSET_EQ => "subset⁼"
        | SUBSET_INTRO => "subset-intro"
+       | IND_SUBSET_INTRO => "independent-subset-intro"
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 

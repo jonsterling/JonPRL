@@ -35,7 +35,9 @@ struct
        ORELSE FunIntro (fresh_variable, level)
        ORELSE IsectIntro (fresh_variable, level)
        ORELSE_LAZY (fn _ => ProdIntro (valOf term, fresh_variable, level))
+       ORELSE IndependentProdIntro
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, fresh_variable, level))
+       ORELSE IndependentSubsetIntro
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
