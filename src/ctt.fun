@@ -630,14 +630,14 @@ struct
       end
 
     fun Lemma (development, lbl) (H >> P) =
-        let
-          val {statement, evidence} = Development.lookup_theorem development lbl
-          val H' >> P' = statement
-        in
-          if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
-          then [] BY (fn _ => Susp.force evidence)
-          else raise Refine
-        end
+      let
+        val {statement, evidence} = Development.lookup_theorem development lbl
+        val H' >> P' = statement
+      in
+        if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
+        then [] BY (fn _ => Susp.force evidence)
+        else raise Refine
+      end
 
     fun Admit (H >> P) =
       [] BY (fn _ => ADMIT $$ #[])
