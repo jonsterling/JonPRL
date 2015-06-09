@@ -238,11 +238,11 @@ struct
         [] BY mk_evidence AX_EQ
       end
 
-    fun FunEq oz (H >> P) =
+    fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
       let
-        val #[fun1, fun2, univ] = P ^! EQ
-        val #[A, xB] = fun1 ^! FUN
-        val #[A', yB'] = fun2 ^! FUN
+        val #[q1, q2, univ] = P ^! EQ
+        val #[A, xB] = q1 ^! Q
+        val #[A', yB'] = q2 ^! Q
         val (UNIV _, #[]) = as_app univ
 
         val z =
@@ -253,9 +253,11 @@ struct
       in
         [ H >> EQ $$ #[A,A',univ]
         , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-        ] BY (fn [D, E] => FUN_EQ $$ #[D, z \\ E]
+        ] BY (fn [D, E] => Q_EQ $$ #[D, z \\ E]
                | _ => raise Refine)
       end
+
+    val FunEq = QuantifierEq (FUN, FUN_EQ)
 
     fun FunIntro oz ok (H >> P) =
       let
@@ -417,23 +419,7 @@ struct
         ] BY mk_evidence ISECT_MEMBER_CASE_EQ
       end
 
-    fun SubsetEq oz (H >> P) =
-      let
-        val #[subset1, subset2, univ] = P ^! EQ
-        val (UNIV k, #[]) = as_app univ
-        val #[A,xB] = subset1 ^! SUBSET
-        val #[A',yB'] = subset2 ^! SUBSET
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xB)
-               | SOME z => z)
-      in
-        [ H >> EQ $$ #[A,A',univ]
-        , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-        ] BY (fn [D, E] => SUBSET_EQ $$ #[D, z \\ E]
-               | _ => raise Refine)
-      end
+    val SubsetEq = QuantifierEq (SUBSET, SUBSET_EQ)
 
     fun SubsetIntro w oz ok (H >> P) =
       let
@@ -490,7 +476,6 @@ struct
                | _ => raise Refine)
       end
 
-
     fun MemUnfold (H >> P) =
       let
         val #[M, A] = P ^! MEM
@@ -527,23 +512,7 @@ struct
         [] BY (fn _ => HYP_EQ $$ #[`` x])
       end
 
-    fun ProdEq oz (H >> P) =
-      let
-        val #[prod1, prod2, univ] = P ^! EQ
-        val #[A, xB] = prod1 ^! PROD
-        val #[A', yB'] = prod2 ^! PROD
-        val (UNIV _, #[]) = as_app univ
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xB)
-               | SOME z => z)
-      in
-        [ H >> EQ $$ #[A,A',univ]
-        , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // ``z, univ]
-        ] BY (fn [D, E] => PROD_EQ $$ #[D, z \\ E]
-               | _ => raise Refine)
-      end
+    val ProdEq = QuantifierEq (PROD, PROD_EQ)
 
     fun ProdIntro w oz ok : tactic =
       fn (H >> P) =>
