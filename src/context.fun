@@ -66,7 +66,7 @@ struct
               go (out tele') (r ^ "\n" ^ pretty_lbl ^ " : " ^ f a)
             end
     in
-      go (out tele) "·"
+      go (out tele) ""
     end
 
   fun eq test =
