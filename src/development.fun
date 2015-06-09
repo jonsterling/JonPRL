@@ -96,6 +96,11 @@ struct
     case Telescope.lookup T lbl of
          Object.Tactic tac => tac
        | _ => raise Subscript
+
+  fun lookup_operator T lbl =
+    case Telescope.lookup T lbl of
+         Object.Operator {arity} => arity
+       | _ => raise Subscript
 end
 
 structure Development : DEVELOPMENT = Development

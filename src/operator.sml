@@ -1,7 +1,7 @@
-structure Operator =
+structure OperatorType =
 struct
-  datatype t
-    = (* Derivations *)
+  datatype 'label operator =
+      (* Derivations *)
       UNIV_EQ | CUM
     | EQ_EQ
     | VOID_EQ | VOID_ELIM
@@ -24,7 +24,75 @@ struct
     | EQ | MEM
     | SUBSET
 
-  val eq = op=
+    | CUSTOM of {label : 'label, arity : int vector}
+end
+
+signature CTT_OPERATOR =
+sig
+  structure Label : LABEL
+
+  include PARSE_OPERATOR
+    where type t = Label.t OperatorType.operator
+    where type env = Label.t -> int vector
+
+end
+
+functor Operator
+  (structure Label : LABEL
+   val parse_label : Label.t CharParser.charParser) : CTT_OPERATOR =
+struct
+  open OperatorType
+  structure Label = Label
+  type t = Label.t operator
+
+  type env = Label.t -> int vector
+  fun eq (UNIV_EQ, UNIV_EQ) = true
+    | eq (CUM, CUM) = true
+    | eq (EQ_EQ, EQ_EQ) = true
+    | eq (VOID_EQ, VOID_EQ) = true
+    | eq (VOID_ELIM, VOID_ELIM) = true
+    | eq (UNIT_EQ, UNIT_EQ) = true
+    | eq (UNIT_INTRO, UNIT_INTRO) = true
+    | eq (UNIT_ELIM, UNIT_ELIM) = true
+    | eq (AX_EQ, AX_EQ) = true
+    | eq (PROD_EQ, PROD_EQ) = true
+    | eq (PROD_INTRO, PROD_INTRO) = true
+    | eq (IND_PROD_INTRO, IND_PROD_INTRO) = true
+    | eq (PROD_ELIM, PROD_ELIM) = true
+    | eq (PAIR_EQ, PAIR_EQ) = true
+    | eq (SPREAD_EQ, SPREAD_EQ) = true
+    | eq (FUN_EQ, FUN_EQ) = true
+    | eq (FUN_INTRO, FUN_INTRO) = true
+    | eq (FUN_ELIM, FUN_ELIM) = true
+    | eq (LAM_EQ, LAM_EQ) = true
+    | eq (AP_EQ, AP_EQ) = true
+    | eq (ISECT_EQ, ISECT_EQ) = true
+    | eq (ISECT_INTRO, ISECT_INTRO) = true
+    | eq (ISECT_ELIM, ISECT_ELIM) = true
+    | eq (ISECT_MEMBER_EQ, ISECT_MEMBER_EQ) = true
+    | eq (ISECT_MEMBER_CASE_EQ, ISECT_MEMBER_CASE_EQ) = true
+    | eq (WITNESS, WITNESS) = true
+    | eq (SUBSET_EQ, SUBSET_EQ) = true
+    | eq (SUBSET_INTRO, SUBSET_INTRO) = true
+    | eq (IND_SUBSET_INTRO, IND_SUBSET_INTRO) = true
+    | eq (SUBSET_ELIM, SUBSET_ELIM) = true
+    | eq (SUBSET_MEMBER_EQ, SUBSET_MEMBER_EQ) = true
+    | eq (ADMIT, ADMIT) = true
+    | eq (UNIV i, UNIV j) = i = j
+    | eq (VOID, VOID) = true
+    | eq (UNIT, UNIT) = true
+    | eq (AX, AX) = true
+    | eq (PROD, PROD) = true
+    | eq (PAIR, PAIR) = true
+    | eq (SPREAD, SPREAD) = true
+    | eq (FUN, FUN) = true
+    | eq (LAM, LAM) = true
+    | eq (AP, AP) = true
+    | eq (ISECT, ISECT) = true
+    | eq (EQ, EQ) = true
+    | eq (MEM, MEM) = true
+    | eq (SUBSET, SUBSET) = true
+    | eq _ = false
 
   fun arity O =
     case O of
@@ -71,7 +139,6 @@ struct
 
        | ADMIT => #[]
 
-
        | UNIV i => #[]
        | VOID => #[]
        | UNIT => #[]
@@ -89,6 +156,8 @@ struct
        | MEM => #[0,0]
 
        | SUBSET => #[0,1]
+
+       | CUSTOM {arity,...} => arity
 
   fun to_string O =
     case O of
@@ -150,23 +219,25 @@ struct
 
        | SUBSET => "subset"
 
+       | CUSTOM {label,...} => Label.to_string label
+
   local
     open ParserCombinators CharParser
     infix 2 return wth suchthat return guard when
-    infixr 1 ||
-    infixr 4 << >>
+    infixr 1 || <|>
+    infixr 4 << >> --
   in
     val parse_int =
       repeat1 digit wth valOf o Int.fromString o String.implode
 
-  fun angles p =
-    middle (string "<") p (string ">")
-      || middle (string "〈") p  (string "〉")
+    fun angles p =
+      middle (string "<") p (string ">")
+        || middle (string "〈") p  (string "〉")
 
-    val parse_univ =
+    val parse_univ : t charParser =
       string "U" >> angles parse_int wth UNIV
 
-    val parse_operator =
+    val extensional_parse_operator : t charParser =
       parse_univ
         || string "void" return VOID
         || string "unit" return UNIT
@@ -182,5 +253,15 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
+
+    fun intensional_parse_operator lookup =
+      parse_label -- (fn lbl =>
+        case (SOME (lookup lbl) handle _ => NONE) of
+             SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
+           | NONE => fail "no such operator")
+
+    fun parse_operator lookup =
+      intensional_parse_operator lookup
+        || extensional_parse_operator
   end
 end

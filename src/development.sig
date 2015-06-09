@@ -41,4 +41,7 @@ sig
 
   (* lookup a custom tactic *)
   val lookup_tactic : t -> label -> Lcf.tactic
+
+  (* lookup a custom operator *)
+  val lookup_operator : t -> label -> int vector
 end

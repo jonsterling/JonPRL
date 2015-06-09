@@ -1,6 +1,9 @@
 welp =def= ⌊unit⌋.
 welp2 =def= ⌊unit⌋.
 
+Operator mine : (1).
+hmmm =def= ⌊mine(x.x)⌋.
+
 Theorem test1 : ⌊Σ(unit; _. Σ(unit; _. unit))⌋ {
   *{ intro ; auto }.
 }.
