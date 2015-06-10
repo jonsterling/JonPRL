@@ -84,7 +84,6 @@ struct
   fun declare_operator T (lbl, arity) =
     Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
 
-  exception Hole
   local
     open Syntax
     infix $

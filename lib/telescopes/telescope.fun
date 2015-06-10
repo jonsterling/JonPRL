@@ -168,7 +168,6 @@ struct
 
   local
     open SnocView
-    exception Hole
   in
     fun search (tele : 'a telescope) phi =
       let

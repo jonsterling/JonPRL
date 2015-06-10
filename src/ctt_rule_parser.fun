@@ -76,8 +76,6 @@ struct
     middle (symbol "[") p (symbol "]")
       || middle (symbol "⌊") p (symbol "⌋")
 
-  exception Hole
-
   type 'a intensional_parser = Development.t -> 'a charParser
   type tactic_parser = (Pos.t -> tactic) intensional_parser
 

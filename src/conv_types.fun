@@ -19,8 +19,6 @@ struct
   open Conv.Syntax
   infix $ \ $$ \\
 
-  exception Hole
-
   structure Set = SplaySet(structure Elem = Variable)
   structure Dict = SplayDict(structure Key = Variable)
 
