@@ -61,7 +61,7 @@ struct
         | go H (x \ E) = x \\ go (Set.insert H x) (out E)
         | go H (` x) =
             if Set.member H x then
-              go H (` x)
+              `` x
             else
               Dict.lookup chart x handle _ => `` x
     in
