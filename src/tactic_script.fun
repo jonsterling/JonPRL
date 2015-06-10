@@ -1,12 +1,16 @@
 functor TacticScript
   (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
+   structure LcfApart : LCF_APART
+     where type goal = Lcf.goal
+     where type evidence = Lcf.evidence
+
    type env
    val parse_rule : env -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
 struct
   structure Lcf = Lcf
   type env = env
 
-  structure Tacticals = Tacticals (Lcf)
+  structure Tacticals = ProgressTacticals (LcfApart)
   open Lcf Tacticals ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>
@@ -64,7 +68,7 @@ struct
 
   and parse_repeat D () =
         middle (symbol "*{") ($ (parse_script D)) (symbol "}")
-          wth REPEAT
+          wth LIMIT
 
   and parse_orelse D () =
         parens (separate1 ($ (parse_script D)) pipe)
