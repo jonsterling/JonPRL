@@ -1,21 +1,25 @@
-RawCat =def= [
+Operator RawCat : ().
+Operator obj : (0).
+Operator hom : (0;0;0).
+Operator idn : (0;0).
+Operator cmp : (0;0;0;0).
+
+[RawCat] =def= [
   Σ(U<0>; Obj.
   Σ(Π(Obj; A. Π(Obj; B. U<0>)); Hom.
   Σ(Π(Obj; A.
-    ap(ap(Hom; A); A)); idn.
+    ap(ap(Hom; A); A)); Idn.
   Σ(Π(Obj; A. Π(Obj; B. Π(Obj; C.
     Π(ap(ap(Hom; B); C); g.
     Π(ap(ap(Hom; A); B); f.
-      ap(ap(Hom; A); C)))))); cmp.
+      ap(ap(Hom; A); C)))))); Cmp.
   unit))))
 ].
 
-obj =def= [λ(C. spread(C; x.y.x))].
-hom =def= [λ(C. spread(spread(C; x.y.y); x.y.x))].
-idn =def= [λ(C. spread(spread(spread(C; x.y.y); x.y.y); x.y.x))].
-cmp =def= [λ(C. spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x))].
-
-Operator welp : (1;0;0).
+[obj(C)] =def= [spread(C; x.y.x)].
+[hom(C;A;B)] =def= [ap(ap(spread(spread(C; x.y.y); x.y.x); A); B)].
+[idn(C;A)] =def= [ap(spread(spread(spread(C; x.y.y); x.y.y); x.y.x); A)].
+[cmp(C;A;B;C)] =def= [ap(ap(ap(spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x); A); B); C)].
 
 Tactic rawcat_unfold {
   unfold <RawCat>;
@@ -25,89 +29,94 @@ Tactic rawcat_unfold {
   unfold <cmp>.
 }.
 
+
 Theorem RawCat_wf : [∈(RawCat; U<1>)] {
   refine <rawcat_unfold>; auto.
 }.
 
-Theorem obj_wf : [∀(RawCat; RC. ∈(ap(obj; RC); U<0>))] {
+
+Theorem obj_wf : [∀(RawCat; RC. ∈(obj(RC); U<0>))] {
   refine <rawcat_unfold>; auto.
 }.
 
 Theorem hom_wf : [
   ∀(RawCat; RC.
-  ∀(ap(obj; RC); A.
-  ∀(ap(obj; RC); B.
-    ∈(ap(ap(ap(hom; RC); A); B); U<0>))))
+  ∀(obj(RC); A.
+  ∀(obj(RC); B.
+    ∈(hom(RC;A;B); U<0>))))
 ] {
   refine <rawcat_unfold>; auto.
 }.
 
-LawCat =def= [
-  λ(RC.
-  Σ(Π(ap(obj; RC); A.
-    Π(ap(ap(ap(hom; RC); A); A); f.
-      =(ap(ap(ap(cmp; RC); ap(idn; RC)); f);
-        f;
-        ap(ap(ap(hom; RC); A); A)))); law_idn_lhs.
-  Σ(Π(ap(obj; RC); A.
-    Π(ap(ap(ap(hom; RC); A); A); f.
-      =(ap(ap(ap(cmp; RC); f); ap(idn; RC));
-        f;
-        ap(ap(ap(hom; RC); A); A)))); law_idn_rhs.
-  Σ(Π(ap(obj; RC); A. Π(ap(obj; RC); B. Π(ap(obj; RC); C. Π(ap(obj; RC); D.
-    Π(ap(ap(ap(hom; RC); A); B); f.
-    Π(ap(ap(ap(hom; RC); B); C); g.
-    Π(ap(ap(ap(hom; RC); C); D); h.
-      =(ap(ap(ap(cmp; RC); ap(ap(ap(cmp; RC); h); g)); f);
-        ap(ap(ap(cmp; RC); h); ap(ap(ap(cmp; RC); g); f));
-        ap(ap(ap(hom; RC); A); D))))))))); law_cmp_ass.
-   unit))))
-].
 
-(*
-Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
-  intro @1;
-  [ unfold <LawCat>; auto; refine <rawcat_unfold>; auto;
-    elim <RC>; auto; elim <t>; auto; elim <t'>; auto; elim <t''>; auto;
-    [ id
-    , id
-    , id
-    , id
-    ]
-  , lemma <RawCat_wf>
-  ].
-}.
-*)
-
-Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
-
-law_idn_lhs =def= [λ(RC. spread(ap(LawCat; RC); x.y.x))].
-law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCat; RC); x.y.y); x.y.x))].
-law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCat; RC); x.y.y); x.y.y); x.y.x))].
-
-Theorem InitialRawCat : [RawCat] {
-  unfold <RawCat>;
-  intro [void]; auto;
-  intro [λ(A. λ(B. void))]; auto;
-  witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto.
-}.
-
-Theorem TerminalRawCat : [RawCat] {
-  unfold <RawCat>;
-  intro [unit]; auto;
-  intro [λ(A. λ(B. unit))]; auto;
-  intro [λ(A. <>)]; auto;
-  intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
-  auto.
-}.
-
-RawFun =def= [
-  λ(RC.
-  λ(RD.
-  Σ(Π(ap(obj; RC); _. ap(obj; RD)); fun_obj.
-  Σ(Π(ap(obj; RC); A.
-    Π(ap(obj; RC); B.
-    Π(ap(ap(ap(hom; RC); A); B); _.
-    Π(ap(ap(ap(hom; RD); ap(fun_obj; A)); ap(fun_obj; B)); _. _)))); fun_hom.
-  unit))))
-].
+|||
+||| LawCat =def= [
+|||   λ(RC.
+|||   Σ(Π(ap(obj; RC); A.
+|||     Π(ap(ap(ap(hom; RC); A); A); f.
+|||       =(ap(ap(ap(cmp; RC); ap(idn; RC)); f);
+|||         f;
+|||         ap(ap(ap(hom; RC); A); A)))); law_idn_lhs.
+|||   Σ(Π(ap(obj; RC); A.
+|||     Π(ap(ap(ap(hom; RC); A); A); f.
+|||       =(ap(ap(ap(cmp; RC); f); ap(idn; RC));
+|||         f;
+|||         ap(ap(ap(hom; RC); A); A)))); law_idn_rhs.
+|||   Σ(Π(ap(obj; RC); A. Π(ap(obj; RC); B. Π(ap(obj; RC); C. Π(ap(obj; RC); D.
+|||     Π(ap(ap(ap(hom; RC); A); B); f.
+|||     Π(ap(ap(ap(hom; RC); B); C); g.
+|||     Π(ap(ap(ap(hom; RC); C); D); h.
+|||       =(ap(ap(ap(cmp; RC); ap(ap(ap(cmp; RC); h); g)); f);
+|||         ap(ap(ap(cmp; RC); h); ap(ap(ap(cmp; RC); g); f));
+|||         ap(ap(ap(hom; RC); A); D))))))))); law_cmp_ass.
+|||    unit))))
+||| ].
+|||
+||| (*
+||| Theorem LawCat_wf : [∀(RawCat; RC. ∈(ap(LawCat; RC); U<1>))] {
+|||   intro @1;
+|||   [ unfold <LawCat>; auto; refine <rawcat_unfold>; auto;
+|||     elim <RC>; auto; elim <t>; auto; elim <t'>; auto; elim <t''>; auto;
+|||     [ id
+|||     , id
+|||     , id
+|||     , id
+|||     ]
+|||   , lemma <RawCat_wf>
+|||   ].
+||| }.
+||| *)
+||| 
+||| Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
+||| 
+||| law_idn_lhs =def= [λ(RC. spread(ap(LawCat; RC); x.y.x))].
+||| law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCat; RC); x.y.y); x.y.x))].
+||| law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCat; RC); x.y.y); x.y.y); x.y.x))].
+||| 
+||| Theorem InitialRawCat : [RawCat] {
+|||   unfold <RawCat>;
+|||   intro [void]; auto;
+|||   intro [λ(A. λ(B. void))]; auto;
+|||   witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto.
+||| }.
+||| 
+||| Theorem TerminalRawCat : [RawCat] {
+|||   unfold <RawCat>;
+|||   intro [unit]; auto;
+|||   intro [λ(A. λ(B. unit))]; auto;
+|||   intro [λ(A. <>)]; auto;
+|||   intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
+|||   auto.
+||| }.
+||| 
+||| RawFun =def= [
+|||   λ(RC.
+|||   λ(RD.
+|||   Σ(Π(ap(obj; RC); _. ap(obj; RD)); fun_obj.
+|||   Σ(Π(ap(obj; RC); A.
+|||     Π(ap(obj; RC); B.
+|||     Π(ap(ap(ap(hom; RC); A); B); _.
+|||     Π(ap(ap(ap(hom; RD); ap(fun_obj; A)); ap(fun_obj; B)); _. _)))); fun_hom.
+|||   unit))))
+||| ].
+||| *)

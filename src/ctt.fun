@@ -644,10 +644,10 @@ struct
 
     fun Unfold (development, lbl) (H >> P) =
       let
-        val definiens = Development.lookup_definition development lbl
-        val rewrite = subst definiens lbl
+        open Conversionals
+        val conv = CDEEP (Development.lookup_definition development lbl)
       in
-        [ Context.map rewrite H >> rewrite P
+        [ Context.map conv H >> conv P
         ] BY (fn [D] => D
                | _ => raise Refine)
       end

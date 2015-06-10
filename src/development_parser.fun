@@ -52,12 +52,6 @@ struct
     identifier
       wth Syntax.Variable.named
 
-  fun parse_definition D =
-    parse_name << symbol "=def="
-      && parse_tm D
-      wth (fn (definiendum, definiens) =>
-             Development.define D (definiendum, definiens))
-
   fun parse_theorem D =
     reserved "Theorem" >> parse_name << colon
       && parse_tm D
@@ -79,15 +73,21 @@ struct
       wth (fn (lbl, tac) => Development.define_tactic D (lbl, tac))
 
   fun parse_operator_decl D =
-    reserved "Operator" >> parse_name << colon
-      && parse_arity
-      wth (fn (lbl, arity) => Development.declare_operator D (lbl, arity))
+    (reserved "Operator" >> parse_name << colon && parse_arity)
+    wth Development.declare_operator D
+
+  fun parse_operator_def D =
+    (parse_tm D && symbol "=def=" >> parse_tm D)
+    wth (fn (M : Syntax.t, N : Syntax.t) =>
+      Development.define_operator D
+        {definiendum = M,
+         definiens = N})
 
   fun parse_decl D =
-    parse_definition D
-      || parse_theorem D
+      parse_theorem D
       || parse_tactic D
       || parse_operator_decl D
+      || parse_operator_def D
 
   fun parse' D () =
     (parse_decl D << dot) -- (fn D' =>

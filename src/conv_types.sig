@@ -14,6 +14,6 @@ signature CONV_COMPILER =
 sig
   include CONV_TYPES
 
-  type rule = {input : Syntax.t, output : Syntax.t}
+  type rule = {definiendum : Syntax.t, definiens : Syntax.t}
   val compile : rule -> conv
 end

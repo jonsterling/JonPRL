@@ -3,8 +3,11 @@ sig
   type term
 
   structure Lcf : LCF
+  structure ConvCompiler : CONV_COMPILER
   structure Telescope : TELESCOPE
   type label = Telescope.label
+
+  sharing type ConvCompiler.Syntax.t = term
 
   structure Object :
   sig
@@ -20,9 +23,6 @@ sig
   (* the empty development *)
   val empty : t
 
-  (* extend a development with a definition *)
-  val define : t -> label * term -> t
-
   (* extend a development with a theorem *)
   val prove : t -> label * Lcf.goal * Lcf.tactic -> t
   exception RemainingSubgoals of Lcf.goal list
@@ -32,9 +32,10 @@ sig
 
   (* extend a development with a new operator *)
   val declare_operator : t -> label * int vector -> t
+  val define_operator : t -> ConvCompiler.rule -> t
 
   (* lookup the definiens *)
-  val lookup_definition : t -> label -> term
+  val lookup_definition : t -> label -> ConvCompiler.conv
 
   (* lookup the statement & evidence of a theorem *)
   val lookup_theorem : t -> label -> {statement : Lcf.goal, evidence : Lcf.evidence Susp.susp}

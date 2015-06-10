@@ -14,7 +14,7 @@ functor ConvCompiler (Conv : CONV_TYPES) : CONV_COMPILER =
 struct
   open Conv
 
-  type rule = {input : Syntax.t, output : Syntax.t}
+  type rule = {definiendum : Syntax.t, definiens : Syntax.t}
 
   open Conv.Syntax
   infix $ \ $$ \\
@@ -49,13 +49,13 @@ struct
       go Set.empty (out template) (out term) Dict.empty
     end
 
-  fun compile {input, output} = fn (M : Syntax.t) =>
+  fun compile {definiendum, definiens} = fn (M : Syntax.t) =>
     let
-      val inop $ inargs = out input handle _ => raise Conv
-      val outop $ outargs = out output handle _ => raise Conv
+      val inop $ inargs = out definiendum handle _ => raise Conv
+      val outop $ outargs = out definiens handle _ => raise Conv
       val Mop $ M_args = out M handle _ => raise Conv
       val _ = if Operator.eq (Mop, inop) then () else raise Conv
-      val chart = compute_chart (input, M)
+      val chart = compute_chart (definiendum, M)
 
       fun go H (p $ es) = p $$ Vector.map (go H o out) es
         | go H (x \ E) = x \\ go (Set.insert H x) (out E)
@@ -65,7 +65,7 @@ struct
             else
               Dict.lookup chart x handle _ => `` x
     in
-      go Set.empty (out output)
+      go Set.empty (out definiens)
     end
 end
 
