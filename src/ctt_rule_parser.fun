@@ -231,5 +231,9 @@ structure CttRuleParser = CttRuleParser
    structure Development = Development
    structure Syntax = Syntax)
 
-structure CttScript = TacticScript (CttRuleParser)
+structure CttScript = TacticScript
+  (struct
+    structure LcfApart = Lcf
+    open CttRuleParser
+   end)
 

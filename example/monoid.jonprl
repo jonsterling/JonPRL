@@ -2,36 +2,68 @@ Operator MonoidSig : ().
 Operator car : (0).
 Operator ze : (0).
 Operator op : (0;0;0).
+
+Operator MonoidLaws : (0).
 Operator LeftUnit : (0).
 Operator RightUnit : (0).
+Operator Assoc : (0).
 
-[MonoidSig] =def= ⌊Σ(U〈0〉; A. Σ(A; zero. Π(A; m. Π(A; n. A))))⌋.
-[car(M)] =def= [spread(M; x.y.x)].
-[ze(M)] =def= [spread(spread(M; x.y.y); x.y.x)].
-[op(M;X;Y)] =def= ⌊ap(ap(spread(spread(M; x.y.y); x.y.y);X);Y)⌋.
-[LeftUnit(M)] =def= [∀(car(M); m. =(m; op(M; ze(M); m); car(M)))].
-[RightUnit(M)] =def= [∀(car(M); m. =(op(M; ze(M); m); m; car(M)))].
+Operator Monoid : ().
 
-Tactic monoid-unfold {
+⌊MonoidSig⌋ =def= ⌊Σ(U〈0〉; A. Σ(A; zero. Π(A; m. Π(A; n. A))))⌋.
+⌊car(M)⌋ =def= ⌊spread(M; x.y.x)⌋.
+⌊ze(M)⌋ =def= ⌊spread(spread(M; x.y.y); x.y.x)⌋.
+⌊op(M;X;Y)⌋ =def= ⌊ap(ap(spread(spread(M; x.y.y); x.y.y);X);Y)⌋.
+⌊LeftUnit(M)⌋ =def= ⌊∀(car(M); m. =(m; op(M; ze(M); m); car(M)))⌋.
+⌊RightUnit(M)⌋ =def= ⌊∀(car(M); m. =(op(M; ze(M); m); m; car(M)))⌋.
+⌊Assoc(M)⌋ =def= ⌊∀(car(M); x. ∀(car(M); y. ∀(car(M); z. =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M)))))⌋.
+
+⌊MonoidLaws(M)⌋ =def= ⌊Σ(LeftUnit(M); _. Σ(RightUnit(M); _. Assoc(M)))⌋.
+⌊Monoid⌋ =def= ⌊subset(MonoidSig; M. MonoidLaws(M))⌋.
+
+Tactic monoid-sig-unfold {
   unfold 〈MonoidSig〉; unfold 〈car〉; unfold 〈op〉; unfold 〈ze〉.
 }.
 
 Theorem MonoidSig-wf : ⌊∈(MonoidSig; U〈1〉)⌋ {
-  refine <monoid-unfold>; auto.
+  refine 〈monoid-sig-unfold〉; auto.
 }.
 
-
 Theorem car-wf : ⌊∀(MonoidSig; M. ∈(car(M); U〈0〉))⌋ {
-  refine 〈monoid-unfold〉; auto;
+  refine 〈monoid-sig-unfold〉; auto;
   elim 〈M〉; auto.
 }.
 
+Tactic monoid-laws-unfold {
+  unfold 〈MonoidLaws〉; unfold 〈LeftUnit〉; unfold 〈RightUnit〉; unfold 〈Assoc〉.
+}.
+
+Tactic monoid-unfold {
+  unfold 〈Monoid〉; refine 〈monoid-sig-unfold〉; refine 〈monoid-laws-unfold〉.
+}.
+
+Tactic monoid-simplify {
+  *{ refine 〈monoid-unfold〉; auto }.
+}.
+
 Theorem LeftUnit-wf : ⌊∀(MonoidSig; M. ∈(LeftUnit(M); U〈0〉))⌋ {
-  unfold 〈LeftUnit〉; refine <monoid-unfold>; auto.
+  refine 〈monoid-simplify〉.
 }.
 
 Theorem RightUnit-wf : ⌊∀(MonoidSig; M. ∈(RightUnit(M);U〈0〉))⌋ {
-  unfold 〈RightUnit〉; refine 〈monoid-unfold〉; auto.
+  refine 〈monoid-simplify〉.
+}.
+
+Theorem Assoc-wf : ⌊∀(MonoidSig; M. ∈(Assoc(M); U〈0〉))⌋ {
+  refine 〈monoid-simplify〉.
+}.
+
+Theorem MonoidLaws-wf : ⌊∀(MonoidSig; M. ∈(MonoidLaws(M); U〈0〉))⌋ {
+  refine 〈monoid-simplify〉.
+}.
+
+Theorem Monoid-wf : ⌊∈(Monoid; U〈1〉)⌋ {
+  refine 〈monoid-simplify〉.
 }.
 
 Theorem UnitMonoidStruct : ⌊MonoidSig⌋ {
@@ -40,13 +72,19 @@ Theorem UnitMonoidStruct : ⌊MonoidSig⌋ {
   intro ⌊<>⌋ ; auto.
 }.
 
-Theorem UnitMonoid-LeftUnit : ⌊LeftUnit(UnitMonoidStruct)⌋ {
-  unfold 〈UnitMonoidStruct〉; unfold 〈LeftUnit〉; refine 〈monoid-unfold〉; auto;
+Theorem UnitMonoid : ⌊Monoid⌋ {
+  unfold 〈Monoid〉;
+  intro ⌊UnitMonoidStruct⌋; unfold 〈UnitMonoidStruct〉;
+  refine 〈monoid-simplify〉;
   elim 〈m〉; auto.
+}.
+
+Theorem UnitMonoid-LeftUnit : ⌊LeftUnit(UnitMonoidStruct)⌋ {
+  unfold 〈UnitMonoidStruct〉;
+  refine 〈monoid-simplify〉; elim 〈m〉; auto.
 }.
 
 Theorem UnitMonoid-RightUnit : ⌊RightUnit(UnitMonoidStruct)⌋ {
-  unfold 〈UnitMonoidStruct〉; unfold 〈RightUnit〉; refine 〈monoid-unfold〉; auto;
-  elim 〈m〉; auto.
+  unfold 〈UnitMonoidStruct〉;
+  refine 〈monoid-simplify〉; elim 〈m〉; auto.
 }.
-
