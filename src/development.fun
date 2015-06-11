@@ -41,7 +41,7 @@ struct
             val evidence' = Susp.force evidence
           in
             "Theorem " ^ Telescope.Label.to_string lbl
-              ^ " : ⌊" ^ Lcf.goal_to_string statement ^ "⌋ {\n  "
+              ^ " : ⸤" ^ Lcf.goal_to_string statement ^ "⸥ {\n  "
               ^ Syntax.to_string evidence' ^ "\n} ext {\n  "
               ^ Syntax.to_string (Extract.extract evidence') ^ "\n}."
           end
@@ -54,8 +54,8 @@ struct
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⌊" ^ Syntax.to_string definiendum ^ "⌋ =def= "
-                       ^ "⌊" ^ Syntax.to_string definiens ^ "⌋.")
+                       "\n⸤" ^ Syntax.to_string definiendum ^ "⸥ ≝ "
+                       ^ "⸤" ^ Syntax.to_string definiens ^ "⸥.")
   end
 
   type object = Object.t

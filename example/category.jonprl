@@ -29,7 +29,6 @@ Tactic rawcat_unfold {
   unfold <cmp>.
 }.
 
-
 Theorem RawCat_wf : [∈(RawCat; U<1>)] {
   refine <rawcat_unfold>; auto.
 }.
@@ -86,20 +85,20 @@ Theorem hom_wf : [
 |||   ].
 ||| }.
 ||| *)
-||| 
+|||
 ||| Cat =def= [subset(RawCat; RC. ap(LawCat; RC))].
-||| 
+|||
 ||| law_idn_lhs =def= [λ(RC. spread(ap(LawCat; RC); x.y.x))].
 ||| law_idn_rhs =def= [λ(RC. spread(spread(ap(LawCat; RC); x.y.y); x.y.x))].
 ||| law_cmp_ass =def= [λ(RC. spread(spread(spread(ap(LawCat; RC); x.y.y); x.y.y); x.y.x))].
-||| 
+|||
 ||| Theorem InitialRawCat : [RawCat] {
 |||   unfold <RawCat>;
 |||   intro [void]; auto;
 |||   intro [λ(A. λ(B. void))]; auto;
 |||   witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto.
 ||| }.
-||| 
+|||
 ||| Theorem TerminalRawCat : [RawCat] {
 |||   unfold <RawCat>;
 |||   intro [unit]; auto;
@@ -108,7 +107,7 @@ Theorem hom_wf : [
 |||   intro [λ(A. λ(B. λ(C. λ(g. λ(f. <>)))))];
 |||   auto.
 ||| }.
-||| 
+|||
 ||| RawFun =def= [
 |||   λ(RC.
 |||   λ(RD.

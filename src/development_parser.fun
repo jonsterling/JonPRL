@@ -44,9 +44,7 @@ struct
 
   val lookup_operator = Development.lookup_operator
 
-  fun parse_tm D  =
-    middle (symbol "[") (Syntax.parse_abt (lookup_operator D)) (symbol "]")
-      || middle (symbol "⌊") (Syntax.parse_abt (lookup_operator D)) (symbol "⌋")
+  val parse_tm  = squares o Syntax.parse_abt o lookup_operator
 
   val parse_name =
     identifier

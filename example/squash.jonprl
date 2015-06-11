@@ -6,6 +6,5 @@ Theorem squash-wf : [∀(U<0>; A. ∈(squash(A); U<0>))] {
 }.
 
 Theorem squash-intro : [∀(U<0>; A. Π(A; M. squash(A)))] {
-  auto; unfold <squash>; auto;
-  intro; auto.
+  unfold <squash>; auto.
 }.
