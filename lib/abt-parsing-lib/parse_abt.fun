@@ -3,7 +3,8 @@ functor ParseAbt
    structure Operator : PARSE_OPERATOR
    sharing Syntax.Operator = Operator) : PARSE_ABT =
 struct
-  structure ParseOp = Operator
+  structure ParseOperator = Operator
+  type env = Operator.env
 
   val force = ParserCombinators.$
   open ParserCombinators CharParser Syntax
@@ -70,22 +71,24 @@ struct
     val new_variable = identifier wth (fn x => (x, Variable.named x))
     fun var sigma = identifier wth (fn x => `` (SymbolTable.named sigma x))
 
-    fun abt sigma () = force (app sigma) || force (abs sigma) || var sigma ?? "abt"
-    and app sigma () =
-      ParseOp.parse_operator
-        && opt (parens (force (args sigma)))
-        wth (fn (O, ES) => O $$ (getOpt (ES, #[]))) ?? "app"
-    and abs sigma () =
+    fun abt sigma env () =
+      (force (app sigma env)
+      || force (abs sigma env)
+      || var sigma) ?? "abt"
+    and app sigma env () =
+      ParseOperator.parse_operator env
+        && opt (parens (force (args sigma env)))
+        wth (fn (O, ES) => O $$ getOpt (ES, #[])) ?? "app"
+    and abs sigma env () =
       (new_variable << spaces << symbol "." << spaces >>= (fn (n,v) =>
         let
           val sigma' = SymbolTable.bind sigma (n,v)
         in
-          force (abt sigma') wth (fn E => v \\ E)
+          force (abt sigma' env) wth (fn E => v \\ E)
         end)) ?? "abs"
-
-    and args sigma () = separate (force (abt sigma)) (symbol ";") wth Vector.fromList ?? "args"
+    and args sigma env () = separate (force (abt sigma env)) (symbol ";") wth Vector.fromList ?? "args"
 
   in
-    val parse_abt : t charParser = force (abt SymbolTable.empty)
+    val parse_abt = force o abt SymbolTable.empty
   end
 end

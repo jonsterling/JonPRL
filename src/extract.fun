@@ -1,11 +1,13 @@
-functor Extract (Syn : ABT_UTIL where Operator = Operator) : EXTRACT =
+functor Extract (Syn : ABT_UTIL where type Operator.t = StringVariable.t OperatorType.operator) : EXTRACT =
 struct
   type evidence = Syn.t
   type term = Syn.t
 
   exception MalformedEvidence of Syn.t
 
-  open Syn Operator
+  open Syn
+  open Operator
+  open OperatorType
   infix $ \ $$ \\ //
 
   val ax = AX $$ #[]

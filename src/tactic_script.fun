@@ -1,12 +1,16 @@
 functor TacticScript
   (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
-   type state
-   val parse_rule : (state -> Lcf.tactic) CharParser.charParser) : TACTIC_SCRIPT =
+   structure LcfApart : LCF_APART
+     where type goal = Lcf.goal
+     where type evidence = Lcf.evidence
+
+   type env
+   val parse_rule : env -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
 struct
   structure Lcf = Lcf
-  type state = state
+  type env = env
 
-  structure Tacticals = Tacticals (Lcf)
+  structure Tacticals = ProgressTacticals (LcfApart)
   open Lcf Tacticals ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>
@@ -43,33 +47,33 @@ struct
     !! (symbol "fail") wth (fn (name, pos) =>
       Lcf.annotate ({name = name, pos = pos}, FAIL))
 
-  fun parse_script () : (state -> tactic) charParser =
-    separate1 ((squares (commaSep ($ parse_script)) wth Sum.INL) <|> ($ plain wth Sum.INR)) semi
-    wth (foldl (fn (t1, t2) => fn s =>
+  fun parse_script D () : tactic charParser =
+    separate1 ((squares (commaSep ($ (parse_script D))) wth Sum.INL) <|> ($ (plain D) wth Sum.INR)) semi
+    wth (foldl (fn (t1, t2) =>
                    case t1 of
-                        Sum.INR t => THEN (t2 s, t s)
-                      | Sum.INL x => THENL (t2 s, map (fn t' => t' s) x)) (fn _ => ID))
+                        Sum.INR t => THEN (t2, t)
+                      | Sum.INL ts => THENL (t2, ts)) ID)
 
-  and plain () =
-    parse_rule
-      || $ parse_try
-      || $ parse_repeat
-      || $ parse_orelse
-      || parse_id wth (fn tac => fn _ => tac)
-      || parse_fail wth (fn tac => fn _ => tac)
+  and plain D () =
+    parse_rule D
+      || $ (parse_try D)
+      || $ (parse_repeat D)
+      || $ (parse_orelse D)
+      || parse_id
+      || parse_fail
 
-  and parse_try () =
-        middle (symbol "?{") ($ parse_script) (symbol "}")
-          wth (fn t => TRY o t)
+  and parse_try D () =
+        middle (symbol "?{") ($ (parse_script D)) (symbol "}")
+          wth TRY
 
-  and parse_repeat () =
-        middle (symbol "*{") ($ parse_script) (symbol "}")
-          wth (fn t => REPEAT o t)
+  and parse_repeat D () =
+        middle (symbol "*{") ($ (parse_script D)) (symbol "}")
+          wth LIMIT
 
-  and parse_orelse () =
-        parens (separate1 ($ parse_script) pipe)
-        wth foldl (fn (t1, t2) => fn s => ORELSE (t1 s, t2 s)) (fn _ => FAIL)
+  and parse_orelse D () =
+        parens (separate1 ($ (parse_script D)) pipe)
+        wth foldl ORELSE FAIL
 
-  val parse = $ parse_script << opt (dot || semi)
+  fun parse D = $ (parse_script D) << opt (dot || semi)
 end
 

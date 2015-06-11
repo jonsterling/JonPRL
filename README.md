@@ -31,6 +31,20 @@ sudo make install
 Optionally, you may install the [JonPRL Mode for
 Emacs](https://github.com/david-christiansen/jonprl-mode).
 
+If you use `pretty-mode`, then you may install the following patterns:
+
+```elisp
+(pretty-add-keywords
+  'jonprl-mode
+  '(("\\\[" . "⸤")
+    ("\\\]" . "⸥")
+    ("<" . "⟨")
+    (">" . "⟩")
+    ("<>" . "⬧")
+    ("\\<\\(=def=\\)\\>" . "≝")
+    ))
+```
+
 ### Running JonPRL
 
 To run JonPRL, simply direct it at your development:
@@ -44,13 +58,12 @@ in order, in case of any dependencies.
 
 ### Basic Syntax
 
-JonPRL has a two-level syntax. There is the syntax of terms in the
-underlying lambda calculus (the object language) and the syntax of
-tactics and definitions in the metalanguage. Terms from the underlying
-lambda calculus are embedded into the metalanguage using either square
-brackets ('[' and ']') or floor brackets ('⌊' and '⌋'). When referring
-to names from the object language in the metalanguage, they are quoted
-in angle brackets ('<' and '>').
+JonPRL has a two-level syntax. There is the syntax of terms in the underlying
+lambda calculus (the object language) and the syntax of tactics and definitions
+in the metalanguage. Terms from the underlying lambda calculus are embedded
+into the metalanguage using brackets (`[` and `]`). When referring to names
+from the object language in the metalanguage, they are quoted in angle brackets
+(`<` and `>`).
 
 The syntax of the object language represents all binders in a
 consistent manner. The variables to be bound in a subterm are written

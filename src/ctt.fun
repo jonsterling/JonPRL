@@ -1,20 +1,20 @@
 functor Ctt
-  (structure Syntax : ABT_UTIL
-     where Operator = Operator
+  (structure Development : DEVELOPMENT
+   structure Syntax : ABT_UTIL
+    where type Operator.t = Development.label OperatorType.operator
+
    structure Sequent : SEQUENT
      where type term = Syntax.t
      where type Context.name = Syntax.Variable.t
-   structure Lcf : LCF
-     where type goal = Sequent.sequent
-     where type evidence = Syntax.t
-   structure ConvTypes : CONV_TYPES
-     where Syntax = Syntax
-   structure Development : DEVELOPMENT
-     where Lcf = Lcf
-     where Telescope.Label = Syntax.Variable
-     where type term = Syntax.t) : CTT =
+
+   structure ConvTypes : CONV_TYPES where Syntax = Syntax
+
+   sharing type Development.Lcf.goal = Sequent.sequent
+   sharing type Development.Lcf.evidence = Syntax.t
+   sharing Development.Telescope.Label = Syntax.Variable
+   sharing type Development.term = Syntax.t) : CTT =
 struct
-  structure Lcf = Lcf
+  structure Lcf = Development.Lcf
   structure ConvTypes = ConvTypes
   structure Syntax = Syntax
 
@@ -24,12 +24,14 @@ struct
   type term = Syntax.t
   type goal = Sequent.sequent
 
+  structure Operator = Syntax.Operator
   structure Development = Development
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure ConvTypes = ConvTypes)
 
-  open Operator Syntax
+  open Syntax
+  open Operator OperatorType
   infix $ \
   infix 8 $$ // \\
 
@@ -642,10 +644,10 @@ struct
 
     fun Unfold (development, lbl) (H >> P) =
       let
-        val definiens = Development.lookup_definition development lbl
-        val rewrite = subst definiens lbl
+        open Conversionals
+        val conv = CDEEP (Development.lookup_definition development lbl)
       in
-        [ Context.map rewrite H >> rewrite P
+        [ Context.map conv H >> conv P
         ] BY (fn [D] => D
                | _ => raise Refine)
       end
@@ -728,7 +730,6 @@ end
 
 structure Ctt = Ctt
   (structure Syntax = Syntax
-   structure Lcf = Lcf
    structure ConvTypes = ConvTypes
    structure Sequent = Sequent
    structure Development = Development)
