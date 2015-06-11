@@ -26,6 +26,17 @@ This puts a binary in `./bin/jonprl`. Optionally, you may install JonPRL globall
 sudo make install
 ```
 
+### Running JonPRL
+
+To run JonPRL, simply direct it at your development:
+
+```sh
+jonprl example/test.jonprl
+```
+
+You may specify as many files as you like in this command; they will be refined
+in order, in case of any dependencies.
+
 #### Emacs Mode
 
 Optionally, you may install the [JonPRL Mode for
@@ -45,16 +56,7 @@ If you use `pretty-mode`, then you may install the following patterns:
     ))
 ```
 
-### Running JonPRL
-
-To run JonPRL, simply direct it at your development:
-
-```sh
-jonprl example/test.jonprl
-```
-
-You may specify as many files as you like in this command; they will be refined
-in order, in case of any dependencies.
+![screenshot of jonprl-mode](./doc/images/jonprl-screenshot.png)
 
 ### Basic Syntax
 
