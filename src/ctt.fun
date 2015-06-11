@@ -86,6 +86,7 @@ struct
            EQ => true
          | MEM => true
          | UNIT => true
+         | VOID => true
          | _ => false
 
     fun assert_irrelevant (H, P) =
