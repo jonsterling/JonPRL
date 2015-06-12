@@ -182,9 +182,9 @@ struct
 
   val parse_unfold : tactic_parser =
     fn D => symbol "unfold"
-      && brackets parse_name
-      wth (fn (name, lbl) => fn pos =>
-             Lcf.annotate ({name = name, pos = pos}, Unfold (D, lbl)))
+      && brackets (separate parse_name whiteSpace)
+      wth (fn (name, lbls) => fn pos =>
+             Lcf.annotate ({name = name, pos = pos}, Unfolds (D, lbls)))
 
   val parse_custom_tactic : tactic_parser =
     fn D => symbol "refine"

@@ -655,6 +655,20 @@ struct
                | _ => raise Refine)
       end
 
+    fun Unfolds (development, lbls) (H >> P) =
+      let
+        open Conversionals
+        infix CTHEN
+        val conv =
+          foldl (fn (lbl, conv) =>
+            conv CTHEN CDEEP (Development.lookup_definition development lbl)
+          ) CID lbls
+      in
+        [ Context.map conv H >> conv P
+        ] BY (fn [D] => D
+               | _ => raise Refine)
+      end
+
     fun Lemma (development, lbl) (H >> P) =
       let
         val {statement, evidence} = Development.lookup_theorem development lbl

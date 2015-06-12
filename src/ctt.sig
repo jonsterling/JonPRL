@@ -100,6 +100,7 @@ sig
     val HypEq : Lcf.tactic
 
     val Unfold : Development.t * Development.label -> Lcf.tactic
+    val Unfolds : Development.t * (Development.label list) -> Lcf.tactic
     val Lemma : Development.t * Development.label -> Lcf.tactic
 
     val RewriteGoal : ConvTypes.conv -> Lcf.tactic

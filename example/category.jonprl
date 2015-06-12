@@ -22,11 +22,7 @@ Operator cmp : (0;0;0;0;0;0).
 [cmp(C;X;Y;Z;f;g)] =def= [ap(ap(ap(ap(ap(spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x); X); Y); Z); f); g)].
 
 Tactic rawcat_unfold {
-  unfold <RawCat>;
-  unfold <obj>;
-  unfold <hom>;
-  unfold <idn>;
-  unfold <cmp>.
+  unfold <RawCat obj hom idn cmp>.
 }.
 
 Theorem RawCat_wf : [∈(RawCat; U<1>)] {
@@ -104,7 +100,8 @@ Operator LawCat : (0).
 [LawCat(RC)] =def= [Σ(LeftIdentity(RC); _. Σ(RightIdentity(RC); _. CmpAssoc(RC)))].
 
 Tactic lawcat_unfold {
-  unfold <LeftIdentity>; unfold <RightIdentity>; unfold <CmpAssoc>; unfold <LawCat>; refine <rawcat_unfold>.
+  unfold <LeftIdentity RightIdentity CmpAssoc LawCat>;
+  refine <rawcat_unfold>.
 }.
 
 Theorem LawCat_wf : [∀(RawCat; RC. ∈(LawCat(RC); U<0>))] {
