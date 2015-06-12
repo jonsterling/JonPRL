@@ -1,0 +1,77 @@
+Operator Bundle : (0).
+
+[Bundle(B)] =def= [
+  Σ(U<0>; Dom.
+  Σ(Π(Dom; _. B); Map.
+  unit))
+].
+
+Operator dom : (0).
+[dom(f)] =def= [spread(f; x.y.x)].
+
+Operator map : (0;0).
+[map(f;b)] =def= [ap(spread(spread(f; x.y.y); x.y.x); b)].
+
+||| NOTE: the goals are printed like so
+|||
+||| [B] : U₀
+||| ⊢ Bundle(B) = Bundle(B) ∈ U₀
+|||
+||| Is this a bug? Shouldn't the goal look like this?
+|||
+||| [B] : U₀
+||| ⊢ Bundle(B) = Bundle(B) ∈ U₁
+Theorem Bundle_wf : [
+  ∀(U<0>; B. ∈(Bundle(B); U<1>))
+] {
+  unfold <Bundle>; auto.
+}.
+
+Theorem dom_wf : [
+  ∀(U<0>; B. ∀(Bundle(B); f. ∈(dom(f); U<0>)))
+] {
+  unfold <Bundle>;
+  unfold <dom>;
+  auto.
+}.
+
+Theorem map_wf : [
+  ∀(U<0>; B. ∀(Bundle(B); f. ∀(dom(f); x. ∈(map(f; x); B))))
+] {
+  unfold <Bundle>;
+  unfold <dom>;
+  unfold <map>;
+  auto.
+}.
+
+Operator Fiber : (0;0).
+[Fiber(f; b)] =def= [
+  Σ(dom(f); x. =(b; map(f; x); B))
+].
+
+Theorem Fiber_wf : [
+  ∀(U<0>; B.
+  ∀(Bundle(B); f.
+  ∀(B; b.
+    ∈(Fiber(f; b); U<0>))))
+] {
+  unfold <Bundle>; auto;
+  unfold <Fiber>; auto;
+  unfold <dom>; auto;
+  unfold <map>; auto.
+}.
+
+Operator Pullback : (0;0).
+[Pullback(f; g)] =def= [
+  Σ(dom(f); x. Fiber(g; map(f; x)))
+].
+
+||| FIXME
+Theorem Pullback_wf : [
+  ∀(U<0>; B.
+  ∀(Bundle(B); f.
+  ∀(Bundle(B); g.
+    ∈(Pullback(f; g); U<0>))))
+] {
+  auto.
+}
