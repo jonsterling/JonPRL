@@ -73,7 +73,6 @@ struct
         ORELSE LamEq (fresh_variable, level)
         ORELSE ApEq (list_at (terms, 0))
         ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
-        ORELSE Cum level
         ORELSE SubsetMemberEq (fresh_variable, level)
         ORELSE IsectMemberEq (fresh_variable, level)
         ORELSE_LAZY (fn _ =>
@@ -81,6 +80,7 @@ struct
                [M, N] => IsectMemberCaseEq (SOME M, N)
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
+        ORELSE Cum level
     end
 
   local

@@ -128,6 +128,8 @@ struct
             in
               k - 1
             end
+         | CUSTOM _ $ _ =>
+             raise Refine
          | _ => 0
 
     fun infer_type (H, M) =

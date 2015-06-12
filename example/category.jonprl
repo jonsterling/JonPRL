@@ -132,7 +132,7 @@ Theorem InitialRawCat : [RawCat] {
 
 Theorem InitialCat : [Cat] {
   unfold <Cat>;
-  intro [InitialRawCat]; unfold <InitialRawCat>;
+  intro [InitialRawCat] @0; unfold <InitialRawCat>;
   *{refine <lawcat_unfold>; auto};
   elim <C>; auto.
 }.
@@ -148,8 +148,8 @@ Theorem TerminalRawCat : [RawCat] {
 
 Theorem TerminalCat : [Cat] {
   unfold <Cat>;
-  intro [TerminalRawCat]; unfold <TerminalRawCat>;
+  intro [TerminalRawCat] <C> @0; unfold <TerminalRawCat>;
   *{refine <lawcat_unfold>; auto};
   ?{elim <f>; auto};
-  elim <C>; auto
+  elim <C>; auto.
 }.

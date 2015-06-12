@@ -74,7 +74,7 @@ Theorem UnitMonoidStruct : [MonoidSig] {
 
 Theorem UnitMonoid : [Monoid] {
   unfold <Monoid>;
-  intro [UnitMonoidStruct]; unfold <UnitMonoidStruct>;
+  intro [UnitMonoidStruct] @0; unfold <UnitMonoidStruct>;
   refine <monoid-simplify>;
   elim <m>; auto.
 }.
