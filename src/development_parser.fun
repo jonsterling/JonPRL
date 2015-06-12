@@ -1,12 +1,11 @@
 functor DevelopmentParser
-  (structure Development : DEVELOPMENT
+  (structure Development : DEVELOPMENT where type Telescope.Label.t = string
    structure Syntax : PARSE_ABT
     where type Operator.t = Development.Telescope.Label.t OperatorType.operator
-    where type env = Development.Telescope.Label.t -> int vector
+    where type ParseOperator.env = Development.Telescope.Label.t -> int vector
    structure Sequent : SEQUENT
    structure TacticScript : TACTIC_SCRIPT
 
-   sharing Development.Telescope.Label = Syntax.Variable
    sharing TacticScript.Lcf = Development.Lcf
    sharing type Development.term = Syntax.t
    sharing type Sequent.term = Development.term
@@ -44,15 +43,15 @@ struct
 
   val lookup_operator = Development.lookup_operator
 
-  val parse_tm  = squares o Syntax.parse_abt o lookup_operator
+  fun parse_tm fvs = squares o Syntax.parse_abt fvs o lookup_operator
 
   val parse_name =
     identifier
       wth Syntax.Variable.named
 
   fun parse_theorem D =
-    reserved "Theorem" >> parse_name << colon
-      && parse_tm D
+    reserved "Theorem" >> identifier << colon
+      && parse_tm [] D
       && braces (TacticScript.parse D)
       wth (fn (thm, (M, tac)) =>
              Development.prove D
@@ -66,17 +65,18 @@ struct
     wth Vector.fromList
 
   fun parse_tactic D =
-    reserved "Tactic" >> parse_name
+    reserved "Tactic" >> identifier
       && braces (TacticScript.parse D)
       wth (fn (lbl, tac) => Development.define_tactic D (lbl, tac))
 
   fun parse_operator_decl D =
-    (reserved "Operator" >> parse_name << colon && parse_arity)
+    (reserved "Operator" >> identifier << colon && parse_arity)
     wth Development.declare_operator D
 
   fun parse_operator_def D =
-    (parse_tm D && symbol "=def=" >> parse_tm D)
-    wth (fn (M : Syntax.t, N : Syntax.t) =>
+    parse_tm [] D -- (fn (tm : Syntax.t) =>
+      succeed tm && (symbol "=def=" >> parse_tm (Syntax.free_variables tm) D)
+    ) wth (fn (M : Syntax.t, N : Syntax.t) =>
       Development.define_operator D
         {definiendum = M,
          definiens = N})

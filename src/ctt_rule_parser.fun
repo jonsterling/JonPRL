@@ -1,6 +1,6 @@
 functor CttRuleParser
   (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
-   structure Ctt : CTT_UTIL
+   structure Ctt : CTT_UTIL where type Development.Telescope.Label.t = string
    structure Operator : PARSE_OPERATOR
     where type env = Ctt.Development.label -> int vector
    sharing type Ctt.Lcf.goal = Lcf.goal
@@ -76,7 +76,7 @@ struct
   type tactic_parser = (Pos.t -> tactic) intensional_parser
 
   val parse_tm : term intensional_parser =
-    squares o ParseSyntax.parse_abt o Development.lookup_operator
+    squares o ParseSyntax.parse_abt [] o Development.lookup_operator
 
   val parse_cum : tactic_parser =
     fn D => symbol "cum"
@@ -137,7 +137,7 @@ struct
              names = names})
 
   val parse_terms : term list intensional_parser =
-    fn D => opt (squares (commaSep1 (ParseSyntax.parse_abt (Development.lookup_operator D))))
+    fn D => opt (squares (commaSep1 (ParseSyntax.parse_abt [] (Development.lookup_operator D))))
     wth (fn oxs => getOpt (oxs, []))
 
   val parse_eq_cd_args : eq_cd_args intensional_parser =
@@ -180,21 +180,21 @@ struct
 
   val parse_lemma : tactic_parser =
     fn D => symbol "lemma"
-      && brackets parse_name
+      && brackets identifier
       wth (fn (name, lbl) => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Lemma (D, lbl)))
 
   val parse_unfold : tactic_parser =
     fn D => symbol "unfold"
-      && brackets (separate parse_name whiteSpace)
+      && brackets (separate identifier whiteSpace)
       wth (fn (name, lbls) => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Unfolds (D, lbls)))
 
   val parse_custom_tactic : tactic_parser =
     fn D => symbol "refine"
-      >> brackets parse_name
+      >> brackets identifier
       wth (fn lbl => fn (pos : Pos.t) =>
-            Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, fn goal =>
+            Lcf.annotate ({name = lbl, pos = pos}, fn goal =>
               Development.lookup_tactic D lbl goal))
 
   fun tactic_parsers D =

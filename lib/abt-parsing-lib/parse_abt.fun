@@ -58,9 +58,17 @@ struct
           v
         end
 
-    fun empty () : t =
+    fun dict_from_fvs fvs =
+      let
+        fun go [] R = R
+          | go (x::xs) R = go xs (StringListDict.insert R (Variable.to_string x) x)
+      in
+        go fvs StringListDict.empty
+      end
+
+    fun empty fvs : t =
       {bound = StringListDict.empty,
-       free = ref StringListDict.empty}
+       free = ref (dict_from_fvs fvs)}
   end
 
   fun parens p = (symbol "(" >> spaces) >> p << (spaces >> symbol ")")
@@ -89,6 +97,8 @@ struct
     and args sigma env () = separate (force (abt sigma env)) (symbol ";") wth Vector.fromList ?? "args"
 
   in
-    fun parse_abt x = force (abt (SymbolTable.empty ()) x)
+    fun parse_abt fvs env =
+      force (abt (SymbolTable.empty fvs) env)
+
   end
 end

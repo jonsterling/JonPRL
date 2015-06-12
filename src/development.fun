@@ -8,7 +8,6 @@ functor Development
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   sharing Telescope.Label = Syntax.Variable
    val as_custom_operator : Syntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -110,7 +109,10 @@ struct
   fun lookup_definition T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {conversion = SOME (_, conv),...} => Susp.force conv
-       | Object.Theorem {evidence,...} => Syntax.subst (Extract.extract (Susp.force evidence)) lbl
+       | Object.Theorem {evidence,...} => (fn tm =>
+           case List.find (fn v => Syntax.Variable.to_string v = Telescope.Label.to_string lbl) (Syntax.free_variables tm) of
+                NONE => tm
+              | SOME v => Syntax.subst (Extract.extract (Susp.force evidence)) v tm)
        | _ => raise Subscript
 
   fun lookup_theorem T lbl =

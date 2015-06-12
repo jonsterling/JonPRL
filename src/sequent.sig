@@ -4,7 +4,7 @@ sig
 
   structure Context : CONTEXT
   type name = Context.name
-  type context = term Context.context
+  type context = Context.context
 
   datatype sequent = >> of context * term
 

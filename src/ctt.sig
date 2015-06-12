@@ -9,7 +9,6 @@ sig
   sharing ConvTypes.Syntax = Syntax
 
   structure Development : DEVELOPMENT
-  sharing Development.Telescope.Label = Syntax.Variable
   sharing Development.Lcf = Lcf
 
   structure Rules : sig
