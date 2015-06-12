@@ -74,4 +74,4 @@ Theorem Pullback_wf : [
     ∈(Pullback(f; g); U<0>))))
 ] {
   auto.
-}
+}.
