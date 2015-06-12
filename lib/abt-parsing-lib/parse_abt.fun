@@ -58,7 +58,7 @@ struct
           v
         end
 
-    val empty : t =
+    fun empty () : t =
       {bound = StringListDict.empty,
        free = ref StringListDict.empty}
   end
@@ -89,6 +89,6 @@ struct
     and args sigma env () = separate (force (abt sigma env)) (symbol ";") wth Vector.fromList ?? "args"
 
   in
-    val parse_abt = force o abt SymbolTable.empty
+    fun parse_abt x = force (abt (SymbolTable.empty ()) x)
   end
 end
