@@ -16,6 +16,9 @@ sig
   exception NotFound of name
   val lookup : 'a context -> name -> 'a
   val lookup_visibility : 'a context -> name -> 'a * Visibility.t
+
+  val nth : 'a context -> int -> name
+
   val search : 'a context -> ('a -> bool) -> (name * 'a) option
 
   val map : ('a -> 'b) -> 'a context -> 'b context

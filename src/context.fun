@@ -32,6 +32,16 @@ struct
 
   fun lookup ctx k = #1 (lookup_visibility ctx k)
 
+  fun nth ctx i =
+    let
+      open Tel.ConsView
+      fun go n Empty = raise Subscript
+        | go n (Cons (lbl, _, tele')) =
+          if n = i then lbl else go (n + 1) (out tele')
+    in
+      go 0 (out ctx)
+    end
+
   fun search ctx phi =
     case Tel.search ctx (phi o #1) of
          SOME (lbl, (a, vis)) => SOME (lbl, a)
@@ -55,18 +65,18 @@ struct
   fun to_string f tele =
     let
       open Tel.ConsView
-      fun go Empty r = r
-        | go (Cons (lbl, (a, vis), tele')) r =
+      fun go i Empty r = r
+        | go i (Cons (lbl, (a, vis), tele')) r =
             let
               val pretty_lbl =
                 case vis of
                      Visibility.Visible => V.to_string lbl
                    | Visibility.Hidden => "[" ^ V.to_string lbl ^ "]"
             in
-              go (out tele') (r ^ "\n" ^ pretty_lbl ^ " : " ^ f a)
+              go (i + 1) (out tele') (r ^ "\n" ^ Int.toString i ^ ". " ^ pretty_lbl ^ " : " ^ f a)
             end
     in
-      go (out tele) ""
+      go 0 (out tele) ""
     end
 
   fun eq test =

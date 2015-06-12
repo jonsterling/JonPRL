@@ -33,13 +33,13 @@ Theorem test6 : [Π(unit; _. Σ(unit; _.unit))] {
 
 Theorem test7 : [Π(Σ(void;_.unit); z. void)] {
   auto;
-  elim <z>;
+  elim #0;
   auto.
 }.
 
 Theorem axiom-of-choice : [∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
   auto; intro [λ(w. spread(ap(φ;w); x.y.x))]; auto;
-  elim <φ> [a]; auto;
-  hyp-subst ← <z> [z. ap(ap(Q;a); spread(z; x.y.x))]; auto;
-  elim <y>; auto.
+  elim #3 [a]; auto;
+  hyp-subst ← #6 [z. ap(ap(Q;a); spread(z; x.y.x))]; auto;
+  elim #5; auto.
 }.

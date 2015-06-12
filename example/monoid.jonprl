@@ -22,7 +22,7 @@ Operator Monoid : ().
 [Monoid] =def= [subset(MonoidSig; M. MonoidLaws(M))].
 
 Tactic monoid-sig-unfold {
-  unfold <MonoidSig>; unfold <car>; unfold <op>; unfold <ze>.
+  unfold <MonoidSig car op ze>
 }.
 
 Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
@@ -30,12 +30,11 @@ Theorem MonoidSig-wf : [∈(MonoidSig; U<1>)] {
 }.
 
 Theorem car-wf : [∀(MonoidSig; M. ∈(car(M); U<0>))] {
-  refine <monoid-sig-unfold>; auto;
-  elim <M>; auto.
+  refine <monoid-sig-unfold>; auto.
 }.
 
 Tactic monoid-laws-unfold {
-  unfold <MonoidLaws>; unfold <LeftUnit>; unfold <RightUnit>; unfold <Assoc>.
+  unfold <MonoidLaws LeftUnit RightUnit Assoc>
 }.
 
 Tactic monoid-unfold {
@@ -76,15 +75,15 @@ Theorem UnitMonoid : [Monoid] {
   unfold <Monoid>;
   intro [UnitMonoidStruct] @0; unfold <UnitMonoidStruct>;
   refine <monoid-simplify>;
-  elim <m>; auto.
+  elim #0; auto.
 }.
 
 Theorem UnitMonoid-LeftUnit : [LeftUnit(UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>;
-  refine <monoid-simplify>; elim <m>; auto.
+  refine <monoid-simplify>; elim #0; auto.
 }.
 
 Theorem UnitMonoid-RightUnit : [RightUnit(UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>;
-  refine <monoid-simplify>; elim <m>; auto.
+  refine <monoid-simplify>; elim #0; auto.
 }.

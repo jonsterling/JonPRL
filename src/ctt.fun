@@ -197,8 +197,9 @@ struct
         [] BY mk_evidence UNIT_INTRO
       end
 
-    fun UnitElim x (H >> P) =
+    fun UnitElim i (H >> P) =
       let
+        val x = Context.nth H i
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctx_subst H ax x
@@ -280,8 +281,9 @@ struct
                | _ => raise Refine)
       end
 
-    fun FunElim (f, s, onames) (H >> P) =
+    fun FunElim (i, s, onames) (H >> P) =
       let
+        val f = Context.nth H i
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -354,8 +356,9 @@ struct
                | _ => raise Refine)
       end
 
-    fun IsectElim (f, s, onames) (H >> P) =
+    fun IsectElim (i, s, onames) (H >> P) =
       let
+        val f = Context.nth H i
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -436,8 +439,9 @@ struct
         ] BY mk_evidence IND_SUBSET_INTRO
       end
 
-    fun SubsetElim (z, onames) (H >> P) =
+    fun SubsetElim (i, onames) (H >> P) =
       let
+        val z = Context.nth H i
         val #[S, xT] = Context.lookup H z ^! SUBSET
         val (s, t) =
           case onames of
@@ -540,8 +544,9 @@ struct
         ] BY mk_evidence IND_PROD_INTRO
       end
 
-    fun ProdElim (z, onames) (H >> P) =
+    fun ProdElim (i, onames) (H >> P) =
       let
+        val z = Context.nth H i
         val #[S, xT] = Context.lookup H z ^! PROD
         val (s, t) =
           case onames of
@@ -629,7 +634,7 @@ struct
                 | _ => raise Refine)
       end
 
-    fun Hypothesis x (H >> P) =
+    fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookup_visibility H x
         val P'' = unify P P'
@@ -640,9 +645,11 @@ struct
         [] BY (fn _ => ``x)
       end
 
+    fun Hypothesis i (H >> P) = Hypothesis_ (Context.nth H i) (H >> P)
+
     fun Assumption (H >> P) =
       case Context.search H (fn x => Syntax.eq (P, x)) of
-           SOME (x, _) => Hypothesis x (H >> P)
+           SOME (x, _) => Hypothesis_ x (H >> P)
          | NONE => raise Refine
 
     fun Unfold (development, lbl) (H >> P) =
@@ -714,18 +721,19 @@ struct
       open Tacticals
       infix THEN THENL
     in
-      fun HypEqSubst (dir, z, xC, ok) (H >> P) =
+      fun HypEqSubst (dir, i, xC, ok) (H >> P) =
         let
+          val z = Context.nth H i
           val X = Context.lookup H z
         in
           case dir of
-               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis z, ID, ID]) (H >> P)
+               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) (H >> P)
              | LEFT =>
                  let
                    val #[M,N,A] = X ^! EQ
                  in
                    (EqSubst (EQ $$ #[N,M,A], xC, ok)
-                     THENL [EqSym THEN Hypothesis z, ID, ID]) (H >> P)
+                     THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
         end
     end

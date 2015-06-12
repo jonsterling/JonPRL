@@ -19,7 +19,7 @@ struct
      level : Level.t option}
 
   type elim_args =
-    {target : name,
+    {target : int,
      names : name list,
      term : term option}
 

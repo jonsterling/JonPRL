@@ -47,10 +47,14 @@ struct
 
   type env = Development.t
 
+  val parse_int =
+    repeat1 digit wth valOf o Int.fromString o String.implode
+
   val parse_level =
-    symbol "@"
-      >> repeat1 digit
-        wth valOf o Int.fromString o String.implode
+    lexeme (symbol "@" >> parse_int)
+
+  val parse_index =
+    lexeme (symbol "#" >> parse_int)
 
   fun parse_opt p =
     symbol "_" return NONE
@@ -87,9 +91,9 @@ struct
 
   val parse_hypothesis : tactic_parser =
     fn D => symbol "hypothesis"
-      && brackets parse_name
-      wth (fn (name, z) =>
-        name_tac name (Hypothesis z))
+      && parse_index
+      wth (fn (name, i) =>
+        name_tac name (Hypothesis i))
 
   val parse_eq_subst : tactic_parser =
     fn D => symbol "subst"
@@ -104,10 +108,10 @@ struct
   val parse_hyp_subst : tactic_parser =
     fn D => symbol "hyp-subst"
       && parse_dir
-      && brackets parse_name
+      && parse_index
       && parse_tm D && opt parse_level
-      wth (fn (name, (dir, (z, (M, k)))) =>
-        name_tac name (HypEqSubst (dir, z, M, k)))
+      wth (fn (name, (dir, (i, (M, k)))) =>
+        name_tac name (HypEqSubst (dir, i, M, k)))
 
   val parse_intro_args : intro_args intensional_parser =
     fn D => opt (parse_tm D)
@@ -124,11 +128,11 @@ struct
           | NONE => [])
 
   val parse_elim_args : elim_args intensional_parser=
-    fn D => brackets parse_name
+    fn D => parse_index
       && opt (parse_tm D)
       && parse_names
-      wth (fn (z, (M, names)) =>
-            {target = z,
+      wth (fn (i, (M, names)) =>
+            {target = i,
              term = M,
              names = names})
 
