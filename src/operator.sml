@@ -24,7 +24,7 @@ struct
     | EQ | MEM
     | SUBSET
 
-    | CUSTOM of {label : 'label, arity : int vector}
+    | CUSTOM of {label : 'label, arity : Arity.t}
 end
 
 signature CTT_OPERATOR =
@@ -33,7 +33,7 @@ sig
 
   include PARSE_OPERATOR
     where type t = Label.t OperatorType.operator
-    where type env = Label.t -> int vector
+    where type env = Label.t -> Arity.t
 
 end
 
@@ -45,7 +45,7 @@ struct
   structure Label = Label
   type t = Label.t operator
 
-  type env = Label.t -> int vector
+  type env = Label.t -> Arity.t
   fun eq (UNIV_EQ, UNIV_EQ) = true
     | eq (CUM, CUM) = true
     | eq (EQ_EQ, EQ_EQ) = true
@@ -160,7 +160,7 @@ struct
 
        | CUSTOM {arity,...} => arity
 
-  fun to_string O =
+  fun toString O =
     case O of
          UNIV_EQ => "U⁼"
        | CUM => "cum"
@@ -204,7 +204,7 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
-       | UNIV i => "U<" ^ Level.to_string i ^ ">"
+       | UNIV i => "U<" ^ Level.toString i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
        | AX => "⬧"
@@ -220,7 +220,7 @@ struct
 
        | SUBSET => "subset"
 
-       | CUSTOM {label,...} => Label.to_string label
+       | CUSTOM {label,...} => Label.toString label
 
   local
     open ParserCombinators CharParser
@@ -261,7 +261,7 @@ struct
              SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")
 
-    fun parse_operator lookup =
+    fun parseOperator lookup =
       intensional_parse_operator lookup
         || extensional_parse_operator
   end

@@ -12,10 +12,10 @@ struct
   fun insert H k vis v =
     Tel.snoc H (k, (v, vis))
 
-  val interpose_after = Tel.interpose_after
+  val interposeAfter = Tel.interposeAfter
   val fresh = Tel.fresh
 
-  fun is_empty (ctx : context) =
+  fun isEmpty (ctx : context) =
     let
       open Tel.SnocView
     in
@@ -29,10 +29,10 @@ struct
   fun modify (ctx : context) (k : V.t) f =
     Tel.modify ctx (k, fn (a, vis) => (f a, vis))
 
-  fun lookup_visibility (ctx : context) k =
+  fun lookupVisibility (ctx : context) k =
     (Tel.lookup ctx k)
 
-  fun lookup ctx k = #1 (lookup_visibility ctx k)
+  fun lookup ctx k = #1 (lookupVisibility ctx k)
 
   fun nth ctx i =
     let
@@ -49,7 +49,7 @@ struct
          SOME (lbl, (a, vis)) => SOME (lbl, a)
        | NONE => NONE
 
-  fun list_items ctx =
+  fun listItems ctx =
     let
       open Tel.SnocView
       fun go Empty r = r
@@ -61,21 +61,21 @@ struct
   fun map f ctx =
     Tel.map ctx (fn (a, vis) => (f a, vis))
 
-  fun map_after k f ctx =
-    Tel.map_after ctx (k, fn (a, vis) => (f a, vis))
+  fun mapAfter k f ctx =
+    Tel.mapAfter ctx (k, fn (a, vis) => (f a, vis))
 
-  fun to_string tele =
+  fun toString tele =
     let
       open Tel.ConsView
       fun go i Empty r = r
         | go i (Cons (lbl, (a, vis), tele')) r =
             let
-              val pretty_lbl =
+              val prettyLbl =
                 case vis of
-                     Visibility.Visible => V.to_string lbl
-                   | Visibility.Hidden => "[" ^ V.to_string lbl ^ "]"
+                     Visibility.Visible => V.toString lbl
+                   | Visibility.Hidden => "[" ^ V.toString lbl ^ "]"
             in
-              go (i + 1) (out tele') (r ^ "\n" ^ Int.toString i ^ ". " ^ pretty_lbl ^ " : " ^ Syntax.to_string a)
+              go (i + 1) (out tele') (r ^ "\n" ^ Int.toString i ^ ". " ^ prettyLbl ^ " : " ^ Syntax.toString a)
             end
     in
       go 1 (out tele) ""
@@ -90,10 +90,10 @@ struct
     let
       open Tel.SnocView
 
-      fun make_var_table vs =
+      fun makeVarTable vs =
         let
           fun go [] R = R
-            | go (x::xs) R = go xs (StringListDict.insert R (V.to_string x) x)
+            | go (x::xs) R = go xs (StringListDict.insert R (V.toString x) x)
         in
           go vs StringListDict.empty
         end
@@ -104,7 +104,7 @@ struct
              tm
            else
              let
-               val vstr = V.to_string v
+               val vstr = V.toString v
              in
                case StringListDict.find tbl vstr of
                     NONE =>
@@ -114,7 +114,7 @@ struct
                       (Syntax.subst (Syntax.``v) v' tm)
              end
     in
-      go (out ctx) (make_var_table (Syntax.free_variables tm)) tm
+      go (out ctx) (makeVarTable (Syntax.freeVariables tm)) tm
     end
 end
 

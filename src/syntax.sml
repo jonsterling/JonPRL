@@ -51,7 +51,7 @@ struct
     infix 8 $$ // \\
     open MyOp
   in
-    val to_string =
+    val toString =
     let
       fun enclose E =
         case out E of
@@ -65,15 +65,15 @@ struct
                let
                  val (x, B) = unbind xB
                in
-                 "⋂" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
+                 "⋂" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
                end
 
            | FUN $ #[A, xB] =>
                let
                  val (x, B) = unbind xB
                in
-                 if has_free (B, x) then
-                   "Π" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
+                 if hasFree (B, x) then
+                   "Π" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
                  else
                    enclose A ^ " => " ^ display B
                end
@@ -82,8 +82,8 @@ struct
                let
                  val (x, B) = unbind xB
                in
-                 if has_free (B, x) then
-                   "Σ" ^ Variable.to_string x ^ " ∈ " ^ display A ^ ". " ^ display B
+                 if hasFree (B, x) then
+                   "Σ" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
                  else
                    enclose A ^ " × " ^ display B
                end
@@ -92,8 +92,8 @@ struct
                let
                  val (x, B) = unbind xB
                in
-                 if has_free (B, x) then
-                   "{" ^ Variable.to_string x ^ " ∈ " ^ display A ^ " | " ^ display B ^ "}"
+                 if hasFree (B, x) then
+                   "{" ^ Variable.toString x ^ " ∈ " ^ display A ^ " | " ^ display B ^ "}"
                  else
                    "{" ^ display A ^ " | " ^ display B ^ "}"
                end
@@ -121,10 +121,10 @@ struct
            | UNIV i $ #[] =>
                "U" ^ subscript i
 
-           | _ => to_string_open display E
+           | _ => toStringOpen display E
 
       and dvar (x, E) =
-        if has_free (E, x) then Variable.to_string x else "_"
+        if hasFree (E, x) then Variable.toString x else "_"
 
       and subscript i =
         case i of

@@ -1,4 +1,4 @@
-functor AbtFreeVariables (Abt : ABT) : ABT_FREE_VARIABLES =
+functor AbtFreeVariables (Abt : ABT) : ABT_freeVariables =
 struct
   structure Abt = Abt
 
@@ -13,7 +13,7 @@ struct
       | go B (`x) R = if Set.member B x then R else Set.insert R x
       | go B (x \ E) R = go (Set.insert B x) (out E) R
   in
-    fun free_variables M =
+    fun freeVariables M =
       go Set.empty (out M) Set.empty
   end
 end

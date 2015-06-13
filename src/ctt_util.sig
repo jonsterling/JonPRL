@@ -5,7 +5,7 @@ sig
 
   type intro_args =
     {term : Syntax.t option,
-     fresh_variable : name option,
+     freshVariable : name option,
      level : Level.t option}
 
   type elim_args =

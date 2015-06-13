@@ -21,7 +21,7 @@ sig
      | Cons of label * 'a * 'r
 
   val out : 'a telescope -> ('a, 'a telescope) view
-  val out_after : 'a telescope -> label -> ('a, 'a telescope) view
+  val outAfter : 'a telescope -> label -> ('a, 'a telescope) view
   val into : ('a, 'a telescope) view -> 'a telescope
 end
 
@@ -29,7 +29,7 @@ signature LABEL =
 sig
   include ORDERED
 
-  val to_string : t -> string
+  val toString : t -> string
   val prime : t -> t
 end
 
@@ -56,16 +56,16 @@ sig
 
   (* manipulation *)
   val map : 'a telescope -> ('a -> 'b) -> 'b telescope
-  val map_after : 'a telescope -> label * ('a -> 'a) -> 'a telescope
+  val mapAfter : 'a telescope -> label * ('a -> 'a) -> 'a telescope
   val modify : 'a telescope -> label * ('a -> 'a) -> 'a telescope
-  val interpose_after : 'a telescope -> label * 'a telescope -> 'a telescope
+  val interposeAfter : 'a telescope -> label * 'a telescope -> 'a telescope
 
   (* comparison *)
   val subtelescope : ('a * 'a -> bool) -> 'a telescope * 'a telescope -> bool
   val eq : ('a * 'a -> bool) -> 'a telescope * 'a telescope -> bool
 
   (* pretty printing *)
-  val to_string : ('a -> string) -> 'a telescope -> string
+  val toString : ('a -> string) -> 'a telescope -> string
 
   (* These views may be used to lazily walk along a telescope *)
   structure SnocView : SNOC_VIEW

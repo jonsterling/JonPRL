@@ -1,7 +1,7 @@
 functor MergeDict (Dict : DICT) =
 struct
   exception DictsNotDisjoint
-  fun merge_dict (d1, d2) =
+  fun mergeDict (d1, d2) =
     Dict.foldl (fn (a, b, d3) =>
       case Dict.find d3 a of
            NONE => Dict.insert d3 a b
@@ -27,7 +27,7 @@ struct
 
   exception LabelExists
 
-  fun interpose_after (SOME {first,last,preds,nexts,vals,names}) (lbl, SOME tele) = SOME
+  fun interposeAfter (SOME {first,last,preds,nexts,vals,names}) (lbl, SOME tele) = SOME
     {first = first,
      last = case SOME (Dict.lookup nexts lbl) handle _ => NONE of
                  NONE => #last tele
@@ -40,7 +40,7 @@ struct
                 NONE => preds'
               | SOME lblpst => Dict.insert preds' lblpst (#last tele)
        in
-         MergeDict.merge_dict (#preds tele, preds'')
+         MergeDict.mergeDict (#preds tele, preds'')
        end,
      nexts =
        let
@@ -50,12 +50,12 @@ struct
                 NONE => nexts'
               | SOME lblpst => Dict.insert nexts' (#last tele) lblpst
        in
-         MergeDict.merge_dict (#nexts tele, nexts'')
+         MergeDict.mergeDict (#nexts tele, nexts'')
        end,
-     vals = MergeDict.merge_dict (vals, #vals tele),
-     names = MergeStringListDict.merge_dict (names, #names tele)}
-    | interpose_after tele (lbl, NONE) = tele
-    | interpose_after NONE (lbl, tele) = tele
+     vals = MergeDict.mergeDict (vals, #vals tele),
+     names = MergeStringListDict.mergeDict (names, #names tele)}
+    | interposeAfter tele (lbl, NONE) = tele
+    | interposeAfter NONE (lbl, tele) = tele
 
   fun modify NONE _ = NONE
     | modify (SOME {first,last,preds,nexts,vals,names}) (lbl, f) =
@@ -79,7 +79,7 @@ struct
     | find _ _ = NONE
 
   fun fresh (SOME tele : 'a telescope, lbl) =
-    if StringListDict.member (#names tele) (Label.to_string lbl) then
+    if StringListDict.member (#names tele) (Label.toString lbl) then
       fresh (SOME tele, L.prime lbl)
     else
       lbl
@@ -94,11 +94,11 @@ struct
      nexts = Dict.empty,
      preds = Dict.empty,
      vals = Dict.insert Dict.empty lbl a,
-     names = StringListDict.insert StringListDict.empty (Label.to_string lbl) lbl}
+     names = StringListDict.insert StringListDict.empty (Label.toString lbl) lbl}
 
-  fun cons (lbl, a) tele = interpose_after (singleton (lbl, a)) (lbl, tele)
+  fun cons (lbl, a) tele = interposeAfter (singleton (lbl, a)) (lbl, tele)
 
-  fun snoc (SOME tele) (lbl, a) = interpose_after (SOME tele) (#last tele, singleton (lbl, a))
+  fun snoc (SOME tele) (lbl, a) = interposeAfter (SOME tele) (#last tele, singleton (lbl, a))
     | snoc NONE (lbl, a) = singleton (lbl, a)
 
   fun map NONE f = NONE
@@ -169,8 +169,8 @@ struct
             Cons (first, Dict.lookup vals first, tail)
           end
 
-    fun out_after NONE lbl = Empty
-      | out_after (SOME {first,last,preds,nexts,vals,names}) lbl =
+    fun outAfter NONE lbl = Empty
+      | outAfter (SOME {first,last,preds,nexts,vals,names}) lbl =
          out (SOME
           {first = lbl,
            last = last,
@@ -186,8 +186,8 @@ struct
   local
     open ConsView
   in
-    fun map_after NONE (lbl, f) = NONE
-      | map_after (SOME tele) (lbl, f) =
+    fun mapAfter NONE (lbl, f) = NONE
+      | mapAfter (SOME tele) (lbl, f) =
           let
             val {first,last,preds,nexts,vals,names} = tele
             fun go Empty D = D
@@ -203,11 +203,11 @@ struct
                names = names}
           end
 
-    fun to_string pretty tele =
+    fun toString pretty tele =
       let
         fun go Empty r = r
           | go (Cons (lbl, a, tele')) r =
-              go (out tele') (r ^ ", " ^ L.to_string lbl ^ " : " ^ pretty a)
+              go (out tele') (r ^ ", " ^ L.toString lbl ^ " : " ^ pretty a)
       in
         go (out tele) "·"
       end

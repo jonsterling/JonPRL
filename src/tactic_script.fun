@@ -5,7 +5,7 @@ functor TacticScript
      where type evidence = Lcf.evidence
 
    type env
-   val parse_rule : env -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
+   val parseRule : env -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
 struct
   structure Lcf = Lcf
   type env = env
@@ -39,41 +39,41 @@ struct
 
   val pipe = symbol "|"
 
-  val parse_id : tactic charParser =
+  val parseId : tactic charParser =
     !! (symbol "id") wth (fn (name, pos) =>
       Lcf.annotate ({name = name, pos = pos}, ID))
 
-  val parse_fail : tactic charParser =
+  val parseFail : tactic charParser =
     !! (symbol "fail") wth (fn (name, pos) =>
       Lcf.annotate ({name = name, pos = pos}, FAIL))
 
-  fun parse_script D () : tactic charParser =
-    separate1 ((squares (commaSep ($ (parse_script D))) wth Sum.INL) <|> ($ (plain D) wth Sum.INR)) semi
+  fun parseScript D () : tactic charParser =
+    separate1 ((squares (commaSep ($ (parseScript D))) wth Sum.INL) <|> ($ (plain D) wth Sum.INR)) semi
     wth (foldl (fn (t1, t2) =>
                    case t1 of
                         Sum.INR t => THEN (t2, t)
                       | Sum.INL ts => THENL (t2, ts)) ID)
 
   and plain D () =
-    parse_rule D
-      || $ (parse_try D)
-      || $ (parse_repeat D)
-      || $ (parse_orelse D)
-      || parse_id
-      || parse_fail
+    parseRule D
+      || $ (parseTry D)
+      || $ (parseRepeat D)
+      || $ (parseOrelse D)
+      || parseId
+      || parseFail
 
-  and parse_try D () =
-        middle (symbol "?{") ($ (parse_script D)) (symbol "}")
+  and parseTry D () =
+        middle (symbol "?{") ($ (parseScript D)) (symbol "}")
           wth TRY
 
-  and parse_repeat D () =
-        middle (symbol "*{") ($ (parse_script D)) (symbol "}")
+  and parseRepeat D () =
+        middle (symbol "*{") ($ (parseScript D)) (symbol "}")
           wth LIMIT
 
-  and parse_orelse D () =
-        parens (separate1 ($ (parse_script D)) pipe)
+  and parseOrelse D () =
+        parens (separate1 ($ (parseScript D)) pipe)
         wth foldl ORELSE FAIL
 
-  fun parse D = $ (parse_script D) << opt (dot || semi)
+  fun parse D = $ (parseScript D) << opt (dot || semi)
 end
 
