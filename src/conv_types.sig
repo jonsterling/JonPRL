@@ -5,7 +5,7 @@ sig
   type conv = Syntax.t -> Syntax.t
   type red = Syntax.t Syntax.view Syntax.view -> Syntax.t
 
-  val reduction_rule : red -> conv
+  val reductionRule : red -> conv
 
   exception Conv
 end

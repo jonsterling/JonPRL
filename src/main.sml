@@ -3,21 +3,21 @@ struct
   fun main (_, args) =
     let
       val (opts, files) = List.partition (String.isPrefix "--") args
-      val check_mode = List.exists (fn opt => opt = "--check") opts
+      val checkMode = List.exists (fn opt => opt = "--check") opts
 
-      fun load_file (f, dev) = CttFrontend.load_file (dev, f)
+      fun loadFile (f, dev) = CttFrontend.loadFile (dev, f)
 
       val D =
-        SOME (foldl load_file Development.empty files)
+        SOME (foldl loadFile Development.empty files)
         handle e => (print (exnMessage e); NONE)
     in
       case D of
            NONE => 1
          | SOME development =>
-             if check_mode then
+             if checkMode then
                0
              else
-              (CttFrontend.print_development development; 0)
+              (CttFrontend.printDevelopment development; 0)
               handle e => (print ("Error: " ^ exnMessage e ^ "\n"); 1)
     end
 end

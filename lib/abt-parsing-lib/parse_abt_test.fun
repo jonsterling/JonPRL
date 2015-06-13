@@ -2,7 +2,7 @@ functor ParseAbtTest () =
 struct
   datatype oper = LAM | AX | AP
 
-  structure O : PARSE_OPERATOR =
+  structure O : parseOperator =
   struct
     type env = unit
     type t = oper
@@ -10,15 +10,15 @@ struct
     fun arity LAM = #[1]
       | arity AX = #[]
       | arity AP = #[0,0]
-    fun to_string LAM = "λ"
-      | to_string AX = "<>"
-      | to_string AP = "ap"
+    fun toString LAM = "λ"
+      | toString AX = "<>"
+      | toString AP = "ap"
 
     open ParserCombinators CharParser
     infix 2 return
     infixr 1 ||
 
-    fun parse_operator () =
+    fun parseOperator () =
       string "λ" return LAM
         || string "<>" return AX
         || string "ap" return AP
@@ -27,8 +27,8 @@ struct
   structure Syn = AbtUtil(Abt(structure Operator = O and Variable = Variable()))
   structure ParseSyn = ParseAbt(structure Syntax = Syn and Operator = O)
 
-  fun print_res pr = print (Sum.sumR (fn b => Syn.to_string b ^ "\n") pr)
-  fun doit s = print_res (CharParser.parseString (ParseSyn.parse_abt ()) s)
+  fun printRes pr = print (Sum.sumR (fn b => Syn.toString b ^ "\n") pr)
+  fun doit s = printRes (CharParser.parseString (ParseSyn.parseAbt ()) s)
 
   val _ =
     (doit "λ(x.λ(x.ap(x;<>)))";

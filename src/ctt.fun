@@ -40,10 +40,10 @@ struct
     open Sequent
     infix >>
 
-    fun ctx_subst (H : context) (m : Syntax.t) (x : Context.name) =
-      Context.map_after x (Syntax.subst m x) H
+    fun ctxSubst (H : context) (m : Syntax.t) (x : Context.name) =
+      Context.mapAfter x (Syntax.subst m x) H
 
-    fun ctx_unbind (H : context, A : Syntax.t, xE : Syntax.t) =
+    fun ctxUnbind (H : context, A : Syntax.t, xE : Syntax.t) =
       let
         val (x, E) = unbind (Context.rebind H xE)
         val x' = Context.fresh (H, x)
@@ -53,7 +53,7 @@ struct
         (H', x', E')
       end
 
-    fun mk_evidence operator = fn Ds => operator $$ Vector.fromList Ds
+    fun mkEvidence operator = fn Ds => operator $$ Vector.fromList Ds
 
     fun BY (Ds, V) = (Ds, V)
     infix BY
@@ -61,7 +61,7 @@ struct
     fun @@ (H, (x,A)) = Context.insert H x Visibility.Visible A
     infix 8 @@
 
-    fun as_app M =
+    fun asApp M =
       case out M of
            O $ ES => (O, ES)
          | _ => raise Refine
@@ -72,7 +72,7 @@ struct
          | _ => raise Refine
     infix ^!
 
-    fun as_variable M =
+    fun asVariable M =
       case out M of
            ` x => x
          | _ => raise Refine
@@ -80,7 +80,7 @@ struct
     fun unify M N =
       if Syntax.eq (M, N) then M else raise Refine
 
-    fun operator_irrelevant O =
+    fun operatorIrrelevant O =
       case O of
            EQ => true
          | MEM => true
@@ -88,42 +88,42 @@ struct
          | VOID => true
          | _ => false
 
-    fun assert_irrelevant (H, P) =
+    fun assertIrrelevant (H, P) =
       case out P of
-           O $ _ => if operator_irrelevant O then () else raise Refine
+           O $ _ => if operatorIrrelevant O then () else raise Refine
          | _ => raise Refine
 
-    fun infer_level (H, P) =
+    fun inferLevel (H, P) =
       case out P of
            UNIV l $ _ => l + 1
          | FUN $ #[A, xB] =>
            let
-             val (H', x, B) = ctx_unbind (H, A, xB)
+             val (H', x, B) = ctxUnbind (H, A, xB)
            in
-             Level.max (infer_level (H, A), infer_level (H', B))
+             Level.max (inferLevel (H, A), inferLevel (H', B))
            end
          | PROD $ #[A, xB] =>
            let
-             val (H', x, B) = ctx_unbind (H, A, xB)
+             val (H', x, B) = ctxUnbind (H, A, xB)
            in
-             Level.max (infer_level (H, A), infer_level (H', B))
+             Level.max (inferLevel (H, A), inferLevel (H', B))
            end
          | ISECT $ #[A, xB] =>
            let
-             val (H', x, B) = ctx_unbind (H, A, xB)
+             val (H', x, B) = ctxUnbind (H, A, xB)
            in
-             Level.max (infer_level (H, A), infer_level (H', B))
+             Level.max (inferLevel (H, A), inferLevel (H', B))
            end
          | SUBSET $ #[A, xB] =>
            let
-             val (H', x, B) = ctx_unbind (H, A, xB)
+             val (H', x, B) = ctxUnbind (H, A, xB)
            in
-             Level.max (infer_level (H, A), infer_level (H', B))
+             Level.max (inferLevel (H, A), inferLevel (H', B))
            end
          | ` x =>
             let
               val X = Context.lookup H x
-              val k = infer_level (H, X)
+              val k = inferLevel (H, X)
             in
               k - 1
             end
@@ -131,25 +131,25 @@ struct
              raise Refine
          | _ => 0
 
-    fun infer_type (H, M) =
+    fun inferType (H, M) =
       case out M of
            UNIV l $ _ => UNIV (l + 1) $$ #[]
          | AP $ #[F, N] =>
              let
-               val #[A, xB] = infer_type (H, F) ^! FUN
+               val #[A, xB] = inferType (H, F) ^! FUN
              in
                xB // N
              end
          | SPREAD $ #[X, uvE] =>
              let
-               val #[A, xB] = infer_type (H, X) ^! PROD
-               val (H', u, vE) = ctx_unbind (H, A, uvE)
-               val (H'', v, E) = ctx_unbind (H', xB // ``u, vE)
+               val #[A, xB] = inferType (H, X) ^! PROD
+               val (H', u, vE) = ctxUnbind (H, A, uvE)
+               val (H'', v, E) = ctxUnbind (H', xB // ``u, vE)
 
                val uval = SPREAD $$ #[X, u \\ (v \\ (``u))]
                val vval = SPREAD $$ #[X, u \\ (v \\ (``v))]
              in
-               subst uval u (subst vval v (infer_type (H'', E)))
+               subst uval u (subst vval v (inferType (H'', E)))
              end
          | ` x => Context.lookup H x
          | _ => raise Refine
@@ -158,42 +158,42 @@ struct
       fn (H >> P) =>
         let
           val #[A, B, univ] = P ^! EQ
-          val (UNIV l, #[]) = as_app univ
-          val k = case ok of NONE => Level.max (infer_level (H, A), infer_level (H, B)) | SOME k => k
-          val _ = Level.assert_lt (k, l)
+          val (UNIV l, #[]) = asApp univ
+          val k = case ok of NONE => Level.max (inferLevel (H, A), inferLevel (H, B)) | SOME k => k
+          val _ = Level.assertLt (k, l)
         in
-          [H >> EQ $$ #[A,B, UNIV k $$ #[]]] BY mk_evidence CUM
+          [H >> EQ $$ #[A,B, UNIV k $$ #[]]] BY mkEvidence CUM
         end
 
     fun UnivEq (H >> P) =
       let
         val #[univ1, univ2, univ3] = P ^! EQ
-        val (UNIV l, #[]) = as_app univ1
-        val (UNIV l', #[]) = as_app univ2
-        val (UNIV k, #[]) = as_app univ3
-        val _ = Level.assert_lt (Level.unify (l, l'), k)
+        val (UNIV l, #[]) = asApp univ1
+        val (UNIV l', #[]) = asApp univ2
+        val (UNIV k, #[]) = asApp univ3
+        val _ = Level.assertLt (Level.unify (l, l'), k)
       in
-        [] BY mk_evidence UNIV_EQ
+        [] BY mkEvidence UNIV_EQ
       end
 
     fun EqEq (H >> P) =
       let
         val #[E1, E2, univ] = P ^! EQ
-        val (UNIV k, #[]) = as_app univ
+        val (UNIV k, #[]) = asApp univ
         val #[M,N,A] = E1 ^! EQ
         val #[M',N',A'] = E2 ^! EQ
       in
         [ H >> EQ $$ #[A,A',univ]
         , H >> EQ $$ #[M,M',A]
         , H >> EQ $$ #[N,N',A]
-        ] BY mk_evidence EQ_EQ
+        ] BY mkEvidence EQ_EQ
       end
 
     fun UnitIntro (H >> P) =
       let
         val #[] = P ^! UNIT
       in
-        [] BY mk_evidence UNIT_INTRO
+        [] BY mkEvidence UNIT_INTRO
       end
 
     fun UnitElim i (H >> P) =
@@ -201,7 +201,7 @@ struct
         val x = Context.nth H (i - 1)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
-        val H' = ctx_subst H ax x
+        val H' = ctxSubst H ax x
         val P' = subst ax x P
       in
         [ H' >> P'
@@ -214,9 +214,9 @@ struct
         val #[unit, unit', univ] = P ^! EQ
         val #[] = unit ^! UNIT
         val #[] = unit' ^! UNIT
-        val (UNIV _, #[]) = as_app univ
+        val (UNIV _, #[]) = asApp univ
       in
-        [] BY mk_evidence UNIT_EQ
+        [] BY mkEvidence UNIT_EQ
       end
 
     fun VoidEq (H >> P) =
@@ -224,14 +224,14 @@ struct
         val #[void, void', univ] = P ^! EQ
         val #[] = void ^! VOID
         val #[] = void' ^! VOID
-        val (UNIV _, #[]) = as_app univ
+        val (UNIV _, #[]) = asApp univ
       in
-        [] BY mk_evidence VOID_EQ
+        [] BY mkEvidence VOID_EQ
       end
 
     fun VoidElim (H >> P) =
       [ H >> VOID $$ #[]
-      ] BY mk_evidence VOID_ELIM
+      ] BY mkEvidence VOID_ELIM
 
     fun AxEq (H >> P) =
       let
@@ -240,7 +240,7 @@ struct
         val #[] = ax' ^! AX
         val #[] = unit ^! UNIT
       in
-        [] BY mk_evidence AX_EQ
+        [] BY mkEvidence AX_EQ
       end
 
     fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
@@ -248,7 +248,7 @@ struct
         val #[q1, q2, univ] = P ^! EQ
         val #[A, xB] = q1 ^! Q
         val #[A', yB'] = q2 ^! Q
-        val (UNIV _, #[]) = as_app univ
+        val (UNIV _, #[]) = asApp univ
 
         val z =
           Context.fresh (H,
@@ -272,7 +272,7 @@ struct
             case oz of
                  NONE => #1 (unbind xP2)
                | SOME z => z)
-        val k = case ok of NONE => infer_level (H, P1) | SOME k => k
+        val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
       in
         [ H @@ (z,P1) >> xP2 // `` z
         , H >> MEM $$ #[P1, UNIV k $$ #[]]
@@ -312,7 +312,7 @@ struct
             case oz of
                  NONE => #1 (unbind cB)
                | SOME z => z)
-        val k = case ok of NONE => infer_level (H, A) | SOME k => k
+        val k = case ok of NONE => inferLevel (H, A) | SOME k => k
       in
         [ H @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
         , H >> MEM $$ #[A, UNIV k $$ #[]]
@@ -327,14 +327,14 @@ struct
         val #[f2, t2] = f2t2 ^! AP
         val funty =
           case ofunty of
-               NONE => unify (infer_type (H, f1)) (infer_type (H, f2))
+               NONE => unify (inferType (H, f1)) (inferType (H, f2))
              | SOME funty => Context.rebind H funty
         val #[S, xT] = funty ^! FUN
         val Tt1' = unify Tt1 (xT // t1)
       in
         [ H >> EQ $$ #[f1, f2, funty]
         , H >> EQ $$ #[t1, t2, S]
-        ] BY mk_evidence AP_EQ
+        ] BY mkEvidence AP_EQ
       end
 
     val IsectEq = QuantifierEq (ISECT, ISECT_EQ)
@@ -347,7 +347,7 @@ struct
             case oz of
                  NONE => #1 (unbind xP2)
                | SOME z => z)
-        val k = case ok of NONE => infer_level (H, P1) | SOME k => k
+        val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
         val H' = Context.insert H z Visibility.Hidden P1
       in
         [ H' >> xP2 // `` z
@@ -385,7 +385,7 @@ struct
             case oz of
                  NONE => #1 (unbind xP2)
                | SOME z => z)
-        val k = case ok of NONE => infer_level (H, P1) | SOME k => k
+        val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
         val H' = Context.insert H z Visibility.Hidden P1
       in
         [ H' >> EQ $$ #[M,N, xP2 // ``z]
@@ -401,14 +401,14 @@ struct
         val isect =
           case oisect of
                SOME isect => isect
-             | NONE => unify (infer_type (H, F1)) (infer_type (H, F2))
+             | NONE => unify (inferType (H, F1)) (inferType (H, F2))
 
         val #[S, xT] = isect ^! ISECT
         val _ = unify Tt (xT // t)
       in
         [ H >> EQ $$ #[F1, F2, isect]
         , H >> MEM $$ #[t, S]
-        ] BY mk_evidence ISECT_MEMBER_CASE_EQ
+        ] BY mkEvidence ISECT_MEMBER_CASE_EQ
       end
 
     val SubsetEq = QuantifierEq (SUBSET, SUBSET_EQ)
@@ -417,7 +417,7 @@ struct
       let
         val w = Context.rebind H w
         val #[P1, xP2] = P ^! SUBSET
-        val k = case ok of SOME k => k | NONE => infer_level (H, P)
+        val k = case ok of SOME k => k | NONE => inferLevel (H, P)
         val z =
           Context.fresh (H,
             case oz of
@@ -435,11 +435,11 @@ struct
       let
         val #[P1, xP2] = P ^! SUBSET
         val (x, P2) = unbind xP2
-        val _ = if has_free (P2, x) then raise Refine else ()
+        val _ = if hasFree (P2, x) then raise Refine else ()
       in
         [ H >> P1
         , H >> P2
-        ] BY mk_evidence IND_SUBSET_INTRO
+        ] BY mkEvidence IND_SUBSET_INTRO
       end
 
     fun SubsetElim (i, onames) (H >> P) =
@@ -455,7 +455,7 @@ struct
 
         val G = Context.empty @@ (s, S)
         val G' = Context.insert G t Visibility.Hidden (xT // ``s)
-        val H' = ctx_subst (Context.interpose_after H (z, G')) (``s) z
+        val H' = ctxSubst (Context.interposeAfter H (z, G')) (``s) z
         val P' = subst (``s) z P
       in
         [ H' >> P'
@@ -472,7 +472,7 @@ struct
             case oz of
                  NONE => #1 (unbind xT)
                | SOME z => z)
-        val k = case ok of SOME k => k | NONE => infer_level (H, subset)
+        val k = case ok of SOME k => k | NONE => inferLevel (H, subset)
       in
         [ H >> EQ $$ #[s,t,S]
         , H >> xT // s
@@ -493,14 +493,14 @@ struct
     fun Witness M (H >> P) =
       let
         val M = Context.rebind H M
-        val has_hidden_variables =
+        val hasHiddenVariables =
           foldl
-            (fn (x, b) => b orelse #2 (Context.lookup_visibility H x) = Visibility.Hidden)
+            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden)
             false
-            (free_variables M)
+            (freeVariables M)
         val _ =
-          if has_hidden_variables then
-            assert_irrelevant (H, P)
+          if hasHiddenVariables then
+            assertIrrelevant (H, P)
           else
             ()
       in
@@ -513,7 +513,7 @@ struct
       let
         val P = P
         val #[M, M', A] = P ^! EQ
-        val x = as_variable (unify M M')
+        val x = asVariable (unify M M')
         val _ = unify A (Context.lookup H x)
       in
         [] BY (fn _ => HYP_EQ $$ #[`` x])
@@ -525,7 +525,7 @@ struct
       let
         val w = Context.rebind H w
         val #[P1, xP2] = P ^! PROD
-        val k = case ok of SOME k => k | NONE => infer_level (H, P)
+        val k = case ok of SOME k => k | NONE => inferLevel (H, P)
         val z =
           Context.fresh (H,
             case oz of
@@ -543,11 +543,11 @@ struct
       let
         val #[P1, xP2] = P ^! PROD
         val (x, P2) = unbind xP2
-        val _ = if has_free (P2, x) then raise Refine else ()
+        val _ = if hasFree (P2, x) then raise Refine else ()
       in
         [ H >> P1
         , H >> P2
-        ] BY mk_evidence IND_PROD_INTRO
+        ] BY mkEvidence IND_PROD_INTRO
       end
 
     fun ProdElim (i, onames) (H >> P) =
@@ -563,7 +563,7 @@ struct
 
         val st = PAIR $$ #[``s, ``t]
         val J = Context.empty @@ (s, S) @@ (t, (xT // ``s))
-        val H' = ctx_subst (Context.interpose_after H (z, J)) st z
+        val H' = ctxSubst (Context.interposeAfter H (z, J)) st z
       in
         [ H' >> subst st z P
         ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
@@ -581,7 +581,7 @@ struct
             case oz of
                  NONE => #1 (unbind xB)
                | SOME z => z)
-        val k = case ok of NONE => infer_level (H, A) | SOME k => k
+        val k = case ok of NONE => inferLevel (H, A) | SOME k => k
       in
         [ H >> EQ $$ #[M, M', A]
         , H >> EQ $$ #[N, N', xB // M]
@@ -598,7 +598,7 @@ struct
 
         val prod =
           case oprod of
-               NONE => unify (infer_type (H, E1)) (infer_type (H, E2))
+               NONE => unify (inferType (H, E1)) (inferType (H, E2))
              | SOME prod => Context.rebind H prod
 
         val (s,t,y) =
@@ -619,8 +619,8 @@ struct
                  val H' = H @@ (z, prod)
                  val Cz =
                    unify
-                     (infer_type (H', SPREAD $$ #[``z, xyT1]))
-                     (infer_type (H', SPREAD $$ #[``z, uvT2]))
+                     (inferType (H', SPREAD $$ #[``z, xyT1]))
+                     (inferType (H', SPREAD $$ #[``z, uvT2]))
                in
                  z \\ Cz
                end
@@ -642,12 +642,12 @@ struct
 
     fun Hypothesis_ x (H >> P) =
       let
-        val (P', visibility) = Context.lookup_visibility H x
+        val (P', visibility) = Context.lookupVisibility H x
         val P'' = unify P P'
       in
         (case visibility of
              Visibility.Visible => ()
-           | Visibility.Hidden => assert_irrelevant (H, P''));
+           | Visibility.Hidden => assertIrrelevant (H, P''));
         [] BY (fn _ => ``x)
       end
 
@@ -661,7 +661,7 @@ struct
     fun Unfold (development, lbl) (H >> P) =
       let
         open Conversionals
-        val conv = CDEEP (Development.lookup_definition development lbl)
+        val conv = CDEEP (Development.lookupDefinition development lbl)
       in
         [ Context.map conv H >> conv P
         ] BY (fn [D] => D
@@ -674,7 +674,7 @@ struct
         infix CTHEN
         val conv =
           foldl (fn (lbl, conv) =>
-            conv CTHEN CDEEP (Development.lookup_definition development lbl)
+            conv CTHEN CDEEP (Development.lookupDefinition development lbl)
           ) CID lbls
       in
         [ Context.map conv H >> conv P
@@ -684,7 +684,7 @@ struct
 
     fun Lemma (development, lbl) (H >> P) =
       let
-        val {statement, evidence} = Development.lookup_theorem development lbl
+        val {statement, evidence} = Development.lookupTheorem development lbl
         val H' >> P' = statement
       in
         if Context.subcontext (H', H) andalso Syntax.eq (P, P')
@@ -704,15 +704,15 @@ struct
         val #[M,N,A] = P ^! EQ
       in
         [ H >> EQ $$ #[N,M,A]
-        ] BY mk_evidence EQ_SYM
+        ] BY mkEvidence EQ_SYM
       end
 
     fun EqSubst (eq, xC, ok) (H >> P) =
       let
         val #[M,N,A] = Context.rebind H eq ^! EQ
-        val (H', x, C) = ctx_unbind (H, A, xC)
+        val (H', x, C) = ctxUnbind (H, A, xC)
         val P' = unify P (xC // M)
-        val k = case ok of SOME k => k | NONE => infer_level (H', C)
+        val k = case ok of SOME k => k | NONE => inferLevel (H', C)
       in
         [ H >> eq
         , H >> xC // N
@@ -750,11 +750,11 @@ struct
   struct
     open Conversionals ConvTypes
 
-    val ApBeta : conv = reduction_rule
+    val ApBeta : conv = reductionRule
       (fn AP $ #[LAM $ #[xE], N] => xE // into N
         | _ => raise Conv)
 
-    val SpreadBeta : conv = reduction_rule
+    val SpreadBeta : conv = reductionRule
       (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
         | _ => raise Conv)
   end

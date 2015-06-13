@@ -9,15 +9,15 @@ struct
 
   infix >>
 
-  fun to_string (H >> P) =
+  fun toString (H >> P) =
     let
-      val ctx = Context.to_string H
-      val prop = Syntax.to_string P
+      val ctx = Context.toString H
+      val prop = Syntax.toString P
     in
-      if Context.is_empty H then
+      if Context.isEmpty H then
         "⊢ " ^ prop
       else
-        Context.to_string H ^ "\n⊢ " ^ prop
+        Context.toString H ^ "\n⊢ " ^ prop
     end
 
   fun eq (H >> P, H' >> P') =

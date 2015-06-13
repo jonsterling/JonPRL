@@ -6,8 +6,8 @@ struct
   type evidence = evidence
   type validation = evidence list -> evidence
   type tactic = goal -> (goal list * validation)
-  val goal_to_string = Sequent.to_string
-  val goal_apart = not o Sequent.eq
+  val goalToString = Sequent.toString
+  val goalApart = not o Sequent.eq
 end
 
 structure Lcf = Lcf

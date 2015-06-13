@@ -41,54 +41,54 @@ struct
   structure TP = TokenParser (LangDef)
   open TP
 
-  val lookup_operator = Development.lookup_operator
+  val lookupOperator = Development.lookupOperator
 
-  fun parse_tm fvs = squares o Syntax.parse_abt fvs o lookup_operator
+  fun parseTm fvs = squares o Syntax.parseAbt fvs o lookupOperator
 
-  val parse_name =
+  val parseName =
     identifier
       wth Syntax.Variable.named
 
-  fun parse_theorem D =
+  fun parseTheorem D =
     reserved "Theorem" >> identifier << colon
-      && parse_tm [] D
+      && parseTm [] D
       && braces (TacticScript.parse D)
       wth (fn (thm, (M, tac)) =>
              Development.prove D
               (thm, Sequent.>> (Sequent.Context.empty, M), tac))
 
-  val parse_int =
+  val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
 
-  val parse_arity =
-    parens (semiSep parse_int)
+  val parseArity =
+    parens (semiSep parseInt)
     wth Vector.fromList
 
-  fun parse_tactic D =
+  fun parseTactic D =
     reserved "Tactic" >> identifier
       && braces (TacticScript.parse D)
-      wth (fn (lbl, tac) => Development.define_tactic D (lbl, tac))
+      wth (fn (lbl, tac) => Development.defineTactic D (lbl, tac))
 
-  fun parse_operator_decl D =
-    (reserved "Operator" >> identifier << colon && parse_arity)
-    wth Development.declare_operator D
+  fun parseOperatorDecl D =
+    (reserved "Operator" >> identifier << colon && parseArity)
+    wth Development.declareOperator D
 
-  fun parse_operator_def D =
-    parse_tm [] D -- (fn (tm : Syntax.t) =>
-      succeed tm && (symbol "=def=" >> parse_tm (Syntax.free_variables tm) D)
+  fun parseOperatorDef D =
+    parseTm [] D -- (fn (tm : Syntax.t) =>
+      succeed tm && (symbol "=def=" >> parseTm (Syntax.freeVariables tm) D)
     ) wth (fn (M : Syntax.t, N : Syntax.t) =>
-      Development.define_operator D
+      Development.defineOperator D
         {definiendum = M,
          definiens = N})
 
-  fun parse_decl D =
-      parse_theorem D
-      || parse_tactic D
-      || parse_operator_decl D
-      || parse_operator_def D
+  fun parseDecl D =
+      parseTheorem D
+      || parseTactic D
+      || parseOperatorDecl D
+      || parseOperatorDef D
 
   fun parse' D () =
-    (parse_decl D << dot) -- (fn D' =>
+    (parseDecl D << dot) -- (fn D' =>
       $ (parse' D') <|>
       (whiteSpace >> not any) return D')
 

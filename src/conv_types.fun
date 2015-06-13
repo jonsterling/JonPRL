@@ -6,7 +6,7 @@ struct
 
   open Syntax
 
-  fun reduction_rule red M = red (map out (out M))
+  fun reductionRule red M = red (map out (out M))
   exception Conv
 end
 
@@ -24,11 +24,11 @@ struct
 
   exception InvalidTemplate
 
-  fun compute_chart (M,N) =
+  fun computeChart (M,N) =
     case (out M, out N) of
          (p $ es, p' $ es') =>
            let
-             val _ = if p <> p' then raise InvalidTemplate else ()
+             val _ = if Operator.eq (p, p') then () else raise InvalidTemplate
              open Vector
              val zipped = tabulate (length es, fn n => (sub (es, n), sub (es', n)))
 
@@ -50,9 +50,9 @@ struct
     let
       val inop $ inargs = out definiendum handle _ => raise Conv
       val outop $ outargs = out definiens handle _ => raise Conv
-      val Mop $ M_args = out M handle _ => raise Conv
+      val Mop $ MArgs = out M handle _ => raise Conv
       val _ = if Operator.eq (Mop, inop) then () else raise Conv
-      val chart = compute_chart (definiendum, M)
+      val chart = computeChart (definiendum, M)
 
       fun go H (p $ es) = p $$ Vector.map (go H o out) es
         | go H (x \ E) = x \\ go (Set.insert H x) (out E)

@@ -15,7 +15,7 @@ struct
 
   type intro_args =
     {term : term option,
-     fresh_variable : name option,
+     freshVariable : name option,
      level : Level.t option}
 
   type elim_args =
@@ -28,15 +28,15 @@ struct
      level : Level.t option,
      terms : term list}
 
-  fun Intro {term,fresh_variable,level} =
+  fun Intro {term,freshVariable,level} =
      MemCD
        ORELSE UnitIntro
        ORELSE Assumption
-       ORELSE FunIntro (fresh_variable, level)
-       ORELSE IsectIntro (fresh_variable, level)
-       ORELSE_LAZY (fn _ => ProdIntro (valOf term, fresh_variable, level))
+       ORELSE FunIntro (freshVariable, level)
+       ORELSE IsectIntro (freshVariable, level)
+       ORELSE_LAZY (fn _ => ProdIntro (valOf term, freshVariable, level))
        ORELSE IndependentProdIntro
-       ORELSE_LAZY (fn _ => SubsetIntro (valOf term, fresh_variable, level))
+       ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
 
   fun take2 (x::y::_) = SOME (x,y)
@@ -57,7 +57,7 @@ struct
 
   fun EqCD {names, level, terms} =
     let
-      val fresh_variable = list_at (names, 0)
+      val freshVariable = list_at (names, 0)
     in
       AxEq
         ORELSE EqEq
@@ -65,16 +65,16 @@ struct
         ORELSE VoidEq
         ORELSE HypEq
         ORELSE UnivEq
-        ORELSE FunEq fresh_variable
-        ORELSE IsectEq fresh_variable
-        ORELSE ProdEq fresh_variable
-        ORELSE SubsetEq fresh_variable
-        ORELSE PairEq (fresh_variable, level)
-        ORELSE LamEq (fresh_variable, level)
+        ORELSE FunEq freshVariable
+        ORELSE IsectEq freshVariable
+        ORELSE ProdEq freshVariable
+        ORELSE SubsetEq freshVariable
+        ORELSE PairEq (freshVariable, level)
+        ORELSE LamEq (freshVariable, level)
         ORELSE ApEq (list_at (terms, 0))
         ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
-        ORELSE SubsetMemberEq (fresh_variable, level)
-        ORELSE IsectMemberEq (fresh_variable, level)
+        ORELSE SubsetMemberEq (freshVariable, level)
+        ORELSE IsectMemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
           case terms of
                [M, N] => IsectMemberCaseEq (SOME M, N)
@@ -88,7 +88,7 @@ struct
       EqCD {names = [], level = NONE, terms = []}
 
     val AutoVoidElim = VoidElim THEN Assumption
-    val AutoIntro = Intro {term = NONE, fresh_variable = NONE, level = NONE}
+    val AutoIntro = Intro {term = NONE, freshVariable = NONE, level = NONE}
 
     open Conversions Conversionals
     infix CORELSE

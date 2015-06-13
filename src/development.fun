@@ -8,7 +8,7 @@ functor Development
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   val as_custom_operator : Syntax.Operator.t -> Telescope.label) : DEVELOPMENT =
+   val asCustomOperator : Syntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
   structure Telescope = Telescope
@@ -32,29 +32,29 @@ struct
       | Tactic of Lcf.tactic
       | Operator of operator_decl
 
-    fun arity_to_string v =
+    fun arity_toString v =
       "(" ^ Vector.foldri (fn (i, s1, s2) => if i = (Vector.length v - 1) then s1 else s1 ^ "; " ^ s2) "" (Vector.map Int.toString v) ^ ")"
 
-    fun to_string (lbl, Theorem {statement, evidence,...}) =
+    fun toString (lbl, Theorem {statement, evidence,...}) =
           let
             val evidence' = Susp.force evidence
           in
-            "Theorem " ^ Telescope.Label.to_string lbl
-              ^ " : ⸤" ^ Lcf.goal_to_string statement ^ "⸥ {\n  "
-              ^ Syntax.to_string evidence' ^ "\n} ext {\n  "
-              ^ Syntax.to_string (Extract.extract evidence') ^ "\n}."
+            "Theorem " ^ Telescope.Label.toString lbl
+              ^ " : ⸤" ^ Lcf.goalToString statement ^ "⸥ {\n  "
+              ^ Syntax.toString evidence' ^ "\n} ext {\n  "
+              ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
-      | to_string (lbl, Tactic _) =
-          "Tactic " ^ Telescope.Label.to_string lbl ^ "."
-      | to_string (lbl, Operator {arity, conversion}) =
-          "Operator " ^ Telescope.Label.to_string lbl
-            ^ " : " ^ arity_to_string arity
+      | toString (lbl, Tactic _) =
+          "Tactic " ^ Telescope.Label.toString lbl ^ "."
+      | toString (lbl, Operator {arity, conversion}) =
+          "Operator " ^ Telescope.Label.toString lbl
+            ^ " : " ^ arity_toString arity
             ^ "."
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ Syntax.to_string definiendum ^ "⸥ ≝ "
-                       ^ "⸤" ^ Syntax.to_string definiens ^ "⸥.")
+                       "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
+                       ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
   end
 
   type object = Object.t
@@ -77,28 +77,28 @@ struct
          | _ => raise RemainingSubgoals subgoals
     end
 
-  fun define_tactic T (lbl, tac) =
+  fun defineTactic T (lbl, tac) =
     Telescope.snoc T (lbl, Object.Tactic tac)
 
-  fun declare_operator T (lbl, arity) =
+  fun declareOperator T (lbl, arity) =
     Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
 
   local
     open Syntax
     infix $
   in
-    fun rule_get_label {definiendum, definiens} =
+    fun ruleGetLabel {definiendum, definiens} =
       case out definiendum of
-           operator $ _ => as_custom_operator operator
+           operator $ _ => asCustomOperator operator
          | _ => raise Fail "invalid rewrite rule"
   end
 
   structure FreeVariables = AbtFreeVariables(Syntax)
-  fun define_operator T (rule as {definiendum, definiens}) =
+  fun defineOperator T (rule as {definiendum, definiens}) =
     let
-      val lbl = rule_get_label rule
-      val LFVs = FreeVariables.free_variables definiendum
-      val RFVs = FreeVariables.free_variables definiens
+      val lbl = ruleGetLabel rule
+      val LFVs = FreeVariables.freeVariables definiendum
+      val RFVs = FreeVariables.freeVariables definiens
       val _ =
         if FreeVariables.Set.subset (RFVs, LFVs) then
           ()
@@ -114,26 +114,26 @@ struct
          | _ => raise Subscript
     end
 
-  fun lookup_definition T lbl =
+  fun lookupDefinition T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {conversion = SOME (_, conv),...} => Susp.force conv
        | Object.Theorem {evidence,...} => (fn tm =>
-           case List.find (fn v => Syntax.Variable.to_string v = Telescope.Label.to_string lbl) (Syntax.free_variables tm) of
+           case List.find (fn v => Syntax.Variable.toString v = Telescope.Label.toString lbl) (Syntax.freeVariables tm) of
                 NONE => tm
               | SOME v => Syntax.subst (Extract.extract (Susp.force evidence)) v tm)
        | _ => raise Subscript
 
-  fun lookup_theorem T lbl =
+  fun lookupTheorem T lbl =
     case Telescope.lookup T lbl of
          Object.Theorem {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
-  fun lookup_tactic T lbl =
+  fun lookupTactic T lbl =
     case Telescope.lookup T lbl of
          Object.Tactic tac => tac
        | _ => raise Subscript
 
-  fun lookup_operator T lbl =
+  fun lookupOperator T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {arity,...} => arity
        | _ => raise Subscript
@@ -148,6 +148,6 @@ structure Development : DEVELOPMENT = Development
 
    open OperatorType
 
-   fun as_custom_operator (CUSTOM {label,...}) = label
-     | as_custom_operator _ = raise Fail "not a custom operator")
+   fun asCustomOperator (CUSTOM {label,...}) = label
+     | asCustomOperator _ = raise Fail "not a custom operator")
 

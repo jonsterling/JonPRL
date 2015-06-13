@@ -8,26 +8,26 @@ sig
   val fresh : context * name -> name
 
   val empty : context
-  val is_empty : context -> bool
+  val isEmpty : context -> bool
 
   val insert : context -> name -> Visibility.t -> term -> context
-  val interpose_after : context -> name * context -> context
+  val interposeAfter : context -> name * context -> context
 
   val modify : context -> name -> (term -> term) -> context
 
   exception NotFound of name
   val lookup : context -> name -> term
-  val lookup_visibility : context -> name -> term * Visibility.t
+  val lookupVisibility : context -> name -> term * Visibility.t
 
   val nth : context -> int -> name
 
   val search : context -> (term -> bool) -> (name * term) option
 
   val map : (term -> term) -> context -> context
-  val map_after : name -> (term -> term) -> context -> context
-  val list_items : context -> (name * Visibility.t * term) list
+  val mapAfter : name -> (term -> term) -> context -> context
+  val listItems : context -> (name * Visibility.t * term) list
 
-  val to_string : context -> string
+  val toString : context -> string
 
   val eq : context * context -> bool
   val subcontext : context * context -> bool

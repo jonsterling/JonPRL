@@ -160,7 +160,7 @@ struct
 
        | CUSTOM {arity,...} => arity
 
-  fun to_string O =
+  fun toString O =
     case O of
          UNIV_EQ => "U⁼"
        | CUM => "cum"
@@ -204,7 +204,7 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
-       | UNIV i => "U<" ^ Level.to_string i ^ ">"
+       | UNIV i => "U<" ^ Level.toString i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
        | AX => "⬧"
@@ -220,7 +220,7 @@ struct
 
        | SUBSET => "subset"
 
-       | CUSTOM {label,...} => Label.to_string label
+       | CUSTOM {label,...} => Label.toString label
 
   local
     open ParserCombinators CharParser
@@ -261,7 +261,7 @@ struct
              SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")
 
-    fun parse_operator lookup =
+    fun parseOperator lookup =
       intensional_parse_operator lookup
         || extensional_parse_operator
   end

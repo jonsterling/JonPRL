@@ -61,7 +61,7 @@ struct
     fun dict_from_fvs fvs =
       let
         fun go [] R = R
-          | go (x::xs) R = go xs (StringListDict.insert R (Variable.to_string x) x)
+          | go (x::xs) R = go xs (StringListDict.insert R (Variable.toString x) x)
       in
         go fvs StringListDict.empty
       end
@@ -84,7 +84,7 @@ struct
       || force (abs sigma env)
       || var sigma) ?? "abt"
     and app sigma env () =
-      ParseOperator.parse_operator env
+      ParseOperator.parseOperator env
         && opt (parens (force (args sigma env)))
         wth (fn (O, ES) => O $$ getOpt (ES, #[])) ?? "app"
     and abs sigma env () =
@@ -97,7 +97,7 @@ struct
     and args sigma env () = separate (force (abt sigma env)) (symbol ";") wth Vector.fromList ?? "args"
 
   in
-    fun parse_abt fvs env =
+    fun parseAbt fvs env =
       force (abt (SymbolTable.empty fvs) env)
 
   end

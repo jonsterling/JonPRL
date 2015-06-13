@@ -9,6 +9,6 @@ sig
   datatype sequent = >> of context * term
 
   val eq : sequent * sequent -> bool
-  val to_string : sequent -> string
+  val toString : sequent -> string
 end
 
