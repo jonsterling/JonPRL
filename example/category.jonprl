@@ -117,7 +117,7 @@ Tactic cat_unfold {
 
 Theorem Cat-wf : [∈(Cat; U<1>)] {
   *{refine <cat_unfold>; auto};
-  elim #0; auto.
+  elim #1; auto.
 }.
 
 Theorem InitialRawCat : [RawCat] {
@@ -131,7 +131,7 @@ Theorem InitialCat : [Cat] {
   unfold <Cat>;
   intro [InitialRawCat] @0; unfold <InitialRawCat>;
   *{refine <lawcat_unfold>; auto};
-  elim #0; auto.
+  elim #1; auto.
 }.
 
 Theorem TerminalRawCat : [RawCat] {
@@ -147,6 +147,5 @@ Theorem TerminalCat : [Cat] {
   unfold <Cat>;
   intro [TerminalRawCat] <C> @0; unfold <TerminalRawCat>;
   *{refine <lawcat_unfold>; auto};
-  ?{elim #2; auto};
-  elim #0; auto.
+  elim #3; auto
 }.
