@@ -64,3 +64,41 @@ Theorem Pullback_wf : [
 ] {
   unfold <Pullback Bundle Fiber map dom fst snd>; auto
 }.
+
+Operator Polynomial : ().
+[Polynomial] =def= [Σ(U<0>; Base. Bundle(Base))].
+
+Theorem Polynomail_wf : [
+  ∈(Polynomial; U<1>)
+] {
+  unfold <Polynomial Bundle>; auto
+}.
+
+Operator base : (0).
+[base(E)] =def= [fst(E)].
+
+Operator bundle : (0).
+[bundle(E)] =def= [snd(E)].
+
+Operator Yoneda : (0;0).
+[Yoneda(B;X)] =def= [Π(B; _. X)].
+
+Theorem Yoneda_wf : [
+  ∀(U<0>; B.
+  ∀(U<0>; X.
+    ∈(Yoneda(B;X); U<0>)))
+] {
+  unfold <Yoneda>; auto.
+}.
+
+Operator Ext : (0;0).
+[Ext(E;X)] =def= [Σ(base(E); b. Yoneda(X; Fiber(base(E); bundle(E); b)))].
+
+Theorem Ext_wf : [
+  ∀(Polynomial; E.
+  ∀(U<0>; X.
+    ∈(Ext(E;X); U<1>)))
+] {
+  unfold <Polynomial Ext Bundle base Yoneda Fiber bundle dom map fst snd>; auto;
+  unfold <snd>; auto
+}.
