@@ -54,15 +54,15 @@ Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(RightUnit(M);U<0>))] {
 }.
 
 Theorem Assoc-wf : [∀(MonoidSig; M. ∈(Assoc(M); U<0>))] {
-  refine <monoid-simplify>; elim #1; auto; elim #3; auto
+  refine <monoid-simplify>.
 }.
 
 Theorem MonoidLaws-wf : [∀(MonoidSig; M. ∈(MonoidLaws(M); U<0>))] {
-  refine <monoid-simplify>; elim #1; auto; elim #3; auto
+  refine <monoid-simplify>.
 }.
 
 Theorem Monoid-wf : [∈(Monoid; U<1>)] {
-  refine <monoid-simplify>; elim #1; auto; elim #3; auto
+  refine <monoid-simplify>.
 }.
 
 Theorem UnitMonoidStruct : [MonoidSig] {
@@ -75,8 +75,7 @@ Theorem UnitMonoid : [Monoid] {
   unfold <Monoid>;
   intro [UnitMonoidStruct] @0; unfold <UnitMonoidStruct>;
   refine <monoid-simplify>;
-  elim #1; auto;
-  elim #3; auto
+  elim #1; auto.
 }.
 
 Theorem UnitMonoid-LeftUnit : [LeftUnit(UnitMonoidStruct)] {
