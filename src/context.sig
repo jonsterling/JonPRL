@@ -1,29 +1,36 @@
 signature CONTEXT =
 sig
-  type name
-  type 'a context
+  structure Syntax : ABT_UTIL
+  type name = Syntax.Variable.t
+  type term = Syntax.t
+  type context
 
-  val fresh : 'a context * name -> name
+  val fresh : context * name -> name
 
-  val empty : 'a context
-  val is_empty : 'a context -> bool
+  val empty : context
+  val is_empty : context -> bool
 
-  val insert : 'a context -> name -> Visibility.t -> 'a -> 'a context
-  val interpose_after : 'a context -> name * 'a context -> 'a context
+  val insert : context -> name -> Visibility.t -> term -> context
+  val interpose_after : context -> name * context -> context
 
-  val modify : 'a context -> name -> ('a -> 'a) -> 'a context
+  val modify : context -> name -> (term -> term) -> context
 
   exception NotFound of name
-  val lookup : 'a context -> name -> 'a
-  val lookup_visibility : 'a context -> name -> 'a * Visibility.t
-  val search : 'a context -> ('a -> bool) -> (name * 'a) option
+  val lookup : context -> name -> term
+  val lookup_visibility : context -> name -> term * Visibility.t
 
-  val map : ('a -> 'b) -> 'a context -> 'b context
-  val map_after : name -> ('a -> 'a) -> 'a context -> 'a context
-  val list_items : 'a context -> (name * Visibility.t * 'a) list
+  val nth : context -> int -> name
 
-  val to_string : ('a -> string) -> 'a context -> string
+  val search : context -> (term -> bool) -> (name * term) option
 
-  val eq : ('a * 'a -> bool) -> 'a context * 'a context -> bool
-  val subcontext : ('a * 'a -> bool) -> 'a context * 'a context -> bool
+  val map : (term -> term) -> context -> context
+  val map_after : name -> (term -> term) -> context -> context
+  val list_items : context -> (name * Visibility.t * term) list
+
+  val to_string : context -> string
+
+  val eq : context * context -> bool
+  val subcontext : context * context -> bool
+
+  val rebind : context -> term -> term
 end

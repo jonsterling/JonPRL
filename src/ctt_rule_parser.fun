@@ -1,6 +1,6 @@
 functor CttRuleParser
   (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
-   structure Ctt : CTT_UTIL
+   structure Ctt : CTT_UTIL where type Development.Telescope.Label.t = string
    structure Operator : PARSE_OPERATOR
     where type env = Ctt.Development.label -> int vector
    sharing type Ctt.Lcf.goal = Lcf.goal
@@ -47,10 +47,14 @@ struct
 
   type env = Development.t
 
+  val parse_int =
+    repeat1 digit wth valOf o Int.fromString o String.implode
+
   val parse_level =
-    symbol "@"
-      >> repeat1 digit
-        wth valOf o Int.fromString o String.implode
+    lexeme (symbol "@" >> parse_int)
+
+  val parse_index =
+    lexeme (symbol "#" >> parse_int)
 
   fun parse_opt p =
     symbol "_" return NONE
@@ -72,7 +76,7 @@ struct
   type tactic_parser = (Pos.t -> tactic) intensional_parser
 
   val parse_tm : term intensional_parser =
-    squares o ParseSyntax.parse_abt o Development.lookup_operator
+    squares o ParseSyntax.parse_abt [] o Development.lookup_operator
 
   val parse_cum : tactic_parser =
     fn D => symbol "cum"
@@ -87,9 +91,9 @@ struct
 
   val parse_hypothesis : tactic_parser =
     fn D => symbol "hypothesis"
-      && brackets parse_name
-      wth (fn (name, z) =>
-        name_tac name (Hypothesis z))
+      && parse_index
+      wth (fn (name, i) =>
+        name_tac name (Hypothesis i))
 
   val parse_eq_subst : tactic_parser =
     fn D => symbol "subst"
@@ -104,10 +108,10 @@ struct
   val parse_hyp_subst : tactic_parser =
     fn D => symbol "hyp-subst"
       && parse_dir
-      && brackets parse_name
+      && parse_index
       && parse_tm D && opt parse_level
-      wth (fn (name, (dir, (z, (M, k)))) =>
-        name_tac name (HypEqSubst (dir, z, M, k)))
+      wth (fn (name, (dir, (i, (M, k)))) =>
+        name_tac name (HypEqSubst (dir, i, M, k)))
 
   val parse_intro_args : intro_args intensional_parser =
     fn D => opt (parse_tm D)
@@ -124,16 +128,16 @@ struct
           | NONE => [])
 
   val parse_elim_args : elim_args intensional_parser=
-    fn D => brackets parse_name
+    fn D => parse_index
       && opt (parse_tm D)
       && parse_names
-      wth (fn (z, (M, names)) =>
-            {target = z,
+      wth (fn (i, (M, names)) =>
+            {target = i,
              term = M,
              names = names})
 
   val parse_terms : term list intensional_parser =
-    fn D => opt (squares (commaSep1 (ParseSyntax.parse_abt (Development.lookup_operator D))))
+    fn D => opt (squares (commaSep1 (ParseSyntax.parse_abt [] (Development.lookup_operator D))))
     wth (fn oxs => getOpt (oxs, []))
 
   val parse_eq_cd_args : eq_cd_args intensional_parser =
@@ -176,21 +180,21 @@ struct
 
   val parse_lemma : tactic_parser =
     fn D => symbol "lemma"
-      && brackets parse_name
+      && brackets identifier
       wth (fn (name, lbl) => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Lemma (D, lbl)))
 
   val parse_unfold : tactic_parser =
     fn D => symbol "unfold"
-      && brackets (separate parse_name whiteSpace)
+      && brackets (separate identifier whiteSpace)
       wth (fn (name, lbls) => fn pos =>
              Lcf.annotate ({name = name, pos = pos}, Unfolds (D, lbls)))
 
   val parse_custom_tactic : tactic_parser =
     fn D => symbol "refine"
-      >> brackets parse_name
+      >> brackets identifier
       wth (fn lbl => fn (pos : Pos.t) =>
-            Lcf.annotate ({name = Syntax.Variable.to_string lbl, pos = pos}, fn goal =>
+            Lcf.annotate ({name = lbl, pos = pos}, fn goal =>
               Development.lookup_tactic D lbl goal))
 
   fun tactic_parsers D =

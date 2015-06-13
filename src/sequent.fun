@@ -4,24 +4,24 @@ struct
 
   structure Context = Context
   type name = Context.name
-  type context = term Context.context
+  type context = Context.context
   datatype sequent = >> of context * term
 
   infix >>
 
   fun to_string (H >> P) =
     let
-      val ctx = Context.to_string Syntax.to_string H
+      val ctx = Context.to_string H
       val prop = Syntax.to_string P
     in
       if Context.is_empty H then
         "⊢ " ^ prop
       else
-        Context.to_string Syntax.to_string H ^ "\n⊢ " ^ prop
+        Context.to_string H ^ "\n⊢ " ^ prop
     end
 
   fun eq (H >> P, H' >> P') =
-    Context.eq Syntax.eq (H, H') andalso Syntax.eq (P, P')
+    Context.eq (H, H') andalso Syntax.eq (P, P')
 
 end
 

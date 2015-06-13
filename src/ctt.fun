@@ -5,13 +5,12 @@ functor Ctt
 
    structure Sequent : SEQUENT
      where type term = Syntax.t
-     where type Context.name = Syntax.Variable.t
+     where Context.Syntax = Syntax
 
    structure ConvTypes : CONV_TYPES where Syntax = Syntax
 
    sharing type Development.Lcf.goal = Sequent.sequent
    sharing type Development.Lcf.evidence = Syntax.t
-   sharing Development.Telescope.Label = Syntax.Variable
    sharing type Development.term = Syntax.t) : CTT =
 struct
   structure Lcf = Development.Lcf
@@ -46,10 +45,10 @@ struct
 
     fun ctx_unbind (H : context, A : Syntax.t, xE : Syntax.t) =
       let
-        val (x, E) = unbind xE
+        val (x, E) = unbind (Context.rebind H xE)
         val x' = Context.fresh (H, x)
-        val H' = Context.insert H x' Visibility.Visible A
-        val E' = subst (``x') x E
+        val H' = Context.insert H x' Visibility.Visible (Context.rebind H A)
+        val E' = Context.rebind H (subst (``x') x E)
       in
         (H', x', E')
       end
@@ -197,8 +196,9 @@ struct
         [] BY mk_evidence UNIT_INTRO
       end
 
-    fun UnitElim x (H >> P) =
+    fun UnitElim i (H >> P) =
       let
+        val x = Context.nth H (i - 1)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctx_subst H ax x
@@ -280,8 +280,10 @@ struct
                | _ => raise Refine)
       end
 
-    fun FunElim (f, s, onames) (H >> P) =
+    fun FunElim (i, s, onames) (H >> P) =
       let
+        val s = Context.rebind H s
+        val f = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -326,7 +328,7 @@ struct
         val funty =
           case ofunty of
                NONE => unify (infer_type (H, f1)) (infer_type (H, f2))
-             | SOME funty => funty
+             | SOME funty => Context.rebind H funty
         val #[S, xT] = funty ^! FUN
         val Tt1' = unify Tt1 (xT // t1)
       in
@@ -354,8 +356,10 @@ struct
                | _ => raise Refine)
       end
 
-    fun IsectElim (f, s, onames) (H >> P) =
+    fun IsectElim (i, s, onames) (H >> P) =
       let
+        val s = Context.rebind H s
+        val f = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -392,6 +396,7 @@ struct
 
     fun IsectMemberCaseEq (oisect, t) (H >> P) =
       let
+        val t = Context.rebind H t
         val #[F1,F2, Tt] = P ^! EQ
         val isect =
           case oisect of
@@ -410,6 +415,7 @@ struct
 
     fun SubsetIntro (w, oz, ok) (H >> P) =
       let
+        val w = Context.rebind H w
         val #[P1, xP2] = P ^! SUBSET
         val k = case ok of SOME k => k | NONE => infer_level (H, P)
         val z =
@@ -436,8 +442,9 @@ struct
         ] BY mk_evidence IND_SUBSET_INTRO
       end
 
-    fun SubsetElim (z, onames) (H >> P) =
+    fun SubsetElim (i, onames) (H >> P) =
       let
+        val z = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H z ^! SUBSET
         val (s, t) =
           case onames of
@@ -485,6 +492,7 @@ struct
 
     fun Witness M (H >> P) =
       let
+        val M = Context.rebind H M
         val has_hidden_variables =
           foldl
             (fn (x, b) => b orelse #2 (Context.lookup_visibility H x) = Visibility.Hidden)
@@ -501,8 +509,9 @@ struct
                | _ => raise Refine)
       end
 
-    fun HypEq (H >> P) =
+    fun HypEq (goal as H >> P) =
       let
+        val P = P
         val #[M, M', A] = P ^! EQ
         val x = as_variable (unify M M')
         val _ = unify A (Context.lookup H x)
@@ -514,6 +523,7 @@ struct
 
     fun ProdIntro (w, oz, ok) (H >> P) =
       let
+        val w = Context.rebind H w
         val #[P1, xP2] = P ^! PROD
         val k = case ok of SOME k => k | NONE => infer_level (H, P)
         val z =
@@ -540,8 +550,9 @@ struct
         ] BY mk_evidence IND_PROD_INTRO
       end
 
-    fun ProdElim (z, onames) (H >> P) =
+    fun ProdElim (i, onames) (H >> P) =
       let
+        val z = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H z ^! PROD
         val (s, t) =
           case onames of
@@ -588,7 +599,7 @@ struct
         val prod =
           case oprod of
                NONE => unify (infer_type (H, E1)) (infer_type (H, E2))
-             | SOME prod => prod
+             | SOME prod => Context.rebind H prod
 
         val (s,t,y) =
           case onames of
@@ -613,7 +624,7 @@ struct
                in
                  z \\ Cz
                end
-             | SOME zC => zC
+             | SOME zC => Context.rebind H zC
 
         val CE1' = unify CE1 (zC // E1)
         val Ts = xT // ``s
@@ -629,7 +640,7 @@ struct
                 | _ => raise Refine)
       end
 
-    fun Hypothesis x (H >> P) =
+    fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookup_visibility H x
         val P'' = unify P P'
@@ -640,9 +651,11 @@ struct
         [] BY (fn _ => ``x)
       end
 
+    fun Hypothesis i (H >> P) = Hypothesis_ (Context.nth H (i - 1)) (H >> P)
+
     fun Assumption (H >> P) =
       case Context.search H (fn x => Syntax.eq (P, x)) of
-           SOME (x, _) => Hypothesis x (H >> P)
+           SOME (x, _) => Hypothesis_ x (H >> P)
          | NONE => raise Refine
 
     fun Unfold (development, lbl) (H >> P) =
@@ -674,7 +687,7 @@ struct
         val {statement, evidence} = Development.lookup_theorem development lbl
         val H' >> P' = statement
       in
-        if Context.subcontext Syntax.eq (H', H) andalso Syntax.eq (P, P')
+        if Context.subcontext (H', H) andalso Syntax.eq (P, P')
         then [] BY (fn _ => Susp.force evidence)
         else raise Refine
       end
@@ -696,15 +709,15 @@ struct
 
     fun EqSubst (eq, xC, ok) (H >> P) =
       let
-        val #[M,N,A] = eq ^! EQ
-        val (H', z, C) = ctx_unbind (H, A, xC)
+        val #[M,N,A] = Context.rebind H eq ^! EQ
+        val (H', x, C) = ctx_unbind (H, A, xC)
         val P' = unify P (xC // M)
         val k = case ok of SOME k => k | NONE => infer_level (H', C)
       in
         [ H >> eq
         , H >> xC // N
         , H' >> MEM $$ #[C, UNIV k $$ #[]]
-        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, z \\ F]
+        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
                | _ => raise Refine)
       end
 
@@ -714,18 +727,20 @@ struct
       open Tacticals
       infix THEN THENL
     in
-      fun HypEqSubst (dir, z, xC, ok) (H >> P) =
+      fun HypEqSubst (dir, i, xC, ok) (H >> P) =
         let
+          val xC = Context.rebind H xC
+          val z = Context.nth H (i - 1)
           val X = Context.lookup H z
         in
           case dir of
-               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis z, ID, ID]) (H >> P)
+               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) (H >> P)
              | LEFT =>
                  let
                    val #[M,N,A] = X ^! EQ
                  in
                    (EqSubst (EQ $$ #[N,M,A], xC, ok)
-                     THENL [EqSym THEN Hypothesis z, ID, ID]) (H >> P)
+                     THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
         end
     end

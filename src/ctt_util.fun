@@ -19,7 +19,7 @@ struct
      level : Level.t option}
 
   type elim_args =
-    {target : name,
+    {target : int,
      names : name list,
      term : term option}
 
@@ -63,8 +63,8 @@ struct
         ORELSE EqEq
         ORELSE UnitEq
         ORELSE VoidEq
-        ORELSE UnivEq
         ORELSE HypEq
+        ORELSE UnivEq
         ORELSE FunEq fresh_variable
         ORELSE IsectEq fresh_variable
         ORELSE ProdEq fresh_variable

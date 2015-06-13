@@ -8,7 +8,6 @@ functor Development
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   sharing Telescope.Label = Syntax.Variable
    val as_custom_operator : Syntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -94,9 +93,17 @@ struct
          | _ => raise Fail "invalid rewrite rule"
   end
 
-  fun define_operator T rule =
+  structure FreeVariables = AbtFreeVariables(Syntax)
+  fun define_operator T (rule as {definiendum, definiens}) =
     let
       val lbl = rule_get_label rule
+      val LFVs = FreeVariables.free_variables definiendum
+      val RFVs = FreeVariables.free_variables definiens
+      val _ =
+        if FreeVariables.Set.subset (RFVs, LFVs) then
+          ()
+        else
+          raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
     in
       case Telescope.lookup T lbl of
            Object.Operator {arity,conversion = NONE} =>
@@ -110,7 +117,10 @@ struct
   fun lookup_definition T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {conversion = SOME (_, conv),...} => Susp.force conv
-       | Object.Theorem {evidence,...} => Syntax.subst (Extract.extract (Susp.force evidence)) lbl
+       | Object.Theorem {evidence,...} => (fn tm =>
+           case List.find (fn v => Syntax.Variable.to_string v = Telescope.Label.to_string lbl) (Syntax.free_variables tm) of
+                NONE => tm
+              | SOME v => Syntax.subst (Extract.extract (Susp.force evidence)) v tm)
        | _ => raise Subscript
 
   fun lookup_theorem T lbl =

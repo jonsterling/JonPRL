@@ -5,7 +5,6 @@ sig
   structure ParseOperator : PARSE_OPERATOR
   sharing Operator = ParseOperator
 
-  type env
-  val parse_abt : env -> t CharParser.charParser
+  val parse_abt : Variable.t list -> ParseOperator.env -> t CharParser.charParser
 end
 

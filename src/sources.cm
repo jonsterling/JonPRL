@@ -6,6 +6,9 @@ group is
   ../lib/cmlib/cmlib.cm
   ../lib/parcom.cm
 
+  abt_free_variables.sig
+  abt_free_variables.fun
+
   visibility.sml
   operator.sml
   syntax.sml

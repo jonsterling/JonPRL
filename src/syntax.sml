@@ -38,7 +38,7 @@ struct
   structure Operator = Operator (V)
   structure Abt = Abt
     (structure Operator = Operator
-     structure Variable = V.Label)
+     structure Variable = Variable ())
 
   structure MyOp = Operator
   structure ParseAbt = ParseAbt
@@ -120,14 +120,6 @@ struct
 
            | UNIV i $ #[] =>
                "U" ^ subscript i
-
-           | SPREAD $ #[M, xyN] =>
-               let
-                 val (x, yN) = unbind xyN
-                 val (y, N) = unbind yN
-               in
-                 "let " ^ dvar (x, yN) ^ "," ^ dvar (y, N) ^ " = " ^ display M ^ " in " ^ display N
-               end
 
            | _ => to_string_open display E
 
