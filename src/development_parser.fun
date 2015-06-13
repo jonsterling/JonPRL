@@ -2,7 +2,7 @@ functor DevelopmentParser
   (structure Development : DEVELOPMENT where type Telescope.Label.t = string
    structure Syntax : PARSE_ABT
     where type Operator.t = Development.Telescope.Label.t OperatorType.operator
-    where type ParseOperator.env = Development.Telescope.Label.t -> int vector
+    where type ParseOperator.env = Development.Telescope.Label.t -> Arity.t
    structure Sequent : SEQUENT
    structure TacticScript : TACTIC_SCRIPT
 

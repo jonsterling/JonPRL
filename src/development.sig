@@ -31,7 +31,7 @@ sig
   val defineTactic : t -> label * Lcf.tactic -> t
 
   (* extend a development with a new operator *)
-  val declareOperator : t -> label * int vector -> t
+  val declareOperator : t -> label * Arity.t -> t
   val defineOperator : t -> ConvCompiler.rule -> t
 
   (* lookup the definiens *)

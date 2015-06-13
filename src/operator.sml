@@ -24,7 +24,7 @@ struct
     | EQ | MEM
     | SUBSET
 
-    | CUSTOM of {label : 'label, arity : int vector}
+    | CUSTOM of {label : 'label, arity : Arity.t}
 end
 
 signature CTT_OPERATOR =
@@ -33,7 +33,7 @@ sig
 
   include PARSE_OPERATOR
     where type t = Label.t OperatorType.operator
-    where type env = Label.t -> int vector
+    where type env = Label.t -> Arity.t
 
 end
 
@@ -45,7 +45,7 @@ struct
   structure Label = Label
   type t = Label.t operator
 
-  type env = Label.t -> int vector
+  type env = Label.t -> Arity.t
   fun eq (UNIV_EQ, UNIV_EQ) = true
     | eq (CUM, CUM) = true
     | eq (EQ_EQ, EQ_EQ) = true

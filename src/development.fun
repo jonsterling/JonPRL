@@ -24,7 +24,7 @@ struct
        script : Lcf.tactic,
        evidence : Lcf.evidence Susp.susp}
     type operator_decl =
-      {arity : int vector,
+      {arity : Arity.t,
        conversion : (ConvCompiler.rule * (ConvCompiler.conv Susp.susp)) option}
 
     datatype t =
