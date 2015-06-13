@@ -23,29 +23,28 @@ struct
   structure Dict = SplayDict(structure Key = Variable)
 
   exception InvalidTemplate
-  fun compute_chart (template, term) =
-    let
-      fun go H (p $ es) (p' $ es') R =
-          if Operator.eq (p, p') then
-            let
-              open Vector
-              val zipped = tabulate (length es, fn n => (sub (es, n), sub (es', n)))
-            in
-              foldl (fn ((e,e'), R') => go H (out e) (out e') R') R zipped
-            end
-          else
-            raise InvalidTemplate
-        | go H (x \ E) (y \ E') R =
-          go (Set.insert H x) (out E) (out (subst (``x) y E')) R
-        | go H (`x) E R =
-          if Set.member H x then
-            R
-          else
-            Dict.insert R x (into E)
-        | go _ _ _ _ = raise InvalidTemplate
-    in
-      go Set.empty (out template) (out term) Dict.empty
-    end
+
+  fun compute_chart (M,N) =
+    case (out M, out N) of
+         (p $ es, p' $ es') =>
+           let
+             val _ = if p <> p' then raise InvalidTemplate else ()
+             open Vector
+             val zipped = tabulate (length es, fn n => (sub (es, n), sub (es', n)))
+
+             fun go H (x \ E) (y \ E') R =
+                 go (Set.insert H x) (out E) (out (subst (``x) y E')) R
+               | go H (`x) E R =
+                 if Set.member H x then
+                   R
+                 else
+                   Dict.insert R x (into E)
+               | go _ _ _ _ = raise InvalidTemplate
+
+           in
+             foldl (fn ((e,e'), R') => go Set.empty (out e) (out e') R') Dict.empty zipped
+           end
+       | _ => raise InvalidTemplate
 
   fun compile {definiendum, definiens} = fn (M : Syntax.t) =>
     let
