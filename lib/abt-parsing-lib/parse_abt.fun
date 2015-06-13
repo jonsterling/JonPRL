@@ -58,7 +58,7 @@ struct
           v
         end
 
-    fun dict_from_fvs fvs =
+    fun dictFromFvs fvs =
       let
         fun go [] R = R
           | go (x::xs) R = go xs (StringListDict.insert R (Variable.toString x) x)
@@ -68,15 +68,13 @@ struct
 
     fun empty fvs : t =
       {bound = StringListDict.empty,
-       free = ref (dict_from_fvs fvs)}
+       free = ref (dictFromFvs fvs)}
   end
 
   fun parens p = (symbol "(" >> spaces) >> p << (spaces >> symbol ")")
-  fun >>= (p : 'a charParser, q : 'a -> 'b charParser) : 'b charParser = join (p wth q)
-  infix >>=
 
   local
-    val new_variable = identifier wth (fn x => (x, Variable.named x))
+    val newVariable = identifier wth (fn x => (x, Variable.named x))
     fun var sigma = identifier wth (fn x => `` (SymbolTable.named sigma x))
 
     fun abt sigma env () =
@@ -88,7 +86,7 @@ struct
         && opt (parens (force (args sigma env)))
         wth (fn (O, ES) => O $$ getOpt (ES, #[])) ?? "app"
     and abs sigma env () =
-      (new_variable << spaces << symbol "." << spaces >>= (fn (n,v) =>
+      (newVariable << spaces << symbol "." << spaces -- (fn (n,v) =>
         let
           val sigma' = SymbolTable.bind sigma (n,v)
         in
@@ -99,6 +97,5 @@ struct
   in
     fun parseAbt fvs env =
       force (abt (SymbolTable.empty fvs) env)
-
   end
 end
