@@ -37,16 +37,6 @@ Theorem Fiber_wf : [
   unfold <Bundle Fiber dom map fst snd>; auto.
 }.
 
-Operator Pullback : (0;0;0).
-[Pullback(B; f; g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
-
-Theorem Pullback_wf : [
-  ∀(U<0>; B. ∀(Bundle(B); f. ∀(Bundle(B); g.
-    ∈(Pullback(B; f; g); U<0>))))
-] {
-  unfold <Pullback Bundle Fiber map dom fst snd>; auto
-}.
-
 Operator Polynomial : ().
 [Polynomial] =def= [Σ(U<0>; Base. Bundle(Base))].
 
@@ -77,4 +67,14 @@ Theorem Ext_wf : [
 ] {
   unfold <Polynomial Ext Bundle base Yoneda Fiber bundle dom map fst snd>; auto;
   unfold <snd>; auto
+}.
+
+Operator Pullback : (0;0;0).
+[Pullback(B; f; g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
+
+Theorem Pullback_wf : [
+  ∀(U<0>; B. ∀(Bundle(B); f. ∀(Bundle(B); g.
+    ∈(Pullback(B; f; g); U<0>))))
+] {
+  unfold <Pullback Bundle Fiber map dom fst snd>; auto
 }.
