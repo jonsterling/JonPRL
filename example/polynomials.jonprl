@@ -83,4 +83,21 @@ Theorem Pullback_wf : [
 ] {
   unfold <Pullback Bundle Fiber map dom fst snd>; auto.
 }.
+
+||| FIXME
+Theorem Pullback_ump : [
+  ∀(U<0>; B.
+  ∀(Bundle(B); f.
+  ∀(Bundle(B); g.
+  ∀(Pullback(B;f;g); p.
+  ∀(U<0>; E.
+  ∀(Π(E; _. dom(f)); ufst.
+  ∀(Π(E; _. dom(g)); usnd.
+  ∀(=(λ(x. map(f; ap(ufst;x))); λ(x. map(g; ap(usnd;x))); Π(E; _. B)); _.
+    Unique(Π(E; _. Pullback(B;f;g)); λ(h.
+      subset(=(λ(x. fst(ap(h;x))); ufst; Π(E; _. dom(f))); _.
+      subset(=(λ(x. snd(ap(h;x))); usnd; Π(E; _. dom(g))); _.
+    unit))))))))))))
+] {
+  auto.
 }.
