@@ -32,7 +32,7 @@ Operator Fiber : (0;0;0).
 [Fiber(B; f; b)] =def= [Σ(dom(f); x. =(b; map(f;x); B))].
 
 Theorem Fiber_wf : [
-  ∀(U<0>; B. ∀(Bundle(B); f. ∀(B; b. ∈(Fiber(B; f;b); U<0>))))
+  ∀(U<0>; B. ∀(Bundle(B); f. ∀(B; b. ∈(Fiber(B;f;b); U<0>))))
 ] {
   unfold <Bundle Fiber dom map fst snd>; auto.
 }.
@@ -60,21 +60,27 @@ Theorem Yoneda_wf : [
 }.
 
 Operator Ext : (0;0).
-[Ext(E;X)] =def= [Σ(base(E); b. ap(Yoneda(X); Fiber(base(E); bundle(E); b)))].
+[Ext(p;X)] =def= [Σ(base(p); b. ap(Yoneda(X); Fiber(base(p); bundle(p); b)))].
 
 Theorem Ext_wf : [
-  ∀(Polynomial; E. ∀(U<0>; X. ∈(Ext(E;X); U<1>)))
+  ∀(Polynomial; p. ∀(U<0>; X. ∈(Ext(p;X); U<1>)))
 ] {
   unfold <Polynomial Ext Bundle base Yoneda Fiber bundle dom map fst snd>; auto;
   unfold <snd>; auto
 }.
 
+Operator Unique : (0;0).
+[Unique(A;B)] =def= [
+  Σ(A; x. subset(ap(B;x); _. ∀(A; y. Π(ap(B;y); _. =(x; y; A)))))
+].
+
 Operator Pullback : (0;0;0).
-[Pullback(B; f; g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
+[Pullback(B;f;g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
 
 Theorem Pullback_wf : [
   ∀(U<0>; B. ∀(Bundle(B); f. ∀(Bundle(B); g.
-    ∈(Pullback(B; f; g); U<0>))))
+    ∈(Pullback(B;f;g); U<0>))))
 ] {
-  unfold <Pullback Bundle Fiber map dom fst snd>; auto
+  unfold <Pullback Bundle Fiber map dom fst snd>; auto.
+}.
 }.
