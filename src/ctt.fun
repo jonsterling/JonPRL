@@ -198,7 +198,7 @@ struct
 
     fun UnitElim i (H >> P) =
       let
-        val x = Context.nth H i
+        val x = Context.nth H (i - 1)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctx_subst H ax x
@@ -283,7 +283,7 @@ struct
     fun FunElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H i
+        val f = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -359,7 +359,7 @@ struct
     fun IsectElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H i
+        val f = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -444,7 +444,7 @@ struct
 
     fun SubsetElim (i, onames) (H >> P) =
       let
-        val z = Context.nth H i
+        val z = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H z ^! SUBSET
         val (s, t) =
           case onames of
@@ -552,7 +552,7 @@ struct
 
     fun ProdElim (i, onames) (H >> P) =
       let
-        val z = Context.nth H i
+        val z = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H z ^! PROD
         val (s, t) =
           case onames of
@@ -651,7 +651,7 @@ struct
         [] BY (fn _ => ``x)
       end
 
-    fun Hypothesis i (H >> P) = Hypothesis_ (Context.nth H i) (H >> P)
+    fun Hypothesis i (H >> P) = Hypothesis_ (Context.nth H (i - 1)) (H >> P)
 
     fun Assumption (H >> P) =
       case Context.search H (fn x => Syntax.eq (P, x)) of
@@ -710,14 +710,14 @@ struct
     fun EqSubst (eq, xC, ok) (H >> P) =
       let
         val #[M,N,A] = Context.rebind H eq ^! EQ
-        val (H', z, C) = ctx_unbind (H, A, xC)
+        val (H', x, C) = ctx_unbind (H, A, xC)
         val P' = unify P (xC // M)
         val k = case ok of SOME k => k | NONE => infer_level (H', C)
       in
         [ H >> eq
         , H >> xC // N
         , H' >> MEM $$ #[C, UNIV k $$ #[]]
-        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, z \\ F]
+        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
                | _ => raise Refine)
       end
 
@@ -730,7 +730,7 @@ struct
       fun HypEqSubst (dir, i, xC, ok) (H >> P) =
         let
           val xC = Context.rebind H xC
-          val z = Context.nth H i
+          val z = Context.nth H (i - 1)
           val X = Context.lookup H z
         in
           case dir of

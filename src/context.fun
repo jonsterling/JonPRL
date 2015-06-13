@@ -78,7 +78,7 @@ struct
               go (i + 1) (out tele') (r ^ "\n" ^ Int.toString i ^ ". " ^ pretty_lbl ^ " : " ^ Syntax.to_string a)
             end
     in
-      go 0 (out tele) ""
+      go 1 (out tele) ""
     end
 
   val eq : context * context -> bool =

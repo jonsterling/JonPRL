@@ -56,7 +56,6 @@ Operator Pullback : (0;0;0).
   Σ(dom(f); x. Fiber(B; g; map(f; x)))
 ].
 
-||| FIXME
 Theorem Pullback_wf : [
   ∀(U<0>; B.
   ∀(Bundle(B); f.
