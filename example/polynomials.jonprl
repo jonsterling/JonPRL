@@ -46,6 +46,36 @@ Theorem Coend_wf : [
   unfold <Coend>; auto.
 }.
 
+||| Ran
+
+Operator Ran : (0;0;0).
+
+[Ran(G;H;A)] =def= [End(λ(X. λ(Y. Power(CTT(A; ap(G;X)); ap(H;Y)))))].
+
+Theorem Ran_wf : [
+  ∀(Π(U<0>; _. U<0>); G.
+  ∀(Π(U<0>; _. U<0>); H.
+  ∀(U<0>; A.
+    ∈(Ran(G;H;A); U<1>))))
+] {
+  unfold <Ran Power End CTT>; auto.
+}.
+
+||| Lan
+
+Operator Lan : (0;0;0).
+
+[Lan(G;H;A)] =def= [Coend(λ(X. λ(Y. Copower(CTT(ap(G;X); A); ap(H;Y)))))].
+
+Theorem Lan_wf : [
+  ∀(Π(U<0>; _. U<0>); G.
+  ∀(Π(U<0>; _. U<0>); H.
+  ∀(U<0>; A.
+    ∈(Lan(G;H;A); U<1>))))
+] {
+  unfold <Lan Copower Coend CTT>; auto.
+}.
+
 ||| Bundles / Fibrations
 
 Operator Bundle : (0).
