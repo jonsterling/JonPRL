@@ -4,6 +4,12 @@ Operator snd : (0).
 [fst(p)] =def= [spread(p; x.y.x)].
 [snd(p)] =def= [spread(p; x.y.y)].
 
+||| Ambient category
+
+Operator CTT : (0;0).
+
+[CTT(A;B)] =def= [Π(A; _. B)].
+
 ||| Power
 
 Operator Power : (0;0).
