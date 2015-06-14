@@ -1,33 +1,35 @@
-Operator Bundle : (0).
-[Bundle(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
-
 Operator fst : (0).
-[fst(p)] =def= [spread(p; x.y.x)].
-
 Operator snd : (0).
+
+[fst(p)] =def= [spread(p; x.y.x)].
 [snd(p)] =def= [spread(p; x.y.y)].
 
-Operator dom : (0).
-[dom(f)] =def= [fst(f)].
+||| Bundles / Fibrations
 
+Operator Bundle : (0).
+Operator dom : (0).
 Operator map : (0;0).
+
+[Bundle(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
+[dom(f)] =def= [fst(f)].
 [map(f;b)] =def= [ap(snd(f); b)].
 
 Theorem Bundle_wf : [∀(U<0>; B. ∈(Bundle(B); U<1>))] {
   unfold <Bundle>; auto
 }.
-
 Theorem dom_wf : [∀(U<0>; B. ∀(Bundle(B); f. ∈(dom(f); U<0>)))] {
   unfold <Bundle map dom fst>; auto
 }.
-
 Theorem map_wf : [
   ∀(U<0>; B. ∀(Bundle(B); f. ∀(dom(f); x. ∈(map(f;x); B))))
 ] {
   unfold <Bundle dom map fst snd>; auto.
 }.
 
+||| Fibers of a bundle over a point
+
 Operator Fiber : (0;0;0).
+
 [Fiber(B; f; b)] =def= [Σ(dom(f); x. =(b; map(f;x); B))].
 
 Theorem Fiber_wf : [
@@ -36,20 +38,24 @@ Theorem Fiber_wf : [
   unfold <Bundle Fiber dom map fst snd>; auto.
 }.
 
+||| Polynomials (non-indexed)
+
 Operator Polynomial : ().
+Operator base : (0).
+Operator bundle : (0).
+
 [Polynomial] =def= [Σ(U<0>; Base. Bundle(Base))].
+[base(E)] =def= [fst(E)].
+[bundle(E)] =def= [snd(E)].
 
 Theorem Polynomial_wf : [∈(Polynomial; U<1>)] {
   unfold <Polynomial Bundle>; auto
 }.
 
-Operator base : (0).
-[base(E)] =def= [fst(E)].
-
-Operator bundle : (0).
-[bundle(E)] =def= [snd(E)].
+||| Yoneda embedding
 
 Operator Embed : (0).
+
 [Embed(B)] =def= [λ(A. Π(A; _. B))].
 
 Theorem Embed_wf : [
@@ -58,7 +64,10 @@ Theorem Embed_wf : [
   unfold <Embed>; auto.
 }.
 
+||| Extension functors of polynomials
+
 Operator Ext : (0;0).
+
 [Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); bundle(p); b)))].
 
 Theorem Ext_wf : [
@@ -68,7 +77,10 @@ Theorem Ext_wf : [
   unfold <snd>; auto
 }.
 
+||| Bundle pullbacks
+
 Operator Pullback : (0;0;0).
+
 [Pullback(B;f;g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
 
 Theorem Pullback_wf : [
