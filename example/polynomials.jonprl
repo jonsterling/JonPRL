@@ -16,6 +16,30 @@ Operator Copower : (0;0).
 
 [Copower(A;B)] =def= [Σ(A; _. B)].
 
+||| End
+
+Operator End : (0).
+
+[End(Hom)] =def= [Π(U<0>; A. ap(ap(Hom; A); A))].
+
+Theorem End_wf : [
+  ∀(Π(U<0>; _. Π(U<0>; _. U<0>)); Hom. ∈(End(Hom); U<1>))
+] {
+  unfold <End>; auto.
+}.
+
+||| Coend
+
+Operator Coend : (0).
+
+[Coend(Hom)] =def= [Σ(U<0>; A. ap(ap(Hom; A); A))].
+
+Theorem Coend_wf : [
+  ∀(Π(U<0>; _. Π(U<0>; _. U<0>)); Hom. ∈(Coend(Hom); U<1>))
+] {
+  unfold <Coend>; auto.
+}.
+
 ||| Bundles / Fibrations
 
 Operator Bundle : (0).
