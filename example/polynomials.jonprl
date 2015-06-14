@@ -144,12 +144,12 @@ Theorem Polynomial_wf : [∈(Polynomial; U<1>)] {
 
 Operator Embed : (0).
 
-[Embed(B)] =def= [λ(A. Π(A; _. B))].
+[Embed(B)] =def= [λ(A. CTT(A;B))].
 
 Theorem Embed_wf : [
   ∀(U<0>; B. ∀(U<0>; X. ∈(ap(Embed(B); X); U<0>)))
 ] {
-  unfold <Embed>; auto.
+  unfold <Embed CTT>; auto.
 }.
 
 ||| Extension functors of polynomials
@@ -161,7 +161,7 @@ Operator Ext : (0;0).
 Theorem Ext_wf : [
   ∀(Polynomial; p. ∀(U<0>; X. ∈(Ext(p;X); U<1>)))
 ] {
-  unfold <Polynomial Ext Bundle base Embed Fiber bundle dom map fst snd>; auto;
+  unfold <Polynomial Ext Bundle base Embed CTT Fiber bundle dom map fst snd>; auto;
   unfold <snd>; auto
 }.
 
