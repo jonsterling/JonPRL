@@ -49,22 +49,22 @@ Operator base : (0).
 Operator bundle : (0).
 [bundle(E)] =def= [snd(E)].
 
-Operator Yoneda : (0).
-[Yoneda(B)] =def= [λ(A. Π(A; _. B))].
+Operator Embed : (0).
+[Embed(B)] =def= [λ(A. Π(A; _. B))].
 
-Theorem Yoneda_wf : [
-  ∀(U<0>; B. ∀(U<0>; X. ∈(ap(Yoneda(B); X); U<0>)))
+Theorem Embed_wf : [
+  ∀(U<0>; B. ∀(U<0>; X. ∈(ap(Embed(B); X); U<0>)))
 ] {
-  unfold <Yoneda>; auto.
+  unfold <Embed>; auto.
 }.
 
 Operator Ext : (0;0).
-[Ext(p;X)] =def= [Σ(base(p); b. ap(Yoneda(X); Fiber(base(p); bundle(p); b)))].
+[Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); bundle(p); b)))].
 
 Theorem Ext_wf : [
   ∀(Polynomial; p. ∀(U<0>; X. ∈(Ext(p;X); U<1>)))
 ] {
-  unfold <Polynomial Ext Bundle base Yoneda Fiber bundle dom map fst snd>; auto;
+  unfold <Polynomial Ext Bundle base Embed Fiber bundle dom map fst snd>; auto;
   unfold <snd>; auto
 }.
 
