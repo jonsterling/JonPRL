@@ -69,11 +69,6 @@ Theorem Ext_wf : [
   unfold <snd>; auto
 }.
 
-Operator Unique : (0;0).
-[Unique(A;B)] =def= [
-  Σ(A; x. subset(ap(B;x); _. ∀(A; y. Π(ap(B;y); _. =(x; y; A)))))
-].
-
 Operator Pullback : (0;0;0).
 [Pullback(B;f;g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
 
@@ -82,22 +77,4 @@ Theorem Pullback_wf : [
     ∈(Pullback(B;f;g); U<0>))))
 ] {
   unfold <Pullback Bundle Fiber map dom fst snd>; auto.
-}.
-
-||| FIXME
-Theorem Pullback_ump : [
-  ∀(U<0>; B.
-  ∀(Bundle(B); f.
-  ∀(Bundle(B); g.
-  ∀(Pullback(B;f;g); p.
-  ∀(U<0>; E.
-  ∀(Π(E; _. dom(f)); ufst.
-  ∀(Π(E; _. dom(g)); usnd.
-  ∀(=(λ(x. map(f; ap(ufst;x))); λ(x. map(g; ap(usnd;x))); Π(E; _. B)); _.
-    Unique(Π(E; _. Pullback(B;f;g)); λ(h.
-      subset(=(λ(x. fst(ap(h;x))); ufst; Π(E; _. dom(f))); _.
-      subset(=(λ(x. snd(ap(h;x))); usnd; Π(E; _. dom(g))); _.
-    unit))))))))))))
-] {
-  auto.
 }.
