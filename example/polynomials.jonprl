@@ -10,47 +10,40 @@ Operator CTT : (0;0).
 
 [CTT(A;B)] =def= [Π(A; _. B)].
 
-||| Power
+||| Power / Copower
 
 Operator Power : (0;0).
-
-[Power(A;B)] =def= [Π(A; _. B)].
-
-||| Copower
-
 Operator Copower : (0;0).
 
+[Power(A;B)] =def= [Π(A; _. B)].
 [Copower(A;B)] =def= [Σ(A; _. B)].
 
-||| End
+||| End / Coend
 
 Operator End : (0).
+Operator Coend : (0).
 
 [End(Hom)] =def= [Π(U<0>; A. ap(ap(Hom; A); A))].
+[Coend(Hom)] =def= [Σ(U<0>; A. ap(ap(Hom; A); A))].
 
 Theorem End_wf : [
   ∀(Π(U<0>; _. Π(U<0>; _. U<0>)); Hom. ∈(End(Hom); U<1>))
 ] {
   unfold <End>; auto.
 }.
-
-||| Coend
-
-Operator Coend : (0).
-
-[Coend(Hom)] =def= [Σ(U<0>; A. ap(ap(Hom; A); A))].
-
 Theorem Coend_wf : [
   ∀(Π(U<0>; _. Π(U<0>; _. U<0>)); Hom. ∈(Coend(Hom); U<1>))
 ] {
   unfold <Coend>; auto.
 }.
 
-||| Ran
+||| Ran / Lan
 
 Operator Ran : (0;0;0).
+Operator Lan : (0;0;0).
 
 [Ran(G;H;A)] =def= [End(λ(X. λ(Y. Power(CTT(A; ap(G;X)); ap(H;Y)))))].
+[Lan(G;H;A)] =def= [Coend(λ(X. λ(Y. Copower(CTT(ap(G;X); A); ap(H;Y)))))].
 
 Theorem Ran_wf : [
   ∀(Π(U<0>; _. U<0>); G.
@@ -60,13 +53,6 @@ Theorem Ran_wf : [
 ] {
   unfold <Ran Power End CTT>; auto.
 }.
-
-||| Lan
-
-Operator Lan : (0;0;0).
-
-[Lan(G;H;A)] =def= [Coend(λ(X. λ(Y. Copower(CTT(ap(G;X); A); ap(H;Y)))))].
-
 Theorem Lan_wf : [
   ∀(Π(U<0>; _. U<0>); G.
   ∀(Π(U<0>; _. U<0>); H.
@@ -79,17 +65,17 @@ Theorem Lan_wf : [
 ||| Yoneda / Codensity
 
 Operator Yoneda : (0;0).
-[Yoneda(F;A)] =def= [Ran(F; λ(X.X); A)].
-
 Operator Codensity : (0;0).
+
+[Yoneda(F;A)] =def= [Ran(F; λ(X.X); A)].
 [Codensity(F;A)] =def= [Ran(F; F; A)].
 
 ||| Coyoneda / Density
 
 Operator Coyoneda : (0;0).
-[Coyoneda(F;A)] =def= [Lan(F; λ(X.X); A)].
-
 Operator Density : (0;0).
+
+[Coyoneda(F;A)] =def= [Lan(F; λ(X.X); A)].
 [Density(F;A)] =def= [Lan(F; F; A)].
 
 ||| Bundles / Fibrations
