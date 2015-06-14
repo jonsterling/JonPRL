@@ -1,5 +1,4 @@
 Operator Bundle : (0).
-
 [Bundle(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
 
 Operator fst : (0).
