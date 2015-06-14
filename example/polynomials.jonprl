@@ -4,6 +4,18 @@ Operator snd : (0).
 [fst(p)] =def= [spread(p; x.y.x)].
 [snd(p)] =def= [spread(p; x.y.y)].
 
+||| Power
+
+Operator Power : (0;0).
+
+[Power(A;B)] =def= [Π(A; _. B)].
+
+||| Copower
+
+Operator Copower : (0;0).
+
+[Copower(A;B)] =def= [Σ(A; _. B)].
+
 ||| Bundles / Fibrations
 
 Operator Bundle : (0).
