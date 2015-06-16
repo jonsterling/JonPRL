@@ -127,6 +127,23 @@ Theorem Forall_wf : [
   unfold <Forall Ran End Power Paths>; auto.
 }.
 
+||| Examples
+
+Operator δ : ().
+Operator Θ : (0;0).
+
+||| diagonal
+[δ] =def= [λ(x.pair(x; x))].
+
+||| equality from left adjoint to substitution
+[Θ(X;p)] =def= [ap(ap(Exists(X;Σ(X;_.X); δ); λ(_. unit)); p)].
+
+||| <> = <> ∈ unit
+Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
+  unfold <Θ δ Exists Lan Coend Copower Paths>; auto;
+  intro [<>]; auto.
+}.
+
 ||| Polynomials (non-indexed)
 
 Operator Polynomial : ().
