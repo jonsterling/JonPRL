@@ -25,6 +25,7 @@ struct
     | SUBSET
 
     | CUSTOM of {label : 'label, arity : Arity.t}
+    | INSTANTIATE
 end
 
 signature CTT_OPERATOR =
@@ -39,7 +40,7 @@ end
 
 functor Operator
   (structure Label : LABEL
-   val parse_label : Label.t CharParser.charParser) : CTT_OPERATOR =
+   val parseLabel : Label.t CharParser.charParser) : CTT_OPERATOR =
 struct
   open OperatorType
   structure Label = Label
@@ -93,6 +94,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
+    | eq (INSTANTIATE,INSTANTIATE) = true
     | eq _ = false
 
   fun arity O =
@@ -159,6 +161,7 @@ struct
        | SUBSET => #[0,1]
 
        | CUSTOM {arity,...} => arity
+       | INSTANTIATE => #[0,0]
 
   fun toString O =
     case O of
@@ -221,6 +224,7 @@ struct
        | SUBSET => "subset"
 
        | CUSTOM {label,...} => Label.toString label
+       | SUBST => "subst"
 
   local
     open ParserCombinators CharParser
@@ -228,18 +232,18 @@ struct
     infixr 1 || <|>
     infixr 4 << >> --
   in
-    val parse_int =
+    val parseInt =
       repeat1 digit wth valOf o Int.fromString o String.implode
 
     fun angles p =
       middle (string "<") p (string ">")
         || middle (string "〈") p  (string "〉")
 
-    val parse_univ : t charParser =
-      string "U" >> angles parse_int wth UNIV
+    val parseUniv : t charParser =
+      string "U" >> angles parseInt wth UNIV
 
-    val extensional_parse_operator : t charParser =
-      parse_univ
+    val extensionalParseOperator : t charParser =
+      parseUniv
         || string "void" return VOID
         || string "unit" return UNIT
         || string "<>" return AX
@@ -254,15 +258,16 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
+        || string "so_apply" return INSTANTIATE
 
-    fun intensional_parse_operator lookup =
-      parse_label -- (fn lbl =>
+    fun intensionalParseOperator lookup =
+      parseLabel -- (fn lbl =>
         case (SOME (lookup lbl) handle _ => NONE) of
              SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")
 
     fun parseOperator lookup =
-      intensional_parse_operator lookup
-        || extensional_parse_operator
+      intensionalParseOperator lookup
+        || extensionalParseOperator
   end
 end

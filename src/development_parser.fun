@@ -1,8 +1,16 @@
 functor DevelopmentParser
-  (structure Development : DEVELOPMENT where type Telescope.Label.t = string
-   structure Syntax : PARSE_ABT
-    where type Operator.t = Development.Telescope.Label.t OperatorType.operator
-    where type ParseOperator.env = Development.Telescope.Label.t -> Arity.t
+  (structure Syntax : PARSE_ABT
+    where type Operator.t = string OperatorType.operator
+    where type ParseOperator.env = string -> Arity.t
+
+   structure Pattern : PARSE_ABT
+    where type Operator.t = string PatternOperatorType.operator
+    where type ParseOperator.env = string -> Arity.t
+   sharing Syntax.Variable = Pattern.Variable
+
+   structure Development : DEVELOPMENT where type Telescope.Label.t = string
+   sharing type Development.ConvCompiler.PatternSyntax.t = Pattern.t
+
    structure Sequent : SEQUENT
    structure TacticScript : TACTIC_SCRIPT
 
@@ -11,7 +19,7 @@ functor DevelopmentParser
    sharing type Sequent.term = Development.term
    sharing type TacticScript.env = Development.t
    sharing type TacticScript.Lcf.goal = Sequent.sequent
-  ) : DEVELOPMENT_PARSER =
+ ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
 
@@ -44,6 +52,7 @@ struct
   val lookupOperator = Development.lookupOperator
 
   fun parseTm fvs = squares o Syntax.parseAbt fvs o lookupOperator
+  val parsePattern = squares o Pattern.parseAbt [] o lookupOperator
 
   val parseName =
     identifier
@@ -74,11 +83,11 @@ struct
     wth Development.declareOperator D
 
   fun parseOperatorDef D =
-    parseTm [] D -- (fn (tm : Syntax.t) =>
-      succeed tm && (symbol "=def=" >> parseTm (Syntax.freeVariables tm) D)
-    ) wth (fn (M : Syntax.t, N : Syntax.t) =>
+    parsePattern D -- (fn (pat : Pattern.t) =>
+      succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) D)
+    ) wth (fn (P : Pattern.t, N : Syntax.t) =>
       Development.defineOperator D
-        {definiendum = M,
+        {definiendum = P,
          definiens = N})
 
   fun parseDecl D =
@@ -97,6 +106,7 @@ end
 
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
+   structure Pattern = PatternSyntax
    structure Development = Development
    structure Sequent = Sequent
    structure TacticScript = CttScript)

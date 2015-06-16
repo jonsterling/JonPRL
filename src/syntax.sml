@@ -30,7 +30,7 @@ struct
       structure TP = TokenParser (LangDef)
       open TP
     in
-      val parse_label : Label.t CharParser.charParser = identifier
+      val parseLabel : Label.t CharParser.charParser = identifier
     end
 
   end

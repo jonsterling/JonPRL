@@ -6,9 +6,6 @@ group is
   ../lib/cmlib/cmlib.cm
   ../lib/parcom.cm
 
-  abt_free_variables.sig
-  abt_free_variables.fun
-
   visibility.sml
   operator.sml
   syntax.sml
@@ -16,10 +13,14 @@ group is
   level.sig
   level.sml
 
+  pattern.fun
+
   conv_types.sig
   conv_types.fun
   conversionals.sig
   conversionals.fun
+  conv_compiler.sig
+  conv_compiler.fun
 
   context.sig
   context.fun

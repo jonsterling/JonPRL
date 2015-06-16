@@ -8,7 +8,8 @@ functor Development
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   val asCustomOperator : Syntax.Operator.t -> Telescope.label) : DEVELOPMENT =
+   sharing type ConvCompiler.PatternSyntax.Variable.t = Syntax.Variable.t
+   val asCustomOperator : ConvCompiler.PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
   structure Telescope = Telescope
@@ -53,7 +54,7 @@ struct
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
+                       "\n⸤" ^ ConvCompiler.PatternSyntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
   end
 
@@ -84,7 +85,7 @@ struct
     Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
 
   local
-    open Syntax
+    open ConvCompiler.PatternSyntax
     infix $
   in
     fun ruleGetLabel {definiendum, definiens} =
@@ -93,26 +94,36 @@ struct
          | _ => raise Fail "invalid rewrite rule"
   end
 
-  structure FreeVariables = AbtFreeVariables(Syntax)
-  fun defineOperator T (rule as {definiendum, definiens}) =
-    let
-      val lbl = ruleGetLabel rule
-      val LFVs = FreeVariables.freeVariables definiendum
-      val RFVs = FreeVariables.freeVariables definiens
-      val _ =
-        if FreeVariables.Set.subset (RFVs, LFVs) then
-          ()
-        else
-          raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
-    in
-      case Telescope.lookup T lbl of
-           Object.Operator {arity,conversion = NONE} =>
-             Telescope.modify T (lbl, fn _ =>
-               Object.Operator
-                {arity = arity,
-                 conversion = SOME (rule, Susp.delay (fn _ => ConvCompiler.compile rule))})
-         | _ => raise Subscript
-    end
+  local
+    structure Set = SplaySet(structure Elem = Syntax.Variable)
+    val setFromList = foldl (fn (x,S) => Set.insert S x) Set.empty
+    fun subset (xs, ys) =
+      let
+        val ys' = setFromList ys
+      in
+        foldl (fn (x,R) => R andalso Set.member ys' x) true xs
+      end
+  in
+    fun defineOperator T (rule as {definiendum, definiens}) =
+      let
+        val lbl = ruleGetLabel rule
+        val LFVs = ConvCompiler.PatternSyntax.freeVariables definiendum
+        val RFVs = Syntax.freeVariables definiens
+        val _ =
+          if subset (RFVs, LFVs) then
+            ()
+          else
+            raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
+      in
+        case Telescope.lookup T lbl of
+             Object.Operator {arity,conversion = NONE} =>
+               Telescope.modify T (lbl, fn _ =>
+                 Object.Operator
+                  {arity = arity,
+                   conversion = SOME (rule, Susp.delay (fn _ => ConvCompiler.compile rule))})
+           | _ => raise Subscript
+      end
+  end
 
   fun lookupDefinition T lbl =
     case Telescope.lookup T lbl of
@@ -146,8 +157,6 @@ structure Development : DEVELOPMENT = Development
    structure Telescope = Telescope(StringVariable)
    structure Lcf = Lcf
 
-   open OperatorType
+   open PatternOperatorType
 
-   fun asCustomOperator (CUSTOM {label,...}) = label
-     | asCustomOperator _ = raise Fail "not a custom operator")
-
+   fun asCustomOperator (APP (lbl, _)) = lbl)
