@@ -96,6 +96,37 @@ Theorem Fiber_wf : [
   unfold <Fam Fiber dom map fst snd>; auto.
 }.
 
+||| Quantifier adjoints
+
+Operator Exists : (0;0;0).
+Operator Invert : (0).
+Operator Forall : (0;0;0).
+
+||| Exists ⊣ Invert ⊣ Forall
+
+[Exists(X;Y;f)] =def= [λ(φ. λ(y. Σ(X; x. Σ(=(ap(f;x); y; Y); _. ap(φ;x)))))].
+[Invert(f)] =def= [λ(φ. λ(x. ap(φ;ap(f;x))))].
+[Forall(X;Y;f)] =def= [λ(φ. λ(y. Σ(X; x. Π(=(y; ap(f;x); Y); _. ap(φ;x)))))].
+
+Theorem Exists_wf : [
+  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
+    ∈(ap(Exists(X;Y;f);φ); Π(Y; _. U<0>))))))
+] {
+  unfold <Exists>; auto.
+}.
+Theorem Invert_wf : [
+  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(Y; _. U<0>); φ.
+    ∈(ap(Invert(f);φ); Π(X; _. U<0>))))))
+] {
+  unfold <Invert>; auto.
+}.
+Theorem Forall_wf : [
+  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
+    ∈(ap(Forall(X;Y;f);φ); Π(Y; _. U<0>))))))
+] {
+  unfold <Forall>; auto.
+}.
+
 ||| Polynomials (non-indexed)
 
 Operator Polynomial : ().
