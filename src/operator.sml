@@ -7,7 +7,7 @@ struct
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
-    | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
+    | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ | FUN_EXT
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
@@ -67,6 +67,7 @@ struct
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
     | eq (AP_EQ, AP_EQ) = true
+    | eq (FUN_EXT, FUN_EXT) = true
     | eq (ISECT_EQ, ISECT_EQ) = true
     | eq (ISECT_INTRO, ISECT_INTRO) = true
     | eq (ISECT_ELIM, ISECT_ELIM) = true
@@ -122,6 +123,7 @@ struct
        | FUN_ELIM => #[0,0,0,2]
        | LAM_EQ => #[1,0]
        | AP_EQ => #[0,0]
+       | FUN_EXT => #[1,0,0,0]
 
        | ISECT_EQ => #[0,1]
        | ISECT_INTRO => #[1,0]
@@ -188,6 +190,7 @@ struct
        | FUN_ELIM => "fun-elim"
        | LAM_EQ => "lam⁼"
        | AP_EQ => "ap⁼"
+       | FUN_EXT => "funext"
 
        | ISECT_EQ => "isect⁼"
        | ISECT_INTRO => "isect-intro"

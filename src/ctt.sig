@@ -78,6 +78,7 @@ sig
     val FunElim : int * term * (name * name) option -> Lcf.tactic
     val LamEq : name option * Level.t option -> Lcf.tactic
     val ApEq : term option -> Lcf.tactic
+    val FunExt : name option * Level.t option -> Lcf.tactic
 
     val IsectEq : name option -> Lcf.tactic
     val IsectIntro : name option * Level.t option -> Lcf.tactic

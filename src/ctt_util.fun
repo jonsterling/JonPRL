@@ -72,6 +72,7 @@ struct
         ORELSE PairEq (freshVariable, level)
         ORELSE LamEq (freshVariable, level)
         ORELSE ApEq (list_at (terms, 0))
+        ORELSE FunExt (freshVariable, level)
         ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
         ORELSE SubsetMemberEq (freshVariable, level)
         ORELSE IsectMemberEq (freshVariable, level)
