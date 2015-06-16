@@ -5,30 +5,7 @@ struct
     structure Label = StringVariable
 
     local
-      open ParserCombinators CharParser
-      infix 2 return wth suchthat return guard when
-      infixr 1 ||
-      infixr 4 << >>
-
-      structure LangDef :> LANGUAGE_DEF =
-      struct
-        type scanner = char CharParser.charParser
-        val commentStart = SOME "(*"
-        val commentEnd = SOME "*)"
-        val commentLine = SOME "|||"
-        val nestedComments = false
-
-        val identLetter = CharParser.letter || CharParser.oneOf (String.explode "-'_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω") || CharParser.digit
-        val identStart = identLetter
-        val opStart = fail "Operators not supported" : scanner
-        val opLetter = opStart
-        val reservedNames = []
-        val reservedOpNames = []
-        val caseSensitive = true
-      end
-
-      structure TP = TokenParser (LangDef)
-      open TP
+      open JonprlTokenParser
     in
       val parseLabel : Label.t CharParser.charParser = identifier
     end

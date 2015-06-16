@@ -13,6 +13,7 @@ group is
   level.sig
   level.sml
 
+  jonprl_language_def.sml
   pattern.fun
 
   conv_types.sig

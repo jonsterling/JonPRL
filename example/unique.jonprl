@@ -3,7 +3,9 @@
 ||| belong in the witness.
 
 Operator unique : (0;1).
-[unique(A; B)] =def= [Σ(A; x. subset(so_apply(B;x); _. ⋂(A; y. ⋂(so_apply(B;y); _. =(x;y;A)))))].
+[unique(A; B)] =def= [
+  Σ(A; x. subset(so_apply(B;x); _. ⋂(A; y. ⋂(so_apply(B;y); _. =(x;y;A)))))
+].
 
 ||| There is just one function void ⇒ A for any A.
 Theorem abort-unique : [⋂(U<0>; A. unique(Π(void; _. A); _. unit))] {
