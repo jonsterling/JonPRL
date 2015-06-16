@@ -1,0 +1,41 @@
+Operator unique : (0;0).
+[unique(A;B)] =def= [
+  Σ(A; x. subset(ap(B;x); _. ⋂(A; y. ⋂(ap(B;y); _. =(x;y;A)))))
+].
+
+Operator Quiver : ().
+Operator obj : (0).
+Operator arr : (0).
+Operator dom : (0;0).
+Operator cod : (0;0).
+Operator hom : (0;0).
+
+[Quiver] =def= [
+  Σ(U<0>; Obj.
+  Σ(U<0>; Arr.
+  Σ(Π(Arr; _. Obj); Dom.
+    Π(Arr; _. Obj))))
+].
+[obj(Q)] =def= [spread(Q; x.y.x)].
+[arr(Q)] =def= [spread(spread(Q; x.y.y); x.y.x)].
+[dom(Q;f)] =def= [ap(spread(spread(spread(Q; x.y.y); x.y.y); x.y.x); f)].
+[cod(Q;f)] =def= [ap(spread(spread(spread(Q; x.y.y); x.y.y); x.y.y); f)].
+[hom(Q;f)] =def= [pair(dom(Q;f); cod(Q;f))].
+
+Operator RawCat : ().
+Operator idn : (0;0).
+Operator cmp : (0;0;0).
+
+[RawCat] =def= [
+  Σ(Quiver; Q.
+  Σ(Π(obj(Q); _. arr(Q)); Idn.
+  subset(Π(arr(Q); _. Π(arr(Q); _. arr(Q))); Cmp.
+  ⋂(arr(Q); g.
+  ⋂(arr(Q); f.
+  ⋂(=(dom(Q;g); cod(Q;f); obj(Q)); _.
+  unique(arr(Q); λ(h.
+  subset(=(h; ap(ap(Cmp;g);f); arr(Q)); _.
+    =(hom(Q;h); pair(dom(Q;f); cod(Q;g)); obj(Q)))))))))))
+].
+[idn(RC;A)] =def= [ap(spread(spread(RC; x.y.y); x.y.x); A)].
+[cmp(RC;g;f)] =def= [ap(ap(spread(spread(RC; x.y.y); x.y.y); g); f)].
