@@ -62,21 +62,8 @@ Theorem Lan_wf : [
   unfold <Lan Copower Coend CTT>; auto.
 }.
 
-||| Yoneda / Codensity
+||| Fam
 
-Operator Yoneda : (0;0).
-Operator Codensity : (0;0).
-
-[Yoneda(F;A)] =def= [Ran(F; λ(X.X); A)].
-[Codensity(F;A)] =def= [Ran(F; F; A)].
-
-||| Coyoneda / Density
-
-Operator Coyoneda : (0;0).
-Operator Density : (0;0).
-
-[Coyoneda(F;A)] =def= [Lan(F; λ(X.X); A)].
-[Density(F;A)] =def= [Lan(F; F; A)].
 
 ||| Bundles / Fibrations
 
