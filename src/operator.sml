@@ -25,7 +25,7 @@ struct
     | SUBSET
 
     | CUSTOM of {label : 'label, arity : Arity.t}
-    | INSTANTIATE
+    | SO_APPLY
 end
 
 signature CTT_OPERATOR =
@@ -95,7 +95,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
-    | eq (INSTANTIATE,INSTANTIATE) = true
+    | eq (SO_APPLY,SO_APPLY) = true
     | eq _ = false
 
   fun arity O =
@@ -163,7 +163,7 @@ struct
        | SUBSET => #[0,1]
 
        | CUSTOM {arity,...} => arity
-       | INSTANTIATE => #[0,0]
+       | SO_APPLY => #[0,0]
 
   fun toString O =
     case O of
@@ -261,7 +261,7 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
-        || string "so_apply" return INSTANTIATE
+        || string "so_apply" return SO_APPLY
 
     fun intensionalParseOperator lookup =
       parseLabel -- (fn lbl =>

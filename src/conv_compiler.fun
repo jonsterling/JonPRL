@@ -108,7 +108,7 @@ structure SoTerm : SO_TERM =
 struct
   structure Operator = Syntax.Operator
 
-  fun asInstantiate OperatorType.INSTANTIATE = SOME ()
+  fun asInstantiate OperatorType.SO_APPLY = SOME ()
     | asInstantiate _ = NONE
 end
 
