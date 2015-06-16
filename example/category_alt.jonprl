@@ -22,6 +22,25 @@ Operator hom : (0;0).
 [cod(Q;f)] =def= [ap(spread(spread(spread(Q; x.y.y); x.y.y); x.y.y); f)].
 [hom(Q;f)] =def= [pair(dom(Q;f); cod(Q;f))].
 
+Theorem Quiver_wf : [∈(Quiver; U<1>)] {
+  unfold <Quiver>; auto.
+}.
+Theorem obj_wf : [⋂(Quiver; Q. ∈(obj(Q); U<0>))] {
+  unfold <Quiver obj>; auto.
+}.
+Theorem arr_wf : [⋂(Quiver; Q. ∈(arr(Q); U<0>))] {
+  unfold <Quiver arr>; auto.
+}.
+Theorem dom_wf : [⋂(Quiver; Q. ⋂(arr(Q); f. ∈(dom(Q;f); obj(Q))))] {
+  unfold <Quiver arr dom obj>; auto.
+}.
+Theorem cod_wf : [⋂(Quiver; Q. ⋂(arr(Q); f. ∈(cod(Q;f); obj(Q))))] {
+  unfold <Quiver arr cod obj>; auto.
+}.
+Theorem hom_wf : [⋂(Quiver; Q. ⋂(arr(Q); f. ∈(hom(Q;f); Σ(obj(Q); _. obj(Q)))))] {
+  unfold <Quiver arr hom dom cod obj>; auto;
+}.
+
 Operator RawCat : ().
 Operator idn : (0;0).
 Operator cmp : (0;0;0).
