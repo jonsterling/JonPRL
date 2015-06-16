@@ -8,7 +8,7 @@ smlnj:
 	build/mkexec.sh `which sml` `pwd` jonprl
 
 test:
-	bin/jonprl example/test.jonprl example/monoid.jonprl example/squash.jonprl
+	bin/jonprl example/test.jonprl example/monoid.jonprl example/squash.jonprl example/unique.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
