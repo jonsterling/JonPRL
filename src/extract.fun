@@ -42,6 +42,7 @@ struct
            end
        | LAM_EQ $ _ => ax
        | AP_EQ $ _ => ax
+       | FUN_EXT $ _ => ax
 
        | ISECT_EQ $ _ => ax
        | ISECT_INTRO $ #[xD, _] => extract (#2 (unbind xD))

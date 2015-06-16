@@ -320,6 +320,25 @@ struct
                 | _ => raise Refine)
       end
 
+    fun FunExt (oz, ok) (H >> P) =
+      let
+        val #[f1,f2,funty] = P ^! EQ
+        val #[S,xT] = funty ^! FUN
+        val z =
+          Context.fresh (H,
+            case oz of
+                 NONE => #1 (unbind xT)
+               | SOME z => z)
+        val k = case ok of NONE => inferLevel (H, S) | SOME k => k
+      in
+        [ H @@ (z, S) >> EQ $$ #[AP $$ #[f1,``z], AP $$ #[f2, ``z], xT // ``z]
+        , H >> MEM $$ #[S, UNIV k $$ #[]]
+        , H >> MEM $$ #[f1, funty]
+        , H >> MEM $$ #[f2, funty]
+        ] BY (fn [D,E,F,G] => FUN_EXT $$ #[z \\ D, E, F, G]
+               | _ => raise Refine)
+      end
+
     fun ApEq ofunty (H >> P) =
       let
         val #[f1t1, f2t2, Tt1] = P ^! EQ

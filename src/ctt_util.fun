@@ -28,6 +28,10 @@ struct
      level : Level.t option,
      terms : term list}
 
+  type ext_args =
+    {freshVariable : name option,
+     level : Level.t option}
+
   fun Intro {term,freshVariable,level} =
      MemCD
        ORELSE UnitIntro
@@ -82,6 +86,9 @@ struct
              | _ => FAIL)
         ORELSE Cum level
     end
+
+  fun Ext {freshVariable, level} =
+    FunExt (freshVariable, level)
 
   local
     val AutoEqCD =

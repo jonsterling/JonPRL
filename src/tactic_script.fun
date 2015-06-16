@@ -17,24 +17,9 @@ struct
   infixr 3 &&
   infixr 4 << >>
 
-  structure LangDef :> LANGUAGE_DEF =
-  struct
-    type scanner = char CharParser.charParser
-    val commentStart = SOME "(*"
-    val commentEnd = SOME "*)"
-    val commentLine = SOME "|||"
-    val nestedComments = false
-
-    val identLetter = CharParser.letter
-    val identStart = identLetter
-    val opStart = fail "Operators not supported" : scanner
-    val opLetter = opStart
-    val reservedNames = ["refine"]
-    val reservedOpNames = []
-    val caseSensitive = true
-  end
-
-  structure TP = TokenParser (LangDef)
+  structure TP = TokenParser
+    (open JonprlLanguageDef
+     val reservedNames = ["refine"])
   open TP
 
   val pipe = symbol "|"

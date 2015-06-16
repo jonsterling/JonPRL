@@ -7,7 +7,7 @@ struct
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
-    | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ
+    | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ | FUN_EXT
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
@@ -25,6 +25,7 @@ struct
     | SUBSET
 
     | CUSTOM of {label : 'label, arity : Arity.t}
+    | SO_APPLY
 end
 
 signature CTT_OPERATOR =
@@ -39,7 +40,7 @@ end
 
 functor Operator
   (structure Label : LABEL
-   val parse_label : Label.t CharParser.charParser) : CTT_OPERATOR =
+   val parseLabel : Label.t CharParser.charParser) : CTT_OPERATOR =
 struct
   open OperatorType
   structure Label = Label
@@ -66,6 +67,7 @@ struct
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
     | eq (AP_EQ, AP_EQ) = true
+    | eq (FUN_EXT, FUN_EXT) = true
     | eq (ISECT_EQ, ISECT_EQ) = true
     | eq (ISECT_INTRO, ISECT_INTRO) = true
     | eq (ISECT_ELIM, ISECT_ELIM) = true
@@ -93,6 +95,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
+    | eq (SO_APPLY,SO_APPLY) = true
     | eq _ = false
 
   fun arity O =
@@ -120,6 +123,7 @@ struct
        | FUN_ELIM => #[0,0,0,2]
        | LAM_EQ => #[1,0]
        | AP_EQ => #[0,0]
+       | FUN_EXT => #[1,0,0,0]
 
        | ISECT_EQ => #[0,1]
        | ISECT_INTRO => #[1,0]
@@ -159,6 +163,7 @@ struct
        | SUBSET => #[0,1]
 
        | CUSTOM {arity,...} => arity
+       | SO_APPLY => #[0,0]
 
   fun toString O =
     case O of
@@ -185,6 +190,7 @@ struct
        | FUN_ELIM => "fun-elim"
        | LAM_EQ => "lam⁼"
        | AP_EQ => "ap⁼"
+       | FUN_EXT => "funext"
 
        | ISECT_EQ => "isect⁼"
        | ISECT_INTRO => "isect-intro"
@@ -221,6 +227,7 @@ struct
        | SUBSET => "subset"
 
        | CUSTOM {label,...} => Label.toString label
+       | SUBST => "subst"
 
   local
     open ParserCombinators CharParser
@@ -228,18 +235,18 @@ struct
     infixr 1 || <|>
     infixr 4 << >> --
   in
-    val parse_int =
+    val parseInt =
       repeat1 digit wth valOf o Int.fromString o String.implode
 
     fun angles p =
       middle (string "<") p (string ">")
         || middle (string "〈") p  (string "〉")
 
-    val parse_univ : t charParser =
-      string "U" >> angles parse_int wth UNIV
+    val parseUniv : t charParser =
+      string "U" >> angles parseInt wth UNIV
 
-    val extensional_parse_operator : t charParser =
-      parse_univ
+    val extensionalParseOperator : t charParser =
+      parseUniv
         || string "void" return VOID
         || string "unit" return UNIT
         || string "<>" return AX
@@ -254,15 +261,16 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
+        || string "so_apply" return SO_APPLY
 
-    fun intensional_parse_operator lookup =
-      parse_label -- (fn lbl =>
+    fun intensionalParseOperator lookup =
+      parseLabel -- (fn lbl =>
         case (SOME (lookup lbl) handle _ => NONE) of
              SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")
 
     fun parseOperator lookup =
-      intensional_parse_operator lookup
-        || extensional_parse_operator
+      intensionalParseOperator lookup
+        || extensionalParseOperator
   end
 end

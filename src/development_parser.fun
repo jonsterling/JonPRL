@@ -1,17 +1,30 @@
+signature PARSE_CTT =
+  PARSE_ABT
+    where type Operator.t = string OperatorType.operator
+    where type ParseOperator.env = string -> Arity.t
+
+signature PARSE_PATTERN =
+  PARSE_ABT
+    where type Operator.t = string PatternOperatorType.operator
+    where type ParseOperator.env = string -> Arity.t
+
 functor DevelopmentParser
-  (structure Development : DEVELOPMENT where type Telescope.Label.t = string
-   structure Syntax : PARSE_ABT
-    where type Operator.t = Development.Telescope.Label.t OperatorType.operator
-    where type ParseOperator.env = Development.Telescope.Label.t -> Arity.t
+  (structure Syntax : PARSE_CTT
+   structure Pattern : PARSE_PATTERN
+   sharing type Syntax.Variable.t = Pattern.Variable.t
+
+   structure Development : DEVELOPMENT where type Telescope.Label.t = string
+   sharing type Development.ConvCompiler.PatternSyntax.t = Pattern.t
+   sharing type Development.term = Syntax.t
+
    structure Sequent : SEQUENT
    structure TacticScript : TACTIC_SCRIPT
 
    sharing TacticScript.Lcf = Development.Lcf
-   sharing type Development.term = Syntax.t
    sharing type Sequent.term = Development.term
    sharing type TacticScript.env = Development.t
    sharing type TacticScript.Lcf.goal = Sequent.sequent
-  ) : DEVELOPMENT_PARSER =
+ ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
 
@@ -21,29 +34,15 @@ struct
   infixr 3 &&
   infixr 4 << >> --
 
-  structure LangDef :> LANGUAGE_DEF =
-  struct
-    type scanner = char CharParser.charParser
-    val commentStart = SOME "(*"
-    val commentEnd = SOME "*)"
-    val commentLine = SOME "|||"
-    val nestedComments = false
-
-    val identLetter = CharParser.letter || CharParser.oneOf (String.explode "-'_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω") || CharParser.digit
-    val identStart = identLetter
-    val opStart = fail "Operators not supported" : scanner
-    val opLetter = opStart
-    val reservedNames = ["Theorem", "Tactic", "Operator"]
-    val reservedOpNames = []
-    val caseSensitive = true
-  end
-
-  structure TP = TokenParser (LangDef)
+  structure TP = TokenParser
+    (open JonprlLanguageDef
+     val reservedNames = ["Theorem", "Tactic", "Operator"])
   open TP
 
   val lookupOperator = Development.lookupOperator
 
   fun parseTm fvs = squares o Syntax.parseAbt fvs o lookupOperator
+  val parsePattern = squares o Pattern.parseAbt [] o lookupOperator
 
   val parseName =
     identifier
@@ -74,11 +73,11 @@ struct
     wth Development.declareOperator D
 
   fun parseOperatorDef D =
-    parseTm [] D -- (fn (tm : Syntax.t) =>
-      succeed tm && (symbol "=def=" >> parseTm (Syntax.freeVariables tm) D)
-    ) wth (fn (M : Syntax.t, N : Syntax.t) =>
+    parsePattern D -- (fn (pat : Pattern.t) =>
+      succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) D)
+    ) wth (fn (P : Pattern.t, N : Syntax.t) =>
       Development.defineOperator D
-        {definiendum = M,
+        {definiendum = P,
          definiens = N})
 
   fun parseDecl D =
@@ -88,6 +87,7 @@ struct
       || parseOperatorDef D
 
   fun parse' D () =
+    whiteSpace >>
     (parseDecl D << dot) -- (fn D' =>
       $ (parse' D') <|>
       (whiteSpace >> not any) return D')
@@ -97,6 +97,7 @@ end
 
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
+   structure Pattern = PatternSyntax
    structure Development = Development
    structure Sequent = Sequent
    structure TacticScript = CttScript)
