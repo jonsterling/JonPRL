@@ -97,6 +97,7 @@ struct
       || parseOperatorDef D
 
   fun parse' D () =
+    whiteSpace >>
     (parseDecl D << dot) -- (fn D' =>
       $ (parse' D') <|>
       (whiteSpace >> not any) return D')
