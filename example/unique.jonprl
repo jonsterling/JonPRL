@@ -7,9 +7,21 @@ Operator unique : (0;1).
   Σ(A; x. subset(so_apply(B;x); _. ⋂(A; y. ⋂(so_apply(B;y); _. =(x;y;A)))))
 ].
 
+||| unique inhabitation
+Operator isContr : (0).
+[isContr(A)] =def= [subset(A; x. ⋂(A; y. =(x; y; A)))].
+
 ||| There is just one function void ⇒ A for any A.
 Theorem abort-unique : [⋂(U<0>; A. unique(Π(void; _. A); _. unit))] {
   unfold <unique>; auto;
   intro [λ(_. baaaaaaaaaaaaaaaaang)]; auto;
+  ext; auto
+}.
+
+||| using isContr: the realizer is just the unique function (the uniqueness
+||| proof is just in the derivation)
+Theorem void-fun-contr : [⋂(U<0>; A. isContr(Π(void; _. A)))] {
+  unfold <isContr>; auto;
+  intro [λ(_. welp)]; auto;
   ext; auto
 }.
