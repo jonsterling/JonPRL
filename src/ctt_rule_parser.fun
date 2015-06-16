@@ -146,6 +146,11 @@ struct
       && opt parseLevel
       wth (fn (Ms, (xs, k)) => {names = xs, terms = Ms, level = k})
 
+  val parseExtArgs : ext_args intensional_parser =
+    fn D => opt (brackets parseName)
+      && opt parseLevel
+      wth (fn (z,k) => {freshVariable = z, level = k})
+
   val parseIntro =
     fn D => symbol "intro"
       && parseIntroArgs D
@@ -156,11 +161,15 @@ struct
       && parseElimArgs D
       wth (fn (name, args) => nameTac name (Elim args))
 
-
   val parseEqCd =
     fn D => symbol "eq-cd"
       && (parseEqCdArgs D)
       wth (fn (name, args) => nameTac name (EqCD args))
+
+  val parseExt =
+    fn D => symbol "ext"
+      && parseExtArgs D
+      wth (fn (name, args) => nameTac name (Ext args))
 
   val parseSymmetry : tactic_parser =
     fn D => symbol "symmetry"
@@ -208,6 +217,7 @@ struct
       || parseIntro D
       || parseElim D
       || parseEqCd D
+      || parseExt D
       || parseCum D
       || parseAuto D
       || parseMemCd D

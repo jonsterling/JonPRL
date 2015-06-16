@@ -28,6 +28,10 @@ struct
      level : Level.t option,
      terms : term list}
 
+  type ext_args =
+    {freshVariable : name option,
+     level : Level.t option}
+
   fun Intro {term,freshVariable,level} =
      MemCD
        ORELSE UnitIntro
@@ -72,7 +76,6 @@ struct
         ORELSE PairEq (freshVariable, level)
         ORELSE LamEq (freshVariable, level)
         ORELSE ApEq (list_at (terms, 0))
-        ORELSE FunExt (freshVariable, level)
         ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
         ORELSE SubsetMemberEq (freshVariable, level)
         ORELSE IsectMemberEq (freshVariable, level)
@@ -83,6 +86,9 @@ struct
              | _ => FAIL)
         ORELSE Cum level
     end
+
+  fun Ext {freshVariable, level} =
+    FunExt (freshVariable, level)
 
   local
     val AutoEqCD =

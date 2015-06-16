@@ -18,8 +18,13 @@ sig
      level : Level.t option,
      terms : term list}
 
+  type ext_args =
+    {freshVariable : name option,
+     level : Level.t option}
+
   val Intro : intro_args -> Lcf.tactic
   val Elim : elim_args -> Lcf.tactic
   val EqCD : eq_cd_args -> Lcf.tactic
+  val Ext : ext_args -> Lcf.tactic
 
 end
