@@ -64,27 +64,24 @@ Theorem Lan_wf : [
 
 ||| Fam
 
-
-||| Bundles / Fibrations
-
-Operator Bundle : (0).
+Operator Fam : (0).
 Operator dom : (0).
 Operator map : (0;0).
 
-[Bundle(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
+[Fam(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
 [dom(f)] =def= [fst(f)].
 [map(f;b)] =def= [ap(snd(f); b)].
 
-Theorem Bundle_wf : [∀(U<0>; B. ∈(Bundle(B); U<1>))] {
-  unfold <Bundle>; auto
+Theorem Fam_wf : [∀(U<0>; B. ∈(Fam(B); U<1>))] {
+  unfold <Fam>; auto
 }.
-Theorem dom_wf : [∀(U<0>; B. ∀(Bundle(B); f. ∈(dom(f); U<0>)))] {
-  unfold <Bundle map dom fst>; auto
+Theorem dom_wf : [∀(U<0>; B. ∀(Fam(B); f. ∈(dom(f); U<0>)))] {
+  unfold <Fam map dom fst>; auto
 }.
 Theorem map_wf : [
-  ∀(U<0>; B. ∀(Bundle(B); f. ∀(dom(f); x. ∈(map(f;x); B))))
+  ∀(U<0>; B. ∀(Fam(B); f. ∀(dom(f); x. ∈(map(f;x); B))))
 ] {
-  unfold <Bundle dom map fst snd>; auto.
+  unfold <Fam dom map fst snd>; auto.
 }.
 
 ||| Fibers of a bundle over a point
@@ -94,23 +91,23 @@ Operator Fiber : (0;0;0).
 [Fiber(B; f; b)] =def= [Σ(dom(f); x. =(b; map(f;x); B))].
 
 Theorem Fiber_wf : [
-  ∀(U<0>; B. ∀(Bundle(B); f. ∀(B; b. ∈(Fiber(B;f;b); U<0>))))
+  ∀(U<0>; B. ∀(Fam(B); f. ∀(B; b. ∈(Fiber(B;f;b); U<0>))))
 ] {
-  unfold <Bundle Fiber dom map fst snd>; auto.
+  unfold <Fam Fiber dom map fst snd>; auto.
 }.
 
 ||| Polynomials (non-indexed)
 
 Operator Polynomial : ().
 Operator base : (0).
-Operator bundle : (0).
+Operator fam : (0).
 
-[Polynomial] =def= [Σ(U<0>; Base. Bundle(Base))].
+[Polynomial] =def= [Σ(U<0>; Base. Fam(Base))].
 [base(E)] =def= [fst(E)].
-[bundle(E)] =def= [snd(E)].
+[fam(E)] =def= [snd(E)].
 
 Theorem Polynomial_wf : [∈(Polynomial; U<1>)] {
-  unfold <Polynomial Bundle>; auto
+  unfold <Polynomial Fam>; auto
 }.
 
 ||| Yoneda embedding
@@ -129,24 +126,24 @@ Theorem Embed_wf : [
 
 Operator Ext : (0;0).
 
-[Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); bundle(p); b)))].
+[Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); fam(p); b)))].
 
 Theorem Ext_wf : [
   ∀(Polynomial; p. ∀(U<0>; X. ∈(Ext(p;X); U<1>)))
 ] {
-  unfold <Polynomial Ext Bundle base Embed CTT Fiber bundle dom map fst snd>; auto;
+  unfold <Polynomial Ext Fam base Embed CTT Fiber fam dom map fst snd>; auto;
   unfold <snd>; auto
 }.
 
-||| Bundle pullbacks
+||| Fam pullbacks
 
 Operator Pullback : (0;0;0).
 
 [Pullback(B;f;g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
 
 Theorem Pullback_wf : [
-  ∀(U<0>; B. ∀(Bundle(B); f. ∀(Bundle(B); g.
+  ∀(U<0>; B. ∀(Fam(B); f. ∀(Fam(B); g.
     ∈(Pullback(B;f;g); U<0>))))
 ] {
-  unfold <Pullback Bundle Fiber map dom fst snd>; auto.
+  unfold <Pullback Fam Fiber map dom fst snd>; auto.
 }.
