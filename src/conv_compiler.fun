@@ -1,5 +1,3 @@
-(* The idea is that whenever we find something that is a subst, then we will
- * compile it out in the conversion. *)
 signature SO_TERM =
 sig
   structure Operator : OPERATOR
@@ -11,17 +9,20 @@ end
 functor ConvCompiler
   (structure Conv : CONV_TYPES
    structure SoTerm : SO_TERM
-   structure Label : LABEL
+
+   type label
    structure PatternSyntax : ABT_UTIL
-     where type Operator.t = Label.t PatternOperatorType.operator
-   val customOperator : Label.t * Arity.t -> Conv.Syntax.Operator.t
+     where type Operator.t = label PatternOperatorType.operator
+
+   val customOperator : label * Arity.t -> Conv.Syntax.Operator.t
+
    sharing Conv.Syntax.Operator = SoTerm.Operator
    sharing Conv.Syntax.Variable = PatternSyntax.Variable) : CONV_COMPILER =
 struct
   open Conv
 
   structure PatternSyntax = PatternSyntax
-  structure Label = Label
+  type label = label
 
   structure S = Conv.Syntax and P = PatternSyntax
   type rule = {definiendum : PatternSyntax.t, definiens : Syntax.t }
@@ -113,8 +114,8 @@ end
 
 structure ConvCompiler = ConvCompiler
   (structure Conv = ConvTypes
-   structure Label = StringVariable
    structure PatternSyntax = PatternSyntax
    structure SoTerm = SoTerm
+   type label = string
    fun customOperator (lbl, arity) =
      OperatorType.CUSTOM {label = lbl, arity = arity})

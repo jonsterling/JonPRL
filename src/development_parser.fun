@@ -1,21 +1,26 @@
-functor DevelopmentParser
-  (structure Syntax : PARSE_ABT
+signature PARSE_CTT =
+  PARSE_ABT
     where type Operator.t = string OperatorType.operator
     where type ParseOperator.env = string -> Arity.t
 
-   structure Pattern : PARSE_ABT
+signature PARSE_PATTERN =
+  PARSE_ABT
     where type Operator.t = string PatternOperatorType.operator
     where type ParseOperator.env = string -> Arity.t
-   sharing Syntax.Variable = Pattern.Variable
+
+functor DevelopmentParser
+  (structure Syntax : PARSE_CTT
+   structure Pattern : PARSE_PATTERN
+   sharing type Syntax.Variable.t = Pattern.Variable.t
 
    structure Development : DEVELOPMENT where type Telescope.Label.t = string
    sharing type Development.ConvCompiler.PatternSyntax.t = Pattern.t
+   sharing type Development.term = Syntax.t
 
    structure Sequent : SEQUENT
    structure TacticScript : TACTIC_SCRIPT
 
    sharing TacticScript.Lcf = Development.Lcf
-   sharing type Development.term = Syntax.t
    sharing type Sequent.term = Development.term
    sharing type TacticScript.env = Development.t
    sharing type TacticScript.Lcf.goal = Sequent.sequent

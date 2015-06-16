@@ -1,8 +1,7 @@
 functor CttRuleParser
   (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
    structure Ctt : CTT_UTIL where type Development.Telescope.Label.t = string
-   structure Operator : PARSE_OPERATOR
-    where type env = Ctt.Development.label -> Arity.t
+   structure Operator : PARSE_OPERATOR where type env = Ctt.Development.label -> Arity.t
    sharing type Ctt.Lcf.goal = Lcf.goal
    sharing type Ctt.Lcf.evidence = Lcf.evidence
    sharing Ctt.Syntax.Operator = Operator):
