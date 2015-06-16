@@ -3,6 +3,10 @@ Operator unique : (0;0).
   Σ(A; x. subset(ap(B;x); _. ⋂(A; y. ⋂(ap(B;y); _. =(x;y;A)))))
 ].
 
+Theorem unique_wf : [⋂(U<0>; A. ⋂(Π(A; _. U<0>); B. ∈(unique(A;B); U<0>)))] {
+  unfold <unique>; auto.
+}.
+
 Operator Quiver : ().
 Operator obj : (0).
 Operator arr : (0).
