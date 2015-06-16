@@ -58,8 +58,8 @@ struct
 
   local
     open Conversionals
-    infix CTHEN
-    fun compile' {definiendum, definiens} = fn (M : Syntax.t) =>
+  in
+    fun compile {definiendum, definiens} = fn (M : Syntax.t) =>
       let
         val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum handle _ => raise Conv
         val S.$ (outop, outargs) = S.out definiens handle _ => raise Conv
@@ -71,27 +71,34 @@ struct
         open S
         infix $ $$ \ \\ //
 
-        fun go H (p $ es) =
-              (case SoTerm.asInstantiate p of
-                   NONE => p $$ Vector.map (go H o out) es
-                 | SOME () =>
-                     let
-                       val #[E, M] = es
-                       val sovar = case out E of `sovar => sovar | _ => raise Conv
-                     in
-                       Dict.lookup chart sovar // M
-                     end)
-          | go H (x \ E) = x \\ go (Set.insert H x) (out E)
+        fun rewriteInstantiations M =
+          case out M of
+               p $ es =>
+                 (case SoTerm.asInstantiate p of
+                      NONE => raise Conv
+                    | SOME () =>
+                        let
+                          val #[E, M] = es
+                        in
+                          case out E of
+                               `sovar => Dict.lookup chart sovar // M
+                             | _ => rewriteInstantiations E // M
+                        end)
+             | _ => raise Conv
+
+        fun go H (p $ es) = p $$ Vector.map (go' H) es
+          | go H (x \ E) = x \\ go' (Set.insert H x) E
           | go H (` x) =
               if Set.member H x then
                 `` x
               else
                 Dict.lookup chart x handle _ => `` x
+        and go' H E = go H (out (CTRY rewriteInstantiations E))
+
+        val res = go Set.empty (out definiens)
       in
-        go Set.empty (out definiens)
+        CDEEP rewriteInstantiations (go Set.empty (out definiens))
       end
-  in
-    fun compile rule = compile' rule
   end
 
 end
