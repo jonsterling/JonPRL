@@ -104,15 +104,15 @@ Operator Forall : (0;0;0).
 
 ||| Exists ⊣ Invert ⊣ Forall
 
-[Exists(X;Y;f)] =def= [λ(φ. λ(y. Σ(X; x. Σ(=(ap(f;x); y; Y); _. ap(φ;x)))))].
+[Exists(X;Y;f)] =def= [λ(φ. λ(y. Lan(X;Y;f;φ;y)))].
 [Invert(f)] =def= [λ(φ. λ(x. ap(φ;ap(f;x))))].
-[Forall(X;Y;f)] =def= [λ(φ. λ(y. Σ(X; x. Π(=(y; ap(f;x); Y); _. ap(φ;x)))))].
+[Forall(X;Y;f)] =def= [λ(φ. λ(y. Ran(X;Y;f;φ;y)))].
 
 Theorem Exists_wf : [
   ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
     ∈(ap(Exists(X;Y;f);φ); Π(Y; _. U<0>))))))
 ] {
-  unfold <Exists>; auto.
+  unfold <Exists Lan Coend Copower Paths>; auto.
 }.
 Theorem Invert_wf : [
   ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(Y; _. U<0>); φ.
@@ -124,7 +124,7 @@ Theorem Forall_wf : [
   ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
     ∈(ap(Forall(X;Y;f);φ); Π(Y; _. U<0>))))))
 ] {
-  unfold <Forall>; auto.
+  unfold <Forall Ran End Power Paths>; auto.
 }.
 
 ||| Polynomials (non-indexed)
