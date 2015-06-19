@@ -59,46 +59,53 @@ struct
 
   local
     open Conversionals
+    fun rewriteInstantiations chart M =
+      let
+        open S
+        infix $ $$ \ \\ //
+      in
+        case out M of
+             p $ es =>
+               (case SoTerm.asInstantiate p of
+                    NONE => raise Conv
+                  | SOME () =>
+                      let
+                        val #[E, M] = es
+                      in
+                        case out E of
+                             `sovar => Dict.lookup chart sovar // M
+                           | _ => rewriteInstantiations chart E // M
+                      end)
+           | _ => raise Conv
+      end
   in
     fun compile {definiendum, definiens} = fn (M : Syntax.t) =>
       let
-        val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum handle _ => raise Conv
-        val S.$ (outop, outargs) = S.out definiens handle _ => raise Conv
-        val S.$ (Mop, Margs) = S.out M handle _ => raise Conv
-
-        val _ = if S.Operator.eq (customOperator (lbl, arity), Mop) then () else raise Conv
+        val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum
+        val S.$ (Mop, Margs) = S.out M
         val chart = computeChart (definiendum, M)
-
-        open S
-        infix $ $$ \ \\ //
-
-        fun rewriteInstantiations M =
-          case out M of
-               p $ es =>
-                 (case SoTerm.asInstantiate p of
-                      NONE => raise Conv
-                    | SOME () =>
-                        let
-                          val #[E, M] = es
-                        in
-                          case out E of
-                               `sovar => Dict.lookup chart sovar // M
-                             | _ => rewriteInstantiations E // M
-                        end)
-             | _ => raise Conv
-
-        fun go H (p $ es) = p $$ Vector.map (go' H) es
-          | go H (x \ E) = x \\ go' (Set.insert H x) E
-          | go H (` x) =
-              if Set.member H x then
-                `` x
-              else
-                Dict.lookup chart x handle _ => `` x
-        and go' H E = go H (out (CTRY rewriteInstantiations E))
-
-        val res = go Set.empty (out definiens)
       in
-        CDEEP rewriteInstantiations (go Set.empty (out definiens))
+        case S.out definiens of
+             S.` x => (Dict.lookup chart x handle _ => S.``x)
+           | S.$ (outop, outargs) =>
+               let
+                 val _ = if S.Operator.eq (customOperator (lbl, arity), Mop) then () else raise Conv
+                 open S
+                 infix $ $$ \ \\ //
+                 fun go H (p $ es) = p $$ Vector.map (go' H) es
+                   | go H (x \ E) = x \\ go' (Set.insert H x) E
+                   | go H (` x) =
+                       if Set.member H x then
+                         `` x
+                       else
+                         Dict.lookup chart x handle _ => `` x
+                 and go' H E = go H (out (CTRY (rewriteInstantiations chart) E))
+                 val res = go Set.empty (out definiens)
+               in
+                 CDEEP (rewriteInstantiations chart) (go Set.empty (out definiens))
+                 handle e => (print (exnMessage e); raise e)
+               end
+           | _ => raise Conv
       end
   end
 
