@@ -227,7 +227,7 @@ struct
        | SUBSET => "subset"
 
        | CUSTOM {label,...} => Label.toString label
-       | SUBST => "subst"
+       | SO_APPLY => "so_apply2"
 
   local
     open ParserCombinators CharParser
