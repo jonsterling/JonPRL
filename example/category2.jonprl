@@ -43,38 +43,32 @@ Tactic rawcat-unfold {
 }.
 
 Theorem obj-wf : [⋂(RawCat; C. ∈(obj(C); U<0>))] {
-  refine <rawcat-unfold>; auto;
-  elim #7; auto
+  refine <rawcat-unfold>; auto
 }.
 
 Theorem arr-wf : [⋂(RawCat; C. ∈(arr(C); U<0>))] {
-  refine <rawcat-unfold>; auto;
-  elim #7; auto
+  refine <rawcat-unfold>; auto
 }.
 
 Theorem src-wf : [⋂(RawCat; C. ⋂(arr(C); f. ∈(src(C;f); obj(C))))] {
-  refine <rawcat-unfold>; auto;
-  elim #7; auto
+  refine <rawcat-unfold>; auto
 }.
 
 Theorem trg-wf : [⋂(RawCat; C. ⋂(arr(C); f. ∈(trg(C;f); obj(C))))] {
-  refine <rawcat-unfold>; auto;
-  elim #7; auto
+  refine <rawcat-unfold>; auto
 }.
 
 Theorem hom-wf : [⋂(RawCat; C. ⋂(obj(C); X. ⋂(obj(C); Y. ∈(hom(C;X;Y); U<0>))))] {
-  refine <rawcat-unfold>; auto;
-  elim #7; auto
+  refine <rawcat-unfold>; auto
 }.
 
 Theorem RawCat-wf : [∈(RawCat; U<1>)] {
   refine <rawcat-unfold>; auto;
-  elim #7; auto
 }.
 
 Theorem InitialRawCat : [RawCat] {
   refine <rawcat-unfold>;
-  intro [void]; auto; [id, elim #7; auto];
-  intro [void]; auto; [id, elim #6; auto];
+  intro [void]; auto;
+  intro [void]; auto;
   *{intro [λ(x.welp)]; auto}.
 }.

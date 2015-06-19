@@ -98,6 +98,7 @@ sig
     val Assumption : Lcf.tactic
     val Hypothesis : int -> Lcf.tactic
     val HypEq : Lcf.tactic
+    val EqInSupertype : Lcf.tactic
 
     val Unfold : Development.t * Development.label -> Lcf.tactic
     val Unfolds : Development.t * (Development.label list) -> Lcf.tactic

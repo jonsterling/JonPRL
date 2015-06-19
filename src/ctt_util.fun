@@ -85,6 +85,7 @@ struct
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
         ORELSE Cum level
+        ORELSE EqInSupertype
     end
 
   fun Ext {freshVariable, level} =

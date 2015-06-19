@@ -78,7 +78,38 @@ struct
          | _ => raise Refine
 
     fun unify M N =
-      if Syntax.eq (M, N) then M else raise Refine
+      if Syntax.eq (M, N) then
+        M
+      else
+        raise Refine
+
+    fun assertSubtype_ f H A B =
+      if Syntax.eq (A, B) then
+        A
+      else
+        case (out A, out B) of
+             (SUBSET $ #[S,xT], SUBSET $ #[S',xT']) =>
+               let
+                 val S'' = f H S S'
+                 val (H', x, T) = ctxUnbind (H,S'',xT)
+                 val T' = xT' // ``x
+               in
+                 SUBSET $$ #[S'', f H' T T']
+               end
+           | (SUBSET $ #[S,xT], _) => f H S B
+           | (FUN $ #[S, xT], FUN $ #[S', xT']) =>
+               let
+                 val S'' = f H S' S
+                 val (H', x, T) = ctxUnbind (H, S'', xT)
+                 val T' = xT' // ``x
+               in
+                 FUN $$ #[S'', f H' T T']
+               end
+           | _ => raise Refine
+
+    fun typeLub H A B =
+      assertSubtype_ typeLub H A B
+      handle _ => assertSubtype_ typeLub H B A
 
     fun operatorIrrelevant O =
       case O of
@@ -346,10 +377,10 @@ struct
         val #[f2, t2] = f2t2 ^! AP
         val funty =
           case ofunty of
-               NONE => unify (inferType (H, f1)) (inferType (H, f2))
+               NONE => typeLub H (inferType (H, f1)) (inferType (H, f2))
              | SOME funty => Context.rebind H funty
         val #[S, xT] = funty ^! FUN
-        val Tt1' = unify Tt1 (xT // t1)
+        val Tt1' = unify (xT // t1) Tt1
       in
         [ H >> EQ $$ #[f1, f2, funty]
         , H >> EQ $$ #[t1, t2, S]
@@ -420,7 +451,7 @@ struct
         val isect =
           case oisect of
                SOME isect => isect
-             | NONE => unify (inferType (H, F1)) (inferType (H, F2))
+             | NONE => typeLub H (inferType (H, F1)) (inferType (H, F2))
 
         val #[S, xT] = isect ^! ISECT
         val _ = unify Tt (xT // t)
@@ -461,9 +492,8 @@ struct
         ] BY mkEvidence IND_SUBSET_INTRO
       end
 
-    fun SubsetElim (i, onames) (H >> P) =
+    fun SubsetElim_ (z : Sequent.name, onames) (H >> P) =
       let
-        val z = Context.nth H (i - 1)
         val #[S, xT] = Context.lookup H z ^! SUBSET
         val (s, t) =
           case onames of
@@ -481,6 +511,9 @@ struct
         ] BY (fn [D] => SUBSET_ELIM $$ #[``z, s \\ (t \\ D)]
                | _ => raise Refine)
       end
+
+    fun SubsetElim (i, onames) (H >> P) =
+      SubsetElim_ (Context.nth H (i - 1), onames) (H >> P)
 
     fun SubsetMemberEq (oz, ok) (H >> P) =
       let
@@ -617,7 +650,7 @@ struct
 
         val prod =
           case oprod of
-               NONE => unify (inferType (H, E1)) (inferType (H, E2))
+               NONE => typeLub H (inferType (H, E1)) (inferType (H, E2))
              | SOME prod => Context.rebind H prod
 
         val (s,t,y) =
@@ -637,7 +670,7 @@ struct
                  val z = Context.fresh (H, Variable.named "z")
                  val H' = H @@ (z, prod)
                  val Cz =
-                   unify
+                   typeLub H'
                      (inferType (H', SPREAD $$ #[``z, xyT1]))
                      (inferType (H', SPREAD $$ #[``z, uvT2]))
                in
@@ -761,6 +794,24 @@ struct
                    (EqSubst (EQ $$ #[N,M,A], xC, ok)
                      THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
+        end
+    end
+
+    local
+      structure Tacticals = Tacticals(Lcf)
+      open Tacticals infix THEN
+    in
+      fun EqInSupertype (H >> P) =
+        let
+          val #[M,N,A] = P ^! EQ
+          val result =
+            Context.search H (fn A' =>
+              case out A' of
+                   SUBSET $ #[A'', _] => Syntax.eq (A, A'')
+                 | _ => false)
+          val x = case result of SOME (x,_) => x | NONE => raise Refine
+        in
+          (SubsetElim_ (x, NONE) THEN HypEq) (H >> P)
         end
     end
   end
