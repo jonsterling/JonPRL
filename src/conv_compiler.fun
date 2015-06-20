@@ -74,7 +74,7 @@ struct
                       in
                         case out E of
                              `sovar => Dict.lookup chart sovar // M
-                           | _ => rewriteInstantiations chart E // M
+                           | _ => raise Conv
                       end)
            | _ => raise Conv
       end
