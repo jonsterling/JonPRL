@@ -1,13 +1,13 @@
 [submodule "sml-lcf"]
 	path = lib/sml-lcf
-	url = git@github.com:jonsterling/sml-lcf.git
+	url = https://github.com/jonsterling/sml-lcf.git
 [submodule "lib/cmlib"]
 	path = lib/cmlib
-	url = git@github.com:standardml/cmlib.git
+	url = https://github.com/standardml/cmlib.git
 [submodule "lib/parcom"]
 	path = lib/parcom
-	url = git@github.com:standardml/parcom.git
+	url = https://github.com/standardml/parcom.git
   ignore = untracked
 [submodule "lib/sml-abt"]
 	path = lib/sml-abt
-	url = git@github.com:jonsterling/sml-abt.git
+	url = https://github.com/jonsterling/sml-abt.git
