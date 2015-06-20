@@ -13,12 +13,12 @@ functor CttRuleParser
      where type world = Development.t
 
    structure Operator : PARSE_OPERATOR
-     where type env = Ctt.label -> Arity.t
+     where type world = Ctt.label -> Arity.t
    sharing type Ctt.Syntax.Operator.t = Operator.t):
 sig
   structure Lcf : ANNOTATED_LCF
-  type env = Development.t
-  val parseRule : env -> Lcf.tactic CharParser.charParser
+  type world = Development.t
+  val parseRule : world -> Lcf.tactic CharParser.charParser
 end =
 struct
   structure AnnLcf = Lcf
@@ -36,7 +36,7 @@ struct
 
   open JonprlTokenParser Rules
 
-  type env = Development.t
+  type world = Development.t
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode

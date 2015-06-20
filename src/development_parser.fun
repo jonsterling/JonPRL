@@ -1,12 +1,12 @@
 signature PARSE_CTT =
   PARSE_ABT
     where type Operator.t = string OperatorType.operator
-    where type ParseOperator.env = string -> Arity.t
+    where type ParseOperator.world = string -> Arity.t
 
 signature PARSE_PATTERN =
   PARSE_ABT
     where type Operator.t = string PatternOperatorType.operator
-    where type ParseOperator.env = string -> Arity.t
+    where type ParseOperator.world = string -> Arity.t
 
 functor DevelopmentParser
   (structure Syntax : PARSE_CTT
@@ -24,7 +24,7 @@ functor DevelopmentParser
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Development.Lcf.tactic
-     where type env = Development.t
+     where type world = Development.t
  ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development

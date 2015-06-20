@@ -4,7 +4,7 @@ struct
 
   structure O : parseOperator =
   struct
-    type env = unit
+    type world = unit
     type t = oper
     val eq = op=
     fun arity LAM = #[1]

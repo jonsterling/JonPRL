@@ -7,7 +7,7 @@ functor PatternOperator (Label : PARSE_LABEL) : PARSE_OPERATOR =
 struct
   open PatternOperatorType
   type t = Label.t operator
-  type env = Label.t -> Arity.t
+  type world = Label.t -> Arity.t
 
   fun eq (APP (l,n), APP (l', n')) = Label.eq (l, l')
 

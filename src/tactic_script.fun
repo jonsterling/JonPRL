@@ -4,11 +4,11 @@ functor TacticScript
      where type goal = Lcf.goal
      where type evidence = Lcf.evidence
 
-   type env
-   val parseRule : env -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
+   type world
+   val parseRule : world -> Lcf.tactic CharParser.charParser) : TACTIC_SCRIPT =
 struct
   structure Lcf = Lcf
-  type env = env
+  type world = world
 
   structure Tacticals = ProgressTacticals (LcfApart)
   open Lcf Tacticals ParserCombinators CharParser

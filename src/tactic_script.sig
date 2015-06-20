@@ -1,6 +1,6 @@
 signature TACTIC_SCRIPT =
 sig
   type tactic
-  type env
-  val parse : env -> tactic CharParser.charParser
+  type world
+  val parse : world -> tactic CharParser.charParser
 end
