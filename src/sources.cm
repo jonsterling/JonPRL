@@ -13,9 +13,12 @@ group is
 
   level.sig
   level.sml
+  dir.sig
+  dir.sml
 
   tactic.sig
   tactic.sml
+  tactic_eval.fun
 
   jonprl_language_def.sml
   parse_label.sig

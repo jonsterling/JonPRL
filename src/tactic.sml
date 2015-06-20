@@ -1,35 +1,37 @@
 structure Tactic : TACTIC =
 struct
-  structure TermSyn = Syntax
-  structure Label   = Syntax.Variable
-  structure Level   = Level
 
-  datatype dir = Left | Right
+  type term = Syntax.t
+  type name = Syntax.Variable.t
+  type label = Syntax.Variable.t
+  type level = Level.t
+  type world = Development.t
+
   datatype t
-    = LEMMA of Label.t
-    | UNFOLD of Label.t list
-    | CUSTOM_TACTIC of Label.t
-    | WITNESS of TermSyn.t
+    = LEMMA of world * label
+    | UNFOLD of world * label list
+    | CUSTOM_TACTIC of world * label
+    | WITNESS of term
     | HYPOTHESIS of int
-    | EQ_SUBST of {left : TermSyn.t,
-                   right : TermSyn.t,
-                   level : Level.t}
-    | HYP_SUBST of {dir : dir,
+    | EQ_SUBST of {left : term,
+                   right : term,
+                   level : level option}
+    | HYP_SUBST of {dir : Dir.dir,
                     index : int,
-                    domain : TermSyn.t,
-                    level : Level.t}
-    | INTRO of {tm : TermSyn.t,
-                freshVariable : TermSyn.Variable.t,
-                level : Level.t}
+                    domain : term,
+                    level : level option}
+    | INTRO of {term : term option,
+                freshVariable : name option,
+                level : level option}
     | ELIM of {target : int,
-               term : TermSyn.t,
-               names : TermSyn.Variable.t list}
-    | EQ_CD of {names : TermSyn.Variable.t list,
-                terms : TermSyn.t list,
-                level : Level.t}
-    | EXT of {freshVariable : TermSyn.Variable.t,
-              level : Level.t}
-    | CUM of Level.t
+               term : term option,
+               names : name list}
+    | EQ_CD of {names : name list,
+                terms : term list,
+                level : level option}
+    | EXT of {freshVariable : name option,
+              level : level option}
+    | CUM of level option
     | AUTO
     | MEM_CD
     | ASSUMPTION

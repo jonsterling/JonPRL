@@ -106,8 +106,7 @@ sig
     val EqSubst : term * term * Level.t option -> tactic
     val EqSym : tactic
 
-    datatype dir = LEFT | RIGHT
-    val HypEqSubst : dir * int * term * Level.t option -> tactic
+    val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end
 
   structure Conversions :

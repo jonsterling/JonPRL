@@ -781,7 +781,6 @@ struct
                | _ => raise Refine)
       end
 
-    datatype dir = LEFT | RIGHT
     local
       structure Tacticals = Tacticals (Lcf)
       open Tacticals
@@ -794,8 +793,8 @@ struct
           val X = Context.lookup H z
         in
           case dir of
-               RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) (H >> P)
-             | LEFT =>
+               Dir.RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) (H >> P)
+             | Dir.LEFT =>
                  let
                    val #[M,N,A] = X ^! EQ
                  in

@@ -92,8 +92,8 @@ struct
         nameTac name (EqSubst (M, N, k)))
 
   val parseDir =
-    (symbol "→" || symbol "->") return RIGHT
-      || (symbol "←" || symbol "<-") return LEFT
+    (symbol "→" || symbol "->") return Dir.RIGHT
+      || (symbol "←" || symbol "<-") return Dir.LEFT
 
   val parseHypSubst : tactic_parser =
     fn D => symbol "hyp-subst"
@@ -231,4 +231,3 @@ structure CttScript = TacticScript
     structure LcfApart = Lcf
     open CttRuleParser
    end)
-
