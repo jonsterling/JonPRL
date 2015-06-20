@@ -7,14 +7,15 @@ functor CttRuleParser
      where type Lcf.evidence = Lcf.evidence
      where type Telescope.Label.t = string
 
+   structure ParseSyntax : PARSE_ABT
+     where type ParseOperator.world = Development.label -> Arity.t
+
    structure Ctt : CTT_UTIL
      where type label = Development.label
      where type tactic = Development.Lcf.tactic
      where type world = Development.t
-
-   structure Operator : PARSE_OPERATOR
-     where type world = Ctt.label -> Arity.t
-   sharing type Ctt.Syntax.Operator.t = Operator.t):
+     where type term = ParseSyntax.t
+     where type name = ParseSyntax.Variable.t):
 sig
   structure Lcf : ANNOTATED_LCF
   type world = Development.t
@@ -22,9 +23,6 @@ sig
 end =
 struct
   structure AnnLcf = Lcf
-  structure ParseSyntax = ParseAbt
-    (structure Syntax = AbtUtil(Ctt.Syntax)
-     structure Operator = Operator)
   structure Tacticals = Tacticals (Lcf)
   open Ctt Lcf Tacticals ParserCombinators CharParser
   structure Lcf = AnnLcf
@@ -53,7 +51,7 @@ struct
 
   val parseName =
     identifier
-      wth Syntax.Variable.named
+      wth ParseSyntax.Variable.named
 
   fun decorateTac tac =
     fn (name, args) => fn (pos : Pos.t) =>
@@ -63,7 +61,7 @@ struct
     fn (pos : Pos.t) =>
       Lcf.annotate ({name = name, pos = pos}, tac)
 
-  type 'a intensional_parser = Development.t -> 'a charParser
+  type 'a intensional_parser = world -> 'a charParser
   type tactic_parser = (Pos.t -> tactic) intensional_parser
 
   val parseTm : term intensional_parser =
@@ -222,11 +220,10 @@ struct
 end
 
 structure CttRuleParser = CttRuleParser
-  (structure Operator = Syntax.ParseOperator
-   structure Ctt = CttUtil
+  (structure Ctt = CttUtil
    structure Lcf = AnnotatedLcf
    structure Development = Development
-   structure Syntax = Syntax)
+   structure ParseSyntax = Syntax)
 
 structure CttScript = TacticScript
   (struct

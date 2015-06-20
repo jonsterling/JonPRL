@@ -1,10 +1,16 @@
 functor CttUtil
   (structure Lcf : LCF_APART
-   structure Ctt : CTT where type tactic = Lcf.tactic) : CTT_UTIL =
+   structure Syntax : ABT
+   structure Conv : CONV
+     where type term = Syntax.t
+   structure Ctt : CTT
+      where type tactic = Lcf.tactic
+      where type conv = Conv.conv
+      where type term = Syntax.t) : CTT_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
-  open Ctt Ctt.Conv
+  open Conv Ctt
 
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
@@ -110,4 +116,4 @@ struct
 end
 
 structure CttUtil = CttUtil
-  (structure Lcf = Lcf and Ctt = Ctt)
+  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt)

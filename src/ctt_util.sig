@@ -4,7 +4,7 @@ sig
   val Auto : tactic
 
   type intro_args =
-    {term : Syntax.t option,
+    {term : term option,
      freshVariable : name option,
      level : Level.t option}
 

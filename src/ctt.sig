@@ -1,11 +1,9 @@
 signature CTT =
 sig
-  structure Syntax : ABT
-  type name = Syntax.Variable.t
-  type term = Syntax.t
+  type name
+  type term
 
-  structure Conv : CONV where type term = term
-
+  type conv
   type world
   type label
   type tactic
@@ -103,7 +101,7 @@ sig
     val Unfolds : world * (label list) -> tactic
     val Lemma : world * label -> tactic
 
-    val RewriteGoal : Conv.conv -> tactic
+    val RewriteGoal : conv -> tactic
 
     val EqSubst : term * term * Level.t option -> tactic
     val EqSym : tactic
@@ -114,7 +112,7 @@ sig
 
   structure Conversions :
   sig
-    val ApBeta : Conv.conv
-    val SpreadBeta : Conv.conv
+    val ApBeta : conv
+    val SpreadBeta : conv
   end
 end
