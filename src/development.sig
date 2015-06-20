@@ -7,6 +7,7 @@
 
 signature DEVELOPMENT =
 sig
+  type t
   type term
   type pattern
   type judgement
@@ -24,7 +25,6 @@ sig
     val toString : label * t -> string
   end
 
-  type t
   type object = Object.t
 
   val out : t -> object Telescope.telescope
