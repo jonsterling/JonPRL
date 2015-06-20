@@ -1,0 +1,8 @@
+Theorem sym :
+  [∀(U<0>; A.
+   ∀(A; M.
+   ∀(A; N.
+   ∀(=(M; N; A); _. =(N; M; A)))))] {
+   auto; trace "Here's a quick message\n\twith escapes";
+   symmetry; auto
+}.

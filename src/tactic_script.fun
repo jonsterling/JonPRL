@@ -32,6 +32,11 @@ struct
     !! (symbol "fail") wth (fn (name, pos) =>
       Lcf.annotate ({name = name, pos = pos}, FAIL))
 
+  val parseTrace : tactic charParser =
+    !! (symbol "trace") && stringLiteral
+      wth (fn ((name, pos), msg) =>
+              Lcf.annotate ({name = name, pos = pos}, (TRACE msg)))
+
   fun parseScript D () : tactic charParser =
     separate1 ((squares (commaSep ($ (parseScript D))) wth Sum.INL) <|> ($ (plain D) wth Sum.INR)) semi
     wth (foldl (fn (t1, t2) =>
@@ -46,6 +51,7 @@ struct
       || $ (parseOrelse D)
       || parseId
       || parseFail
+      || parseTrace
 
   and parseTry D () =
         middle (symbol "?{") ($ (parseScript D)) (symbol "}")
@@ -53,7 +59,7 @@ struct
 
   and parseRepeat D () =
         middle (symbol "*{") ($ (parseScript D)) (symbol "}")
-          wth LIMIT
+        wth LIMIT
 
   and parseOrelse D () =
         parens (separate1 ($ (parseScript D)) pipe)
@@ -61,4 +67,3 @@ struct
 
   fun parse D = $ (parseScript D) << opt (dot || semi)
 end
-
