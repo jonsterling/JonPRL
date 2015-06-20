@@ -4,11 +4,11 @@ functor CttUtil
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
-  open Ctt Ctt.ConvTypes
+  open Ctt Ctt.Conv
 
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
-     structure ConvTypes = ConvTypes)
+     structure Conv = Conv)
 
   open Tacticals Rules
   infix ORELSE ORELSE_LAZY THEN

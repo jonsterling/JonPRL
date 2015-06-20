@@ -7,7 +7,7 @@ sig
 end
 
 functor ConvCompiler
-  (structure Conv : CONV_TYPES
+  (structure Conv : CONV
    structure SoTerm : SO_TERM
 
    type label
@@ -31,7 +31,7 @@ struct
   structure Dict = SplayDict(structure Key = S.Variable)
   structure Conversionals = Conversionals
     (structure Syntax = Conv.Syntax
-     structure ConvTypes = Conv)
+     structure Conv = Conv)
 
   exception InvalidTemplate
 
@@ -119,7 +119,7 @@ struct
 end
 
 structure ConvCompiler = ConvCompiler
-  (structure Conv = ConvTypes
+  (structure Conv = Conv
    structure PatternSyntax = PatternSyntax
    structure SoTerm = SoTerm
    type label = string

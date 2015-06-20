@@ -1,8 +1,8 @@
 functor Conversionals
   (structure Syntax : ABT
-   structure ConvTypes : CONV_TYPES) : CONVERSIONALS =
+   structure Conv : CONV) : CONVERSIONALS =
 struct
-  open ConvTypes
+  open Conv
   open Syntax
   infix $ \
   infix 8 $$ \\
@@ -29,4 +29,4 @@ end
 
 structure Conversionals = Conversionals
   (structure Syntax = Syntax
-   structure ConvTypes = ConvTypes)
+   structure Conv = Conv)

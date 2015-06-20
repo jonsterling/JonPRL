@@ -111,3 +111,5 @@ struct
     end
   end
 end
+
+structure Conv = Conv (Syntax)

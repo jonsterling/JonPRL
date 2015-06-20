@@ -6,6 +6,8 @@ group is
   ../lib/cmlib/cmlib.cm
   ../lib/parcom.cm
 
+  conv/conv.cm
+
   visibility.sml
   operator.sml
   syntax.sml
@@ -18,8 +20,6 @@ group is
   parse_label.fun
   pattern.fun
 
-  conv_types.sig
-  conv_types.fun
   conversionals.sig
   conversionals.fun
   conv_compiler.sig

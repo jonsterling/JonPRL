@@ -1,6 +1,6 @@
 signature CONV_COMPILER =
 sig
-  include CONV_TYPES
+  include CONV
 
   type label
   structure PatternSyntax : ABT_UTIL

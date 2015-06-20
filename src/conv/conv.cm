@@ -1,0 +1,13 @@
+Library
+  signature CONV
+  signature CONV_UTIL
+  signature CONVERSIONALS
+  functor Conv
+  functor ConvUtil
+  functor Conversionals
+is
+  ../../lib/sml-abt/abt.cm
+  conv.sig
+  conv.fun
+  conversionals.sig
+  conversionals.fun

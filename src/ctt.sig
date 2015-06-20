@@ -5,8 +5,8 @@ sig
   type term = Syntax.t
 
   structure Lcf : LCF
-  structure ConvTypes : CONV_TYPES
-  sharing ConvTypes.Syntax = Syntax
+  structure Conv : CONV
+  sharing Conv.Syntax = Syntax
 
   structure Development : DEVELOPMENT
   sharing Development.Lcf = Lcf
@@ -104,7 +104,7 @@ sig
     val Unfolds : Development.t * (Development.label list) -> Lcf.tactic
     val Lemma : Development.t * Development.label -> Lcf.tactic
 
-    val RewriteGoal : ConvTypes.conv -> Lcf.tactic
+    val RewriteGoal : Conv.conv -> Lcf.tactic
 
     val EqSubst : term * term * Level.t option -> Lcf.tactic
     val EqSym : Lcf.tactic
@@ -115,7 +115,7 @@ sig
 
   structure Conversions :
   sig
-    val ApBeta : ConvTypes.conv
-    val SpreadBeta : ConvTypes.conv
+    val ApBeta : Conv.conv
+    val SpreadBeta : Conv.conv
   end
 end

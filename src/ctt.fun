@@ -7,18 +7,18 @@ functor Ctt
      where type term = Syntax.t
      where Context.Syntax = Syntax
 
-   structure ConvTypes : CONV_TYPES where Syntax = Syntax
+   structure Conv : CONV where Syntax = Syntax
 
    sharing type Development.Lcf.goal = Sequent.sequent
    sharing type Development.Lcf.evidence = Syntax.t
    sharing type Development.term = Syntax.t) : CTT =
 struct
   structure Lcf = Development.Lcf
-  structure ConvTypes = ConvTypes
+  structure Conv = ConvUtil(Conv)
   structure Syntax = Syntax
 
   type tactic = Lcf.tactic
-  type conv = ConvTypes.conv
+  type conv = Conv.conv
   type name = Sequent.name
   type term = Syntax.t
   type goal = Sequent.sequent
@@ -27,7 +27,7 @@ struct
   structure Development = Development
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
-     structure ConvTypes = ConvTypes)
+     structure Conv = Conv)
 
   open Syntax
   open Operator OperatorType
@@ -818,7 +818,7 @@ struct
 
   structure Conversions =
   struct
-    open Conversionals ConvTypes
+    open Conversionals Conv
 
     val ApBeta : conv = reductionRule
       (fn AP $ #[LAM $ #[xE], N] => xE // into N
@@ -832,6 +832,6 @@ end
 
 structure Ctt = Ctt
   (structure Syntax = Syntax
-   structure ConvTypes = ConvTypes
+   structure Conv = Conv
    structure Sequent = Sequent
    structure Development = Development)
