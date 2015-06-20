@@ -1,15 +1,17 @@
 functor Development
   (structure Syntax : ABT_UTIL
+   structure PatternSyntax : ABT_UTIL
    structure Lcf : LCF
     where type evidence = Syntax.t
    structure PatternCompiler : PATTERN_COMPILER
-   sharing PatternCompiler.Syntax = Syntax
+   sharing type PatternCompiler.term = Syntax.t
    structure Extract : EXTRACT
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   sharing type PatternCompiler.PatternSyntax.Variable.t = Syntax.Variable.t
-   val asCustomOperator : PatternCompiler.PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
+   sharing type PatternCompiler.pattern = PatternSyntax.t
+   sharing type PatternSyntax.Variable.t = Syntax.Variable.t
+   val asCustomOperator : PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
   structure Telescope = Telescope
@@ -54,7 +56,7 @@ struct
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ PatternCompiler.PatternSyntax.toString definiendum ^ "⸥ ≝ "
+                       "\n⸤" ^ PatternSyntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
   end
 
@@ -85,7 +87,7 @@ struct
     Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
 
   local
-    open PatternCompiler.PatternSyntax
+    open PatternSyntax
     infix $
   in
     fun ruleGetLabel {definiendum, definiens} =
@@ -107,7 +109,7 @@ struct
     fun defineOperator T (rule as {definiendum, definiens}) =
       let
         val lbl = ruleGetLabel rule
-        val LFVs = PatternCompiler.PatternSyntax.freeVariables definiendum
+        val LFVs = PatternSyntax.freeVariables definiendum
         val RFVs = Syntax.freeVariables definiens
         val _ =
           if subset (RFVs, LFVs) then
@@ -152,6 +154,7 @@ end
 
 structure Development : DEVELOPMENT = Development
   (structure Syntax = Syntax
+   structure PatternSyntax = PatternSyntax
    structure PatternCompiler = PatternCompiler
    structure Extract = Extract
    structure Telescope = Telescope(StringVariable)

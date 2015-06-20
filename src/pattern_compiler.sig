@@ -1,11 +1,10 @@
 signature PATTERN_COMPILER =
 sig
-  include CONV
-
   type label
-  structure PatternSyntax : ABT_UTIL
-    where type Operator.t = label PatternOperatorType.operator
+  type term
+  type pattern
+  type conv = term -> term
 
-  type rule = {definiendum : PatternSyntax.t, definiens : Syntax.t }
+  type rule = {definiendum : pattern, definiens : term}
   val compile : rule -> conv
 end

@@ -19,13 +19,13 @@ functor PatternCompiler
    sharing Conv.Syntax.Operator = SoTerm.Operator
    sharing Conv.Syntax.Variable = PatternSyntax.Variable) : PATTERN_COMPILER =
 struct
-  open Conv
-
   structure PatternSyntax = PatternSyntax
-  type label = label
-
   structure S = Conv.Syntax and P = PatternSyntax
-  type rule = {definiendum : PatternSyntax.t, definiens : Syntax.t }
+  type term = S.t
+  type pattern = P.t
+  type rule = {definiendum : pattern, definiens : term}
+  type conv = Conv.conv
+  type label = label
 
   structure Set = SplaySet(structure Elem = S.Variable)
   structure Dict = SplayDict(structure Key = S.Variable)
@@ -58,7 +58,7 @@ struct
        | _ => raise InvalidTemplate
 
   local
-    open Conversionals
+    open Conv Conversionals
     fun rewriteInstantiations chart M =
       let
         open S
@@ -79,7 +79,7 @@ struct
            | _ => raise Conv
       end
   in
-    fun compile {definiendum, definiens} = fn (M : Syntax.t) =>
+    fun compile ({definiendum, definiens} : rule) = fn (M : Syntax.t) =>
       let
         val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum
         val S.$ (Mop, Margs) = S.out M

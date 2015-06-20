@@ -7,7 +7,7 @@ sig
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
-  sharing type PatternCompiler.Syntax.t = term
+  sharing type PatternCompiler.term = term
 
   structure Object :
   sig

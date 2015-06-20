@@ -14,7 +14,7 @@ functor DevelopmentParser
    sharing type Syntax.Variable.t = Pattern.Variable.t
 
    structure Development : DEVELOPMENT where type Telescope.Label.t = string
-   sharing type Development.PatternCompiler.PatternSyntax.t = Pattern.t
+   sharing type Development.PatternCompiler.pattern = Pattern.t
    sharing type Development.term = Syntax.t
 
    structure Sequent : SEQUENT
