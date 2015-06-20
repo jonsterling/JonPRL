@@ -3,9 +3,7 @@ struct
   datatype 'label operator = APP of 'label * Arity.t
 end
 
-functor PatternOperator
-  (structure Label : LABEL
-   val parseLabel : Label.t CharParser.charParser) : PARSE_OPERATOR =
+functor PatternOperator (Label : PARSE_LABEL) : PARSE_OPERATOR =
 struct
   open PatternOperatorType
   type t = Label.t operator
@@ -35,7 +33,7 @@ struct
     infixr 4 << >> --
   in
     fun parseApp lookup =
-      parseLabel -- (fn lbl =>
+      Label.parseLabel -- (fn lbl =>
         case (SOME (lookup lbl) handle _ => NONE) of
              SOME arity => succeed (APP (lbl, arity))
            | NONE => fail "no such operator")
@@ -46,18 +44,7 @@ end
 
 structure PatternSyntax : PARSE_ABT =
 struct
-  structure V =
-  struct
-    structure Label = StringVariable
-
-    local
-      open JonprlTokenParser
-    in
-      val parseLabel : Label.t CharParser.charParser = identifier
-    end
-  end
-
-  structure PatternOperator = PatternOperator (V)
+  structure PatternOperator = PatternOperator (ParseLabel (StringVariable))
   structure Abt = Abt
     (structure Operator = PatternOperator
      structure Variable = Syntax.Variable)

@@ -38,9 +38,7 @@ sig
 
 end
 
-functor Operator
-  (structure Label : LABEL
-   val parseLabel : Label.t CharParser.charParser) : CTT_OPERATOR =
+functor Operator (Label : PARSE_LABEL) : CTT_OPERATOR =
 struct
   open OperatorType
   structure Label = Label
@@ -264,7 +262,7 @@ struct
         || string "so_apply" return SO_APPLY
 
     fun intensionalParseOperator lookup =
-      parseLabel -- (fn lbl =>
+      Label.parseLabel -- (fn lbl =>
         case (SOME (lookup lbl) handle _ => NONE) of
              SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")

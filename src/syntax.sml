@@ -1,16 +1,6 @@
 structure Syntax : PARSE_ABT =
 struct
-  structure V =
-  struct
-    structure Label = StringVariable
-
-    local
-      open JonprlTokenParser
-    in
-      val parseLabel : Label.t CharParser.charParser = identifier
-    end
-
-  end
+  structure V = ParseLabel (StringVariable)
 
   structure Operator = Operator (V)
   structure Abt = Abt
