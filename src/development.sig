@@ -1,3 +1,10 @@
+(* DEVELOPMENT models the aspect of Brouwer's Creating Subject which realizes
+ * constructions over time. A value of type DEVELOPMENT.t is a stage in time at
+ * which the knowledge of the creating subject may be queried, or to which new
+ * knowledge may be added, resulting in another stage in time. In this sense,
+ * the possible values of type DEVELOPMENT.t form a spread, whose law is
+ * governed by the admissibility of new knowledge. *)
+
 signature DEVELOPMENT =
 sig
   type term
