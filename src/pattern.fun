@@ -26,7 +26,6 @@ struct
   fun toString (APP (l, _)) = Label.toString l
 
   local
-    exception Hole
     open ParserCombinators CharParser
     infix 2 return wth suchthat return guard when
     infixr 1 || <|>
