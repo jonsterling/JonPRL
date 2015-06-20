@@ -103,7 +103,6 @@ struct
                  val res = go Set.empty (out definiens)
                in
                  CDEEP (rewriteInstantiations chart) (go Set.empty (out definiens))
-                 handle e => (print (exnMessage e); raise e)
                end
            | _ => raise Conv
       end
