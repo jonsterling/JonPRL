@@ -1,13 +1,14 @@
 functor Development
   (structure Syntax : ABT_UTIL
+   structure Evidence : ABT_UTIL
    structure PatternSyntax : ABT_UTIL
    structure Lcf : LCF
-    where type evidence = Syntax.t
+     where type evidence = Evidence.t
    structure PatternCompiler : PATTERN_COMPILER
-   sharing type PatternCompiler.term = Syntax.t
+     where type term = Syntax.t
    structure Extract : EXTRACT
-    where type evidence = Lcf.evidence
-    where type term = Syntax.t
+     where type evidence = Lcf.evidence
+     where type term = Syntax.t
    structure Telescope : TELESCOPE
    sharing type PatternCompiler.pattern = PatternSyntax.t
    sharing type PatternSyntax.Variable.t = Syntax.Variable.t
@@ -47,7 +48,7 @@ struct
           in
             "Theorem " ^ Telescope.Label.toString lbl
               ^ " : ⸤" ^ goalToString statement ^ "⸥ {\n  "
-              ^ Syntax.toString evidence' ^ "\n} ext {\n  "
+              ^ Evidence.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
       | toString (lbl, Tactic _) =
@@ -157,6 +158,7 @@ end
 
 structure Development : DEVELOPMENT = Development
   (structure Syntax = Syntax
+   structure Evidence = Syntax
    structure PatternSyntax = PatternSyntax
    structure PatternCompiler = PatternCompiler
    structure Extract = Extract
