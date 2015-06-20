@@ -22,11 +22,14 @@ functor DevelopmentParser
      where type term = Syntax.t
 
    structure TacticScript : TACTIC_SCRIPT
-     where type tactic = Development.tactic
+     where type Tacticals.tactic = Development.tactic
+     where type Tacticals.goal = Development.judgement
      where type world = Development.world
  ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
+
+  exception RemainingSubgoals = TacticScript.Tacticals.RemainingSubgoals
 
   open ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
@@ -51,7 +54,7 @@ struct
   fun parseTheorem D =
     reserved "Theorem" >> identifier << colon
       && parseTm [] D
-      && braces (TacticScript.parse D)
+      && braces (TacticScript.parseComplete D)
       wth (fn (thm, (M, tac)) =>
              Development.prove D
               (thm, Sequent.>> (Sequent.Context.empty, M), tac))

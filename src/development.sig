@@ -37,7 +37,6 @@ sig
 
   (* extend a development with a theorem *)
   val prove : world -> label * judgement * tactic -> world
-  exception RemainingSubgoals of judgement list
 
   (* extend a development with a custom tactic *)
   val defineTactic : world -> label * tactic -> world

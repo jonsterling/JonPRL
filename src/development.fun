@@ -74,18 +74,15 @@ struct
 
   val empty = Telescope.empty
 
-  exception RemainingSubgoals of judgement list
-
   fun prove T (lbl, goal, tac) =
     let
-      val (subgoals, validation) = tac goal
+      val ([], validation) = tac goal
     in
-      case subgoals of
-           [] => Telescope.snoc T (lbl, Object.Theorem
-                  {statement = goal,
-                   script = tac,
-                   evidence = Susp.delay (fn _ => validation [])})
-         | _ => raise RemainingSubgoals subgoals
+      Telescope.snoc T
+        (lbl, Object.Theorem
+          {statement = goal,
+          script = tac,
+          evidence = Susp.delay (fn _ => validation [])})
     end
 
   fun defineTactic T (lbl, tac) =

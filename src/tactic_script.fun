@@ -65,5 +65,10 @@ struct
         parens (separate1 ($ (parseScript D)) pipe)
         wth foldl ORELSE FAIL
 
-  fun parse D = $ (parseScript D) << opt (dot || semi)
+  fun parse D =
+    $ (parseScript D) << opt (dot || semi)
+
+  fun parseComplete D =
+    !! (parse D) wth (fn (script, pos) =>
+      Lcf.annotate ({name = "COMPLETE", pos = pos}, COMPLETE script))
 end
