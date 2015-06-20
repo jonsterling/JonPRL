@@ -1,7 +1,7 @@
 functor ParseAbt
   (structure Syntax : ABT_UTIL
    structure Operator : PARSE_OPERATOR
-   sharing Syntax.Operator = Operator) : PARSE_ABT =
+   sharing type Syntax.Operator.t = Operator.t) : PARSE_ABT =
 struct
   structure ParseOperator = Operator
   type env = Operator.env

@@ -1,9 +1,8 @@
 signature SO_TERM =
 sig
-  structure Operator : OPERATOR
+  include ABT
 
-  (* instantiate : (0;0) *)
-  val asInstantiate : Operator.t -> unit option
+  val asInstantiate : t -> (t * t) option
 end
 
 functor PatternCompiler
@@ -14,13 +13,13 @@ functor PatternCompiler
    structure PatternSyntax : ABT_UTIL
      where type Operator.t = label PatternOperatorType.operator
 
-   val customOperator : label * Arity.t -> Conv.Syntax.Operator.t
+   val customOperator : label * Arity.t -> SoTerm.Operator.t
 
-   sharing Conv.Syntax.Operator = SoTerm.Operator
-   sharing Conv.Syntax.Variable = PatternSyntax.Variable) : PATTERN_COMPILER =
+   sharing type Conv.term = SoTerm.t
+   sharing type SoTerm.Variable.t = PatternSyntax.Variable.t) : PATTERN_COMPILER =
 struct
   structure PatternSyntax = PatternSyntax
-  structure S = Conv.Syntax and P = PatternSyntax
+  structure S = AbtUtil(SoTerm) and P = PatternSyntax
   type term = S.t
   type pattern = P.t
   type rule = {definiendum : pattern, definiens : term}
@@ -30,7 +29,7 @@ struct
   structure Set = SplaySet(structure Elem = S.Variable)
   structure Dict = SplayDict(structure Key = S.Variable)
   structure Conversionals = Conversionals
-    (structure Syntax = Conv.Syntax
+    (structure Syntax = S
      structure Conv = Conv)
 
   exception InvalidTemplate
@@ -64,22 +63,15 @@ struct
         open S
         infix $ $$ \ \\ //
       in
-        case out M of
-             p $ es =>
-               (case SoTerm.asInstantiate p of
-                    NONE => raise Conv
-                  | SOME () =>
-                      let
-                        val #[E, M] = es
-                      in
-                        case out E of
-                             `sovar => Dict.lookup chart sovar // M
-                           | _ => raise Conv
-                      end)
-           | _ => raise Conv
+        case SoTerm.asInstantiate M of
+             NONE => raise Conv
+           | SOME (E, M) =>
+               (case out E of
+                     `sovar => Dict.lookup chart sovar // M
+                   | _ => raise Conv)
       end
   in
-    fun compile ({definiendum, definiens} : rule) = fn (M : Syntax.t) =>
+    fun compile ({definiendum, definiens} : rule) = fn (M : S.t) =>
       let
         val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum
         val S.$ (Mop, Margs) = S.out M
@@ -112,10 +104,13 @@ end
 
 structure SoTerm : SO_TERM =
 struct
-  structure Operator = Syntax.Operator
+  open Syntax
+  infix $
 
-  fun asInstantiate OperatorType.SO_APPLY = SOME ()
-    | asInstantiate _ = NONE
+  fun asInstantiate M =
+    case out M of
+         OperatorType.SO_APPLY $ #[E, M] => SOME (E, M)
+       | _ => NONE
 end
 
 structure PatternCompiler = PatternCompiler

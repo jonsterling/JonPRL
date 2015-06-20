@@ -5,11 +5,11 @@ sig
   type term = Syntax.t
 
   structure Lcf : LCF
-  structure Conv : CONV
-  sharing Conv.Syntax = Syntax
+  structure Conv : CONV where type term = term
 
   structure Development : DEVELOPMENT
-  sharing Development.Lcf = Lcf
+    where type Lcf.goal = Lcf.goal
+    where type Lcf.evidence = Lcf.evidence
 
   structure Rules : sig
     (* Pretend you have got a proof. *)

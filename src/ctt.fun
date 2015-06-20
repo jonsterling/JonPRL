@@ -7,14 +7,14 @@ functor Ctt
      where type term = Syntax.t
      where Context.Syntax = Syntax
 
-   structure Conv : CONV where Syntax = Syntax
+   structure Conv : CONV where type term = Syntax.t
 
    sharing type Development.Lcf.goal = Sequent.sequent
    sharing type Development.Lcf.evidence = Syntax.t
    sharing type Development.term = Syntax.t) : CTT =
 struct
   structure Lcf = Development.Lcf
-  structure Conv = ConvUtil(Conv)
+  structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
   structure Syntax = Syntax
 
   type tactic = Lcf.tactic

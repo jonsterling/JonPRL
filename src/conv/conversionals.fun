@@ -1,4 +1,4 @@
-functor Conversionals (structure Syntax : ABT and Conv : CONV) : CONVERSIONALS =
+functor Conversionals (structure Conv : CONV and Syntax : ABT where type t = Conv.term) : CONVERSIONALS =
 struct
   open Conv
   open Syntax
