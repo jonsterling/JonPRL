@@ -31,16 +31,16 @@ struct
   structure Object =
   struct
     type theorem =
-      {statement : Lcf.goal,
-       script : Lcf.tactic,
-       evidence : Lcf.evidence Susp.susp}
+      {statement : judgement,
+       script : tactic,
+       evidence : evidence Susp.susp}
     type operator_decl =
       {arity : Arity.t,
-       conversion : (PatternCompiler.rule * (PatternCompiler.conv Susp.susp)) option}
+       conversion : (PatternCompiler.rule * (conv Susp.susp)) option}
 
     datatype t =
         Theorem of theorem
-      | Tactic of Lcf.tactic
+      | Tactic of tactic
       | Operator of operator_decl
 
     fun arity_toString v =
@@ -74,7 +74,7 @@ struct
 
   val empty = Telescope.empty
 
-  exception RemainingSubgoals of Lcf.goal list
+  exception RemainingSubgoals of judgement list
 
   fun prove T (lbl, goal, tac) =
     let
