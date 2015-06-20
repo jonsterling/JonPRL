@@ -20,6 +20,8 @@ struct
 
   type label = Telescope.label
   type term = Syntax.t
+  type pattern = PatternSyntax.t
+  type conv = term -> term
 
   structure Object =
   struct

@@ -1,13 +1,12 @@
 signature DEVELOPMENT =
 sig
   type term
+  type pattern
+  type conv = term -> term
 
   structure Lcf : LCF
-  structure PatternCompiler : PATTERN_COMPILER
   structure Telescope : TELESCOPE
   type label = Telescope.label
-
-  sharing type PatternCompiler.term = term
 
   structure Object :
   sig
@@ -32,10 +31,10 @@ sig
 
   (* extend a development with a new operator *)
   val declareOperator : t -> label * Arity.t -> t
-  val defineOperator : t -> PatternCompiler.rule -> t
+  val defineOperator : t -> {definiendum : pattern, definiens : term} -> t
 
   (* lookup the definiens *)
-  val lookupDefinition : t -> label -> PatternCompiler.conv
+  val lookupDefinition : t -> label -> conv
 
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : t -> label -> {statement : Lcf.goal, evidence : Lcf.evidence Susp.susp}

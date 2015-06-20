@@ -14,13 +14,12 @@ functor DevelopmentParser
    sharing type Syntax.Variable.t = Pattern.Variable.t
 
    structure Sequent : SEQUENT
+     where type term = Syntax.t
    structure Development : DEVELOPMENT
      where type Telescope.Label.t = string
      where type Lcf.goal = Sequent.sequent
-
-   sharing type Development.PatternCompiler.pattern = Pattern.t
-   sharing type Development.term = Syntax.t
-   sharing type Sequent.term = Development.term
+     where type pattern = Pattern.t
+     where type term = Syntax.t
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Development.Lcf.tactic
