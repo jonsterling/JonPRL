@@ -7,7 +7,7 @@ Library
   functor Conversionals
 is
   $/basis.cm
-  ../../lib/sml-abt/abt.cm
+  ../sml-abt/abt.cm
   conv.sig
   conv.fun
   conversionals.sig

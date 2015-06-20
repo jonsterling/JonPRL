@@ -2,11 +2,10 @@ group is
   ../lib/telescopes/telescopes.cm
   ../lib/sml-abt/abt.cm
   ../lib/sml-lcf/lcf.cm
+  ../lib/sml-conv/conv.cm
   ../lib/abt-parsing-lib/abt-parsing-lib.cm
   ../lib/cmlib/cmlib.cm
   ../lib/parcom.cm
-
-  conv/conv.cm
 
   visibility.sml
   operator.sml
