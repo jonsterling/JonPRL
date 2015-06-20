@@ -1,4 +1,4 @@
-signature CONV_COMPILER =
+signature PATTERN_COMPILER =
 sig
   include CONV
 

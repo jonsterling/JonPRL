@@ -2,18 +2,18 @@ functor Development
   (structure Syntax : ABT_UTIL
    structure Lcf : LCF
     where type evidence = Syntax.t
-   structure ConvCompiler : CONV_COMPILER
-   sharing ConvCompiler.Syntax = Syntax
+   structure PatternCompiler : PATTERN_COMPILER
+   sharing PatternCompiler.Syntax = Syntax
    structure Extract : EXTRACT
     where type evidence = Lcf.evidence
     where type term = Syntax.t
    structure Telescope : TELESCOPE
-   sharing type ConvCompiler.PatternSyntax.Variable.t = Syntax.Variable.t
-   val asCustomOperator : ConvCompiler.PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
+   sharing type PatternCompiler.PatternSyntax.Variable.t = Syntax.Variable.t
+   val asCustomOperator : PatternCompiler.PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
   structure Telescope = Telescope
-  structure ConvCompiler = ConvCompiler
+  structure PatternCompiler = PatternCompiler
 
   type label = Telescope.label
   type term = Syntax.t
@@ -26,7 +26,7 @@ struct
        evidence : Lcf.evidence Susp.susp}
     type operator_decl =
       {arity : Arity.t,
-       conversion : (ConvCompiler.rule * (ConvCompiler.conv Susp.susp)) option}
+       conversion : (PatternCompiler.rule * (PatternCompiler.conv Susp.susp)) option}
 
     datatype t =
         Theorem of theorem
@@ -54,7 +54,7 @@ struct
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ ConvCompiler.PatternSyntax.toString definiendum ^ "⸥ ≝ "
+                       "\n⸤" ^ PatternCompiler.PatternSyntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
   end
 
@@ -85,7 +85,7 @@ struct
     Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
 
   local
-    open ConvCompiler.PatternSyntax
+    open PatternCompiler.PatternSyntax
     infix $
   in
     fun ruleGetLabel {definiendum, definiens} =
@@ -107,7 +107,7 @@ struct
     fun defineOperator T (rule as {definiendum, definiens}) =
       let
         val lbl = ruleGetLabel rule
-        val LFVs = ConvCompiler.PatternSyntax.freeVariables definiendum
+        val LFVs = PatternCompiler.PatternSyntax.freeVariables definiendum
         val RFVs = Syntax.freeVariables definiens
         val _ =
           if subset (RFVs, LFVs) then
@@ -120,7 +120,7 @@ struct
                Telescope.modify T (lbl, fn _ =>
                  Object.Operator
                   {arity = arity,
-                   conversion = SOME (rule, Susp.delay (fn _ => ConvCompiler.compile rule))})
+                   conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))})
            | _ => raise Subscript
       end
   end
@@ -152,7 +152,7 @@ end
 
 structure Development : DEVELOPMENT = Development
   (structure Syntax = Syntax
-   structure ConvCompiler = ConvCompiler
+   structure PatternCompiler = PatternCompiler
    structure Extract = Extract
    structure Telescope = Telescope(StringVariable)
    structure Lcf = Lcf

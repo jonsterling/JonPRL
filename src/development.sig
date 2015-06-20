@@ -3,11 +3,11 @@ sig
   type term
 
   structure Lcf : LCF
-  structure ConvCompiler : CONV_COMPILER
+  structure PatternCompiler : PATTERN_COMPILER
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
-  sharing type ConvCompiler.Syntax.t = term
+  sharing type PatternCompiler.Syntax.t = term
 
   structure Object :
   sig
@@ -32,10 +32,10 @@ sig
 
   (* extend a development with a new operator *)
   val declareOperator : t -> label * Arity.t -> t
-  val defineOperator : t -> ConvCompiler.rule -> t
+  val defineOperator : t -> PatternCompiler.rule -> t
 
   (* lookup the definiens *)
-  val lookupDefinition : t -> label -> ConvCompiler.conv
+  val lookupDefinition : t -> label -> PatternCompiler.conv
 
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : t -> label -> {statement : Lcf.goal, evidence : Lcf.evidence Susp.susp}

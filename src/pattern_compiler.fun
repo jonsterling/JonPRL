@@ -6,7 +6,7 @@ sig
   val asInstantiate : Operator.t -> unit option
 end
 
-functor ConvCompiler
+functor PatternCompiler
   (structure Conv : CONV
    structure SoTerm : SO_TERM
 
@@ -17,7 +17,7 @@ functor ConvCompiler
    val customOperator : label * Arity.t -> Conv.Syntax.Operator.t
 
    sharing Conv.Syntax.Operator = SoTerm.Operator
-   sharing Conv.Syntax.Variable = PatternSyntax.Variable) : CONV_COMPILER =
+   sharing Conv.Syntax.Variable = PatternSyntax.Variable) : PATTERN_COMPILER =
 struct
   open Conv
 
@@ -118,7 +118,7 @@ struct
     | asInstantiate _ = NONE
 end
 
-structure ConvCompiler = ConvCompiler
+structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
    structure PatternSyntax = PatternSyntax
    structure SoTerm = SoTerm
