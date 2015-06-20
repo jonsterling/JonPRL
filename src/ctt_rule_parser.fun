@@ -3,8 +3,9 @@ functor CttRuleParser
      where type metadata = TacticMetadata.metadata
 
    structure Development : DEVELOPMENT
-     where type Lcf.goal = Lcf.goal
-     where type Lcf.evidence = Lcf.evidence
+     where type judgement = Lcf.goal
+     where type evidence = Lcf.evidence
+     where type tactic = Lcf.tactic
      where type Telescope.Label.t = string
 
    structure ParseSyntax : PARSE_ABT
@@ -12,7 +13,7 @@ functor CttRuleParser
 
    structure Ctt : CTT_UTIL
      where type label = Development.label
-     where type tactic = Development.Lcf.tactic
+     where type tactic = Development.tactic
      where type world = Development.t
      where type term = ParseSyntax.t
      where type name = ParseSyntax.Variable.t):

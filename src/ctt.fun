@@ -1,19 +1,25 @@
 functor Ctt
-  (structure Development : DEVELOPMENT
+  (structure Lcf : LCF
+   structure Development : DEVELOPMENT
+     where type judgement = Lcf.goal
+     where type evidence = Lcf.evidence
+     where type tactic = Lcf.tactic
+
    structure Syntax : ABT_UTIL
-    where type Operator.t = Development.label OperatorType.operator
+     where type Operator.t = Development.label OperatorType.operator
 
    structure Sequent : SEQUENT
      where type term = Syntax.t
      where Context.Syntax = Syntax
 
+   sharing type Lcf.goal = Sequent.sequent
+   sharing type Lcf.evidence = Syntax.t
+
    structure Conv : CONV where type term = Syntax.t
 
-   sharing type Development.Lcf.goal = Sequent.sequent
-   sharing type Development.Lcf.evidence = Syntax.t
    sharing type Development.term = Syntax.t) : CTT =
 struct
-  structure Lcf = Development.Lcf
+  structure Lcf = Lcf
   structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
   structure Syntax = Syntax
 
@@ -833,7 +839,8 @@ struct
 end
 
 structure Ctt = Ctt
-  (structure Syntax = Syntax
+  (structure Lcf = Lcf
+   structure Syntax = Syntax
    structure Conv = Conv
    structure Sequent = Sequent
    structure Development = Development)

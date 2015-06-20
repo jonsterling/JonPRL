@@ -17,12 +17,12 @@ functor DevelopmentParser
      where type term = Syntax.t
    structure Development : DEVELOPMENT
      where type Telescope.Label.t = string
-     where type Lcf.goal = Sequent.sequent
+     where type judgement = Sequent.sequent
      where type pattern = Pattern.t
      where type term = Syntax.t
 
    structure TacticScript : TACTIC_SCRIPT
-     where type tactic = Development.Lcf.tactic
+     where type tactic = Development.tactic
      where type world = Development.t
  ) : DEVELOPMENT_PARSER =
 struct

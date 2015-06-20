@@ -2,9 +2,12 @@ signature DEVELOPMENT =
 sig
   type term
   type pattern
-  type conv = term -> term
+  type judgement
+  type evidence
 
-  structure Lcf : LCF
+  type conv = term -> term
+  type tactic
+
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
@@ -23,11 +26,11 @@ sig
   val empty : t
 
   (* extend a development with a theorem *)
-  val prove : t -> label * Lcf.goal * Lcf.tactic -> t
-  exception RemainingSubgoals of Lcf.goal list
+  val prove : t -> label * judgement * tactic -> t
+  exception RemainingSubgoals of judgement list
 
   (* extend a development with a custom tactic *)
-  val defineTactic : t -> label * Lcf.tactic -> t
+  val defineTactic : t -> label * tactic -> t
 
   (* extend a development with a new operator *)
   val declareOperator : t -> label * Arity.t -> t
@@ -37,10 +40,10 @@ sig
   val lookupDefinition : t -> label -> conv
 
   (* lookup the statement & evidence of a theorem *)
-  val lookupTheorem : t -> label -> {statement : Lcf.goal, evidence : Lcf.evidence Susp.susp}
+  val lookupTheorem : t -> label -> {statement : judgement, evidence : evidence Susp.susp}
 
   (* lookup a custom tactic *)
-  val lookupTactic : t -> label -> Lcf.tactic
+  val lookupTactic : t -> label -> tactic
 
   (* lookup a custom operator *)
   val lookupOperator : t -> label -> Arity.t

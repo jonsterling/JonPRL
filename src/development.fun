@@ -22,6 +22,10 @@ struct
   type label = Telescope.label
   type term = Syntax.t
   type pattern = PatternSyntax.t
+  type judgement = Lcf.goal
+  type evidence = Lcf.evidence
+  type tactic = Lcf.tactic
+
   type conv = term -> term
 
   structure Object =
