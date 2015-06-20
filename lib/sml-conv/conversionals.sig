@@ -11,8 +11,8 @@ sig
    *)
   val CID : conv
 
-  (* CTHEN (t1, t2) will take a term, apply t1 to it and then apply t2
-   * to the result. If either fail the entire conv will fail.
+  (* CTHEN (t1, t2) run t1 to it and then run t2 to the result.
+   * If either fail the entire conv will fail.
    *)
   val CTHEN : conv * conv -> conv
 
@@ -31,7 +31,7 @@ sig
   (* [This conversion only makes sense when the underlying term
    *  is a tree]
    *
-   * CDEEP t runs t on the supplied and if it succeeds just behaves as t.
+   * CDEEP t will run t and if it succeeds just behaves as t.
    * If t fails CDEEP will walk to the nodes of the t and recurse with
    * CDEEP t there. If there are no subterms then CDEEP t just behaves
    * as CID. Note that CDEEP t will apply to *every* subterm so the conv
