@@ -20,6 +20,7 @@ sig
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
+  (* TODO: don't include this in this signature *)
   structure Object :
   sig
     type t
