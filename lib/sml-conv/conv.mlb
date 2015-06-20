@@ -1,0 +1,15 @@
+$(SML_LIB)/basis/basis.mlb
+../sml-abt/abt.mlb
+local
+  conv.sig
+  conv.fun
+  conversionals.sig
+  conversionals.fun
+in
+  signature CONV
+  signature CONV_UTIL
+  signature CONVERSIONALS
+  functor Conv
+  functor ConvUtil
+  functor Conversionals
+end
