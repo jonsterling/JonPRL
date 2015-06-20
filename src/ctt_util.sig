@@ -1,7 +1,7 @@
 signature CTT_UTIL =
 sig
   include CTT
-  val Auto : Lcf.tactic
+  val Auto : tactic
 
   type intro_args =
     {term : Syntax.t option,
@@ -22,9 +22,9 @@ sig
     {freshVariable : name option,
      level : Level.t option}
 
-  val Intro : intro_args -> Lcf.tactic
-  val Elim : elim_args -> Lcf.tactic
-  val EqCD : eq_cd_args -> Lcf.tactic
-  val Ext : ext_args -> Lcf.tactic
+  val Intro : intro_args -> tactic
+  val Elim : elim_args -> tactic
+  val EqCD : eq_cd_args -> tactic
+  val Ext : ext_args -> tactic
 
 end

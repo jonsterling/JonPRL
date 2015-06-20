@@ -1,6 +1,6 @@
 functor CttUtil
   (structure Lcf : LCF_APART
-   structure Ctt : CTT where Lcf = Lcf) : CTT_UTIL =
+   structure Ctt : CTT where type tactic = Lcf.tactic) : CTT_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)

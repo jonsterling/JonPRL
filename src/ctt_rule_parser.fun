@@ -1,13 +1,23 @@
 functor CttRuleParser
-  (structure Lcf : ANNOTATED_LCF where type metadata = TacticMetadata.metadata
-   structure Ctt : CTT_UTIL where type Development.Telescope.Label.t = string
-   structure Operator : PARSE_OPERATOR where type env = Ctt.Development.label -> Arity.t
-   sharing type Ctt.Lcf.goal = Lcf.goal
-   sharing type Ctt.Lcf.evidence = Lcf.evidence
-   sharing Ctt.Syntax.Operator = Operator):
+  (structure Lcf : ANNOTATED_LCF
+     where type metadata = TacticMetadata.metadata
+
+   structure Development : DEVELOPMENT
+     where type Lcf.goal = Lcf.goal
+     where type Lcf.evidence = Lcf.evidence
+     where type Telescope.Label.t = string
+
+   structure Ctt : CTT_UTIL
+     where type label = Development.label
+     where type tactic = Development.Lcf.tactic
+     where type world = Development.t
+
+   structure Operator : PARSE_OPERATOR
+     where type env = Ctt.label -> Arity.t
+   sharing type Ctt.Syntax.Operator.t = Operator.t):
 sig
   structure Lcf : ANNOTATED_LCF
-  type env = Ctt.Development.t
+  type env = Development.t
   val parseRule : env -> Lcf.tactic CharParser.charParser
 end =
 struct
