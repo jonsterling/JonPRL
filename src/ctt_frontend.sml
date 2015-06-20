@@ -30,7 +30,7 @@ struct
          | Sum.INR x => x)
       handle
           Development.RemainingSubgoals goals =>
-            (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Lcf.goalToString g ^ "\n") "" goals ^ "\n\n");
+            (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals ^ "\n\n");
             raise Development.RemainingSubgoals goals)
         | AnnotatedLcf.RefinementFailed (exn as {error, goal, metadata as {name,pos}}) =>
             (print

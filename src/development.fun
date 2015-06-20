@@ -11,7 +11,8 @@ functor Development
    structure Telescope : TELESCOPE
    sharing type PatternCompiler.pattern = PatternSyntax.t
    sharing type PatternSyntax.Variable.t = Syntax.Variable.t
-   val asCustomOperator : PatternSyntax.Operator.t -> Telescope.label) : DEVELOPMENT =
+   val asCustomOperator : PatternSyntax.Operator.t -> Telescope.label
+   val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
   structure Telescope = Telescope
@@ -43,7 +44,7 @@ struct
             val evidence' = Susp.force evidence
           in
             "Theorem " ^ Telescope.Label.toString lbl
-              ^ " : ⸤" ^ Lcf.goalToString statement ^ "⸥ {\n  "
+              ^ " : ⸤" ^ goalToString statement ^ "⸥ {\n  "
               ^ Syntax.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
@@ -162,4 +163,5 @@ structure Development : DEVELOPMENT = Development
 
    open PatternOperatorType
 
-   fun asCustomOperator (APP (lbl, _)) = lbl)
+   fun asCustomOperator (APP (lbl, _)) = lbl
+   val goalToString = Sequent.toString)
