@@ -14,12 +14,12 @@ functor CttRuleParser
    structure Ctt : CTT_UTIL
      where type label = Development.label
      where type tactic = Development.tactic
-     where type world = Development.t
+     where type world = Development.world
      where type term = ParseSyntax.t
      where type name = ParseSyntax.Variable.t):
 sig
   structure Lcf : ANNOTATED_LCF
-  type world = Development.t
+  type world = Development.world
   val parseRule : world -> Lcf.tactic CharParser.charParser
 end =
 struct
@@ -35,7 +35,7 @@ struct
 
   open JonprlTokenParser Rules
 
-  type world = Development.t
+  type world = Development.world
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -214,7 +214,7 @@ struct
       || parseAssumption D
       || parseSymmetry D
 
-  val parseRule : Development.t -> tactic charParser =
+  val parseRule : Development.world -> tactic charParser =
     fn D => !! (tacticParsers D)
     wth (fn (t, pos) => t pos)
 

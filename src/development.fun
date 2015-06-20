@@ -69,8 +69,8 @@ struct
   end
 
   type object = Object.t
-  type t = object Telescope.telescope
-  fun out t = t
+  type world = object Telescope.telescope
+  fun enumerate t = t
 
   val empty = Telescope.empty
 

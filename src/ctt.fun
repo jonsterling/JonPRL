@@ -28,7 +28,7 @@ struct
   type name = Sequent.name
   type term = Syntax.t
   type goal = Sequent.sequent
-  type world = Development.t
+  type world = Development.world
   type label = Development.label
 
   structure Operator = Syntax.Operator

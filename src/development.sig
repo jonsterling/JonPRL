@@ -1,20 +1,21 @@
 (* DEVELOPMENT models the aspect of Brouwer's Creating Subject which realizes
- * constructions over time. A value of type DEVELOPMENT.t is a stage in time at
+ * constructions over time. A value of type DEVELOPMENT.world is a stage in time at
  * which the knowledge of the creating subject may be queried, or to which new
- * knowledge may be added, resulting in another stage in time. In this sense,
- * the possible values of type DEVELOPMENT.t form a spread, whose law is
+ * knowledge may be added, which are accessible at a new stage. In this sense,
+ * the possible values of type DEVELOPMENT.world form a spread, whose law is
  * governed by the admissibility of new knowledge. *)
 
 signature DEVELOPMENT =
 sig
-  type t
-  type term
-  type pattern
+  type world
   type judgement
   type evidence
+  type tactic
+
+  type term
+  type pattern
 
   type conv = term -> term
-  type tactic
 
   structure Telescope : TELESCOPE
   type label = Telescope.label
@@ -27,31 +28,32 @@ sig
 
   type object = Object.t
 
-  val out : t -> object Telescope.telescope
+  (* enumerate the objects and knowledge available at a world *)
+  val enumerate : world -> object Telescope.telescope
 
-  (* the empty development *)
-  val empty : t
+  (* the empty world *)
+  val empty : world
 
   (* extend a development with a theorem *)
-  val prove : t -> label * judgement * tactic -> t
+  val prove : world -> label * judgement * tactic -> world
   exception RemainingSubgoals of judgement list
 
   (* extend a development with a custom tactic *)
-  val defineTactic : t -> label * tactic -> t
+  val defineTactic : world -> label * tactic -> world
 
   (* extend a development with a new operator *)
-  val declareOperator : t -> label * Arity.t -> t
-  val defineOperator : t -> {definiendum : pattern, definiens : term} -> t
+  val declareOperator : world -> label * Arity.t -> world
+  val defineOperator : world -> {definiendum : pattern, definiens : term} -> world
 
   (* lookup the definiens *)
-  val lookupDefinition : t -> label -> conv
+  val lookupDefinition : world -> label -> conv
 
   (* lookup the statement & evidence of a theorem *)
-  val lookupTheorem : t -> label -> {statement : judgement, evidence : evidence Susp.susp}
+  val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
 
   (* lookup a custom tactic *)
-  val lookupTactic : t -> label -> tactic
+  val lookupTactic : world -> label -> tactic
 
   (* lookup a custom operator *)
-  val lookupOperator : t -> label -> Arity.t
+  val lookupOperator : world -> label -> Arity.t
 end
