@@ -8,8 +8,7 @@ struct
       fun loadFile (f, dev) = CttFrontend.loadFile (dev, f)
 
       val D =
-        SOME (foldl loadFile Development.empty files)
-        handle e => (print (exnMessage e); NONE)
+        SOME (foldl loadFile Development.empty files) handle e => NONE
     in
       case D of
            NONE => 1
