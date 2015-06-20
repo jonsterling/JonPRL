@@ -1,39 +1,24 @@
 functor CttRuleParser
-  (structure Lcf : ANNOTATED_LCF
-     where type metadata = TacticMetadata.metadata
-
-   structure Development : DEVELOPMENT
-     where type judgement = Lcf.goal
-     where type evidence = Lcf.evidence
-     where type tactic = Lcf.tactic
-     where type Telescope.Label.t = string
-
+  (structure Tactic : TACTIC
+     where type level = int
    structure ParseSyntax : PARSE_ABT
-     where type ParseOperator.world = Development.label -> Arity.t
-
-   structure Ctt : CTT_UTIL
-     where type label = Development.label
-     where type tactic = Development.tactic
-     where type world = Development.t
-     where type term = ParseSyntax.t
-     where type name = ParseSyntax.Variable.t):
+     where type t = Tactic.term
+     where type Variable.t = Tactic.name
+     where type ParseOperator.world = Tactic.label -> Arity.t
+   val lookupOperator : Tactic.world -> Tactic.label -> Arity.t
+   val stringToLabel  : string -> Tactic.label):
 sig
-  structure Lcf : ANNOTATED_LCF
-  type world = Development.t
-  val parseRule : world -> Lcf.tactic CharParser.charParser
+  val parseRule : Tactic.world -> Tactic.t CharParser.charParser
 end =
 struct
-  structure AnnLcf = Lcf
-  structure Tacticals = Tacticals (Lcf)
-  open Ctt Lcf Tacticals ParserCombinators CharParser
-  structure Lcf = AnnLcf
+  open Tactic ParserCombinators CharParser
 
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>
   infixr 3 &&
   infixr 4 << >>
 
-  open JonprlTokenParser Rules
+  open JonprlTokenParser
 
   type world = Development.t
 
@@ -54,42 +39,37 @@ struct
     identifier
       wth ParseSyntax.Variable.named
 
-  fun decorateTac tac =
-    fn (name, args) => fn (pos : Pos.t) =>
-      Lcf.annotate ({name = name, pos = pos}, tac args)
+  val parseLabel = identifier wth stringToLabel
 
-  fun nameTac name tac =
-    fn (pos : Pos.t) =>
-      Lcf.annotate ({name = name, pos = pos}, tac)
+  type 'a intensional_parser = Tactic.world -> 'a charParser
+  type tactic_parser = (Pos.t -> Tactic.t) intensional_parser
 
-  type 'a intensional_parser = world -> 'a charParser
-  type tactic_parser = (Pos.t -> tactic) intensional_parser
-
-  val parseTm : term intensional_parser =
-    squares o ParseSyntax.parseAbt [] o Development.lookupOperator
+  val parseTm : ParseSyntax.t intensional_parser =
+    squares o ParseSyntax.parseAbt [] o lookupOperator
 
   val parseCum : tactic_parser =
     fn D => symbol "cum"
       && opt parseLevel
-      wth (fn (name, k) => nameTac name (Cum k))
+      wth (fn (name, k) => fn pos => CUM (k, {name = name, pos = pos}))
 
   val parseWitness : tactic_parser =
     fn D => symbol "witness"
       && parseTm D
-      wth (fn (name, tm) =>
-        nameTac name (Witness tm))
+      wth (fn (name, tm) => fn pos =>
+              WITNESS (tm, {name = name, pos = pos}))
 
   val parseHypothesis : tactic_parser =
     fn D => symbol "hypothesis"
       && parseIndex
-      wth (fn (name, i) =>
-        nameTac name (Hypothesis i))
+      wth (fn (name, i) => fn pos =>
+        HYPOTHESIS (i, {name = name, pos = pos}))
 
   val parseEqSubst : tactic_parser =
     fn D => symbol "subst"
       && parseTm D && parseTm D && opt parseLevel
-      wth (fn (name, (M, (N, k))) =>
-        nameTac name (EqSubst (M, N, k)))
+      wth (fn (name, (M, (N, k))) => fn pos =>
+              EQ_SUBST ({left = M, right = N, level = k},
+                        {name = name, pos = pos}))
 
   val parseDir =
     (symbol "→" || symbol "->") return Dir.RIGHT
@@ -100,10 +80,14 @@ struct
       && parseDir
       && parseIndex
       && parseTm D && opt parseLevel
-      wth (fn (name, (dir, (i, (M, k)))) =>
-        nameTac name (HypEqSubst (dir, i, M, k)))
+      wth (fn (name, (dir, (i, (M, k)))) => fn pos =>
+              HYP_SUBST ({dir = dir,
+                          index = i,
+                          domain = M,
+                          level = k},
+                         {name = name, pos = pos}))
 
-  val parseIntroArgs : intro_args intensional_parser =
+  val parseIntroArgs =
     fn D => opt (parseTm D)
       && opt (brackets parseName)
       && opt parseLevel
@@ -117,7 +101,7 @@ struct
     wth (fn SOME xs => xs
           | NONE => [])
 
-  val parseElimArgs : elim_args intensional_parser=
+  val parseElimArgs =
     fn D => parseIndex
       && opt (parseTm D)
       && parseNames
@@ -127,16 +111,16 @@ struct
              names = names})
 
   val parseTerms : term list intensional_parser =
-    fn D => opt (squares (commaSep1 (ParseSyntax.parseAbt [] (Development.lookupOperator D))))
+    fn D => opt (squares (commaSep1 (ParseSyntax.parseAbt [] (lookupOperator D))))
     wth (fn oxs => getOpt (oxs, []))
 
-  val parseEqCdArgs : eq_cd_args intensional_parser =
+  val parseEqCdArgs =
     fn D => (parseTerms D)
       && parseNames
       && opt parseLevel
       wth (fn (Ms, (xs, k)) => {names = xs, terms = Ms, level = k})
 
-  val parseExtArgs : ext_args intensional_parser =
+  val parseExtArgs =
     fn D => opt (brackets parseName)
       && opt parseLevel
       wth (fn (z,k) => {freshVariable = z, level = k})
@@ -144,57 +128,60 @@ struct
   val parseIntro =
     fn D => symbol "intro"
       && parseIntroArgs D
-      wth (fn (name, args) => nameTac name (Intro args))
+      wth (fn (name, args) => fn pos =>
+              INTRO (args, {name = name, pos = pos}))
 
   val parseElim =
     fn D => symbol "elim"
       && parseElimArgs D
-      wth (fn (name, args) => nameTac name (Elim args))
+      wth (fn (name, args) => fn pos =>
+              ELIM (args, {pos = pos, name = name}))
 
   val parseEqCd =
     fn D => symbol "eq-cd"
       && (parseEqCdArgs D)
-      wth (fn (name, args) => nameTac name (EqCD args))
+      wth (fn (name, args) => fn pos =>
+              EQ_CD (args, {name = name, pos = pos}))
 
   val parseExt =
     fn D => symbol "ext"
       && parseExtArgs D
-      wth (fn (name, args) => nameTac name (Ext args))
+      wth (fn (name, args) => fn pos =>
+              EXT (args, {name = name, pos = pos}))
 
   val parseSymmetry : tactic_parser =
     fn D => symbol "symmetry"
-      wth (fn name => nameTac name EqSym)
+      wth (fn name => fn pos => SYMMETRY {name = name, pos = pos})
 
   val parseAssumption : tactic_parser =
     fn D => symbol "assumption"
-      wth (fn name => nameTac name Assumption)
+      wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
 
   val parseMemCd : tactic_parser =
     fn D => symbol "mem-cd"
-      wth (fn name => nameTac name MemCD)
+      wth (fn name => fn pos => MEM_CD {name = name, pos = pos})
 
   val parseAuto : tactic_parser =
     fn D => symbol "auto"
-      wth (fn name => nameTac name Auto)
+      wth (fn name => fn pos => AUTO {name = name, pos = pos})
 
   val parseLemma : tactic_parser =
     fn D => symbol "lemma"
-      && brackets identifier
+      && brackets parseLabel
       wth (fn (name, lbl) => fn pos =>
-             Lcf.annotate ({name = name, pos = pos}, Lemma (D, lbl)))
+             LEMMA (D, lbl, {name = name, pos = pos}))
 
   val parseUnfold : tactic_parser =
     fn D => symbol "unfold"
-      && brackets (separate identifier whiteSpace)
+      && brackets (separate parseLabel whiteSpace)
       wth (fn (name, lbls) => fn pos =>
-             Lcf.annotate ({name = name, pos = pos}, Unfolds (D, lbls)))
+             UNFOLD (D, lbls, ({name = name, pos = pos})))
 
   val parseCustomTactic : tactic_parser =
     fn D => symbol "refine"
       >> brackets identifier
-      wth (fn lbl => fn (pos : Pos.t) =>
-            Lcf.annotate ({name = lbl, pos = pos}, fn goal =>
-              Development.lookupTactic D lbl goal))
+      wth (fn name => fn (pos : Pos.t) =>
+            CUSTOM_TACTIC (D, stringToLabel name, {name = name, pos = pos}))
 
   fun tacticParsers D =
     parseLemma D
@@ -214,20 +201,19 @@ struct
       || parseAssumption D
       || parseSymmetry D
 
-  val parseRule : Development.t -> tactic charParser =
+  val parseRule : Tactic.world -> Tactic.t charParser =
     fn D => !! (tacticParsers D)
     wth (fn (t, pos) => t pos)
-
 end
 
 structure CttRuleParser = CttRuleParser
-  (structure Ctt = CttUtil
-   structure Lcf = AnnotatedLcf
-   structure Development = Development
-   structure ParseSyntax = Syntax)
+  (structure Tactic = Tactic
+   structure ParseSyntax = Syntax
+   val lookupOperator = Development.lookupOperator
+   val stringToLabel  = StringVariable.named)
 
 structure CttScript = TacticScript
   (struct
-    structure LcfApart = Lcf
+    structure Tactic = Tactic
     open CttRuleParser
    end)

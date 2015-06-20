@@ -50,10 +50,14 @@ struct
       | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption
       | SYMMETRY a => an a EqSym
-      | TRY (tac, a) => an a (T.TRY (eval tac))
+      | TRY tac => T.TRY (eval tac)
       | REPEAT tac => T.LIMIT (eval tac)
       | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map eval tacs)
-      | THEN (l, r) => T.THEN (eval l, eval r)
+      | THEN ts =>
+        List.foldl (fn (Sum.INL x, rest) => T.THEN (rest, x)
+                     | (Sum.INR xs, rest) => T.THENL (rest, xs))
+                   T.ID
+                   ts
       | THENL (l, rs)  => T.THENL (eval l, map eval rs)
       | ID a => an a T.ID
       | FAIL a => an a T.FAIL

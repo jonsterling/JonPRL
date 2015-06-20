@@ -39,11 +39,10 @@ sig
       | MEM_CD of meta
       | ASSUMPTION of meta
       | SYMMETRY of meta
-      | TRY of t * meta
+      | TRY of t
       | REPEAT of t
       | ORELSE of t list
-      | THEN of t * t
-      | THENL of t * t list
+      | THEN of (t, t list) Sum.sum list
       | ID of meta
       | FAIL of meta
       | TRACE of string * meta

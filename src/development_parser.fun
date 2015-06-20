@@ -22,7 +22,7 @@ functor DevelopmentParser
      where type term = Syntax.t
 
    structure TacticScript : TACTIC_SCRIPT
-     where type tactic = Development.tactic
+     where type tactic = Tactic.t
      where type world = Development.t
  ) : DEVELOPMENT_PARSER =
 struct
