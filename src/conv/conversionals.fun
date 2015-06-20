@@ -1,9 +1,8 @@
-functor Conversionals
-  (structure Syntax : ABT
-   structure Conv : CONV) : CONVERSIONALS =
+functor Conversionals (structure Syntax : ABT and Conv : CONV) : CONVERSIONALS =
 struct
   open Conv
   open Syntax
+
   infix $ \
   infix 8 $$ \\
 
@@ -26,7 +25,3 @@ struct
   val CID : conv = fn M => M
   val CFAIL : conv = fn M => raise Conv
 end
-
-structure Conversionals = Conversionals
-  (structure Syntax = Syntax
-   structure Conv = Conv)

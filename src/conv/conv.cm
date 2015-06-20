@@ -6,6 +6,7 @@ Library
   functor ConvUtil
   functor Conversionals
 is
+  $/basis.cm
   ../../lib/sml-abt/abt.cm
   conv.sig
   conv.fun

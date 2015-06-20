@@ -20,8 +20,6 @@ group is
   parse_label.fun
   pattern.fun
 
-  conversionals.sig
-  conversionals.fun
   conv_compiler.sig
   conv_compiler.fun
 
