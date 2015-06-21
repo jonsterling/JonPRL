@@ -4,16 +4,12 @@ sig
     type name
     type label
     type level
-    type world
     type meta = TacticMetadata.metadata
 
-    (* TODO: Can we avoid duplicating this?
-     * Split this out of the big ctt.sig signature perhaps?
-     *)
     datatype t
-      = LEMMA of world * label * meta
-      | UNFOLD of world * label list * meta
-      | CUSTOM_TACTIC of world * label * meta
+      = LEMMA of label * meta
+      | UNFOLD of label list * meta
+      | CUSTOM_TACTIC of label * meta
       | WITNESS of term * meta
       | HYPOTHESIS of int * meta
       | EQ_SUBST of {left : term,

@@ -5,12 +5,14 @@ functor CttRuleParser
      where type t = Tactic.term
      where type Variable.t = Tactic.name
      where type ParseOperator.world = Tactic.label -> Arity.t
-   val lookupOperator : Tactic.world -> Tactic.label -> Arity.t
+   type world
+   val lookupOperator : world -> Tactic.label -> Arity.t
    val stringToLabel  : string -> Tactic.label):
 sig
-  val parseRule : Tactic.world -> Tactic.t CharParser.charParser
+  val parseRule : world -> Tactic.t CharParser.charParser
 end =
 struct
+  type world = world
   open Tactic ParserCombinators CharParser
 
   infix 2 return wth suchthat return guard when
@@ -19,8 +21,6 @@ struct
   infixr 4 << >>
 
   open JonprlTokenParser
-
-  type world = Development.t
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -41,7 +41,7 @@ struct
 
   val parseLabel = identifier wth stringToLabel
 
-  type 'a intensional_parser = Tactic.world -> 'a charParser
+  type 'a intensional_parser = world -> 'a charParser
   type tactic_parser = (Pos.t -> Tactic.t) intensional_parser
 
   val parseTm : ParseSyntax.t intensional_parser =
@@ -169,19 +169,19 @@ struct
     fn D => symbol "lemma"
       && brackets parseLabel
       wth (fn (name, lbl) => fn pos =>
-             LEMMA (D, lbl, {name = name, pos = pos}))
+             LEMMA (lbl, {name = name, pos = pos}))
 
   val parseUnfold : tactic_parser =
     fn D => symbol "unfold"
       && brackets (separate parseLabel whiteSpace)
       wth (fn (name, lbls) => fn pos =>
-             UNFOLD (D, lbls, ({name = name, pos = pos})))
+             UNFOLD (lbls, ({name = name, pos = pos})))
 
   val parseCustomTactic : tactic_parser =
     fn D => symbol "refine"
       >> brackets identifier
       wth (fn name => fn (pos : Pos.t) =>
-            CUSTOM_TACTIC (D, stringToLabel name, {name = name, pos = pos}))
+            CUSTOM_TACTIC (stringToLabel name, {name = name, pos = pos}))
 
   fun tacticParsers D =
     parseLemma D
@@ -201,7 +201,7 @@ struct
       || parseAssumption D
       || parseSymmetry D
 
-  val parseRule : Tactic.world -> Tactic.t charParser =
+  val parseRule : world -> Tactic.t charParser =
     fn D => !! (tacticParsers D)
     wth (fn (t, pos) => t pos)
 end
@@ -209,6 +209,7 @@ end
 structure CttRuleParser = CttRuleParser
   (structure Tactic = Tactic
    structure ParseSyntax = Syntax
+   type world = Development.t
    val lookupOperator = Development.lookupOperator
    val stringToLabel  = StringVariable.named)
 
@@ -216,4 +217,5 @@ structure CttScript = TacticScript
   (struct
     structure Tactic = Tactic
     open CttRuleParser
+    type world = Development.t
    end)

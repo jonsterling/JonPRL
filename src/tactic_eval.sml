@@ -1,6 +1,6 @@
 structure TacticEval :
         sig
-            val eval : Tactic.t -> Ctt.tactic
+            val eval : Development.t -> Tactic.t -> Ctt.tactic
         end =
 struct
   open Tactic
@@ -9,11 +9,11 @@ struct
 
   fun an a t = AnnotatedLcf.annotate (a, t)
 
-  fun eval t =
+  fun eval wld t =
     case t of
-        LEMMA (wld, lbl, a) => an a (Lemma (wld, lbl))
-      | UNFOLD (wld, lbls, a) => an a (Unfolds (wld, lbls))
-      | CUSTOM_TACTIC (wld, lbl, a) =>
+        LEMMA (lbl, a) => an a (Lemma (wld, lbl))
+      | UNFOLD (lbls, a) => an a (Unfolds (wld, lbls))
+      | CUSTOM_TACTIC (lbl, a) =>
         an a (Development.lookupTactic wld lbl)
       | WITNESS (t, a) => an a (Witness t)
       | HYPOTHESIS (i, a) => an a (Hypothesis i)
@@ -36,12 +36,12 @@ struct
       | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption
       | SYMMETRY a => an a EqSym
-      | TRY tac => T.TRY (eval tac)
-      | REPEAT tac => T.LIMIT (eval tac)
-      | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map eval tacs)
+      | TRY tac => T.TRY (eval wld tac)
+      | REPEAT tac => T.LIMIT (eval wld tac)
+      | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map (eval wld) tacs)
       | THEN ts =>
-        List.foldl (fn (Sum.INL x, rest) => T.THEN (rest, eval x)
-                     | (Sum.INR xs, rest) => T.THENL (rest, map eval xs))
+        List.foldl (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
+                     | (Sum.INR xs, rest) => T.THENL (rest, map (eval wld) xs))
                    T.ID
                    ts
       | ID a => an a T.ID

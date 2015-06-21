@@ -18,7 +18,10 @@ group is
 
   tactic.sig
   tactic.sml
-  tactic_eval.fun
+  tactic_eval.sml
+
+  development-ast.sig
+  development-ast.sml
 
   jonprl_language_def.sml
   parse_label.sig

@@ -1,10 +1,12 @@
 functor TacticScript
   (structure Tactic : TACTIC
-   val parseRule : Tactic.world -> Tactic.t CharParser.charParser)
+   type world
+   val parseRule : world -> Tactic.t CharParser.charParser)
         : TACTIC_SCRIPT =
 struct
-   type world = Tactic.world
+  type world = world
   type tactic = Tactic.t
+
   open Tactic ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>

@@ -5,13 +5,12 @@ struct
   type name = Syntax.Variable.t
   type label = Development.label
   type level = Level.t
-  type world = Development.t
   type meta = TacticMetadata.metadata
 
   datatype t
-    = LEMMA of world * label * meta
-    | UNFOLD of world * label list * meta
-    | CUSTOM_TACTIC of world * label * meta
+    = LEMMA of label * meta
+    | UNFOLD of label list * meta
+    | CUSTOM_TACTIC of label * meta
     | WITNESS of term * meta
     | HYPOTHESIS of int * meta
     | EQ_SUBST of {left : term,

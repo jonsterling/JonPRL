@@ -21,10 +21,11 @@ functor DevelopmentParser
      where type pattern = Pattern.t
      where type term = Syntax.t
      where type tactic = Ctt.tactic
+     where type t = Development.t
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
-     where type world = Development.t
+     where type world  = Development.t
  ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
@@ -57,7 +58,7 @@ struct
              Development.prove D
               (thm,
                Sequent.>> (Sequent.Context.empty, M),
-               TacticEval.eval tac))
+               TacticEval.eval D tac))
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -70,7 +71,7 @@ struct
     reserved "Tactic" >> identifier
       && braces (TacticScript.parse D)
       wth (fn (lbl, tac) =>
-              Development.defineTactic D (lbl, TacticEval.eval tac))
+              Development.defineTactic D (lbl, TacticEval.eval D tac))
 
   fun parseOperatorDecl D =
     (reserved "Operator" >> identifier << colon && parseArity)
