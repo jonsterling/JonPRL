@@ -116,4 +116,4 @@ structure CttDevelopmentParser = DevelopmentParser
    structure Sequent = Sequent
    structure TacticScript = CttScript
    val stringToLabel = StringVariable.named
-   open Development)
+   open StringVariableContext)
