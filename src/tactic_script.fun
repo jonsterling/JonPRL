@@ -53,7 +53,7 @@ struct
 
   and parseRepeat D () =
         middle (symbol "*{") ($ (parseScript D)) (symbol "}")
-        wth REPEAT
+        wth LIMIT
 
   and parseOrelse D () =
         parens (separate1 ($ (parseScript D)) pipe)

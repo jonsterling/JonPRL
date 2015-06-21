@@ -36,7 +36,7 @@ sig
       | ASSUMPTION of meta
       | SYMMETRY of meta
       | TRY of t
-      | REPEAT of t
+      | LIMIT of t
       | ORELSE of t list
       | THEN of (t, t list) Sum.sum list
       | ID of meta

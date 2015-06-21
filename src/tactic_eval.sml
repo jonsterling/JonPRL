@@ -37,7 +37,7 @@ struct
       | ASSUMPTION a => an a Assumption
       | SYMMETRY a => an a EqSym
       | TRY tac => T.TRY (eval wld tac)
-      | REPEAT tac => T.LIMIT (eval wld tac)
+      | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map (eval wld) tacs)
       | THEN ts =>
         List.foldl (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
