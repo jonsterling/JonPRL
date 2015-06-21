@@ -11,22 +11,23 @@ signature PARSE_PATTERN =
 functor DevelopmentParser
   (structure Syntax : PARSE_CTT
    structure Pattern : PARSE_PATTERN
-   sharing type Syntax.Variable.t = Pattern.Variable.t
+     where type Variable.t = Syntax.Variable.t
 
    structure Sequent : SEQUENT
      where type term = Syntax.t
+
    structure Development : DEVELOPMENT
      where type Telescope.Label.t = string
      where type judgement = Sequent.sequent
      where type pattern = Pattern.t
      where type term = Syntax.t
-     where type tactic = Ctt.tactic
-     where type world = Development.world
+
    structure DevelopmentAst : DEVELOPMENT_AST
      where type label = Development.label
      where Syntax = Syntax
      where Pattern = Pattern
      where Tactic = Tactic
+
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
      where type world  = Development.world) : DEVELOPMENT_PARSER =
