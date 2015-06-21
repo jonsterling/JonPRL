@@ -22,13 +22,18 @@ functor DevelopmentParser
      where type term = Syntax.t
      where type tactic = Ctt.tactic
      where type t = Development.t
-
+   structure DevelopmentAst : DEVELOPMENT_AST
+     where type label = Development.label
+     where Syntax = Syntax
+     where Pattern = Pattern
+     where Tactic = Tactic
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
      where type world  = Development.t
  ) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
+  structure DevelopmentAst = DevelopmentAst
 
   open ParserCombinators CharParser
   infix 2 return wth suchthat return guard when
@@ -55,10 +60,7 @@ struct
       && parseTm [] D
       && braces (TacticScript.parse D)
       wth (fn (thm, (M, tac)) =>
-             Development.prove D
-              (thm,
-               Sequent.>> (Sequent.Context.empty, M),
-               TacticEval.eval D tac))
+             (D, DevelopmentAst.THEOREM (thm, M, tac)))
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -71,19 +73,19 @@ struct
     reserved "Tactic" >> identifier
       && braces (TacticScript.parse D)
       wth (fn (lbl, tac) =>
-              Development.defineTactic D (lbl, TacticEval.eval D tac))
+              (D, DevelopmentAst.TACTIC (lbl, tac)))
 
   fun parseOperatorDecl D =
     (reserved "Operator" >> identifier << colon && parseArity)
-    wth Development.declareOperator D
+     wth (fn (lbl, arity) =>
+             (Development.declareOperator D (lbl, arity),
+              DevelopmentAst.OPERATOR (lbl, arity)))
 
   fun parseOperatorDef D =
     parsePattern D -- (fn (pat : Pattern.t) =>
       succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) D)
     ) wth (fn (P : Pattern.t, N : Syntax.t) =>
-      Development.defineOperator D
-        {definiendum = P,
-         definiens = N})
+              (D, DevelopmentAst.DEFINITION (P, N)))
 
   fun parseDecl D =
       parseTheorem D
@@ -91,18 +93,20 @@ struct
       || parseOperatorDecl D
       || parseOperatorDef D
 
-  fun parse' D () =
+  fun parse' D ast () =
     whiteSpace >>
-    (parseDecl D << dot) -- (fn D' =>
-      $ (parse' D') <|>
-      (whiteSpace >> not any) return D')
+    (parseDecl D << dot) -- (fn (D', decl) =>
+      $ (parse' D' (decl :: ast)) <|>
+      (whiteSpace >> not any) return (D', ast))
 
-  fun parse D = ($ (parse' D))
+  fun parse D = ($ (fn () => parse' D [] ()
+                             wth (fn (D, ast) => (D, List.rev ast))))
 end
 
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
    structure Pattern = PatternSyntax
    structure Development = Development
+   structure DevelopmentAst = DevelopmentAst
    structure Sequent = Sequent
    structure TacticScript = CttScript)

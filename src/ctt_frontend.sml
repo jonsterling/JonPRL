@@ -25,9 +25,10 @@ struct
 
       open CttDevelopmentParser
     in
-      (case (CharParser.parseChars (parse initialDevelopment) coordStream) of
+      (case CharParser.parseChars (parse initialDevelopment) coordStream of
            Sum.INL e => raise Fail e
-         | Sum.INR x => x)
+         | Sum.INR (newDevelopment, ast) =>
+           DevelopmentAstEval.eval newDevelopment ast)
       handle
           Development.RemainingSubgoals goals =>
             (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals ^ "\n\n");

@@ -22,6 +22,7 @@ group is
 
   development-ast.sig
   development-ast.sml
+  development-ast-eval.sml
 
   jonprl_language_def.sml
   parse_label.sig

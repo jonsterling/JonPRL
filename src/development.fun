@@ -136,13 +136,14 @@ struct
   end
 
   fun lookupDefinition T lbl =
+    (print (Telescope.Label.toString lbl);
     case Telescope.lookup T lbl of
          Object.Operator {conversion = SOME (_, conv),...} => Susp.force conv
        | Object.Theorem {evidence,...} => (fn tm =>
            case List.find (fn v => Syntax.Variable.toString v = Telescope.Label.toString lbl) (Syntax.freeVariables tm) of
                 NONE => tm
               | SOME v => Syntax.subst (Extract.extract (Susp.force evidence)) v tm)
-       | _ => raise Subscript
+       | _ => raise Subscript)
 
   fun lookupTheorem T lbl =
     case Telescope.lookup T lbl of
