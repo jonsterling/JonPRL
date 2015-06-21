@@ -9,30 +9,35 @@ signature PARSE_PATTERN =
     where type ParseOperator.world = string -> Arity.t
 
 functor DevelopmentParser
-  (structure Syntax : PARSE_CTT
-   structure Pattern : PARSE_PATTERN
+  (structure Tactic : TACTIC
+   structure Syntax : PARSE_ABT
+     where type ParseOperator.world = Tactic.label -> Arity.t
+   structure Pattern : PARSE_ABT
      where type Variable.t = Syntax.Variable.t
-
+     where type ParseOperator.world = Tactic.label -> Arity.t
    structure Sequent : SEQUENT
      where type term = Syntax.t
 
-   structure Development : DEVELOPMENT
-     where type Telescope.Label.t = string
-     where type judgement = Sequent.sequent
-     where type pattern = Pattern.t
-     where type term = Syntax.t
+   type world
 
    structure DevelopmentAst : DEVELOPMENT_AST
-     where type label = Development.label
-     where Syntax = Syntax
-     where Pattern = Pattern
-     where Tactic = Tactic
+     where type Syntax.t = Syntax.t
+     where type Pattern.t = Pattern.t
+     where type Tactic.t = Tactic.t
+     where type label    = Tactic.label
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
-     where type world  = Development.world) : DEVELOPMENT_PARSER =
+     where type world = world
+
+   val declareOperator : TacticScript.world
+                          -> (Tactic.label * Arity.t)
+                          -> TacticScript.world
+   val lookupOperator : TacticScript.world -> Tactic.label -> Arity.t
+
+   val stringToLabel  : string -> Tactic.label) : DEVELOPMENT_PARSER =
 struct
-  structure Development = Development
+  type world = TacticScript.world
   structure DevelopmentAst = DevelopmentAst
 
   open ParserCombinators CharParser
@@ -46,8 +51,6 @@ struct
      val reservedNames = ["Theorem", "Tactic", "Operator"])
   open TP
 
-  val lookupOperator = Development.lookupOperator
-
   fun parseTm fvs = squares o Syntax.parseAbt fvs o lookupOperator
   val parsePattern = squares o Pattern.parseAbt [] o lookupOperator
 
@@ -55,8 +58,10 @@ struct
     identifier
       wth Syntax.Variable.named
 
+  val parseLabel = identifier wth stringToLabel
+
   fun parseTheorem D =
-    reserved "Theorem" >> identifier << colon
+    reserved "Theorem" >> parseLabel << colon
       && parseTm [] D
       && braces (TacticScript.parse D)
       wth (fn (thm, (M, tac)) =>
@@ -70,15 +75,15 @@ struct
     wth Vector.fromList
 
   fun parseTactic D =
-    reserved "Tactic" >> identifier
+    reserved "Tactic" >> parseLabel
       && braces (TacticScript.parse D)
       wth (fn (lbl, tac) =>
               (D, DevelopmentAst.TACTIC (lbl, tac)))
 
   fun parseOperatorDecl D =
-    (reserved "Operator" >> identifier << colon && parseArity)
+    (reserved "Operator" >> parseLabel << colon && parseArity)
      wth (fn (lbl, arity) =>
-             (Development.declareOperator D (lbl, arity),
+             (declareOperator D (lbl, arity),
               DevelopmentAst.OPERATOR (lbl, arity)))
 
   fun parseOperatorDef D =
@@ -105,8 +110,10 @@ end
 
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
+   structure Tactic = Tactic
    structure Pattern = PatternSyntax
-   structure Development = Development
    structure DevelopmentAst = DevelopmentAst
    structure Sequent = Sequent
-   structure TacticScript = CttScript)
+   structure TacticScript = CttScript
+   val stringToLabel = StringVariable.named
+   open Development)
