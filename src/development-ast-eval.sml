@@ -1,8 +1,8 @@
 structure DevelopmentAstEval :
           sig
-              val eval : Development.t
+              val eval : Development.world
                          -> DevelopmentAst.t list
-                         -> Development.t
+                         -> Development.world
           end =
 struct
   open DevelopmentAst

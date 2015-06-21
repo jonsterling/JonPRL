@@ -2,7 +2,7 @@ structure CttFrontend =
 struct
   structure Extract = Extract(Syntax)
 
-  fun printDevelopment development =
+  fun printDevelopment world =
     let
       open Development.Telescope
       fun go ConsView.Empty = ()
@@ -10,10 +10,10 @@ struct
             (print (Development.Object.toString (lbl, obj) ^ "\n\n");
              go (ConsView.out tele))
     in
-      go (ConsView.out (Development.out development))
+      go (ConsView.out (Development.enumerate world))
     end
 
-  fun loadFile (initialDevelopment, name) : Development.t =
+  fun loadFile (initialDevelopment, name) : Development.world =
     let
       val instream = TextIO.openIn name
       val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)

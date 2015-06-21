@@ -16,17 +16,15 @@ sig
   exception Conv
 end
 
-(* As a super set of the CONV signature this when
- * the term type is actually built from an ABT (in the sense
- * of (sml-abt) additional functions are possible.
+(* This is an extension of the CONV signature for when we have
+ * the term type built from an ABT (in the sense
+ * of (sml-abt). It provides some convenient utilities.
  *)
 signature CONV_UTIL =
 sig
   (* This is a strict superset of CONV *)
   include CONV
-  (* We require there be an ABT module where
-   * term (from CONV) is the type of the ABT
-   *)
+
   structure Syntax : ABT where type t = term
 
   (* A red (short for reduction) is a rule taking a partially

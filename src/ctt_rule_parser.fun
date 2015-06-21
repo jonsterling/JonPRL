@@ -209,7 +209,7 @@ end
 structure CttRuleParser = CttRuleParser
   (structure Tactic = Tactic
    structure ParseSyntax = Syntax
-   type world = Development.t
+   type world = Development.world
    val lookupOperator = Development.lookupOperator
    val stringToLabel  = StringVariable.named)
 
@@ -217,5 +217,5 @@ structure CttScript = TacticScript
   (struct
     structure Tactic = Tactic
     open CttRuleParser
-    type world = Development.t
+    type world = Development.world
    end)

@@ -21,7 +21,7 @@ functor DevelopmentParser
      where type pattern = Pattern.t
      where type term = Syntax.t
      where type tactic = Ctt.tactic
-     where type t = Development.t
+     where type world = Development.world
    structure DevelopmentAst : DEVELOPMENT_AST
      where type label = Development.label
      where Syntax = Syntax
@@ -29,8 +29,7 @@ functor DevelopmentParser
      where Tactic = Tactic
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
-     where type world  = Development.t
- ) : DEVELOPMENT_PARSER =
+     where type world  = Development.world) : DEVELOPMENT_PARSER =
 struct
   structure Development = Development
   structure DevelopmentAst = DevelopmentAst

@@ -1,5 +1,5 @@
 (* In order to construct a module ascribing CONV from an ABT_UTIL
- * ascribing structure one may use Conv. This uses the Syntax.t
+ * ascribing structure one may use Conv. This uses Syntax.t
  * for terms.
  *)
 functor Conv (Syntax : ABT_UTIL) : CONV =

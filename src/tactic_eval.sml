@@ -1,6 +1,6 @@
 structure TacticEval :
         sig
-            val eval : Development.t -> Tactic.t -> Ctt.tactic
+            val eval : Development.world -> Tactic.t -> Ctt.tactic
         end =
 struct
   open Tactic

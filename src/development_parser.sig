@@ -3,7 +3,7 @@ sig
     structure Development : DEVELOPMENT
     structure DevelopmentAst : DEVELOPMENT_AST
 
-    val parse : Development.t
-                -> (Development.t * DevelopmentAst.t list)
+    val parse : Development.world
+                -> (Development.world * DevelopmentAst.t list)
                        CharParser.charParser
 end
