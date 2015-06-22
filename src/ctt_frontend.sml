@@ -13,6 +13,19 @@ struct
       go (ConsView.out (Development.enumerate world))
     end
 
+  fun prettyException E =
+    case E of
+         AnnotatedLcf.RefinementFailed (exn as {error, goal, metadata as {name, pos}}) =>
+           "[" ^ Pos.toString pos
+           ^ "]: tactic '"
+           ^ name
+           ^ "' failed with goal: \n"
+           ^ Sequent.toString goal
+           ^ "\n\n" ^ prettyException error
+       | TacticEval.RemainingSubgoals goals =>
+           ("Remaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals)
+       | _ => exnMessage E
+
   fun loadFile (initialDevelopment, name) : Development.world =
     let
       val instream = TextIO.openIn name
@@ -37,14 +50,6 @@ struct
            Sum.INL e => raise Fail e
          | Sum.INR (bindings, ast) =>
            DevelopmentAstEval.eval (updateDevelopment bindings) ast)
-      handle
-          Development.RemainingSubgoals goals =>
-            (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals ^ "\n\n");
-            raise Development.RemainingSubgoals goals)
-        | AnnotatedLcf.RefinementFailed (exn as {error, goal, metadata as {name,pos}}) =>
-            (print
-              ("\n\n[" ^ Pos.toString pos
-                 ^ "]: tactic '" ^ name ^ "' failed (" ^ exnMessage error ^ ") with goal: \n" ^ Sequent.toString goal ^ "\n\n");
-            raise AnnotatedLcf.RefinementFailed exn)
+      handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
 end

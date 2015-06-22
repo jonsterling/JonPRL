@@ -85,8 +85,6 @@ struct
 
   val empty = Telescope.empty
 
-  exception RemainingSubgoals of judgement list
-
   fun prove T (lbl, goal, tac) =
     let
       val (subgoals, validation) = tac goal
@@ -96,7 +94,7 @@ struct
                   {statement = goal,
                    script = tac,
                    evidence = Susp.delay (fn _ => validation [])})
-         | _ => raise RemainingSubgoals subgoals
+         | _ => raise Fail "Subgoals not discharged"
     end
 
   fun defineTactic T (lbl, tac) =

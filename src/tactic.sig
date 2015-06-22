@@ -37,9 +37,10 @@ sig
       | SYMMETRY of meta
       | TRY of t
       | LIMIT of t
-      | ORELSE of t list
+      | ORELSE of t list * meta
       | THEN of (t, t list) Sum.sum list
       | ID of meta
       | FAIL of meta
       | TRACE of string * meta
+      | COMPLETE of t * meta
 end
