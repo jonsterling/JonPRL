@@ -13,6 +13,19 @@ group is
 
   level.sig
   level.sml
+  dir.sig
+  dir.sml
+
+  tactic.sig
+  tactic.sml
+  tactic_eval.sml
+
+  parser_context.sig
+  parser_context.fun
+
+  development-ast.sig
+  development-ast.sml
+  development-ast-eval.sml
 
   jonprl_language_def.sml
   parse_label.sig
@@ -50,4 +63,3 @@ group is
 
   ctt_frontend.sml
   main.sml
-

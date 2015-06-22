@@ -71,6 +71,15 @@ struct
   type object = Object.t
   type world = object Telescope.telescope
   fun enumerate t = t
+  fun enumerateOperators t =
+      let
+          open Telescope.SnocView
+          fun go Empty bind = bind
+            | go (Snoc (rest, lbl, Object.Operator {arity, ...})) bind =
+              go (out rest) ((lbl, arity) :: bind)
+            | go  (Snoc (rest, lbl, _)) bind =
+              go (out rest) bind
+      in go (out t) [] end
 
   val empty = Telescope.empty
 

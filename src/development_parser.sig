@@ -1,5 +1,7 @@
 signature DEVELOPMENT_PARSER =
 sig
-  structure Development : DEVELOPMENT
-  val parse : Development.world -> Development.world CharParser.charParser
+    type world
+    structure DevelopmentAst : DEVELOPMENT_AST
+
+    val parse : world -> (world * DevelopmentAst.t list) CharParser.charParser
 end

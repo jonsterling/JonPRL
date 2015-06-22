@@ -22,12 +22,20 @@ struct
              Stream.Nil => true
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
+      val initialContext =
+          StringVariableContext.new
+              (Development.enumerateOperators initialDevelopment)
+      fun updateDevelopment bindings =
+        List.foldl (fn (bind, wld) => Development.declareOperator wld bind)
+                   initialDevelopment
+                   (StringVariableContext.enumerateOperators bindings)
 
       open CttDevelopmentParser
     in
-      (case (CharParser.parseChars (parse initialDevelopment) coordStream) of
+      (case CharParser.parseChars (parse initialContext) coordStream of
            Sum.INL e => raise Fail e
-         | Sum.INR x => x)
+         | Sum.INR (bindings, ast) =>
+           DevelopmentAstEval.eval (updateDevelopment bindings) ast)
       handle
           Development.RemainingSubgoals goals =>
             (print ("\n\nRemaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals ^ "\n\n");
