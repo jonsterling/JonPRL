@@ -97,7 +97,7 @@ struct
     whiteSpace >>
     (parseDecl D << dot) -- (fn (D', decl) =>
       $ (parse' D' (decl :: ast)) <|>
-      (whiteSpace >> not any) return (D', ast))
+      (whiteSpace >> not any) return (D', decl :: ast))
 
   fun parse D = ($ (fn () => parse' D [] ()
                              wth (fn (D, ast) => (D, List.rev ast))))
