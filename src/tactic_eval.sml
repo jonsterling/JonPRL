@@ -1,11 +1,13 @@
 structure TacticEval :
 sig
+  exception RemainingSubgoals of Development.judgement list
   val eval : Development.world -> Tactic.t -> Ctt.tactic
 end =
 struct
   open Tactic
   open Ctt.Rules
   structure T = ProgressTacticals(Lcf)
+  exception RemainingSubgoals = T.RemainingSubgoals
 
   fun an a t = AnnotatedLcf.annotate (a, t)
 
@@ -38,7 +40,7 @@ struct
       | SYMMETRY a => an a EqSym
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
-      | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map (eval wld) tacs)
+      | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
       | THEN ts =>
         List.foldl
           (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
@@ -48,4 +50,5 @@ struct
       | ID a => an a T.ID
       | FAIL a => an a T.FAIL
       | TRACE (msg, a) => an a (T.TRACE msg)
+      | COMPLETE (t, a) => an a (T.COMPLETE (eval wld t))
 end

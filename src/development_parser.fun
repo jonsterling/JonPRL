@@ -32,7 +32,6 @@ functor DevelopmentParser
 
    val declareOperator : TacticScript.world -> (Tactic.label * Arity.t) -> TacticScript.world
    val lookupOperator : TacticScript.world -> Tactic.label -> Arity.t
-
    val stringToLabel  : string -> Tactic.label) : DEVELOPMENT_PARSER =
 struct
   type world = TacticScript.world
@@ -61,9 +60,10 @@ struct
   fun parseTheorem D =
     reserved "Theorem" >> parseLabel << colon
       && parseTm [] D
-      && braces (TacticScript.parse D)
-      wth (fn (thm, (M, tac)) =>
-             (D, DevelopmentAst.THEOREM (thm, M, tac)))
+      && braces (!! (TacticScript.parse D))
+      wth (fn (thm, (M, (tac, pos))) =>
+             (D, DevelopmentAst.THEOREM
+               (thm, M, Tactic.COMPLETE (tac, {name = "COMPLETE", pos = pos}))))
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode

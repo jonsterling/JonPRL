@@ -43,6 +43,7 @@ struct
       || $ (parseTry D)
       || $ (parseRepeat D)
       || $ (parseOrelse D)
+      || $ (parseComplete D)
       || parseId
       || parseFail
       || parseTrace
@@ -56,8 +57,12 @@ struct
     wth LIMIT
 
   and parseOrelse D () =
-    parens (separate1 ($ (parseScript D)) pipe)
-    wth ORELSE
+    !! (parens (separate1 ($ (parseScript D)) pipe))
+    wth (fn (ts, pos) => ORELSE (ts, {name = "ORELSE", pos = pos}))
+
+  and parseComplete D () =
+    !! (middle (symbol "!{") ($ (parseScript D)) (symbol "}"))
+    wth (fn (t, pos) => COMPLETE (t, {name = "COMPLETE", pos = pos}))
 
   fun parse D = $ (parseScript D) << opt (dot || semi)
 end
