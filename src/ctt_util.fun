@@ -65,7 +65,8 @@ struct
   fun Elim {target, names, term} =
     (VoidElim THEN Hypothesis target)
       ORELSE UnitElim target
-      ORELSE ProdElim (target, take2 names)
+      ORELSE_LAZY (fn _ => PlusElim (target, take2 names))
+      ORELSE_LAZY (fn _ => ProdElim (target, take2 names))
       ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
       ORELSE_LAZY (fn _ => IsectElim (target, valOf term, take2 names))
       ORELSE SubsetElim (target, take2 names)
@@ -80,6 +81,13 @@ struct
         ORELSE VoidEq
         ORELSE HypEq
         ORELSE UnivEq
+        ORELSE PlusEq
+        ORELSE InlEq level
+        ORELSE InrEq level
+        ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
+                                      (List.nth (terms, 1),
+                                       List.nth (terms, 2),
+                                       take2 names))
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable

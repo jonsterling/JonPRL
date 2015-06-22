@@ -286,6 +286,10 @@ struct
         || string "unit" return UNIT
         || string "<>" return AX
         || string "Σ" return PROD
+        || string "+" return PLUS
+        || string "inl" return INL
+        || string "inr" return INR
+        || string "decide" return DECIDE
         || string "pair" return PAIR
         || string "spread" return SPREAD
         || string "Π" return FUN

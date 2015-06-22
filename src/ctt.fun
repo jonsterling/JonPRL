@@ -721,7 +721,7 @@ struct
       in
         [ H >> A
         , H >> MEM $$ #[B, UNIV k $$ #[]]
-        ] BY (fn [InA, WfB] => INL $$ #[InA, WfB]
+        ] BY (fn [InA, WfB] => PLUS_INTROL $$ #[InA, WfB]
                | _ => raise Refine)
       end
 
@@ -732,7 +732,7 @@ struct
       in
         [ H >> B
         , H >> MEM $$ #[A, UNIV k $$ #[]]
-        ] BY (fn [InB, WfA] => INR $$ #[InB, WfA]
+        ] BY (fn [InB, WfA] => PLUS_INTROR $$ #[InB, WfA]
                | _ => raise Refine)
       end
 
@@ -754,7 +754,7 @@ struct
       in
         [ H's >> subst withs z P
         , H't >> subst witht z P
-        ] BY (fn [L, R] => PLUS_ELIM $$ #[``z, L, R]
+        ] BY (fn [L, R] => PLUS_ELIM $$ #[``z, s \\ L, t \\ R]
                | _ => raise Refine)
       end
 
@@ -786,7 +786,7 @@ struct
                | _ => raise Refine)
       end
 
-    fun DecideEq (A, B, x) (H >> P) =
+    fun DecideEq C (A, B, x) (H >> P) =
       let
         val #[M, N, T] = P ^! EQ
         val #[M', sL, tR] = M ^! DECIDE
@@ -797,10 +797,12 @@ struct
                                   Context.fresh (H, Variable.named "t"))
         val H's = H @@ (s, A)
         val H't = H @@ (t, B)
+        val C's = subst1 C (INL $$ #[``s])
+        val C't = subst1 C (INR $$ #[``t])
       in
         [ H >> EQ $$ #[M', N', PLUS $$ #[A, B]]
-        , H's >> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), P]
-        , H't >> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), P]
+        , H's >> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
+        , H't >> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
         ] BY (fn [EqM, EqL, EqR] => DECIDE_EQ $$ #[EqM, EqR, EqL]
                | _ => raise Refine)
       end

@@ -37,6 +37,20 @@ Theorem test7 : [Π(Σ(void;_.unit); z. void)] {
   auto.
 }.
 
+Theorem test8 : [∈(+(void; void); U<0>)] {
+  auto
+}.
+
+Theorem test9 : [=(inl(<>); inl(<>); +(unit; void))] {
+  auto
+}.
+
+Theorem test10 : [∀(U<0>; A.
+                  ∀(U<0>; B.
+                  Π(+(A; B); _. +(B; A))))] {
+  auto; elim #3; [intro #1, intro #0]; auto
+}.
+
 Theorem axiom-of-choice : [∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
   auto; intro [λ(w. spread(ap(φ;w); x.y.x))]; auto;
   elim #4 [a]; auto;
