@@ -7,7 +7,7 @@ functor CttRuleParser
      where type ParseOperator.world = Tactic.label -> Arity.t
    type world
    val lookupOperator : world -> Tactic.label -> Arity.t
-   val stringToLabel  : string -> Tactic.label):
+   val stringToLabel  : string -> Tactic.label) :
 sig
   val parseRule : world -> Tactic.t CharParser.charParser
 end =
@@ -81,11 +81,12 @@ struct
       && parseIndex
       && parseTm D && opt parseLevel
       wth (fn (name, (dir, (i, (M, k)))) => fn pos =>
-              HYP_SUBST ({dir = dir,
-                          index = i,
-                          domain = M,
-                          level = k},
-                         {name = name, pos = pos}))
+              HYP_SUBST
+                ({dir = dir,
+                  index = i,
+                  domain = M,
+                  level = k},
+                 {name = name, pos = pos}))
 
   val parseIntroArgs =
     fn D => opt (parseTm D)

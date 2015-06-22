@@ -23,9 +23,9 @@ group is
   parser_context.sig
   parser_context.fun
 
-  development-ast.sig
-  development-ast.sml
-  development-ast-eval.sml
+  development_ast.sig
+  development_ast.sml
+  development_ast_eval.sml
 
   jonprl_language_def.sml
   parse_label.sig

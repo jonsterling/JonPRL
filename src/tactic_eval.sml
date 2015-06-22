@@ -1,7 +1,7 @@
 structure TacticEval :
-        sig
-            val eval : Development.world -> Tactic.t -> Ctt.tactic
-        end =
+sig
+  val eval : Development.world -> Tactic.t -> Ctt.tactic
+end =
 struct
   open Tactic
   open Ctt.Rules

@@ -48,16 +48,16 @@ struct
       || parseTrace
 
   and parseTry D () =
-        middle (symbol "?{") ($ (parseScript D)) (symbol "}")
-          wth TRY
+    middle (symbol "?{") ($ (parseScript D)) (symbol "}")
+    wth TRY
 
   and parseRepeat D () =
-        middle (symbol "*{") ($ (parseScript D)) (symbol "}")
-        wth LIMIT
+    middle (symbol "*{") ($ (parseScript D)) (symbol "}")
+    wth LIMIT
 
   and parseOrelse D () =
-        parens (separate1 ($ (parseScript D)) pipe)
-        wth ORELSE
+    parens (separate1 ($ (parseScript D)) pipe)
+    wth ORELSE
 
   fun parse D = $ (parseScript D) << opt (dot || semi)
 end

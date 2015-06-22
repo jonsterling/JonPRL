@@ -23,12 +23,13 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
       val initialContext =
-          StringVariableContext.new
-              (Development.enumerateOperators initialDevelopment)
+        StringVariableContext.new
+          (Development.enumerateOperators initialDevelopment)
       fun updateDevelopment bindings =
-        List.foldl (fn (bind, wld) => Development.declareOperator wld bind)
-                   initialDevelopment
-                   (StringVariableContext.enumerateOperators bindings)
+        List.foldl
+          (fn (bind, wld) => Development.declareOperator wld bind)
+          initialDevelopment
+          (StringVariableContext.enumerateOperators bindings)
 
       open CttDevelopmentParser
     in

@@ -1,9 +1,7 @@
 structure DevelopmentAstEval :
-          sig
-              val eval : Development.world
-                         -> DevelopmentAst.t list
-                         -> Development.world
-          end =
+sig
+  val eval : Development.world -> DevelopmentAst.t list -> Development.world
+end =
 struct
   open DevelopmentAst
   fun eval_decl D ast =
@@ -16,8 +14,7 @@ struct
       | TACTIC (lbl, tac) =>
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
-        Development.defineOperator D {definiendum = pat,
-                                      definiens = term}
+        Development.defineOperator D {definiendum = pat, definiens = term}
 
   fun eval D = List.foldl (fn (decl, D) => eval_decl D decl) D
 end
