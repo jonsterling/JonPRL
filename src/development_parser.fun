@@ -30,9 +30,7 @@ functor DevelopmentParser
      where type tactic = Tactic.t
      where type world = world
 
-   val declareOperator : TacticScript.world
-                          -> (Tactic.label * Arity.t)
-                          -> TacticScript.world
+   val declareOperator : TacticScript.world -> (Tactic.label * Arity.t) -> TacticScript.world
    val lookupOperator : TacticScript.world -> Tactic.label -> Arity.t
 
    val stringToLabel  : string -> Tactic.label) : DEVELOPMENT_PARSER =

@@ -40,10 +40,11 @@ struct
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE tacs => List.foldl T.ORELSE T.FAIL (map (eval wld) tacs)
       | THEN ts =>
-        List.foldl (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
-                     | (Sum.INR xs, rest) => T.THENL (rest, map (eval wld) xs))
-                   T.ID
-                   ts
+        List.foldl
+          (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
+            | (Sum.INR xs, rest) => T.THENL (rest, map (eval wld) xs))
+          T.ID
+          ts
       | ID a => an a T.ID
       | FAIL a => an a T.FAIL
       | TRACE (msg, a) => an a (T.TRACE msg)
