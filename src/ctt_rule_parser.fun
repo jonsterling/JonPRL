@@ -90,10 +90,12 @@ struct
 
   val parseIntroArgs =
     fn D => opt (parseTm D)
+      && opt parseIndex
       && opt (brackets parseName)
       && opt parseLevel
-      wth (fn (tm, (z, k)) =>
+      wth (fn (tm, (rule, (z, k))) =>
             {term = tm,
+             rule = rule,
              freshVariable = z,
              level = k})
 

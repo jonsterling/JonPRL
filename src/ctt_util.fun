@@ -21,6 +21,7 @@ struct
 
   type intro_args =
     {term : term option,
+     rule : int option,
      freshVariable : name option,
      level : Level.t option}
 
@@ -38,10 +39,14 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
-  fun Intro {term,freshVariable,level} =
+  fun Intro {term,rule,freshVariable,level} =
      MemCD
        ORELSE UnitIntro
        ORELSE Assumption
+       ORELSE_LAZY (fn _ => case valOf rule of
+                                0 => PlusIntroL level
+                              | 1 => PlusIntroR level
+                              | _ => raise Fail "Out of range for PLUS")
        ORELSE FunIntro (freshVariable, level)
        ORELSE IsectIntro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdIntro (valOf term, freshVariable, level))
@@ -102,7 +107,10 @@ struct
       EqCD {names = [], level = NONE, terms = []}
 
     val AutoVoidElim = VoidElim THEN Assumption
-    val AutoIntro = Intro {term = NONE, freshVariable = NONE, level = NONE}
+    val AutoIntro = Intro {term = NONE,
+                           rule = NONE,
+                           freshVariable = NONE,
+                           level = NONE}
 
     open Conversions Conversionals
     infix CORELSE

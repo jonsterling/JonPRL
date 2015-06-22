@@ -21,6 +21,7 @@ struct
                     domain : term,
                     level : level option} * meta
     | INTRO of {term : term option,
+                rule : int option,
                 freshVariable : name option,
                 level : level option} * meta
     | ELIM of {target : int,
