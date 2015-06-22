@@ -23,10 +23,8 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
       val initialContext =
-          List.foldl (fn (bind, wld) =>
-                         StringVariableContext.declareOperator wld bind)
-                     StringVariableContext.empty
-                     (Development.enumerateOperators initialDevelopment)
+          StringVariableContext.new
+              (Development.enumerateOperators initialDevelopment)
       fun updateDevelopment bindings =
         List.foldl (fn (bind, wld) => Development.declareOperator wld bind)
                    initialDevelopment

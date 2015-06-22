@@ -4,20 +4,27 @@ struct
   type label = Ord.t
 
   structure Dict = SplayDict(structure Key = Ord)
-  type world = Arity.t Dict.dict
+  type world = {initial : Arity.t Dict.dict,
+                added   : Arity.t Dict.dict}
 
   exception NoSuchOperator of label
 
-  val empty = Dict.empty
+  fun new bnds =
+      {initial = List.foldl
+                     (fn ((lbl, a), wld) => Dict.insert wld lbl a)
+                     Dict.empty
+                     bnds,
+       added = Dict.empty}
 
-  fun lookupOperator dict lbl =
-    case Dict.find dict lbl of
-        NONE => raise NoSuchOperator lbl
+  fun lookupOperator {initial, added} lbl =
+    case Dict.find added lbl of
+        NONE => (Dict.lookup initial lbl handle _ => raise NoSuchOperator lbl)
       | SOME a => a
 
-  fun declareOperator dict (lbl, arity) = Dict.insert dict lbl arity
+  fun declareOperator {initial, added} (lbl, arity) =
+    {initial = initial, added = Dict.insert added lbl arity}
 
-  fun enumerateOperators dict = Dict.toList dict
+  fun enumerateOperators {initial, added} = Dict.toList added
 end
 
 structure StringVariableContext = ParserContext(structure Ord = StringVariable)
