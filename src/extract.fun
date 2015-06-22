@@ -24,6 +24,7 @@ struct
        | UNIT_INTRO $ _ => ax
        | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => AX $$ #[]
+       |  EQ_SYM $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
@@ -65,7 +66,7 @@ struct
        | ` x => `` x
        | x \ E => x \\ extract E
 
-       | _ => raise MalformedEvidence E
+       | _ => (print (Syn.toString E); raise MalformedEvidence E)
 end
 
 structure Extract = Extract(Syntax)
