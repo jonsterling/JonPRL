@@ -14,8 +14,5 @@ group is
   tactic_eval.sml
   development_ast_eval.sml
 
-  pattern_compiler.sig
-  pattern_compiler.fun
-
   ctt_frontend.sml
   main.sml
