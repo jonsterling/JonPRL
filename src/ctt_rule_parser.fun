@@ -8,7 +8,7 @@ functor CttRuleParser
      where type Variable.t = Tactic.name
      where type ParseOperator.world = ParserContext.label -> Arity.t
    val stringToLabel : string -> ParserContext.label
-   ) : INTENSIONAL_PARSER
+   ) :> INTENSIONAL_PARSER
          where type world = ParserContext.world
            and type t = Tactic.t =
 struct
