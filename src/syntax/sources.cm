@@ -1,0 +1,30 @@
+group is
+  ../../lib/sml-abt/abt.cm
+  ../../lib/abt-parsing-lib/abt-parsing-lib.cm
+  ../../lib/telescopes/telescopes.cm
+  ../../lib/cmlib/cmlib.cm
+  ../../lib/parcom.cm
+  ../../lib/sml-conv/conv.cm
+
+  level.sig
+  level.sml
+
+  dir.sig
+  dir.sml
+
+  parse_label.sig
+  parse_label.fun
+
+  jonprl_language_def.sml
+
+  operator.sml
+  syntax.sml
+
+  pattern.fun
+
+  tactic.sig
+  tactic.sml
+  tactic_metadata.sml
+
+  development_ast.sig
+  development_ast.sml
