@@ -152,5 +152,6 @@ sig
   sig
     val ApBeta : conv
     val SpreadBeta : conv
+    val DecideBeta : conv
   end
 end

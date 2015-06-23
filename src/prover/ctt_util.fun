@@ -123,7 +123,7 @@ struct
     open Conversions Conversionals
     infix CORELSE
 
-    val Reduce = ApBeta CORELSE SpreadBeta
+    val Reduce = ApBeta CORELSE SpreadBeta CORELSE DecideBeta
     val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
     val Auto =
