@@ -128,6 +128,12 @@ sig
     val SubsetElim : int * (name * name) option -> tactic
     val SubsetMemberEq : name option * Level.t option -> tactic
 
+    (* H >> IR(I;O) = IR(I';O') ∈ U{k + 1} by InductionRecursionEq
+     *   H >> I = I' ∈ U{k}
+     *   H >> O = O' ∈ U{k}
+     *)
+    val InductionRecursionEq : tactic
+
     val MemCD : tactic
     val Witness : term -> tactic
 

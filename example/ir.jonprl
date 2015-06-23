@@ -1,0 +1,3 @@
+Theorem ir-wf : [∈(IR(unit;unit); U<1>)] {
+  auto
+}.

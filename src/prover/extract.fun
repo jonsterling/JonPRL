@@ -66,6 +66,8 @@ struct
        | SUBSET_ELIM $ #[R, stD] => extract (stD // R) // ax
        | SUBSET_MEMBER_EQ $ _ => ax
 
+       | IR_EQ $ _ => ax
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
@@ -75,7 +77,7 @@ struct
        | ` x => `` x
        | x \ E => x \\ extract E
 
-       | _ => (print (Syn.toString E); raise MalformedEvidence E)
+       | _ => raise MalformedEvidence E
 end
 
 structure Extract = Extract(Syntax)

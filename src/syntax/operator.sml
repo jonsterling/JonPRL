@@ -12,6 +12,7 @@ struct
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
+    | IR_EQ
 
     | ADMIT
 
@@ -25,6 +26,7 @@ struct
     | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
+    | IR | IR_IOTA | IR_SIGMA | IR_DELTA
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -79,6 +81,12 @@ struct
     | eq (IND_SUBSET_INTRO, IND_SUBSET_INTRO) = true
     | eq (SUBSET_ELIM, SUBSET_ELIM) = true
     | eq (SUBSET_MEMBER_EQ, SUBSET_MEMBER_EQ) = true
+    | eq (PLUS_EQ, PLUS_EQ) = true
+    | eq (PLUS_INTROL, PLUS_INTROL) = true
+    | eq (PLUS_INTROR, PLUS_INTROR) = true
+    | eq (PLUS_ELIM, PLUS_ELIM) = true
+    | eq (IR_EQ, IR_EQ) = true
+
     | eq (ADMIT, ADMIT) = true
     | eq (UNIV i, UNIV j) = i = j
     | eq (VOID, VOID) = true
@@ -96,10 +104,6 @@ struct
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
     | eq (SO_APPLY,SO_APPLY) = true
-    | eq (PLUS_EQ, PLUS_EQ) = true
-    | eq (PLUS_INTROL, PLUS_INTROL) = true
-    | eq (PLUS_INTROR, PLUS_INTROR) = true
-    | eq (PLUS_ELIM, PLUS_ELIM) = true
     | eq (INL_EQ, INL_EQ) = true
     | eq (INR_EQ, INR_EQ) = true
     | eq (DECIDE_EQ, DECIDE_EQ) = true
@@ -107,6 +111,10 @@ struct
     | eq (INL, INL) = true
     | eq (INR, INR) = true
     | eq (DECIDE, DECIDE) = true
+    | eq (IR, IR) = true
+    | eq (IR_IOTA, IR_IOTA) = true
+    | eq (IR_SIGMA, IR_SIGMA) = true
+    | eq (IR_DELTA, IR_DELTA) = true
     | eq _ = false
 
   fun arity O =
@@ -161,6 +169,8 @@ struct
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
+       | IR_EQ => #[0,0]
+
        | ADMIT => #[]
 
        | UNIV i => #[]
@@ -179,6 +189,11 @@ struct
        | DECIDE => #[0, 1, 1]
 
        | ISECT => #[0,1]
+
+       | IR => #[0,0]
+       | IR_IOTA => #[0]
+       | IR_SIGMA => #[0,1]
+       | IR_DELTA => #[0,1]
 
        | EQ => #[0,0,0]
        | MEM => #[0,0]
@@ -241,6 +256,8 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
+       | IR_EQ => "IR-eq"
+
        | UNIV i => "U<" ^ Level.toString i ^ ">"
        | VOID => "void"
        | UNIT => "unit"
@@ -258,6 +275,11 @@ struct
        | INL => "inl"
        | INR => "inr"
        | DECIDE => "decide"
+
+       | IR => "IR"
+       | IR_IOTA => "ι"
+       | IR_DELTA => "δ"
+       | IR_SIGMA => "σ"
 
        | SUBSET => "subset"
 
@@ -300,6 +322,10 @@ struct
         || string "=" return EQ
         || string "∈" return MEM
         || string "subset" return SUBSET
+        || string "IR" return IR
+        || string "ι" return IR_IOTA
+        || string "σ" return IR_SIGMA
+        || string "δ" return IR_DELTA
         || string "so_apply" return SO_APPLY
 
     fun intensionalParseOperator lookup =

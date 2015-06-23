@@ -134,7 +134,7 @@ struct
 
     fun inferLevel (H, P) =
       case out P of
-           UNIV l $ _ => l + 1
+           UNIV l $ _ => Level.succ l
          | FUN $ #[A, xB] =>
            let
              val (H', x, B) = ctxUnbind (H, A, xB)
@@ -159,6 +159,7 @@ struct
            in
              Level.max (inferLevel (H, A), inferLevel (H', B))
            end
+         | IR $ #[I, O] => Level.succ (Level.max (inferLevel (H, I), inferLevel (H, O)))
          | ` x =>
             let
               val X = Context.lookup H x
@@ -810,6 +811,19 @@ struct
         ] BY (fn [EqM, EqL, EqR] =>
                  DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
                | _ => raise Refine)
+      end
+
+    fun InductionRecursionEq (H >> P) =
+      let
+        val #[ir1, ir2, univ] = P ^! EQ
+        val (UNIV i', _) = asApp univ
+        val Ui = UNIV (Level.pred i') $$ #[]
+        val #[I1, O1] = ir1 ^! IR
+        val #[I2, O2] = ir2 ^! IR
+      in
+        [ H >> EQ $$ #[I1, I2, Ui]
+        , H >> EQ $$ #[O1, O2, Ui]
+        ] BY mkEvidence IR_EQ
       end
 
     fun Hypothesis_ x (H >> P) =
