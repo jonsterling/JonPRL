@@ -30,8 +30,8 @@ functor DevelopmentParser
      where type tactic = Tactic.t
      where type world = world
 
-   val declareOperator : TacticScript.world -> (Tactic.label * Arity.t) -> TacticScript.world
-   val lookupOperator : TacticScript.world -> Tactic.label -> Arity.t
+   val declareOperator : world -> (Tactic.label * Arity.t) -> world
+   val lookupOperator : world -> Tactic.label -> Arity.t
    val stringToLabel  : string -> Tactic.label) : DEVELOPMENT_PARSER =
 struct
   type world = TacticScript.world
@@ -57,12 +57,12 @@ struct
 
   val parseLabel = identifier wth stringToLabel
 
-  fun parseTheorem D =
+  fun parseTheorem w =
     reserved "Theorem" >> parseLabel << colon
-      && parseTm [] D
-      && braces (!! (TacticScript.parse D))
+      && parseTm [] w
+      && braces (!! (TacticScript.parse w))
       wth (fn (thm, (M, (tac, pos))) =>
-             (D, DevelopmentAst.THEOREM
+             (w, DevelopmentAst.THEOREM
                (thm, M, Tactic.COMPLETE (tac, {name = "COMPLETE", pos = pos}))))
 
   val parseInt =
@@ -72,38 +72,37 @@ struct
     parens (semiSep parseInt)
     wth Vector.fromList
 
-  fun parseTactic D =
+  fun parseTactic w =
     reserved "Tactic" >> parseLabel
-      && braces (TacticScript.parse D)
+      && braces (TacticScript.parse w)
       wth (fn (lbl, tac) =>
-              (D, DevelopmentAst.TACTIC (lbl, tac)))
+              (w, DevelopmentAst.TACTIC (lbl, tac)))
 
-  fun parseOperatorDecl D =
+  fun parseOperatorDecl w =
     (reserved "Operator" >> parseLabel << colon && parseArity)
      wth (fn (lbl, arity) =>
-             (declareOperator D (lbl, arity),
+             (declareOperator w (lbl, arity),
               DevelopmentAst.OPERATOR (lbl, arity)))
 
-  fun parseOperatorDef D =
-    parsePattern D -- (fn (pat : Pattern.t) =>
-      succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) D)
+  fun parseOperatorDef w =
+    parsePattern w -- (fn (pat : Pattern.t) =>
+      succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) w)
     ) wth (fn (P : Pattern.t, N : Syntax.t) =>
-              (D, DevelopmentAst.DEFINITION (P, N)))
+              (w, DevelopmentAst.DEFINITION (P, N)))
 
-  fun parseDecl D =
-      parseTheorem D
-      || parseTactic D
-      || parseOperatorDecl D
-      || parseOperatorDef D
+  fun parseDecl w =
+      parseTheorem w
+      || parseTactic w
+      || parseOperatorDecl w
+      || parseOperatorDef w
 
-  fun parse' D ast () =
+  fun parse' w ast () =
     whiteSpace >>
-    (parseDecl D << dot) -- (fn (D', decl) =>
-      $ (parse' D' (decl :: ast)) <|>
-      (whiteSpace >> not any) return (D', decl :: ast))
+    (parseDecl w << dot) -- (fn (w', decl) =>
+      $ (parse' w' (decl :: ast)) <|>
+      (whiteSpace >> not any) return (w', decl :: ast))
 
-  fun parse D = ($ (fn () => parse' D [] ()
-                             wth (fn (D, ast) => (D, List.rev ast))))
+  fun parse w = $ (parse' w []) wth (fn (w, ast) => (w, List.rev ast))
 end
 
 structure CttDevelopmentParser = DevelopmentParser

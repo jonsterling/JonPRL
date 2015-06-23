@@ -5,7 +5,7 @@ struct
 
   structure Dict = SplayDict(structure Key = Ord)
   type world = {initial : Arity.t Dict.dict,
-                added   : Arity.t Dict.dict}
+                added : Arity.t Dict.dict}
 
   exception NoSuchOperator of label
 

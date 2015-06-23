@@ -1,8 +1,7 @@
 functor TacticScript
   (structure Tactic : TACTIC
    type world
-   val parseRule : world -> Tactic.t CharParser.charParser)
-        : TACTIC_SCRIPT =
+   val parseRule : world -> Tactic.t CharParser.charParser) : TACTIC_SCRIPT =
 struct
   type world = world
   type tactic = Tactic.t
@@ -33,36 +32,36 @@ struct
       wth (fn ((name, pos), msg) =>
               TRACE (msg, {name = name, pos = pos}))
 
-  fun parseScript D () : tactic charParser =
-    separate1 ((squares (commaSep ($ (parseScript D))) wth Sum.INR)
-                   <|> ($ (plain D) wth Sum.INL)) semi
+  fun parseScript w () : tactic charParser =
+    separate1 ((squares (commaSep ($ (parseScript w))) wth Sum.INR)
+                   <|> ($ (plain w) wth Sum.INL)) semi
     wth THEN
 
-  and plain D () =
-    parseRule D
-      || $ (parseTry D)
-      || $ (parseRepeat D)
-      || $ (parseOrelse D)
-      || $ (parseComplete D)
+  and plain w () =
+    parseRule w
+      || $ (parseTry w)
+      || $ (parseRepeat w)
+      || $ (parseOrelse w)
+      || $ (parseComplete w)
       || parseId
       || parseFail
       || parseTrace
 
-  and parseTry D () =
-    middle (symbol "?{") ($ (parseScript D)) (symbol "}")
+  and parseTry w () =
+    middle (symbol "?{") ($ (parseScript w)) (symbol "}")
     wth TRY
 
-  and parseRepeat D () =
-    middle (symbol "*{") ($ (parseScript D)) (symbol "}")
+  and parseRepeat w () =
+    middle (symbol "*{") ($ (parseScript w)) (symbol "}")
     wth LIMIT
 
-  and parseOrelse D () =
-    !! (parens (separate1 ($ (parseScript D)) pipe))
+  and parseOrelse w () =
+    !! (parens (separate1 ($ (parseScript w)) pipe))
     wth (fn (ts, pos) => ORELSE (ts, {name = "ORELSE", pos = pos}))
 
-  and parseComplete D () =
-    !! (middle (symbol "!{") ($ (parseScript D)) (symbol "}"))
+  and parseComplete w () =
+    !! (middle (symbol "!{") ($ (parseScript w)) (symbol "}"))
     wth (fn (t, pos) => COMPLETE (t, {name = "COMPLETE", pos = pos}))
 
-  fun parse D = $ (parseScript D) << opt (dot || semi)
+  fun parse w = $ (parseScript w) << opt (dot || semi)
 end
