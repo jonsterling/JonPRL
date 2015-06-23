@@ -106,7 +106,7 @@ sig
      *)
     val InrEq : Level.t option -> tactic
     val DecideEq : term
-                   -> (term * term * (name * name) option)
+                   -> (term * term * (name * name * name) option)
                    -> tactic
 
     val FunEq : name option -> tactic

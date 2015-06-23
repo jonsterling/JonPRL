@@ -87,7 +87,7 @@ struct
         ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
                                       (List.nth (terms, 1),
                                        List.nth (terms, 2),
-                                       take2 names))
+                                       take3 names))
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable

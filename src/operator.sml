@@ -135,7 +135,7 @@ struct
        | PLUS_ELIM => #[0, 1, 1]
        | INL_EQ => #[0, 0]
        | INR_EQ => #[0, 0]
-       | DECIDE_EQ => #[0, 1, 1]
+       | DECIDE_EQ => #[0, 2, 2]
 
        | FUN_EQ => #[0,1]
        | FUN_INTRO => #[1,0]

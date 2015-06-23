@@ -791,19 +791,24 @@ struct
         val #[M, N, T] = P ^! EQ
         val #[M', sL, tR] = M ^! DECIDE
         val #[N', sL', tR'] = N ^! DECIDE
-        val (s, t) = case x of
-                         SOME names => names
-                       | NONE => (Context.fresh (H, Variable.named "s"),
-                                  Context.fresh (H, Variable.named "t"))
+        val (s, t, eq) =
+            case x of
+                SOME names => names
+              | NONE => (Context.fresh (H, Variable.named "s"),
+                         Context.fresh (H, Variable.named "t"),
+                         Context.fresh (H, Variable.named "eq"))
         val H's = H @@ (s, A)
+                    @@ (eq, EQ $$ #[M', INL $$ #[``s], PLUS $$ #[A, B]])
         val H't = H @@ (t, B)
+                    @@ (eq, EQ $$ #[M', INR $$ #[``t], PLUS $$ #[A, B]])
         val C's = subst1 C (INL $$ #[``s])
         val C't = subst1 C (INR $$ #[``t])
       in
         [ H >> EQ $$ #[M', N', PLUS $$ #[A, B]]
         , H's >> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
         , H't >> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
-        ] BY (fn [EqM, EqL, EqR] => DECIDE_EQ $$ #[EqM, EqR, EqL]
+        ] BY (fn [EqM, EqL, EqR] =>
+                 DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
                | _ => raise Refine)
       end
 
