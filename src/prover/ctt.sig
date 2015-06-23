@@ -140,11 +140,17 @@ sig
      *)
     val InductionRecursionIntroIota : Level.t option -> tactic
 
-    (* H >> IR(I;O) ext δ(s. E) by InductionRecursionIntroSigma S x k
+    (* H >> IR(I;O) ext σ(s. E) by InductionRecursionIntroSigma S x k
      *   H >> S ∈ U{k}
-     *   H, x : S => IR(I;O) >> IR(I;O) ext E
+     *   H, x : S >> IR(I;O) ext E
      *)
     val InductionRecursionIntroSigma : term * name option * Level.t option -> tactic
+
+    (* H >> IR(I;O) ext δ(f. E) by InductionRecursionIntroDelta S x k
+     *   H >> S ∈ U{k}
+     *   H, x : S => I >> IR(I;O) ext E
+     *)
+    val InductionRecursionIntroDelta : term * name option * Level.t option -> tactic
 
     val MemCD : tactic
     val Witness : term -> tactic

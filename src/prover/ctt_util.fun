@@ -58,6 +58,7 @@ struct
          case valOf rule of
               0 => InductionRecursionIntroIota level
             | 1 => InductionRecursionIntroSigma (valOf term, freshVariable, level)
+            | 2 => InductionRecursionIntroDelta (valOf term, freshVariable, level)
             | _ => raise Fail "Out of range for IR")
 
   fun take2 (x::y::_) = SOME (x,y)

@@ -9,3 +9,7 @@ Theorem iota-formation-test : [IR(void;unit)] {
 Theorem sigma-formation-test : [IR(void;unit)] {
   intro [unit] #1; auto; intro #0; [assumption, auto]
 }.
+
+Theorem delta-formation-test : [IR(void;unit)] {
+  intro [unit] #2; auto; elim #1 [<>]; auto
+}.

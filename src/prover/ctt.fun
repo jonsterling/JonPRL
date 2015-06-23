@@ -839,12 +839,24 @@ struct
     fun InductionRecursionIntroSigma (S, ox, ok) (H >> P) =
       let
         val #[I, O] = P ^! IR
-        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "k")
+        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "s")
         val k = case ok of SOME k => k | NONE => inferLevel (H, S)
       in
         [ H >> MEM $$ #[S, UNIV k $$ #[]]
         , H @@ (x, S) >> P
         ] BY (fn [D,E] => IR_INTRO_SIGMA $$ #[D, x \\ E]
+               | _ => raise Refine)
+      end
+
+    fun InductionRecursionIntroDelta (S, ox, ok) (H >> P) =
+      let
+        val #[I, O] = P ^! IR
+        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "k")
+        val k = case ok of SOME k => k | NONE => inferLevel (H, S)
+      in
+        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        , H @@ (x, FUN $$ #[S, Variable.named "_" \\ I]) >> P
+        ] BY (fn [D,E] => IR_INTRO_DELTA $$ #[D, x \\ E]
                | _ => raise Refine)
       end
 
