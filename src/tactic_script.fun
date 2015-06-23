@@ -1,9 +1,9 @@
 functor TacticScript
   (structure Tactic : TACTIC
-   type world
-   val parseRule : world -> Tactic.t CharParser.charParser) : TACTIC_SCRIPT =
+   structure RuleParser : INTENSIONAL_PARSER
+     where type t = Tactic.t) : TACTIC_SCRIPT =
 struct
-  type world = world
+  type world = RuleParser.world
   type tactic = Tactic.t
 
   open Tactic ParserCombinators CharParser
@@ -38,7 +38,7 @@ struct
     wth THEN
 
   and plain w () =
-    parseRule w
+    RuleParser.parse w
       || $ (parseTry w)
       || $ (parseRepeat w)
       || $ (parseOrelse w)

@@ -8,10 +8,9 @@ functor CttRuleParser
      where type Variable.t = Tactic.name
      where type ParseOperator.world = ParserContext.label -> Arity.t
    val stringToLabel : string -> ParserContext.label
-   ) :
-sig
-  val parseRule : ParserContext.world -> Tactic.t CharParser.charParser
-end =
+   ) : INTENSIONAL_PARSER
+         where type world = ParserContext.world
+           and type t = Tactic.t =
 struct
   open ParserContext Tactic ParserCombinators CharParser
 
@@ -204,7 +203,7 @@ struct
       || parseAssumption w
       || parseSymmetry w
 
-  val parseRule : world -> Tactic.t charParser =
+  val parse : world -> Tactic.t charParser =
     fn w => !! (tacticParsers w)
     wth (fn (t, pos) => t pos)
 end
@@ -216,8 +215,5 @@ structure CttRuleParser = CttRuleParser
    val stringToLabel = StringVariable.named)
 
 structure CttScript = TacticScript
-  (struct
-    structure Tactic = Tactic
-    type world = StringVariableContext.world
-    open CttRuleParser
-   end)
+  (structure Tactic = Tactic
+   structure RuleParser = CttRuleParser)

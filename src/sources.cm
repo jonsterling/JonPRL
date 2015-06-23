@@ -20,6 +20,8 @@ group is
   tactic.sml
   tactic_eval.sml
 
+  intensional_parser.sig
+
   parser_context.sig
   parser_context.fun
 
