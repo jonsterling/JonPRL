@@ -5,6 +5,7 @@ sig
 
   type intro_args =
     {term : term option,
+     rule : int option,
      freshVariable : name option,
      level : Level.t option}
 

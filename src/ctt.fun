@@ -700,6 +700,118 @@ struct
                 | _ => raise Refine)
       end
 
+
+    fun PlusEq (H >> P) =
+      let
+        val #[L, R, U] = P ^! EQ
+        val (UNIV _, #[]) = asApp U
+        val #[A, B] = L ^! PLUS
+        val #[A', B'] = R ^! PLUS
+      in
+         [ H >> EQ $$ #[A, A', U]
+         , H >> EQ $$ #[B, B', U]
+         ] BY (fn [L, R] => PLUS_EQ $$ #[L, R]
+                | _ => raise Refine)
+      end
+
+    fun PlusIntroL x (H >> P) =
+      let
+        val #[A, B] = P ^! PLUS
+        val k = case x of SOME k => k | NONE => inferLevel (H, B)
+      in
+        [ H >> A
+        , H >> MEM $$ #[B, UNIV k $$ #[]]
+        ] BY (fn [InA, WfB] => PLUS_INTROL $$ #[InA, WfB]
+               | _ => raise Refine)
+      end
+
+    fun PlusIntroR x (H >> P) =
+      let
+        val #[A, B] = P ^! PLUS
+        val k = case x of SOME k => k | NONE => inferLevel (H, A)
+      in
+        [ H >> B
+        , H >> MEM $$ #[A, UNIV k $$ #[]]
+        ] BY (fn [InB, WfA] => PLUS_INTROR $$ #[InB, WfA]
+               | _ => raise Refine)
+      end
+
+    fun PlusElim (i, onames) (H >> P) =
+      let
+        val z = Context.nth H (i - 1)
+        val #[A, B] = Context.lookup H z ^! PLUS
+        val (s, t) =
+            case onames of
+                SOME names => names
+              | NONE => (Context.fresh (H, Variable.named "s"),
+                         Context.fresh (H, Variable.named "t"))
+        val withs = INL $$ #[``s]
+        val witht = INR $$ #[``t]
+        val H's = ctxSubst (Context.interposeAfter H (z, Context.empty @@ (s, A)))
+                           withs z
+        val H't = ctxSubst (Context.interposeAfter H (z, Context.empty @@ (t, B)))
+                           witht z
+      in
+        [ H's >> subst withs z P
+        , H't >> subst witht z P
+        ] BY (fn [L, R] => PLUS_ELIM $$ #[``z, s \\ L, t \\ R]
+               | _ => raise Refine)
+      end
+
+    fun InlEq x (H >> P) =
+      let
+        val #[M, N, T] = P ^! EQ
+        val #[A, B] = T ^! PLUS
+        val #[M'] = M ^! INL
+        val #[N'] = N ^! INL
+        val k = case x of SOME k => k | NONE => inferLevel (H, B)
+      in
+        [ H >> EQ $$ #[M', N', A]
+        , H >> MEM $$ #[B, UNIV k $$ #[]]
+        ] BY (fn [In, Wf] => INL_EQ $$ #[In, Wf]
+               | _ => raise Refine)
+      end
+
+    fun InrEq x (H >> P) =
+      let
+        val #[M, N, T] = P ^! EQ
+        val #[A, B] = T ^! PLUS
+        val #[M'] = M ^! INR
+        val #[N'] = N ^! INR
+        val k = case x of SOME k => k | NONE => inferLevel (H, A)
+      in
+        [ H >> EQ $$ #[M', N', B]
+        , H >> MEM $$ #[A, UNIV k $$ #[]]
+        ] BY (fn [In, Wf] => INR_EQ $$ #[In, Wf]
+               | _ => raise Refine)
+      end
+
+    fun DecideEq C (A, B, x) (H >> P) =
+      let
+        val #[M, N, T] = P ^! EQ
+        val #[M', sL, tR] = M ^! DECIDE
+        val #[N', sL', tR'] = N ^! DECIDE
+        val (s, t, eq) =
+            case x of
+                SOME names => names
+              | NONE => (Context.fresh (H, Variable.named "s"),
+                         Context.fresh (H, Variable.named "t"),
+                         Context.fresh (H, Variable.named "eq"))
+        val H's = H @@ (s, A)
+                    @@ (eq, EQ $$ #[M', INL $$ #[``s], PLUS $$ #[A, B]])
+        val H't = H @@ (t, B)
+                    @@ (eq, EQ $$ #[M', INR $$ #[``t], PLUS $$ #[A, B]])
+        val C's = subst1 C (INL $$ #[``s])
+        val C't = subst1 C (INR $$ #[``t])
+      in
+        [ H >> EQ $$ #[M', N', PLUS $$ #[A, B]]
+        , H's >> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
+        , H't >> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
+        ] BY (fn [EqM, EqL, EqR] =>
+                 DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
+               | _ => raise Refine)
+      end
+
     fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookupVisibility H x

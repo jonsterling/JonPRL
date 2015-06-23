@@ -23,8 +23,9 @@ struct
         an a (EqSubst (left, right, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
         an a (HypEqSubst (dir, index, domain, level))
-      | INTRO ({term, freshVariable, level}, a) =>
+      | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (CttUtil.Intro {term = term,
+                             rule = rule,
                              freshVariable = freshVariable,
                              level = level})
       | ELIM ({target, term, names}, a) =>

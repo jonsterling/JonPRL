@@ -11,6 +11,7 @@ struct
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
+    | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
     | ADMIT
 
@@ -23,6 +24,7 @@ struct
     | ISECT
     | EQ | MEM
     | SUBSET
+    | PLUS | INL | INR | DECIDE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -94,6 +96,17 @@ struct
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
     | eq (SO_APPLY,SO_APPLY) = true
+    | eq (PLUS_EQ, PLUS_EQ) = true
+    | eq (PLUS_INTROL, PLUS_INTROL) = true
+    | eq (PLUS_INTROR, PLUS_INTROR) = true
+    | eq (PLUS_ELIM, PLUS_ELIM) = true
+    | eq (INL_EQ, INL_EQ) = true
+    | eq (INR_EQ, INR_EQ) = true
+    | eq (DECIDE_EQ, DECIDE_EQ) = true
+    | eq (PLUS, PLUS) = true
+    | eq (INL, INL) = true
+    | eq (INR, INR) = true
+    | eq (DECIDE, DECIDE) = true
     | eq _ = false
 
   fun arity O =
@@ -115,6 +128,14 @@ struct
        | PROD_ELIM => #[0,2]
        | PAIR_EQ => #[0,0,1]
        | SPREAD_EQ => #[0,3]
+
+       | PLUS_EQ => #[0, 0]
+       | PLUS_INTROL => #[0, 0] (* The extra arg is that the other *)
+       | PLUS_INTROR => #[0, 0] (* branch has a type. Just a wf-ness goal *)
+       | PLUS_ELIM => #[0, 1, 1]
+       | INL_EQ => #[0, 0]
+       | INR_EQ => #[0, 0]
+       | DECIDE_EQ => #[0, 2, 2]
 
        | FUN_EQ => #[0,1]
        | FUN_INTRO => #[1,0]
@@ -152,6 +173,10 @@ struct
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | PLUS => #[0, 0]
+       | INL => #[0]
+       | INR => #[0]
+       | DECIDE => #[0, 1, 1]
 
        | ISECT => #[0,1]
 
@@ -190,6 +215,14 @@ struct
        | AP_EQ => "ap⁼"
        | FUN_EXT => "funext"
 
+       | PLUS_INTROL => "plus-introl"
+       | PLUS_INTROR => "plus-intror"
+       | PLUS_ELIM => "plus-elim"
+       | PLUS_EQ => "plus⁼"
+       | INL_EQ => "inl-eq"
+       | INR_EQ => "inr-eq"
+       | DECIDE_EQ => "decide-eq"
+
        | ISECT_EQ => "isect⁼"
        | ISECT_INTRO => "isect-intro"
        | ISECT_ELIM => "isect-elim"
@@ -221,6 +254,10 @@ struct
        | ISECT => "⋂"
        | EQ => "="
        | MEM => "∈"
+       | PLUS => "+"
+       | INL => "inl"
+       | INR => "inr"
+       | DECIDE => "decide"
 
        | SUBSET => "subset"
 
@@ -249,6 +286,10 @@ struct
         || string "unit" return UNIT
         || string "<>" return AX
         || string "Σ" return PROD
+        || string "+" return PLUS
+        || string "inl" return INL
+        || string "inr" return INR
+        || string "decide" return DECIDE
         || string "pair" return PAIR
         || string "spread" return SPREAD
         || string "Π" return FUN

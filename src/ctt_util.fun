@@ -21,6 +21,7 @@ struct
 
   type intro_args =
     {term : term option,
+     rule : int option,
      freshVariable : name option,
      level : Level.t option}
 
@@ -38,10 +39,14 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
-  fun Intro {term,freshVariable,level} =
+  fun Intro {term,rule,freshVariable,level} =
      MemCD
        ORELSE UnitIntro
        ORELSE Assumption
+       ORELSE_LAZY (fn _ => case valOf rule of
+                                0 => PlusIntroL level
+                              | 1 => PlusIntroR level
+                              | _ => raise Fail "Out of range for PLUS")
        ORELSE FunIntro (freshVariable, level)
        ORELSE IsectIntro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdIntro (valOf term, freshVariable, level))
@@ -60,7 +65,8 @@ struct
   fun Elim {target, names, term} =
     (VoidElim THEN Hypothesis target)
       ORELSE UnitElim target
-      ORELSE ProdElim (target, take2 names)
+      ORELSE_LAZY (fn _ => PlusElim (target, take2 names))
+      ORELSE_LAZY (fn _ => ProdElim (target, take2 names))
       ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
       ORELSE_LAZY (fn _ => IsectElim (target, valOf term, take2 names))
       ORELSE SubsetElim (target, take2 names)
@@ -75,6 +81,13 @@ struct
         ORELSE VoidEq
         ORELSE HypEq
         ORELSE UnivEq
+        ORELSE PlusEq
+        ORELSE InlEq level
+        ORELSE InrEq level
+        ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
+                                      (List.nth (terms, 1),
+                                       List.nth (terms, 2),
+                                       take3 names))
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable
@@ -102,7 +115,10 @@ struct
       EqCD {names = [], level = NONE, terms = []}
 
     val AutoVoidElim = VoidElim THEN Assumption
-    val AutoIntro = Intro {term = NONE, freshVariable = NONE, level = NONE}
+    val AutoIntro = Intro {term = NONE,
+                           rule = NONE,
+                           freshVariable = NONE,
+                           level = NONE}
 
     open Conversions Conversionals
     infix CORELSE

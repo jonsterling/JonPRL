@@ -24,7 +24,7 @@ struct
        | UNIT_INTRO $ _ => ax
        | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => AX $$ #[]
-       |  EQ_SYM $ _ => ax
+       | EQ_SYM $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
@@ -32,6 +32,15 @@ struct
        | PROD_ELIM $ #[R, xyD] => SPREAD $$ #[R, extract xyD]
        | PAIR_EQ $ _ => ax
        | SPREAD_EQ $ _ => ax
+
+       | PLUS_EQ $ _ => ax
+       | INL_EQ $ _ => ax
+       | INR_EQ $ _ => ax
+       | DECIDE_EQ $ _ => ax
+       | PLUS_INTROL $ #[E, _] => INL $$ #[extract E]
+       | PLUS_INTROR $ #[E, _] => INR $$ #[extract E]
+       | PLUS_ELIM $ #[E, xD, xF] =>
+         DECIDE $$ #[extract E, extract xD, extract xF]
 
        | FUN_EQ $ _ => ax
        | FUN_INTRO $ #[xE, _] => LAM $$ #[extract xE]
