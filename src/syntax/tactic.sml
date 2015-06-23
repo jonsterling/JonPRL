@@ -3,7 +3,7 @@ struct
 
   type term = Syntax.t
   type name = Syntax.Variable.t
-  type label = Development.label
+  type label = string
   type level = Level.t
   type meta = TacticMetadata.metadata
 

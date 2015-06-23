@@ -1,0 +1,31 @@
+group is
+  ../syntax/sources.cm
+  ../../lib/sml-abt/abt.cm
+  ../../lib/telescopes/telescopes.cm
+  ../../lib/cmlib/cmlib.cm
+  ../../lib/sml-lcf/lcf.cm
+  ../../lib/sml-conv/conv.cm
+
+  sequent.fun
+  sequent.sig
+
+  visibility.sml
+
+  extract.sig
+  extract.fun
+
+  context.fun
+  context.sig
+
+  development.fun
+  development.sig
+
+  lcf.fun
+
+  ctt.fun
+  ctt.sig
+  ctt_util.fun
+  ctt_util.sig
+
+  pattern_compiler.fun
+  pattern_compiler.sig

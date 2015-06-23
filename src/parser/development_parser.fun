@@ -17,8 +17,6 @@ functor DevelopmentParser
    structure Pattern : PARSE_ABT
      where type Variable.t = Syntax.Variable.t
      where type ParseOperator.world = Tactic.label -> Arity.t
-   structure Sequent : SEQUENT
-     where type term = Syntax.t
 
    structure DevelopmentAst : DEVELOPMENT_AST
      where type Syntax.t = Syntax.t
@@ -109,7 +107,6 @@ structure CttDevelopmentParser = DevelopmentParser
    structure Tactic = Tactic
    structure Pattern = PatternSyntax
    structure DevelopmentAst = DevelopmentAst
-   structure Sequent = Sequent
    structure TacticScript = CttScript
    val stringToLabel = StringVariable.named
    structure ParserContext = StringVariableContext)

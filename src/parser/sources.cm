@@ -1,0 +1,17 @@
+group is
+  ../../lib/sml-abt/abt.cm
+  ../../lib/abt-parsing-lib/abt-parsing-lib.cm
+  ../../lib/telescopes/telescopes.cm
+  ../../lib/cmlib/cmlib.cm
+  ../../lib/parcom.cm
+  ../syntax/sources.cm
+
+  ctt_rule_parser.fun
+  tactic_script.fun
+  tactic_script.sig
+
+  development_parser.fun
+  development_parser.sig
+  intensional_parser.sig
+  parser_context.fun
+  parser_context.sig
