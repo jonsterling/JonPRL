@@ -9,7 +9,9 @@ signature PARSE_PATTERN =
     where type ParseOperator.world = string -> Arity.t
 
 functor DevelopmentParser
-  (structure Tactic : TACTIC
+  (structure ParserContext : PARSER_CONTEXT
+   structure Tactic : TACTIC
+     where type label = ParserContext.label
    structure Syntax : PARSE_ABT
      where type ParseOperator.world = Tactic.label -> Arity.t
    structure Pattern : PARSE_ABT
@@ -18,23 +20,20 @@ functor DevelopmentParser
    structure Sequent : SEQUENT
      where type term = Syntax.t
 
-   type world
-
    structure DevelopmentAst : DEVELOPMENT_AST
      where type Syntax.t = Syntax.t
      where type Pattern.t = Pattern.t
      where type Tactic.t = Tactic.t
-     where type label    = Tactic.label
+     where type label = ParserContext.label
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
-     where type world = world
+     where type world = ParserContext.world
 
-   val declareOperator : world -> (Tactic.label * Arity.t) -> world
-   val lookupOperator : world -> Tactic.label -> Arity.t
-   val stringToLabel  : string -> Tactic.label) : DEVELOPMENT_PARSER =
+   val stringToLabel : string -> Tactic.label) : DEVELOPMENT_PARSER =
 struct
-  type world = TacticScript.world
+  open ParserContext
+
   structure DevelopmentAst = DevelopmentAst
 
   open ParserCombinators CharParser
@@ -113,4 +112,4 @@ structure CttDevelopmentParser = DevelopmentParser
    structure Sequent = Sequent
    structure TacticScript = CttScript
    val stringToLabel = StringVariable.named
-   open StringVariableContext)
+   structure ParserContext = StringVariableContext)

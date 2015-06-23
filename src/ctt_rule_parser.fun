@@ -1,20 +1,19 @@
 functor CttRuleParser
-  (structure Tactic : TACTIC
+  (structure ParserContext : PARSER_CONTEXT
+   structure Tactic : TACTIC
      where type level = int
+     where type label = ParserContext.label
    structure ParseSyntax : PARSE_ABT
      where type t = Tactic.term
      where type Variable.t = Tactic.name
-     where type ParseOperator.world = Tactic.label -> Arity.t
-
-   type world
-   val lookupOperator : world -> Tactic.label -> Arity.t
-   val stringToLabel : string -> Tactic.label) :
+     where type ParseOperator.world = ParserContext.label -> Arity.t
+   val stringToLabel : string -> ParserContext.label
+   ) :
 sig
-  val parseRule : world -> Tactic.t CharParser.charParser
+  val parseRule : ParserContext.world -> Tactic.t CharParser.charParser
 end =
 struct
-  type world = world
-  open Tactic ParserCombinators CharParser
+  open ParserContext Tactic ParserCombinators CharParser
 
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>
@@ -213,7 +212,7 @@ end
 structure CttRuleParser = CttRuleParser
   (structure Tactic = Tactic
    structure ParseSyntax = Syntax
-   open StringVariableContext
+   structure ParserContext = StringVariableContext
    val stringToLabel = StringVariable.named)
 
 structure CttScript = TacticScript
