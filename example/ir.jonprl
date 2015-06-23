@@ -1,3 +1,7 @@
 Theorem ir-wf : [∈(IR(unit;unit); U<1>)] {
   auto
 }.
+
+Theorem iota-formation-test : [IR(void;unit)] {
+  auto
+}.

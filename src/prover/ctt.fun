@@ -826,6 +826,16 @@ struct
         ] BY mkEvidence IR_EQ
       end
 
+    fun InductionRecursionIntroIota ok (H >> P) =
+      let
+        val #[I, O] = P ^! IR
+        val k = case ok of SOME k => k | NONE => inferLevel (H, I)
+      in
+        [ H >> O
+        , H >> MEM $$ #[I, UNIV k $$ #[]]
+        ] BY mkEvidence IR_INTRO_IOTA
+      end
+
     fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookupVisibility H x

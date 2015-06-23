@@ -67,6 +67,7 @@ struct
        | SUBSET_MEMBER_EQ $ _ => ax
 
        | IR_EQ $ _ => ax
+       | IR_INTRO_IOTA $ #[D,E] => IR_IOTA $$ #[extract D]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
