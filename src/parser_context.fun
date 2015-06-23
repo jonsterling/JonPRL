@@ -1,20 +1,21 @@
-functor ParserContext(structure Ord : ORDERED) :>
-        PARSER_CONTEXT where type label = Ord.t =
+functor ParserContext(structure Label : LABEL) :> PARSER_CONTEXT where type label = Label.t =
 struct
-  type label = Ord.t
+  type label = Label.t
 
-  structure Dict = SplayDict(structure Key = Ord)
-  type world = {initial : Arity.t Dict.dict,
-                added : Arity.t Dict.dict}
+  structure Dict = SplayDict(structure Key = Label)
+  type world =
+    {initial : Arity.t Dict.dict,
+     added : Arity.t Dict.dict}
 
   exception NoSuchOperator of label
 
   fun new bnds =
-      {initial = List.foldl
-                     (fn ((lbl, a), wld) => Dict.insert wld lbl a)
-                     Dict.empty
-                     bnds,
-       added = Dict.empty}
+    {initial =
+       List.foldl
+         (fn ((lbl, a), wld) => Dict.insert wld lbl a)
+         Dict.empty
+         bnds,
+     added = Dict.empty}
 
   fun lookupOperator {initial, added} lbl =
     case Dict.find added lbl of
@@ -22,9 +23,11 @@ struct
       | SOME a => a
 
   fun declareOperator {initial, added} (lbl, arity) =
-    {initial = initial, added = Dict.insert added lbl arity}
+    {initial = initial,
+     added = Dict.insert added lbl arity}
 
-  fun enumerateOperators {initial, added} = Dict.toList added
+  fun enumerateOperators {initial, added} =
+    Dict.toList added
 end
 
-structure StringVariableContext = ParserContext(structure Ord = StringVariable)
+structure StringVariableContext = ParserContext(structure Label = StringVariable)
