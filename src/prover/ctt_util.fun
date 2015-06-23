@@ -43,17 +43,22 @@ struct
      MemCD
        ORELSE UnitIntro
        ORELSE Assumption
-       ORELSE_LAZY (fn _ => case valOf rule of
-                                0 => PlusIntroL level
-                              | 1 => PlusIntroR level
-                              | _ => raise Fail "Out of range for PLUS")
+       ORELSE_LAZY (fn _ =>
+         case valOf rule of
+              0 => PlusIntroL level
+            | 1 => PlusIntroR level
+            | _ => raise Fail "Out of range for PLUS")
        ORELSE FunIntro (freshVariable, level)
        ORELSE IsectIntro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdIntro (valOf term, freshVariable, level))
        ORELSE IndependentProdIntro
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
-       ORELSE (InductionRecursionIntroIota level)
+       ORELSE_LAZY (fn _ =>
+         case valOf rule of
+              0 => InductionRecursionIntroIota level
+            | 1 => InductionRecursionIntroSigma (valOf term, freshVariable, level)
+            | _ => raise Fail "Out of range for IR")
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE

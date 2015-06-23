@@ -3,5 +3,9 @@ Theorem ir-wf : [∈(IR(unit;unit); U<1>)] {
 }.
 
 Theorem iota-formation-test : [IR(void;unit)] {
-  auto
+  intro #0; auto
+}.
+
+Theorem sigma-formation-test : [IR(void;unit)] {
+  intro [unit] #1; auto; intro #0; [assumption, auto]
 }.

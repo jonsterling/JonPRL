@@ -68,6 +68,7 @@ struct
 
        | IR_EQ $ _ => ax
        | IR_INTRO_IOTA $ #[D,E] => IR_IOTA $$ #[extract D]
+       | IR_INTRO_SIGMA $ #[D,xE] => IR_SIGMA $$ #[extract xE]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

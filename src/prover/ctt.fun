@@ -836,6 +836,18 @@ struct
         ] BY mkEvidence IR_INTRO_IOTA
       end
 
+    fun InductionRecursionIntroSigma (S, ox, ok) (H >> P) =
+      let
+        val #[I, O] = P ^! IR
+        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "k")
+        val k = case ok of SOME k => k | NONE => inferLevel (H, S)
+      in
+        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        , H @@ (x, S) >> P
+        ] BY (fn [D,E] => IR_INTRO_SIGMA $$ #[D, x \\ E]
+               | _ => raise Refine)
+      end
+
     fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookupVisibility H x
