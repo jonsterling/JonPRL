@@ -67,10 +67,10 @@ NatC = Bool ◃ So
 ℕ = Fan NatC
 
 ze : ℕ
-ze = fan (ff , (absurd , _))
+ze = fan (ff , absurd , _)
 
 su : ℕ → ℕ
-su n = fan (tt , ((λ _ → n ) , _))
+su n = fan (tt , (λ _ → n ) , _)
 
 mutual
   -- nonwellfounded trees on IR codes (I think these are Capretta's "Wander Types").
@@ -87,4 +87,17 @@ mutual
 
 -- The spread on NatC is the type of natural numbers with an infinite element adjoined
 ∞ : ℕ∞
-Spread.front ∞ = tt , ((λ _ → ∞) , _)
+Spread.front ∞ = tt , (λ _ → ∞) , _
+
+ChoiceSequence : Set
+ChoiceSequence = Spread (ℕ ◃ λ _ → Unit)
+
+ones : ChoiceSequence
+Spread.front ones = su ze , (λ _ → ones) , ⟨⟩
+
+nats : ChoiceSequence
+nats = go ze
+  where
+    go : ℕ → ChoiceSequence
+    Spread.front (go i) = i , (λ _ → go (su i)) , ⟨⟩
+

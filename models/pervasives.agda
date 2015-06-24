@@ -10,6 +10,7 @@ record Σ (A : Set) (B : A → Set) : Set where
     fst : A
     snd : B fst
 
+infixr 8 _,_
 syntax Σ A (λ x → B) = Σ[ x ∶ A ] B
 
 record Unit : Set where
