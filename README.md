@@ -3,6 +3,10 @@ JonPRL is a proof refinement logic in the sense of λ-PRL or
 theory](http://www.sciencedirect.com/science/article/pii/S1570868305000704)
 from Allen, Bickford, Constable, Harper and many other names.
 
+### Discussion and Questions ###
+
+There is an IRC channel on freenode at #jonprl.
+
 ### Building & Installing JonPRL
 
 JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build.  First
