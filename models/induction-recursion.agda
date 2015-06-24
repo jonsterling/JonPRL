@@ -1,5 +1,4 @@
 {-# OPTIONS --copatterns #-}
-{-# OPTIONS --no-positivity-check #-}
 
 -- NOTE: everything in this module can be proved terminating & positive
 -- externally; it's also possible to reformulate the definitions such that Agda
@@ -46,8 +45,7 @@ infix 0 ⟦_⟧_
     let hx , t = hx,t in π (⟦ T (xi ∘ hx) ⟧ X ↓ xi) t
 
 mutual
-  -- wellfounded trees on IR codes. It's not clearly strictly positive &
-  -- terminating, but it can be proved externally.
+  -- wellfounded trees on IR codes
   data Fan {I : Set} (c : IR I I) : Set where
     fan : no-fan c c → Fan c
 
