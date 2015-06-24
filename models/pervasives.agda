@@ -21,9 +21,9 @@ data Void : Set where
 absurd : {A : Set} → Void → A
 absurd ()
 
-data Bool : Set where
-  tt ff : Bool
+data 𝔹 : Set where
+  tt ff : 𝔹
 
-So : Bool → Set
+So : 𝔹 → Set
 So tt = Unit
 So ff = Void

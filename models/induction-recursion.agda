@@ -1,4 +1,3 @@
-{-# OPTIONS --copatterns #-}
 {-# OPTIONS --no-positivity-check #-}
 
 -- NOTE: everything in this module can be proved terminating & positive
@@ -36,6 +35,8 @@ slice = _↓_
 syntax slice E (λ e → p) = e ∶ E ↓ p
 
 infix 0 ⟦_⟧_
+
+-- Every IR code gives rise to a functor on slice categories (its extension)
 ⟦_⟧_ : ∀ {I O} → IR I O → Set/ I → Set/ O
 ⟦ ι o ⟧ X ↓ xi = _ ∶ Unit ↓ o
 ⟦ σ S T ⟧ X ↓ xi =
@@ -46,11 +47,14 @@ infix 0 ⟦_⟧_
     let hx , t = hx,t in π (⟦ T (xi ∘ hx) ⟧ X ↓ xi) t
 
 -- Containers (signatures) may be interpreted into IR codes
-_◃_ : (S : Set) (P : S → Set) → IR Unit Unit
-S ◃ P = choose⟨ s ∶ S ⟩ (recurse⟨ P s ⟩ p ↦ element ⟨⟩)
+cont : (S : Set) (P : S → Set) → IR Unit Unit
+cont S P = choose⟨ s ∶ S ⟩ (recurse⟨ P s ⟩ p ↦ element ⟨⟩)
+
+syntax cont S (λ s → P) = s ∶ S ◃ P
 
 {-# NO_TERMINATION_CHECK #-}
 mutual
+  -- A fan on an IR code is the least fixpoint of the code's extension
   data Fan {I : Set} (c : IR I I) : Set where
     sup : dom (⟦ c ⟧ (Fan c) ↓ fan-idx) → Fan c
 
@@ -59,6 +63,7 @@ mutual
 
 {-# NO_TERMINATION_CHECK #-}
 mutual
+  -- A spread on an IR code is the greatest fixpoint of the code's extension
   data Spread {I : Set} (c : IR I I) : Set where
     inf : ∞ dom (⟦ c ⟧ Spread c ↓ spread-idx) → Spread c
 
@@ -67,7 +72,7 @@ mutual
 
 -- An IR code for the natural numbers
 NatC : IR Unit Unit
-NatC = Bool ◃ So
+NatC = b ∶ 𝔹 ◃ So b
 
 ℕ = Fan NatC
 
@@ -80,10 +85,10 @@ su n = sup (tt , (λ _ → n) , ⟨⟩)
 ℕ∞ = Spread NatC
 
 infinity : ℕ∞
-infinity = inf (♯ (tt , (λ x → infinity) , ⟨⟩))
+infinity = inf (♯ (tt , (λ _ → infinity) , ⟨⟩))
 
 ChoiceSequence : Set
-ChoiceSequence = Spread (ℕ ◃ λ x → Unit)
+ChoiceSequence = Spread (_ ∶ ℕ ◃ Unit)
 
 ones : ChoiceSequence
 ones = inf (♯ (su ze , (λ _ → ones) , ⟨⟩))
