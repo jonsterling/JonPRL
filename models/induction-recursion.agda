@@ -1,6 +1,5 @@
 {-# OPTIONS --copatterns #-}
 {-# OPTIONS --no-positivity-check #-}
-{-# OPTIONS --no-termination-check #-}
 
 -- NOTE: everything in this module can be proved terminating & positive
 -- externally; it's also possible to reformulate the definitions such that Agda
@@ -9,6 +8,7 @@
 module induction-recursion where
 
 open import pervasives
+open import coinduction
 
 data IR (I O : Set) : Set₁ where
   ι : O → IR I O
@@ -49,16 +49,24 @@ mutual
   -- wellfounded trees on IR codes. It's not clearly strictly positive &
   -- terminating, but it can be proved externally.
   data Fan {I : Set} (c : IR I I) : Set where
-    fan : dom (⟦ c ⟧ Fan c ↓ fan-idx) → Fan c
+    fan : no-fan c c → Fan c
 
   fan-idx : {I : Set} {c : IR I I} → Fan c → I
-  fan-idx {c = c} (fan t) = π (⟦ c ⟧ Fan c ↓ fan-idx) t
+  fan-idx {c = c} (fan t) = de-fan c c t
 
+  no-fan : {I : Set} (c d : IR I I) → Set
+  no-fan c (ι x) = Unit
+  no-fan c (σ S T) = Σ[ s ∶ S ] no-fan c (T s)
+  no-fan c (δ H T) = Σ[ hc ∶ (H → Fan c) ] no-fan c (T (λ h → fan-idx (hc h)))
+
+  de-fan : {I : Set} (c d : IR I I) → no-fan c d → I
+  de-fan c (ι i) ⟨⟩ = i
+  de-fan c (σ S T) (s , t) = de-fan c (T s) t
+  de-fan c (δ H T) (hc , t) = de-fan c (T (λ h → fan-idx (hc h))) t
 
 -- Containers (signatures) may be interpreted into IR codes
 _◃_ : (S : Set) (P : S → Set) → IR Unit Unit
 S ◃ P = choose⟨ s ∶ S ⟩ (recurse⟨ P s ⟩ p ↦ element ⟨⟩)
-
 
 -- An IR code for the natural numbers
 NatC : IR Unit Unit
@@ -72,33 +80,3 @@ ze = fan (ff , absurd , _)
 
 su : ℕ → ℕ
 su n = fan (tt , (λ _ → n ) , _)
-
-mutual
-  -- nonwellfounded trees on IR codes (I think these are Capretta's "Wander Types").
-  record Spread {I : Set} (c : IR I I) : Set where
-    coinductive
-    constructor spread
-    field
-      front : dom (⟦ c ⟧ Spread c ↓ spread-idx)
-
-  spread-idx : {I : Set} {c : IR I I} → Spread c → I
-  spread-idx {c = c} spr = π (⟦ c ⟧ Spread c ↓ spread-idx) (Spread.front spr)
-
-ℕ∞ = Spread NatC
-
--- The spread on NatC is the type of natural numbers with an infinite element adjoined
-∞ : ℕ∞
-Spread.front ∞ = tt , (λ _ → ∞) , _
-
-ChoiceSequence : Set
-ChoiceSequence = Spread (ℕ ◃ λ _ → Unit)
-
-ones : ChoiceSequence
-Spread.front ones = su ze , (λ _ → ones) , ⟨⟩
-
-nats : ChoiceSequence
-nats = go ze
-  where
-    go : ℕ → ChoiceSequence
-    Spread.front (go i) = i , (λ _ → go (su i)) , ⟨⟩
-
