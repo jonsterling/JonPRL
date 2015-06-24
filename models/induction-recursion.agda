@@ -35,6 +35,7 @@ slice = _↓_
 
 syntax slice E (λ e → p) = e ∶ E ↓ p
 
+infix 0 ⟦_⟧_
 ⟦_⟧_ : ∀ {I O} → IR I O → Set/ I → Set/ O
 ⟦ ι o ⟧ X ↓ xi = _ ∶ Unit ↓ o
 ⟦ σ S T ⟧ X ↓ xi =
@@ -56,7 +57,7 @@ mutual
 
 -- Containers (signatures) may be interpreted into IR codes
 _◃_ : (S : Set) (P : S → Set) → IR Unit Unit
-S ◃ P = choose⟨ s ∶ S ⟩ recurse⟨ P s ⟩ p ↦ element ⟨⟩
+S ◃ P = choose⟨ s ∶ S ⟩ (recurse⟨ P s ⟩ p ↦ element ⟨⟩)
 
 
 -- An IR code for the natural numbers
