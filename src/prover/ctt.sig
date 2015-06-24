@@ -140,7 +140,7 @@ sig
      *)
     val InductionRecursionIntroIota : Level.t option -> tactic
 
-    (* H >> IR(I;O) ext σ(s. E) by InductionRecursionIntroSigma S x k
+    (* H >> IR(I;O) ext σ(x. E) by InductionRecursionIntroSigma S x k
      *   H >> S ∈ U{k}
      *   H, x : S >> IR(I;O) ext E
      *)
@@ -157,6 +157,12 @@ sig
      *   H >> I ∈ U{k}
      *)
     val InductionRecursionIotaEq : Level.t option -> tactic
+
+    (* H >> σ(x.E) = σ(x.E') ∈ IR(I;O) by InductionRecursionSigmaEq S x k
+     *   H >> S ∈ U{k}
+     *   H , x : S >> E ∈ IR(I;O)
+     *)
+    val InductionRecursionSigmaEq : term * name option * Level.t option -> tactic
 
     val MemCD : tactic
     val Witness : term -> tactic

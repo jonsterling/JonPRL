@@ -873,6 +873,22 @@ struct
         ] BY mkEvidence IR_IOTA_EQ
       end
 
+    fun InductionRecursionSigmaEq (S, ox, ok) (H >> P) =
+      let
+        val #[sigma1, sigma2, ir] = P ^! EQ
+        val #[I,O] = ir ^! IR
+        val #[yE] = sigma1 ^! IR_SIGMA
+        val #[zE'] = sigma2 ^! IR_SIGMA
+        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "x")
+        val k = case ok of SOME k => k | NONE => inferLevel (H, S)
+      in
+        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        , H @@ (x, S) >> EQ $$ #[yE // ``x, zE' // ``x, ir]
+        ] BY (fn [D, E] => IR_SIGMA_EQ $$ #[D, x \\ E]
+               | _ => raise Refine)
+      end
+
+
     fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookupVisibility H x
