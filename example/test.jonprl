@@ -53,12 +53,12 @@ Theorem test10 : [∀(U<0>; A.
 
 Theorem test11 :
         [=(decide(inl(<>); x.x; y.y); decide(inr(<>); x.x; y.y); unit)] {
-  auto
+  reduce; auto
 }.
 
 Theorem axiom-of-choice : [∀(U<0>; A. ∀(U<0>; B. ∀(Π(A; _. Π(B; _. U<0>)); Q. Π(Π(A; a. Σ(B; b. ap(ap(Q;a);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
   auto; intro [λ(w. spread(ap(φ;w); x.y.x))]; auto;
-  elim #4 [a]; auto;
+  elim #4 [a]; auto; reduce;
   hyp-subst ← #7 [h. ap(ap(Q;a); spread(h; x.y.x))]; auto;
-  elim #6; auto.
+  elim #6; reduce; auto
 }.

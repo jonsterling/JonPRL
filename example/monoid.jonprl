@@ -42,7 +42,7 @@ Tactic monoid-unfold {
 }.
 
 Tactic monoid-simplify {
-  *{ refine <monoid-unfold>; auto }.
+  *{ refine <monoid-unfold>; reduce; auto }.
 }.
 
 Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(LeftUnit(M); U<0>))] {

@@ -36,6 +36,7 @@ struct
         an a (CttUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
       | AUTO a => an a CttUtil.Auto
+      | REDUCE (i, a) => an a (CttUtil.Reduce i)
       | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption
       | SYMMETRY a => an a EqSym

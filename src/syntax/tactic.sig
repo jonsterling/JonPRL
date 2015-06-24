@@ -6,8 +6,8 @@ sig
     type level
     type meta = TacticMetadata.metadata
 
-    datatype t
-      = LEMMA of label * meta
+    datatype t =
+        LEMMA of label * meta
       | UNFOLD of label list * meta
       | CUSTOM_TACTIC of label * meta
       | WITNESS of term * meta
@@ -33,6 +33,7 @@ sig
                 level : level option} * meta
       | CUM of level option * meta
       | AUTO of meta
+      | REDUCE of int option * meta
       | MEM_CD of meta
       | ASSUMPTION of meta
       | SYMMETRY of meta
