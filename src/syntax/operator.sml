@@ -12,8 +12,8 @@ struct
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
-    | IR_EQ | IR_INTRO_IOTA | IR_INTRO_SIGMA | IR_INTRO_DELTA | IR_IOTA_EQ
-    | IR_SIGMA_EQ
+    | IR_EQ | IR_INTRO_IOTA | IR_INTRO_SIGMA | IR_INTRO_DELTA
+    | IR_IOTA_EQ | IR_SIGMA_EQ | IR_DELTA_EQ
 
     | ADMIT
 
@@ -92,6 +92,7 @@ struct
     | eq (IR_INTRO_DELTA, IR_INTRO_DELTA) = true
     | eq (IR_IOTA_EQ, IR_IOTA_EQ) = true
     | eq (IR_SIGMA_EQ, IR_SIGMA_EQ) = true
+    | eq (IR_DELTA_EQ, IR_DELTA_EQ) = true
 
     | eq (ADMIT, ADMIT) = true
     | eq (UNIV i, UNIV j) = i = j
@@ -181,6 +182,7 @@ struct
        | IR_INTRO_DELTA => #[0,1]
        | IR_IOTA_EQ => #[0,0]
        | IR_SIGMA_EQ => #[0,1]
+       | IR_DELTA_EQ => #[0,1]
 
        | ADMIT => #[]
 
@@ -273,6 +275,7 @@ struct
        | IR_INTRO_DELTA => "IR-intro-δ"
        | IR_IOTA_EQ => "IR-ι-eq"
        | IR_SIGMA_EQ => "IR-σ-eq"
+       | IR_DELTA_EQ => "IR-δ-eq"
 
        | UNIV i => "U<" ^ Level.toString i ^ ">"
        | VOID => "void"

@@ -119,6 +119,11 @@ struct
             (List.nth (terms, 0),
              freshVariable,
              level))
+        ORELSE_LAZY (fn _ =>
+          InductionRecursionDeltaEq
+            (List.nth (terms, 0),
+             freshVariable,
+             level))
         ORELSE Cum level
         ORELSE EqInSupertype
     end

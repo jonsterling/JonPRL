@@ -888,6 +888,21 @@ struct
                | _ => raise Refine)
       end
 
+    fun InductionRecursionDeltaEq (S, ox, ok) (H >> P) =
+      let
+        val #[delta1, delta2, ir] = P ^! EQ
+        val #[I,O] = ir ^! IR
+        val #[yE] = delta1 ^! IR_DELTA
+        val #[zE'] = delta2 ^! IR_DELTA
+        val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "x")
+        val k = case ok of SOME k => k | NONE => inferLevel (H, S)
+      in
+        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        , H @@ (x, FUN $$ #[S, Variable.named "_" \\ I]) >> EQ $$ #[yE // ``x, zE' // ``x, ir]
+        ] BY (fn [D, E] => IR_DELTA_EQ $$ #[D, x \\ E]
+               | _ => raise Refine)
+      end
+
 
     fun Hypothesis_ x (H >> P) =
       let
