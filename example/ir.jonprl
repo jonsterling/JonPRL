@@ -13,3 +13,7 @@ Theorem sigma-formation-test : [IR(void;unit)] {
 Theorem delta-formation-test : [IR(void;unit)] {
   intro [unit] #2; auto; elim #1 [<>]; auto
 }.
+
+Theorem iota-eq-test : [=(ι(<>); ap(λ(x.ι(x)); <>); IR(void;unit))] {
+  auto
+}.

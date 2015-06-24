@@ -12,7 +12,7 @@ struct
     | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
-    | IR_EQ | IR_INTRO_IOTA | IR_INTRO_SIGMA | IR_INTRO_DELTA
+    | IR_EQ | IR_INTRO_IOTA | IR_INTRO_SIGMA | IR_INTRO_DELTA | IR_IOTA_EQ
 
     | ADMIT
 
@@ -89,6 +89,7 @@ struct
     | eq (IR_INTRO_IOTA, IR_INTRO_IOTA) = true
     | eq (IR_INTRO_SIGMA, IR_INTRO_SIGMA) = true
     | eq (IR_INTRO_DELTA, IR_INTRO_DELTA) = true
+    | eq (IR_IOTA_EQ, IR_IOTA_EQ) = true
 
     | eq (ADMIT, ADMIT) = true
     | eq (UNIV i, UNIV j) = i = j
@@ -176,6 +177,7 @@ struct
        | IR_INTRO_IOTA => #[0,0]
        | IR_INTRO_SIGMA => #[0,1]
        | IR_INTRO_DELTA => #[0,1]
+       | IR_IOTA_EQ => #[0,0]
 
        | ADMIT => #[]
 
@@ -266,6 +268,7 @@ struct
        | IR_INTRO_IOTA => "IR-intro-ι"
        | IR_INTRO_SIGMA => "IR-intro-σ"
        | IR_INTRO_DELTA => "IR-intro-δ"
+       | IR_IOTA_EQ => "IR-ι-eq"
 
        | UNIV i => "U<" ^ Level.toString i ^ ">"
        | VOID => "void"

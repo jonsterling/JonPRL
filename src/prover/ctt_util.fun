@@ -91,10 +91,12 @@ struct
         ORELSE PlusEq
         ORELSE InlEq level
         ORELSE InrEq level
-        ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
-                                      (List.nth (terms, 1),
-                                       List.nth (terms, 2),
-                                       take3 names))
+        ORELSE_LAZY (fn _ =>
+          DecideEq
+            (List.nth (terms, 0))
+            (List.nth (terms, 1),
+             List.nth (terms, 2),
+             take3 names))
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable
@@ -111,6 +113,7 @@ struct
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
         ORELSE InductionRecursionEq
+        ORELSE InductionRecursionIotaEq level
         ORELSE Cum level
         ORELSE EqInSupertype
     end

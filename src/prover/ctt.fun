@@ -860,6 +860,19 @@ struct
                | _ => raise Refine)
       end
 
+    fun InductionRecursionIotaEq ok (H >> P) =
+      let
+        val #[iota1, iota2, ir] = P ^! EQ
+        val #[I,O] = ir ^! IR
+        val #[M] = iota1 ^! IR_IOTA
+        val #[N] = iota2 ^! IR_IOTA
+        val k = case ok of SOME k => k | NONE => inferLevel (H, I)
+      in
+        [ H >> EQ $$ #[M,N,O]
+        , H >> MEM $$ #[I, UNIV k $$ #[]]
+        ] BY mkEvidence IR_IOTA_EQ
+      end
+
     fun Hypothesis_ x (H >> P) =
       let
         val (P', visibility) = Context.lookupVisibility H x

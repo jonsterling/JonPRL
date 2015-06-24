@@ -70,6 +70,7 @@ struct
        | IR_INTRO_IOTA $ #[D,E] => IR_IOTA $$ #[extract D]
        | IR_INTRO_SIGMA $ #[D,xE] => IR_SIGMA $$ #[extract xE]
        | IR_INTRO_DELTA $ #[D,xE] => IR_DELTA $$ #[extract xE]
+       | IR_IOTA_EQ $ _ => ax
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
