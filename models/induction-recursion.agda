@@ -1,4 +1,5 @@
 {-# OPTIONS --copatterns #-}
+{-# OPTIONS --no-positivity-check #-}
 
 -- NOTE: everything in this module can be proved terminating & positive
 -- externally; it's also possible to reformulate the definitions such that Agda
@@ -44,37 +45,51 @@ infix 0 ⟦_⟧_
   hx,t ∶ Σ[ hx ∶ (H → X) ] dom (⟦ T (xi ∘ hx) ⟧ X ↓ xi) ↓
     let hx , t = hx,t in π (⟦ T (xi ∘ hx) ⟧ X ↓ xi) t
 
-mutual
-  -- wellfounded trees on IR codes
-  data Fan {I : Set} (c : IR I I) : Set where
-    fan : no-fan c c → Fan c
-
-  fan-idx : {I : Set} {c : IR I I} → Fan c → I
-  fan-idx {c = c} (fan t) = de-fan c c t
-
-  no-fan : {I : Set} (c d : IR I I) → Set
-  no-fan c (ι x) = Unit
-  no-fan c (σ S T) = Σ[ s ∶ S ] no-fan c (T s)
-  no-fan c (δ H T) = Σ[ hc ∶ (H → Fan c) ] no-fan c (T (λ h → fan-idx (hc h)))
-
-  de-fan : {I : Set} (c d : IR I I) → no-fan c d → I
-  de-fan c (ι i) ⟨⟩ = i
-  de-fan c (σ S T) (s , t) = de-fan c (T s) t
-  de-fan c (δ H T) (hc , t) = de-fan c (T (λ h → fan-idx (hc h))) t
-
 -- Containers (signatures) may be interpreted into IR codes
 _◃_ : (S : Set) (P : S → Set) → IR Unit Unit
 S ◃ P = choose⟨ s ∶ S ⟩ (recurse⟨ P s ⟩ p ↦ element ⟨⟩)
+
+{-# NO_TERMINATION_CHECK #-}
+mutual
+  data Fan {I : Set} (c : IR I I) : Set where
+    sup : dom (⟦ c ⟧ (Fan c) ↓ fan-idx) → Fan c
+
+  fan-idx : ∀ {I} {c : IR I I} → Fan c → I
+  fan-idx {c = c} (sup x) = π (⟦ c ⟧ (Fan c) ↓ fan-idx) x
+
+{-# NO_TERMINATION_CHECK #-}
+mutual
+  data Spread {I : Set} (c : IR I I) : Set where
+    inf : ∞ dom (⟦ c ⟧ Spread c ↓ spread-idx) → Spread c
+
+  spread-idx : ∀ {I} {c : IR I I} → Spread c → I
+  spread-idx {c = c} (inf x) = π (⟦ c ⟧ (Spread c) ↓ spread-idx) (♭ x)
 
 -- An IR code for the natural numbers
 NatC : IR Unit Unit
 NatC = Bool ◃ So
 
--- The fan on NatC is simply the set of natural numbers
 ℕ = Fan NatC
 
 ze : ℕ
-ze = fan (ff , absurd , _)
+ze = sup (ff , absurd , ⟨⟩)
 
 su : ℕ → ℕ
-su n = fan (tt , (λ _ → n ) , _)
+su n = sup (tt , (λ _ → n) , ⟨⟩)
+
+ℕ∞ = Spread NatC
+
+infinity : ℕ∞
+infinity = inf (♯ (tt , (λ x → infinity) , ⟨⟩))
+
+ChoiceSequence : Set
+ChoiceSequence = Spread (ℕ ◃ λ x → Unit)
+
+ones : ChoiceSequence
+ones = inf (♯ (su ze , (λ _ → ones) , ⟨⟩))
+
+nats : ChoiceSequence
+nats = go ze
+  where
+    go : ℕ → ChoiceSequence
+    go i = inf (♯ (i , (λ _ → go (su i)) , ⟨⟩))
