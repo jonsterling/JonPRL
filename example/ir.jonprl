@@ -26,3 +26,11 @@ Theorem delta-eq-test : [∈(delta-formation-test; IR(void;unit))] {
   unfold <delta-formation-test>; auto; elim #1 [<>]; auto
 }.
 
+
+||| Containers
+Operator Cont : (0;1).
+[Cont(S;P)] =def= [σ(S; s. δ(so_apply(P;s); p. ι(<>)))].
+
+Theorem Cont-wf : [⋂(U<0>; S. ⋂(Π(S; s. U<0>); P. ∈(Cont(S; x. ap(P; x)); IR(unit;unit))))] {
+  unfold <Cont>; auto
+}.
