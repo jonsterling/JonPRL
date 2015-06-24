@@ -844,7 +844,7 @@ struct
       in
         [ H >> MEM $$ #[S, UNIV k $$ #[]]
         , H @@ (x, S) >> P
-        ] BY (fn [D,E] => IR_INTRO_SIGMA $$ #[D, x \\ E]
+        ] BY (fn [D,E] => IR_INTRO_SIGMA $$ #[S, D, x \\ E]
                | _ => raise Refine)
       end
 
@@ -856,7 +856,7 @@ struct
       in
         [ H >> MEM $$ #[S, UNIV k $$ #[]]
         , H @@ (x, FUN $$ #[S, Variable.named "_" \\ I]) >> P
-        ] BY (fn [D,E] => IR_INTRO_DELTA $$ #[D, x \\ E]
+        ] BY (fn [D,E] => IR_INTRO_DELTA $$ #[S, D, x \\ E]
                | _ => raise Refine)
       end
 
@@ -873,31 +873,31 @@ struct
         ] BY mkEvidence IR_IOTA_EQ
       end
 
-    fun InductionRecursionSigmaEq (S, ox, ok) (H >> P) =
+    fun InductionRecursionSigmaEq (ox, ok) (H >> P) =
       let
         val #[sigma1, sigma2, ir] = P ^! EQ
         val #[I,O] = ir ^! IR
-        val #[yE] = sigma1 ^! IR_SIGMA
-        val #[zE'] = sigma2 ^! IR_SIGMA
+        val #[S, yE] = sigma1 ^! IR_SIGMA
+        val #[S', zE'] = sigma2 ^! IR_SIGMA
         val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "x")
         val k = case ok of SOME k => k | NONE => inferLevel (H, S)
       in
-        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        [ H >> EQ $$ #[S, S', UNIV k $$ #[]]
         , H @@ (x, S) >> EQ $$ #[yE // ``x, zE' // ``x, ir]
         ] BY (fn [D, E] => IR_SIGMA_EQ $$ #[D, x \\ E]
                | _ => raise Refine)
       end
 
-    fun InductionRecursionDeltaEq (S, ox, ok) (H >> P) =
+    fun InductionRecursionDeltaEq (ox, ok) (H >> P) =
       let
         val #[delta1, delta2, ir] = P ^! EQ
         val #[I,O] = ir ^! IR
-        val #[yE] = delta1 ^! IR_DELTA
-        val #[zE'] = delta2 ^! IR_DELTA
+        val #[S, yE] = delta1 ^! IR_DELTA
+        val #[S', zE'] = delta2 ^! IR_DELTA
         val x = Context.fresh (H, case ox of SOME x => x | NONE => Variable.named "x")
         val k = case ok of SOME k => k | NONE => inferLevel (H, S)
       in
-        [ H >> MEM $$ #[S, UNIV k $$ #[]]
+        [ H >> EQ $$ #[S, S', UNIV k $$ #[]]
         , H @@ (x, FUN $$ #[S, Variable.named "_" \\ I]) >> EQ $$ #[yE // ``x, zE' // ``x, ir]
         ] BY (fn [D, E] => IR_DELTA_EQ $$ #[D, x \\ E]
                | _ => raise Refine)

@@ -114,16 +114,8 @@ struct
              | _ => FAIL)
         ORELSE InductionRecursionEq
         ORELSE InductionRecursionIotaEq level
-        ORELSE_LAZY (fn _ =>
-          InductionRecursionSigmaEq
-            (List.nth (terms, 0),
-             freshVariable,
-             level))
-        ORELSE_LAZY (fn _ =>
-          InductionRecursionDeltaEq
-            (List.nth (terms, 0),
-             freshVariable,
-             level))
+        ORELSE InductionRecursionSigmaEq (freshVariable, level)
+        ORELSE InductionRecursionDeltaEq (freshVariable, level)
         ORELSE Cum level
         ORELSE EqInSupertype
     end

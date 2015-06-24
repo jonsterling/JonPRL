@@ -178,8 +178,8 @@ struct
 
        | IR_EQ => #[0,0]
        | IR_INTRO_IOTA => #[0,0]
-       | IR_INTRO_SIGMA => #[0,1]
-       | IR_INTRO_DELTA => #[0,1]
+       | IR_INTRO_SIGMA => #[0,0,1]
+       | IR_INTRO_DELTA => #[0,0,1]
        | IR_IOTA_EQ => #[0,0]
        | IR_SIGMA_EQ => #[0,1]
        | IR_DELTA_EQ => #[0,1]
@@ -205,8 +205,8 @@ struct
 
        | IR => #[0,0]
        | IR_IOTA => #[0]
-       | IR_SIGMA => #[1]
-       | IR_DELTA => #[1]
+       | IR_SIGMA => #[0,1]
+       | IR_DELTA => #[0,1]
 
        | EQ => #[0,0,0]
        | MEM => #[0,0]

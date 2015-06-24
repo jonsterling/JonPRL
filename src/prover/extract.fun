@@ -68,8 +68,8 @@ struct
 
        | IR_EQ $ _ => ax
        | IR_INTRO_IOTA $ #[D,E] => IR_IOTA $$ #[extract D]
-       | IR_INTRO_SIGMA $ #[D,xE] => IR_SIGMA $$ #[extract xE]
-       | IR_INTRO_DELTA $ #[D,xE] => IR_DELTA $$ #[extract xE]
+       | IR_INTRO_SIGMA $ #[S,D,xE] => IR_SIGMA $$ #[S, extract xE]
+       | IR_INTRO_DELTA $ #[S,D,xE] => IR_DELTA $$ #[S, extract xE]
        | IR_IOTA_EQ $ _ => ax
        | IR_SIGMA_EQ $ _ => ax
        | IR_DELTA_EQ $ _ => ax

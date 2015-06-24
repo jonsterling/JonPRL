@@ -19,9 +19,10 @@ Theorem iota-eq-test : [=(ι(<>); ap(λ(x.ι(x)); <>); IR(void;unit))] {
 }.
 
 Theorem sigma-eq-test : [∈(sigma-formation-test; IR(void;unit))] {
-  unfold <sigma-formation-test>; auto; eq-cd [void]; auto
+  unfold <sigma-formation-test>; auto
 }.
 
 Theorem delta-eq-test : [∈(delta-formation-test; IR(void;unit))] {
-  unfold <delta-formation-test>; auto; eq-cd [unit]; auto; elim #1 [<>]; auto
+  unfold <delta-formation-test>; auto; elim #1 [<>]; auto
 }.
+
