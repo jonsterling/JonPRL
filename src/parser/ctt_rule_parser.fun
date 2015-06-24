@@ -167,6 +167,11 @@ struct
     fn w => symbol "auto"
       wth (fn name => fn pos => AUTO {name = name, pos = pos})
 
+  val parseReduce : tactic_parser =
+    fn w => symbol "reduce"
+      && opt parseInt
+      wth (fn (name, n) => fn pos => REDUCE (n, {name = name, pos = pos}))
+
   val parseLemma : tactic_parser =
     fn w => symbol "lemma"
       && brackets parseLabel
@@ -199,6 +204,7 @@ struct
       || parseExt w
       || parseCum w
       || parseAuto w
+      || parseReduce w
       || parseMemCd w
       || parseAssumption w
       || parseSymmetry w

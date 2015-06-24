@@ -127,7 +127,16 @@ struct
     val DeepReduce = RewriteGoal (CDEEP Reduce)
   in
     val Auto =
-      LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD ORELSE PROGRESS DeepReduce)
+      LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
+
+    fun Reduce NONE = LIMIT DeepReduce
+      | Reduce (SOME n) =
+        let
+          fun go 0 = ID
+            | go n = DeepReduce THEN (go (n - 1))
+        in
+          go n
+        end
   end
 end
 
