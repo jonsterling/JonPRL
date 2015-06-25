@@ -93,21 +93,6 @@ Ran {X} _⇒_ f φ y = ∫↓[ x ∶ X ] (y ⇒ f x) ⋔ φ x
 Lan : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
 Lan {X} _⇒_ f φ y = ∫↑[ x ∶ X ] (f x ⇒ y) ⊗ φ x
 
-_⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
-f ⁻¹ = λ i → Σ[ e ∶ dom f ] map f e ≡ i
-
-Pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
-Pull f g = Σ[ x ∶ dom f ] Σ[ y ∶ dom g ] map f x ≡ map g y
-
-infix 1 Pull
-syntax Pull {I} f g = f ×[ I ] g
-
-Sect : ∀ {I} → 𝔉 I → Set
-Sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
-
-_* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
-_* {I} {J} f i = (I ↓ f) ×[ J ] i ↓ fst
-
 module Hyperdoctrine where
   ∃⊣ : ∀ {X Y} → (X → Y) → (𝒫 X → 𝒫 Y)
   ∃⊣ = Lan _≡_
@@ -128,6 +113,21 @@ module Hyperdoctrine where
   Θ = ∃⊣ δ (λ _ → Unit)
 
 module CwF where
+  _⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
+  f ⁻¹ = λ i → Σ[ e ∶ dom f ] map f e ≡ i
+
+  Pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
+  Pull f g = Σ[ x ∶ dom f ] Σ[ y ∶ dom g ] map f x ≡ map g y
+
+  infix 1 Pull
+  syntax Pull {I} f g = f ×[ I ] g
+
+  Sect : ∀ {I} → 𝔉 I → Set
+  Sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
+
+  _* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
+  _* {I} {J} f i = (I ↓ f) ×[ J ] i ↓ fst
+
   Ctx : Set₁
   Ctx = Set
 
