@@ -8,21 +8,21 @@ open import Agda.Primitive
 infix 0 Π
 syntax Π A (λ x → B) = Π[ x ∶ A ] B
 
-id : ∀ {a} {A : Set a} → A → A
+id : {A : Set} → A → A
 id x = x
 
 infixr 9 _∘_
-_∘_ : ∀ {a b c}
-  → {A : Set a}
-  → {B : A → Set b}
-  → {C : {x : A} → B x → Set c}
+_∘_ :
+    {A : Set}
+  → {B : A → Set}
+  → {C : {x : A} → B x → Set}
   → (g : (∀ {x} (y : B x) → C y))
   → (f : (x : A) → B x)
   → ((x : A) → C (f x))
 g ∘ f = λ x → g (f x)
 
 infixr 8 _,_
-record Σ {a b} (A : Set a) (B : A → Set b) : Set (a ⊔ b) where
+record Σ (A : Set) (B : A → Set) : Set where
   constructor _,_
   field
     fst : A
