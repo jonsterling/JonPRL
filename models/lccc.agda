@@ -56,93 +56,139 @@ data Void : Set where
 absurd : {A : Set} → Void → A
 absurd ()
 
-Pow : Set → Set₁
-Pow Γ = Γ → Set
+End : ∀ (I : Set) (φ : I → Set) → Set
+End = Π
+
+infix 0 End
+syntax End I (λ x → φ) = ∫↓[ x ∶ I ] φ
+
+infixr 0 _⋔_
+_⋔_ : Set → Set → Set
+A ⋔ B = A → B
+
+Coend : (A : Set) (φ : A → Set) → Set
+Coend = Σ
+
+infix 0 Coend
+syntax Coend I (λ x → φ) = ∫↑[ x ∶ I ] φ
+
+infixr 0 _⊗_
+_⊗_ : Set → Set → Set
+A ⊗ B = A × B
+
+𝒫 : Set → Set₁
+𝒫 I = I → Set
 
 infix 0 _↓_
-record Fam (I : Set) : Set₁ where
+record 𝔉 (I : Set) : Set₁ where
   constructor _↓_
   field
     dom : Set
     map : dom → I
-open Fam
+open 𝔉
 
-_⁻¹ : ∀ {I} → Fam I → Pow I
+Ran : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
+Ran {X} _⇒_ f φ y = ∫↓[ x ∶ X ] (y ⇒ f x) ⋔ φ x
+
+Lan : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
+Lan {X} _⇒_ f φ y = ∫↑[ x ∶ X ] (f x ⇒ y) ⊗ φ x
+
+_⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
 f ⁻¹ = λ i → Σ[ e ∶ dom f ] map f e ≡ i
 
-Pullback : ∀ {I} → Fam I → Fam I → Set
-Pullback f g = Σ[ x ∶ dom f ] Σ[ y ∶ dom g ] map f x ≡ map g y
+Pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
+Pull f g = Σ[ x ∶ dom f ] Σ[ y ∶ dom g ] map f x ≡ map g y
 
-infix 1 Pullback
-syntax Pullback {I} f g = f ×[ I ] g
+infix 1 Pull
+syntax Pull {I} f g = f ×[ I ] g
 
-Section : ∀ {I} → Fam I → Set
-Section {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
+Sect : ∀ {I} → 𝔉 I → Set
+Sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
 
-_* : ∀ {I J} → (I → J) → (Fam J → Fam I)
+_* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
 _* {I} {J} f i = (I ↓ f) ×[ J ] i ↓ fst
 
-Ctx : Set₁
-Ctx = Set
+module Hyperdoctrine where
+  ∃⊣ : ∀ {X Y} → (X → Y) → (𝒫 X → 𝒫 Y)
+  ∃⊣ = Lan _≡_
 
-⋄ : Ctx
-⋄ = Unit
+  ⊣∀ : ∀ {X Y} → (X → Y) → (𝒫 X → 𝒫 Y)
+  ⊣∀ = Ran _≡_
 
-Ty : Ctx → Set₁
-Ty = Fam
+  ∃₁ : ∀ {X Y} → 𝒫 (X × Y) → 𝒫 X
+  ∃₁ = ∃⊣ fst
 
-Tm : (Γ : Ctx) (A : Ty Γ) → Ctx
-Tm _ A = Section A
+  ∀₁ : ∀ {X Y} → 𝒫 (X × Y) → 𝒫 X
+  ∀₁ = ⊣∀ fst
 
-Sub : Ctx → Ctx → Set
-Sub Δ Γ = Δ → Γ
+  δ : ∀ {X} → X → X × X
+  δ x = x , x
 
-infix 1 _▸_
-_▸_ : (Γ : Ctx) (A : Ty Γ) → Ctx
-Γ ▸ A = Σ Γ (A ⁻¹)
+  Θ : ∀ {X} → 𝒫 (X × X)
+  Θ = ∃⊣ δ (λ _ → Unit)
 
---           θ : Sub Δ Γ
---           A : Ty Γ
---    A *[ θ ] : Ty Δ
---             = (Δ ↓ θ) ×[ Γ ] A ↓ π₁
---             = fam { dom = pullback (Δ ↓ θ) A; map = π₁ }
---             = fam { dom = Σ[ d ∶ Δ ] Σ[ x ∶ dom A ] θ d ≡[Γ] A x; map = π₁ }
---
--- A *[ θ ] --- π₁ ∘ π₂ ---> dom A
---   |                        |
---   π₁                      map A
---   |                        |
---   v                        v
---   Δ --------- θ ---------> Γ
+module CwF where
+  Ctx : Set₁
+  Ctx = Set
 
-infix 2 _*ty[_]
-_*ty[_] : ∀ {Δ Γ} → Ty Γ → (Sub Δ Γ → Ty Δ)
-A *ty[ θ ] = (θ *) A
+  ⋄ : Ctx
+  ⋄ = Unit
 
-wkn : {Γ : Ctx} (A : Ty Γ) → Sub (Γ ▸ A) Γ
-wkn A = map A ∘ fst ∘ snd
+  Ty : Ctx → Set₁
+  Ty = 𝔉
 
-var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
-var Γ A = M , sec where
-  M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
-  M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
-  sec : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
-  sec (._ , _ , refl) = refl
+  Tm : (Γ : Ctx) (A : Ty Γ) → Ctx
+  Tm _ A = Sect A
 
-ext : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
-ext θ M x with fst M x | snd M x
-... | ._ , _ , sec | refl = θ x , _ , sym sec
+  Sub : Ctx → Ctx → Set
+  Sub Δ Γ = Δ → Γ
 
--- without uniqueness...
-law : ∀ {Γ Δ}
-  → (γ : Sub Δ Γ)
-  → (A : Ty Γ)
-  → (M : Tm Δ (A *ty[ γ ]))
-  → Σ[ θ ∶ Sub Δ (Γ ▸ A) ] θ ≡ ext γ M
-law γ A M = ext γ M , refl
+  infix 1 _▸_
+  _▸_ : (Γ : Ctx) (A : Ty Γ) → Ctx
+  Γ ▸ A = Σ Γ (A ⁻¹)
 
-Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
-Σ↓ f M = dom M ↓ f ∘ map M
+  --           θ : Sub Δ Γ
+  --           A : Ty Γ
+  --    A *[ θ ] : Ty Δ
+  --             = (Δ ↓ θ) ×[ Γ ] A ↓ π₁
+  --             = fam { dom = pull (Δ ↓ θ) A; map = π₁ }
+  --             = fam { dom = Σ[ d ∶ Δ ] Σ[ x ∶ dom A ] θ d ≡[Γ] A x; map = π₁ }
+  --
+  -- A *[ θ ] --- π₁ ∘ π₂ ---> dom A
+  --   |                        |
+  --   π₁                      map A
+  --   |                        |
+  --   v                        v
+  --   Δ --------- θ ---------> Γ
 
-Π↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
-Π↓ f M = {!!}
+  infix 2 _*ty[_]
+  _*ty[_] : ∀ {Δ Γ} → Ty Γ → (Sub Δ Γ → Ty Δ)
+  A *ty[ θ ] = (θ *) A
+
+  wkn : {Γ : Ctx} (A : Ty Γ) → Sub (Γ ▸ A) Γ
+  wkn A = map A ∘ fst ∘ snd
+
+  var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
+  var Γ A = M , sec where
+    M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
+    M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
+    sec : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
+    sec (._ , _ , refl) = refl
+
+  ext : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
+  ext θ M x with fst M x | snd M x
+  ... | ._ , _ , sec | refl = θ x , _ , sym sec
+
+  -- without uniqueness...
+  law : ∀ {Γ Δ}
+    → (γ : Sub Δ Γ)
+    → (A : Ty Γ)
+    → (M : Tm Δ (A *ty[ γ ]))
+    → Σ[ θ ∶ Sub Δ (Γ ▸ A) ] θ ≡ ext γ M
+  law γ A M = ext γ M , refl
+
+  Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
+  Σ↓ θ M = dom M ↓ θ ∘ map M
+
+  Π↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
+  Π↓ θ M = {!!}
