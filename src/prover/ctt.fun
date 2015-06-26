@@ -967,6 +967,36 @@ struct
           ] BY (fn [D] => CEQUAL_STEP $$ #[D]
                  | _ => raise Refine)
         end
+
+      fun CEqSubst (eq, xC) (H >> P) =
+        let
+          val #[M, N] = eq ^! CEQUAL
+          val _ = unify P (xC // M)
+        in
+          [ H >> eq
+          , H >> xC // N
+          ] BY (fn [D, E] => CEQUAL_SUBST $$ #[D, E]
+                 | _ => raise Refine)
+        end
+
+      fun HypCEqSubst (dir, i, xC) (H >> P) =
+        let
+          val xC = Context.rebind H xC
+          val z = Context.nth H (i - 1)
+          val X = Context.lookup H z
+        in
+          case dir of
+              Dir.RIGHT =>
+              (CEqSubst (X, xC) THENL [Hypothesis_ z, ID]) (H >> P)
+            | Dir.LEFT =>
+              let
+                val #[M,N] = X ^! CEQUAL
+              in
+                (CEqSubst (CEQUAL $$ #[N,M], xC)
+                          THENL [CEqSym THEN Hypothesis_ z, ID]) (H >> P)
+              end
+        end
+
     end
 
     local

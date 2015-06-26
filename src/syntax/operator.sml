@@ -15,6 +15,7 @@ struct
 
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
+    | CEQUAL_SUBST
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -69,6 +70,7 @@ struct
     | eq (CEQUAL_REFL, CEQUAL_REFL) = true
     | eq (CEQUAL_SYM, CEQUAL_SYM) = true
     | eq (CEQUAL_STEP, CEQUAL_STEP) = true
+    | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -126,6 +128,7 @@ struct
        | CEQUAL_REFL => #[]
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
+       | CEQUAL_SUBST => #[0, 0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -214,6 +217,7 @@ struct
        | CEQUAL_REFL => "~-refl"
        | CEQUAL_SYM => "~-sym"
        | CEQUAL_STEP => "~-step"
+       | CEQUAL_SUBST => "~-subst"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
