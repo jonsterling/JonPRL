@@ -87,6 +87,8 @@ record 𝔉 (I : Set) : Set₁ where
     map : dom → I
 open 𝔉
 
+-- NOTE: large extensions are possible here with Yoneda embeddings for homs
+
 Ran : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
 Ran {X} _⇒_ f φ y = ∫↓[ x ∶ X ] (y ⇒ f x) ⋔ φ x
 
