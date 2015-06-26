@@ -77,6 +77,7 @@ struct
     in
       AxEq
         ORELSE EqEq
+        ORELSE CEqEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq

@@ -125,6 +125,7 @@ struct
          | MEM => true
          | UNIT => true
          | VOID => true
+         | CEQUAL => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
@@ -935,6 +936,19 @@ struct
                    (EqSubst (EQ $$ #[N,M,A], xC, ok)
                      THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
+        end
+
+      fun CEqEq (H >> P) =
+        let
+          val #[M, N, U] = P ^! EQ
+          val (UNIV _, _) = asApp U
+          val #[L, R] = M ^! CEQUAL
+          val #[L', R'] = N ^! CEQUAL
+        in
+          [ H >> CEQUAL $$ #[L, L']
+          , H >> CEQUAL $$ #[R, R']
+          ] BY (fn [D, E] => CEQUAL_EQ $$ #[D, E]
+                 | _ => raise Refine)
         end
 
       fun CEqRefl (H >> P) =

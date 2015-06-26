@@ -20,6 +20,11 @@ struct
                     index : int,
                     domain : term,
                     level : level option} * meta
+    | CEQ_SUBST of {left : term,
+                    right : term} * meta
+    | CHYP_SUBST of {dir : Dir.dir,
+                     index : int,
+                     domain : term} * meta
     | INTRO of {term : term option,
                 rule : int option,
                 freshVariable : name option,

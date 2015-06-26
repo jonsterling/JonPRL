@@ -145,6 +145,7 @@ sig
     val EqSubst : term * term * Level.t option -> tactic
     val EqSym : tactic
 
+    val CEqEq : tactic
     val CEqRefl : tactic
     val CEqSym  : tactic
     val CEqStep : tactic

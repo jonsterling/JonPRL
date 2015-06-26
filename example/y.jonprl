@@ -11,3 +11,17 @@ Theorem y-is-fix-point : [
     ceq(Y(f); ap(f;Y(f)))))] {
   auto; unfold <Y>; step; sreflexivity
 }.
+
+Theorem transitive : [
+   ∀(U<0>; A.
+   ∀(∀(A; _.A); f.
+   ∀(∀(A; _.A); g.
+   ∀(Π(A; _.A); h.
+   ∀(ceq(f; g); _.
+   ∀(ceq(g; h); _.
+   ceq(f; h)))))))] {
+  auto; ?{sreflexivity};
+  chyp-subst → #5 [c. ceq(c; h)];
+  chyp-subst ← #6 [c. ceq(g; c)];
+  sreflexivity
+}.
