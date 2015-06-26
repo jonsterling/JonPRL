@@ -6,14 +6,14 @@ Theorem test : [ceq(λ(x.x); λ(x.x))] {
 }.
 
 Theorem y-is-fix-point : [
-    ∀(U<0>; A.
+    ∀(U{i}; A.
     ∀(Π(A; _.A); f .
     ceq(Y(f); ap(f;Y(f)))))] {
   auto; unfold <Y>; step; sreflexivity
 }.
 
 Theorem transitive : [
-   ∀(U<0>; A.
+   ∀(U{i}; A.
    ∀(∀(A; _.A); f.
    ∀(∀(A; _.A); g.
    ∀(Π(A; _.A); h.

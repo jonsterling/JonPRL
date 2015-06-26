@@ -29,6 +29,7 @@ struct
        | CEQUAL_REFL $ _ => ax
        | CEQUAL_SYM $ _ => ax
        | CEQUAL_STEP $ _ => ax
+       | CEQUAL_SUBST $ #[D, E] => extract E
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
