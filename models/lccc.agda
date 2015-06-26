@@ -210,10 +210,10 @@ module CwF where
   --           θ : Sub Δ Γ
   --           A : Ty Γ
   --    A *[ θ ] : Ty Δ
-  --             = (Δ ↓ θ) ×[ Γ ] A ↓ fst
-  --             = fam { dom = pull (Δ ↓ θ) A; map = fst }
-  --             = fam { dom = Σ Δ (fiber A ∘ θ); map = fst }
-  --             = fam { dom = Σ[ d ∶ Δ ] Σ[ x ∶ dom A ] map A x ≡[Γ] θ d; map = fst }
+  --             = ((Δ ↓ θ) ×[ Γ ] A) ↓ fst
+  --             = (pull (Δ ↓ θ) A) ↓ fst
+  --             = (Σ Δ (fiber A ∘ θ)) ↓ fst
+  --             = (Σ[ d ∶ Δ ] Σ[ x ∶ dom A ] map A x ≡[Γ] θ d) ↓ fst
   --
   -- A *[ θ ] -- π₂ --> dom A
   --   |                 |
