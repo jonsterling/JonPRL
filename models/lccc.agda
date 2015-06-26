@@ -152,6 +152,9 @@ module Hyperdoctrine where
   I = ∃⊣ Δ ⊤-𝒫
 
 module CwF where
+  postulate
+    fun-ext : {A B : Set} {f g : A → B} → (∀ x → f x ≡ g x) → f ≡ g
+
   fiber : ∀ {I} → 𝔉 I → 𝒫 I
   fiber f = λ i → Σ[ e ∶ dom f ] map f e ≡ i
 
