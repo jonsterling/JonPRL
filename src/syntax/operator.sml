@@ -2,7 +2,7 @@ structure OperatorType =
 struct
   datatype 'label operator =
       (* Derivations *)
-      UNIV_EQ | CUM
+      UNIV_EQ of Level.t | CUM
     | EQ_EQ
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
@@ -47,7 +47,7 @@ struct
   type t = Label.t operator
 
   type world = Label.t -> Arity.t
-  fun eq (UNIV_EQ, UNIV_EQ) = true
+  fun eq (UNIV_EQ i, UNIV_EQ j) = i = j
     | eq (CUM, CUM) = true
     | eq (EQ_EQ, EQ_EQ) = true
     | eq (VOID_EQ, VOID_EQ) = true
@@ -112,7 +112,7 @@ struct
 
   fun arity O =
     case O of
-         UNIV_EQ => #[]
+         UNIV_EQ _ => #[]
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
        | VOID_EQ => #[]
@@ -192,7 +192,7 @@ struct
 
   fun toString O =
     case O of
-         UNIV_EQ => "U⁼"
+         UNIV_EQ i => "U⁼{" ^ Level.toString i ^ "}"
        | CUM => "cum"
        | VOID_EQ => "void⁼"
        | VOID_ELIM => "void-elim"

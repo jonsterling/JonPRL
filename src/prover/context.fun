@@ -2,22 +2,22 @@ functor Context (Syntax : ABT_UTIL) : CONTEXT =
 struct
   structure V = Syntax.Variable
   structure Syntax = Syntax
-  structure Tel = Telescope (V)
+  structure Telescope = Telescope (V)
   type name = V.t
   type term = Syntax.t
 
-  type context = (term * Visibility.t) Tel.telescope
+  type context = (term * Visibility.t) Telescope.telescope
 
-  val empty = Tel.empty
+  val empty = Telescope.empty
   fun insert H k vis v =
-    Tel.snoc H (k, (v, vis))
+    Telescope.snoc H (k, (v, vis))
 
-  val interposeAfter = Tel.interposeAfter
-  val fresh = Tel.fresh
+  val interposeAfter = Telescope.interposeAfter
+  val fresh = Telescope.fresh
 
   fun isEmpty (ctx : context) =
     let
-      open Tel.SnocView
+      open Telescope.SnocView
     in
       case out ctx of
            Empty => true
@@ -27,16 +27,16 @@ struct
   exception NotFound of name
 
   fun modify (ctx : context) (k : V.t) f =
-    Tel.modify ctx (k, fn (a, vis) => (f a, vis))
+    Telescope.modify ctx (k, fn (a, vis) => (f a, vis))
 
   fun lookupVisibility (ctx : context) k =
-    (Tel.lookup ctx k)
+    (Telescope.lookup ctx k)
 
   fun lookup ctx k = #1 (lookupVisibility ctx k)
 
   fun nth ctx i =
     let
-      open Tel.ConsView
+      open Telescope.ConsView
       fun go n Empty = raise Subscript
         | go n (Cons (lbl, _, tele')) =
           if n = i then lbl else go (n + 1) (out tele')
@@ -45,13 +45,13 @@ struct
     end
 
   fun search ctx phi =
-    case Tel.search ctx (phi o #1) of
+    case Telescope.search ctx (phi o #1) of
          SOME (lbl, (a, vis)) => SOME (lbl, a)
        | NONE => NONE
 
   fun listItems ctx =
     let
-      open Tel.SnocView
+      open Telescope.SnocView
       fun go Empty r = r
         | go (Snoc (tele', lbl, (a, vis))) r = go (out tele') ((lbl, vis, a) :: r)
     in
@@ -59,14 +59,14 @@ struct
     end
 
   fun map f ctx =
-    Tel.map ctx (fn (a, vis) => (f a, vis))
+    Telescope.map ctx (fn (a, vis) => (f a, vis))
 
   fun mapAfter k f ctx =
-    Tel.mapAfter ctx (k, fn (a, vis) => (f a, vis))
+    Telescope.mapAfter ctx (k, fn (a, vis) => (f a, vis))
 
   fun toString tele =
     let
-      open Tel.ConsView
+      open Telescope.ConsView
       fun go i Empty r = r
         | go i (Cons (lbl, (a, vis), tele')) r =
             let
@@ -82,13 +82,13 @@ struct
     end
 
   val eq : context * context -> bool =
-    Tel.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso Syntax.eq (a, b))
+    Telescope.eq (fn ((a, vis), (b, vis')) => vis = vis' andalso Syntax.eq (a, b))
   val subcontext : context * context -> bool =
-    Tel.subtelescope (fn ((a, vis), (b, vis')) => vis = vis' andalso Syntax.eq (a, b))
+    Telescope.subtelescope (fn ((a, vis), (b, vis')) => vis = vis' andalso Syntax.eq (a, b))
 
   fun rebind ctx tm =
     let
-      open Tel.SnocView
+      open Telescope.SnocView
 
       fun makeVarTable vs =
         let

@@ -1,4 +1,4 @@
-functor Sequent (structure Context : CONTEXT) : SEQUENT =
+functor Sequent (structure Context : CONTEXT where type Syntax.t = Syntax.t) : SEQUENT =
 struct
   type term = Syntax.t
 

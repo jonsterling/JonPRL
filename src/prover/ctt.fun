@@ -210,9 +210,10 @@ struct
         val (UNIV l, #[]) = asApp univ1
         val (UNIV l', #[]) = asApp univ2
         val (UNIV k, #[]) = asApp univ3
-        val _ = Level.assertLt (Level.unify (l, l'), k)
+        val _ = Level.assertEq (l, l')
+        val _ = Level.assertLt (l, k)
       in
-        [] BY mkEvidence UNIV_EQ
+        [] BY mkEvidence (UNIV_EQ l)
       end
 
     fun EqEq (H >> P) =
@@ -843,10 +844,22 @@ struct
                | _ => raise Refine)
       end
 
-    fun Unfold (development, lbl) (H >> P) =
+    structure LevelSolver =
+      LevelSolver
+        (SyntaxWithUniverses
+          (type label = Development.label
+           structure Syntax = Syntax))
+
+    structure SequentLevelSolver = SequentLevelSolver
+      (structure Solver = LevelSolver
+       structure Abt = Syntax
+       structure Sequent = Sequent)
+
+    fun Unfold (development, lbl, ok) (H >> P) =
       let
+        val k = case ok of SOME k => k | NONE => Level.base
         open Conversionals
-        val conv = CDEEP (Development.lookupDefinition development lbl)
+        val conv = LevelSolver.subst (LevelSolver.Level.yank k) o CDEEP (Development.lookupDefinition development lbl)
       in
         [ Context.map conv H >> conv P
         ] BY (fn [D] => D
@@ -858,7 +871,7 @@ struct
         open Conversionals
         infix CTHEN
         val conv =
-          foldl (fn (lbl, conv) =>
+          foldl (fn ((lbl, _), conv) =>
             conv CTHEN CDEEP (Development.lookupDefinition development lbl)
           ) CID lbls
       in
@@ -871,10 +884,10 @@ struct
       let
         val {statement, evidence} = Development.lookupTheorem development lbl
         val H' >> P' = statement
+        val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
+        val substitution = LevelSolver.Level.resolve constraints
       in
-        if Context.subcontext (H', H) andalso Syntax.eq (P, P')
-        then [] BY (fn _ => Susp.force evidence)
-        else raise Refine
+        [] BY (fn _ => LevelSolver.subst substitution (Susp.force evidence))
       end
 
     fun Admit (H >> P) =

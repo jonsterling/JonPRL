@@ -137,8 +137,8 @@ sig
     val HypEq : tactic
     val EqInSupertype : tactic
 
-    val Unfold : world * label -> tactic
-    val Unfolds : world * (label list) -> tactic
+    val Unfold : world * label * Level.t option -> tactic
+    val Unfolds : world * ((label * Level.t option) list) -> tactic
     val Lemma : world * label -> tactic
 
     val RewriteGoal : conv -> tactic

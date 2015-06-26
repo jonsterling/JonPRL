@@ -186,7 +186,8 @@ struct
 
   val parseUnfold : tactic_parser =
     fn w => symbol "unfold"
-      && brackets (separate parseLabel whiteSpace)
+      && brackets (separate (parseLabel wth (fn x => (x, NONE))) whiteSpace)
+      (* TODO: parse optional level annotations *)
       wth (fn (name, lbls) => fn pos =>
              UNFOLD (lbls, ({name = name, pos = pos})))
 
