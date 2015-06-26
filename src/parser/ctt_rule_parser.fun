@@ -1,7 +1,7 @@
 functor CttRuleParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
-     where type level = int
+     where type level = Level.t
      where type label = ParserContext.label
    structure ParseSyntax : PARSE_ABT
      where type t = Tactic.term
@@ -25,7 +25,7 @@ struct
     repeat1 digit wth valOf o Int.fromString o String.implode
 
   val parseLevel =
-    lexeme (symbol "@" >> parseInt)
+    lexeme (symbol "@" >> Level.parse)
 
   val parseIndex =
     lexeme (symbol "#" >> parseInt)

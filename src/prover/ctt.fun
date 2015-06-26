@@ -134,7 +134,7 @@ struct
 
     fun inferLevel (H, P) =
       case out P of
-           UNIV l $ _ => l + 1
+           UNIV l $ _ => Level.succ l
          | FUN $ #[A, xB] =>
            let
              val (H', x, B) = ctxUnbind (H, A, xB)
@@ -164,15 +164,15 @@ struct
               val X = Context.lookup H x
               val k = inferLevel (H, X)
             in
-              k - 1
+              Level.pred k
             end
          | CUSTOM _ $ _ =>
              raise Refine
-         | _ => 0
+         | _ => Level.base
 
     fun inferType (H, M) =
       case out M of
-           UNIV l $ _ => UNIV (l + 1) $$ #[]
+           UNIV l $ _ => UNIV (Level.succ l) $$ #[]
          | AP $ #[F, N] =>
              let
                val #[A, xB] = inferType (H, F) ^! FUN

@@ -244,7 +244,7 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
-       | UNIV i => "U<" ^ Level.toString i ^ ">"
+       | UNIV i => "U{" ^ Level.toString i ^ "}"
        | VOID => "void"
        | UNIT => "unit"
        | AX => "⬧"
@@ -281,7 +281,7 @@ struct
         || middle (string "〈") p  (string "〉")
 
     val parseUniv : t charParser =
-      string "U" >> angles parseInt wth UNIV
+      string "U" >> middle (string "{") Level.parse (string "}") wth UNIV
 
     val extensionalParseOperator : t charParser =
       parseUniv
