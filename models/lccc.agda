@@ -242,15 +242,19 @@ module CwF where
   ext θ M x with fst M x | snd M x
   ... | ._ , _ , prf | refl = θ x , _ , prf
 
+  infix 0 ⟨_,_⟩
+  ⟨_,_⟩ : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
+  ⟨_,_⟩ = ext
+
   ctx-cmp-ump : ∀ {Γ Δ}
     → (γ : Sub Δ Γ)
     → (A : Ty Γ)
     → (M : Tm Δ (A *ty[ γ ]))
     → Σ[ θ ∶ Sub Δ (Γ ▸ A) ]
-      ( θ ≡ ext γ M × wkn A ∘ θ ≡ γ )
-  ctx-cmp-ump {Δ = Δ} γ A M = ext γ M , refl , fun-ext wkn-prf
+      ( θ ≡ ⟨ γ , M ⟩ × wkn A ∘ θ ≡ γ )
+  ctx-cmp-ump {Δ = Δ} γ A M = ⟨ γ , M ⟩ , refl , fun-ext wkn-prf
     where
-      wkn-prf : (x : Δ) → (wkn A ∘ ext γ M) x ≡ γ x
+      wkn-prf : (x : Δ) → (wkn A ∘ ⟨ γ , M ⟩) x ≡ γ x
       wkn-prf x with fst M x | snd M x
       wkn-prf x | ._ , _ , prf | refl = prf
 
