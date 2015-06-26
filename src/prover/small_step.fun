@@ -64,6 +64,11 @@ struct
             | CANON => stepDecideBeta (S, L, R)
         )
       | SO_APPLY $ #[L, R] => (
+          (* This can't come up but I don't think it's wrong
+           * Leaving this in here so it's an actual semantics
+           * for the core type theory: not just what users
+           * can say with the syntax we give.
+           *)
           case out L of
             x \ L => STEP (subst R x L)
            | _ =>
