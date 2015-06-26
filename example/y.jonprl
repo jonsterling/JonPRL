@@ -20,7 +20,7 @@ Theorem transitive : [
    ∀(ceq(f; g); _.
    ∀(ceq(g; h); _.
    ceq(f; h)))))))] {
-  auto; ?{sreflexivity};
+  auto;
   chyp-subst → #5 [c. ceq(c; h)];
   chyp-subst ← #6 [c. ceq(g; c)];
   sreflexivity
