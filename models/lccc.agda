@@ -230,11 +230,13 @@ module CwF where
   wkn A = map A ∘ π₂
 
   var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
-  var Γ A = M , prf where
-    M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
-    M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
-    prf : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
-    prf (._ , _ , refl) = refl
+  var Γ A = M , prf
+    where
+      M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
+      M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
+
+      prf : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
+      prf (._ , _ , refl) = refl
 
   ext : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
   ext θ M x with fst M x | snd M x
