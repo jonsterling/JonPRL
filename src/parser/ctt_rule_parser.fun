@@ -87,14 +87,14 @@ struct
                   level = k},
                  {name = name, pos = pos}))
 
-  val parseEqSubst : tactic_parser =
+  val parseCEqSubst : tactic_parser =
     fn w => symbol "csubst"
       && parseTm w && parseTm w
       wth (fn (name, (M, N)) => fn pos =>
               CEQ_SUBST ({left = M, right = N},
                          {name = name, pos = pos}))
 
-  val parseHypSubst : tactic_parser =
+  val parseCHypSubst : tactic_parser =
     fn w => symbol "chyp-subst"
       && parseDir
       && parseIndex
@@ -249,6 +249,8 @@ struct
       || parseCEqualRefl w
       || parseCEqualSym w
       || parseCEqualStep w
+      || parseCEqSubst w
+      || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =
     fn w => !! (tacticParsers w)
