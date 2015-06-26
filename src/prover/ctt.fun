@@ -16,7 +16,7 @@ functor Ctt
    sharing type Lcf.evidence = Syntax.t
 
    structure Conv : CONV where type term = Syntax.t
-
+   structure Semantics : SMALL_STEP where type syn = Syntax.t
    sharing type Development.term = Syntax.t) : CTT =
 struct
   structure Lcf = Lcf
@@ -936,6 +936,37 @@ struct
                      THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
         end
+
+      fun CEqRefl (H >> P) =
+        let
+          val #[M, N] = P ^! CEQUAL
+          val _ = unify M N
+        in
+            [] BY (fn [] => CEQUAL_REFL $$ #[]
+                   | _  => raise Refine)
+        end
+
+      fun CEqSym (H >> P) =
+        let
+          val #[M, N] = P ^! CEQUAL
+        in
+          [H >> CEQUAL $$ #[N, M]
+          ] BY (fn [D] => CEQUAL_SYM $$ #[D]
+                 | _ => raise Refine)
+        end
+
+      fun CEqStep (H >> P) =
+        let
+          val #[M, N] = P ^! CEQUAL
+          val M' =
+              case Semantics.step M handle Semantics.Stuck _ => raise Refine of
+                  Semantics.STEP M' => M'
+                | CANON => raise Refine
+        in
+          [ H >> CEQUAL $$ #[M', N]
+          ] BY (fn [D] => CEQUAL_STEP $$ #[D]
+                 | _ => raise Refine)
+        end
     end
 
     local
@@ -980,5 +1011,6 @@ structure Ctt = Ctt
   (structure Lcf = Lcf
    structure Syntax = Syntax
    structure Conv = Conv
+   structure Semantics = Semantics
    structure Sequent = Sequent
    structure Development = Development)

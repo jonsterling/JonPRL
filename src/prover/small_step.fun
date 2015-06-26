@@ -1,5 +1,5 @@
 functor SmallStep (Syn : ABT_UTIL where type Operator.t = StringVariable.t OperatorType.operator)
-        : SMALL_STEP =
+        : SMALL_STEP where type syn = Syn.t =
 struct
   type syn = Syn.t
 
@@ -81,3 +81,5 @@ struct
       | _ \ _ => raise Stuck e (* Cannot step a binder *)
       | _ => raise Stuck e
 end
+
+structure Semantics = SmallStep(Syntax)
