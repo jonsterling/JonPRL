@@ -830,6 +830,19 @@ struct
            SOME (x, _) => Hypothesis_ x (H >> P)
          | NONE => raise Refine
 
+    fun Assert (term, name) (H >> P) =
+      let
+        val k =
+            case name of
+                SOME k => k
+              | NONE => Context.fresh (H, Variable.named "H")
+      in
+        [ H >> term
+        , H @@ (k, term) >> P
+        ] BY (fn [D, E] => ASSERT $$ #[D, k \\ E]
+               | _ => raise Refine)
+      end
+
     fun Unfold (development, lbl) (H >> P) =
       let
         open Conversionals

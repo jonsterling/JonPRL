@@ -71,6 +71,7 @@ struct
        | EQ_SUBST $ #[_, D, _] => extract D
 
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
+       | ASSERT $ #[D, E] => AP $$ #[LAM $$ #[E], extract D]
 
        | ` x => `` x
        | x \ E => x \\ extract E

@@ -132,6 +132,7 @@ sig
     val Witness : term -> tactic
 
     val Assumption : tactic
+    val Assert     : term * name option -> tactic
     val Hypothesis : int -> tactic
     val HypEq : tactic
     val EqInSupertype : tactic

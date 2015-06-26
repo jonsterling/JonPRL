@@ -159,6 +159,12 @@ struct
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
 
+  val parseAssert : tactic_parser =
+   fn w => symbol "assert" && parseTm w && opt (brackets parseName)
+     wth (fn (name, (term, hyp)) => fn pos =>
+             ASSERT ({assertion = term, name = hyp},
+                     {name = name, pos = pos}))
+
   val parseMemCd : tactic_parser =
     fn w => symbol "mem-cd"
       wth (fn name => fn pos => MEM_CD {name = name, pos = pos})
@@ -207,6 +213,7 @@ struct
       || parseReduce w
       || parseMemCd w
       || parseAssumption w
+      || parseAssert w
       || parseSymmetry w
 
   val parse : world -> Tactic.t charParser =
