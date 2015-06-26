@@ -53,6 +53,7 @@ struct
        ORELSE IndependentProdIntro
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
+       ORELSE CEqRefl
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -77,6 +78,7 @@ struct
     in
       AxEq
         ORELSE EqEq
+        ORELSE CEqEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq

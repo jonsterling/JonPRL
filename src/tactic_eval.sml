@@ -23,6 +23,10 @@ struct
         an a (EqSubst (left, right, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
         an a (HypEqSubst (dir, index, domain, level))
+      | CEQ_SUBST ({left, right}, a) =>
+        an a (CEqSubst (left, right))
+      | CHYP_SUBST ({dir, index, domain}, a) =>
+        an a (HypCEqSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (CttUtil.Intro {term = term,
                              rule = rule,
@@ -42,6 +46,9 @@ struct
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
       | SYMMETRY a => an a EqSym
+      | CEQUAL_REFL a => an a CEqRefl
+      | CEQUAL_SYM a => an a CEqSym
+      | CEQUAL_STEP a => an a CEqStep
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))

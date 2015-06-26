@@ -20,6 +20,11 @@ struct
                     index : int,
                     domain : term,
                     level : level option} * meta
+    | CEQ_SUBST of {left : term,
+                    right : term} * meta
+    | CHYP_SUBST of {dir : Dir.dir,
+                     index : int,
+                     domain : term} * meta
     | INTRO of {term : term option,
                 rule : int option,
                 freshVariable : name option,
@@ -40,6 +45,9 @@ struct
     | ASSERT of {assertion : term,
                  name : name option} * meta
     | SYMMETRY of meta
+    | CEQUAL_REFL of meta
+    | CEQUAL_SYM of meta
+    | CEQUAL_STEP of meta
     | TRY of t
     | LIMIT of t
     | ORELSE of t list * meta

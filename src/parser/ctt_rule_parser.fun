@@ -87,6 +87,25 @@ struct
                   level = k},
                  {name = name, pos = pos}))
 
+  val parseCEqSubst : tactic_parser =
+    fn w => symbol "csubst"
+      && parseTm w && parseTm w
+      wth (fn (name, (M, N)) => fn pos =>
+              CEQ_SUBST ({left = M, right = N},
+                         {name = name, pos = pos}))
+
+  val parseCHypSubst : tactic_parser =
+    fn w => symbol "chyp-subst"
+      && parseDir
+      && parseIndex
+      && parseTm w
+      wth (fn (name, (dir, (i, M))) => fn pos =>
+              CHYP_SUBST
+                ({dir = dir,
+                  index = i,
+                  domain = M},
+                 {name = name, pos = pos}))
+
   val parseIntroArgs =
     fn w => opt (parseTm w)
       && opt parseIndex
@@ -155,6 +174,18 @@ struct
     fn w => symbol "symmetry"
       wth (fn name => fn pos => SYMMETRY {name = name, pos = pos})
 
+  val parseCEqualRefl : tactic_parser =
+    fn w => symbol "sreflexivity"
+      wth (fn name => fn pos => CEQUAL_REFL {name = name, pos = pos})
+
+  val parseCEqualSym : tactic_parser =
+    fn w => symbol "ssymmetry"
+      wth (fn name => fn pos => CEQUAL_SYM {name = name, pos = pos})
+
+  val parseCEqualStep : tactic_parser =
+    fn w => symbol "step"
+      wth (fn name => fn pos => CEQUAL_STEP {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -215,6 +246,11 @@ struct
       || parseAssumption w
       || parseAssert w
       || parseSymmetry w
+      || parseCEqualRefl w
+      || parseCEqualSym w
+      || parseCEqualStep w
+      || parseCEqSubst w
+      || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =
     fn w => !! (tacticParsers w)

@@ -14,6 +14,8 @@ struct
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
     | ADMIT | ASSERT
+    | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
+    | CEQUAL_SUBST
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -25,6 +27,7 @@ struct
     | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
+    | CEQUAL
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -50,6 +53,7 @@ struct
   fun eq (UNIV_EQ i, UNIV_EQ j) = i = j
     | eq (CUM, CUM) = true
     | eq (EQ_EQ, EQ_EQ) = true
+    | eq (CEQUAL_EQ, CEQUAL_EQ) = true
     | eq (VOID_EQ, VOID_EQ) = true
     | eq (VOID_ELIM, VOID_ELIM) = true
     | eq (UNIT_EQ, UNIT_EQ) = true
@@ -63,6 +67,10 @@ struct
     | eq (PAIR_EQ, PAIR_EQ) = true
     | eq (SPREAD_EQ, SPREAD_EQ) = true
     | eq (FUN_EQ, FUN_EQ) = true
+    | eq (CEQUAL_REFL, CEQUAL_REFL) = true
+    | eq (CEQUAL_SYM, CEQUAL_SYM) = true
+    | eq (CEQUAL_STEP, CEQUAL_STEP) = true
+    | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -93,6 +101,7 @@ struct
     | eq (AP, AP) = true
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
+    | eq (CEQUAL, CEQUAl) = true
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
@@ -115,6 +124,11 @@ struct
          UNIV_EQ _ => #[]
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
+       | CEQUAL_EQ => #[0, 0]
+       | CEQUAL_REFL => #[]
+       | CEQUAL_SYM => #[0]
+       | CEQUAL_STEP => #[0]
+       | CEQUAL_SUBST => #[0, 0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -183,6 +197,7 @@ struct
        | ISECT => #[0,1]
 
        | EQ => #[0,0,0]
+       | CEQUAL => #[0, 0]
        | MEM => #[0,0]
 
        | SUBSET => #[0,1]
@@ -198,6 +213,11 @@ struct
        | VOID_ELIM => "void-elim"
 
        | EQ_EQ => "eq⁼"
+       | CEQUAL_EQ => "~⁼"
+       | CEQUAL_REFL => "~-refl"
+       | CEQUAL_SYM => "~-sym"
+       | CEQUAL_STEP => "~-step"
+       | CEQUAL_SUBST => "~-subst"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
@@ -256,6 +276,7 @@ struct
        | AP => "ap"
        | ISECT => "⋂"
        | EQ => "="
+       | CEQUAL => "~"
        | MEM => "∈"
        | PLUS => "+"
        | INL => "inl"
@@ -301,6 +322,7 @@ struct
         || string "∀" return ISECT
         || string "⋂" return ISECT
         || string "=" return EQ
+        || string "ceq" return CEQUAL
         || string "∈" return MEM
         || string "subset" return SUBSET
         || string "so_apply" return SO_APPLY
