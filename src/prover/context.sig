@@ -1,9 +1,12 @@
 signature CONTEXT =
 sig
   structure Syntax : ABT_UTIL
+  structure Telescope : TELESCOPE
+    where type Label.t = Syntax.Variable.t
+
   type name = Syntax.Variable.t
   type term = Syntax.t
-  type context
+  type context = (term * Visibility.t) Telescope.telescope
 
   val fresh : context * name -> name
 

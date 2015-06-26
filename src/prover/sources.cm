@@ -20,6 +20,9 @@ group is
   development.fun
   development.sig
 
+  level_solver.sig
+  level_solver.fun
+
   lcf.fun
 
   ctt.fun

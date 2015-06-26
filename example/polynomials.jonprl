@@ -33,14 +33,14 @@ Tactic autoR {
 }.
 
 Theorem End_wf : [
-  ∀(U<0>; U. ∀(Π(U; _. Π(U; _. U<0>)); Hom.
-    ∈(End(U;Hom); U<0>)))
+  ∀(U{i}; U. ∀(Π(U; _. Π(U; _. U{i})); Hom.
+    ∈(End(U;Hom); U{i})))
 ] {
   unfold <End>; auto.
 }.
 Theorem Coend_wf : [
-  ∀(U<0>; U. ∀(Π(U; _. Π(U; _. U<0>)); Hom.
-    ∈(Coend(U;Hom); U<0>)))
+  ∀(U{i}; U. ∀(Π(U; _. Π(U; _. U{i})); Hom.
+    ∈(Coend(U;Hom); U{i})))
 ] {
   unfold <Coend>; auto.
 }.
@@ -54,14 +54,14 @@ Operator Lan : (0;0;0;0;0).
 [Lan(E;B;f;φ;b)] =def= [Coend(E; λ(X. λ(Y. Copower(Paths(B; ap(f;X); b); ap(φ;Y)))))].
 
 Theorem Ran_wf : [
-  ∀(U<0>; E. ∀(U<0>; B. ∀(Π(E; _. B); f. ∀(Π(E; _. U<0>); φ. ∀(B; b.
-    ∈(Ran(E;B;f;φ;b); U<0>))))))
+  ∀(U{i}; E. ∀(U{i}; B. ∀(Π(E; _. B); f. ∀(Π(E; _. U{i}); φ. ∀(B; b.
+    ∈(Ran(E;B;f;φ;b); U{i}))))))
 ] {
   unfold <Ran Power End Paths>; refine <autoR>.
 }.
 Theorem Lan_wf : [
-  ∀(U<0>; E. ∀(U<0>; B. ∀(Π(E; _. B); f. ∀(Π(E; _. U<0>); φ. ∀(B; b.
-    ∈(Lan(E;B;f;φ;b); U<0>))))))
+  ∀(U{i}; E. ∀(U{i}; B. ∀(Π(E; _. B); f. ∀(Π(E; _. U{i}); φ. ∀(B; b.
+    ∈(Lan(E;B;f;φ;b); U{i}))))))
 ] {
   unfold <Lan Copower Coend Paths>; refine <autoR>.
 }.
@@ -72,18 +72,18 @@ Operator Fam : (0).
 Operator dom : (0).
 Operator map : (0;0).
 
-[Fam(B)] =def= [Σ(U<0>; Dom. Π(Dom; _. B))].
+[Fam(B)] =def= [Σ(U{i}; Dom. Π(Dom; _. B))].
 [dom(f)] =def= [fst(f)].
 [map(f;b)] =def= [ap(snd(f); b)].
 
-Theorem Fam_wf : [∀(U<0>; B. ∈(Fam(B); U<1>))] {
+Theorem Fam_wf : [∀(U{i}; B. ∈(Fam(B); U{i'}))] {
   unfold <Fam>; auto
 }.
-Theorem dom_wf : [∀(U<0>; B. ∀(Fam(B); f. ∈(dom(f); U<0>)))] {
+Theorem dom_wf : [∀(U{i}; B. ∀(Fam(B); f. ∈(dom(f); U{i})))] {
   unfold <Fam map dom fst>; auto
 }.
 Theorem map_wf : [
-  ∀(U<0>; B. ∀(Fam(B); f. ∀(dom(f); x. ∈(map(f;x); B))))
+  ∀(U{i}; B. ∀(Fam(B); f. ∀(dom(f); x. ∈(map(f;x); B))))
 ] {
   unfold <Fam dom map fst snd>; refine <autoR>.
 }.
@@ -95,7 +95,7 @@ Operator Fiber : (0;0;0).
 [Fiber(B; f; b)] =def= [Σ(dom(f); x. =(b; map(f;x); B))].
 
 Theorem Fiber_wf : [
-  ∀(U<0>; B. ∀(Fam(B); f. ∀(B; b. ∈(Fiber(B;f;b); U<0>))))
+  ∀(U{i}; B. ∀(Fam(B); f. ∀(B; b. ∈(Fiber(B;f;b); U{i}))))
 ] {
   unfold <Fam Fiber dom map fst snd>; refine <autoR>.
 }.
@@ -113,20 +113,20 @@ Operator Forall : (0;0;0).
 [Forall(X;Y;f)] =def= [λ(φ. λ(y. Ran(X;Y;f;φ;y)))].
 
 Theorem Exists_wf : [
-  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
-    ∈(ap(Exists(X;Y;f);φ); Π(Y; _. U<0>))))))
+  ∀(U{i}; X. ∀(U{i}; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U{i}); φ.
+    ∈(ap(Exists(X;Y;f);φ); Π(Y; _. U{i}))))))
 ] {
   unfold <Exists Lan Coend Copower Paths>; refine <autoR>.
 }.
 Theorem Invert_wf : [
-  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(Y; _. U<0>); φ.
-    ∈(ap(Invert(f);φ); Π(X; _. U<0>))))))
+  ∀(U{i}; X. ∀(U{i}; Y. ∀(Π(X; _. Y); f. ∀(Π(Y; _. U{i}); φ.
+    ∈(ap(Invert(f);φ); Π(X; _. U{i}))))))
 ] {
   unfold <Invert>; refine <autoR>.
 }.
 Theorem Forall_wf : [
-  ∀(U<0>; X. ∀(U<0>; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U<0>); φ.
-    ∈(ap(Forall(X;Y;f);φ); Π(Y; _. U<0>))))))
+  ∀(U{i}; X. ∀(U{i}; Y. ∀(Π(X; _. Y); f. ∀(Π(X; _. U{i}); φ.
+    ∈(ap(Forall(X;Y;f);φ); Π(Y; _. U{i}))))))
 ] {
   unfold <Forall Ran End Power Paths>; refine <autoR>
 }.
@@ -154,11 +154,11 @@ Operator Polynomial : ().
 Operator base : (0).
 Operator fam : (0).
 
-[Polynomial] =def= [Σ(U<0>; Base. Fam(Base))].
+[Polynomial] =def= [Σ(U{i}; Base. Fam(Base))].
 [base(E)] =def= [fst(E)].
 [fam(E)] =def= [snd(E)].
 
-Theorem Polynomial_wf : [∈(Polynomial; U<1>)] {
+Theorem Polynomial_wf : [∈(Polynomial; U{i'})] {
   unfold <Polynomial Fam>; auto
 }.
 
@@ -169,7 +169,7 @@ Operator Embed : (0).
 [Embed(B)] =def= [λ(A. CTT(A;B))].
 
 Theorem Embed_wf : [
-  ∀(U<0>; B. ∀(U<0>; X. ∈(ap(Embed(B); X); U<0>)))
+  ∀(U{i}; B. ∀(U{i}; X. ∈(ap(Embed(B); X); U{i})))
 ] {
   unfold <Embed CTT>; refine <autoR>.
 }.
@@ -181,7 +181,7 @@ Operator Ext : (0;0).
 [Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); fam(p); b)))].
 
 Theorem Ext_wf : [
-  ∀(Polynomial; p. ∀(U<0>; X. ∈(Ext(p;X); U<1>)))
+  ∀(Polynomial; p. ∀(U{i}; X. ∈(Ext(p;X); U{i'})))
 ] {
   unfold <Polynomial Ext Fam base Embed CTT Fiber fam dom map fst snd>; refine <autoR>;
   unfold <snd>; refine <autoR>
@@ -194,8 +194,8 @@ Operator Pullback : (0;0;0).
 [Pullback(B;f;g)] =def= [Σ(dom(f); x. Fiber(B; g; map(f;x)))].
 
 Theorem Pullback_wf : [
-  ∀(U<0>; B. ∀(Fam(B); f. ∀(Fam(B); g.
-    ∈(Pullback(B;f;g); U<0>))))
+  ∀(U{i}; B. ∀(Fam(B); f. ∀(Fam(B); g.
+    ∈(Pullback(B;f;g); U{i}))))
 ] {
   unfold <Pullback Fam Fiber map dom fst snd>; refine <autoR>.
 }.

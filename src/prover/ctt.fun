@@ -134,7 +134,7 @@ struct
 
     fun inferLevel (H, P) =
       case out P of
-           UNIV l $ _ => l + 1
+           UNIV l $ _ => Level.succ l
          | FUN $ #[A, xB] =>
            let
              val (H', x, B) = ctxUnbind (H, A, xB)
@@ -164,15 +164,15 @@ struct
               val X = Context.lookup H x
               val k = inferLevel (H, X)
             in
-              k - 1
+              Level.pred k
             end
          | CUSTOM _ $ _ =>
              raise Refine
-         | _ => 0
+         | _ => Level.base
 
     fun inferType (H, M) =
       case out M of
-           UNIV l $ _ => UNIV (l + 1) $$ #[]
+           UNIV l $ _ => UNIV (Level.succ l) $$ #[]
          | AP $ #[F, N] =>
              let
                val #[A, xB] = inferType (H, F) ^! FUN
@@ -210,9 +210,10 @@ struct
         val (UNIV l, #[]) = asApp univ1
         val (UNIV l', #[]) = asApp univ2
         val (UNIV k, #[]) = asApp univ3
-        val _ = Level.assertLt (Level.unify (l, l'), k)
+        val _ = Level.assertEq (l, l')
+        val _ = Level.assertLt (l, k)
       in
-        [] BY mkEvidence UNIV_EQ
+        [] BY mkEvidence (UNIV_EQ l)
       end
 
     fun EqEq (H >> P) =
@@ -555,7 +556,7 @@ struct
         val M = Context.rebind H M
         val hasHiddenVariables =
           foldl
-            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden)
+            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden handle _ => false)
             false
             (freeVariables M)
         val _ =
@@ -843,24 +844,31 @@ struct
                | _ => raise Refine)
       end
 
-    fun Unfold (development, lbl) (H >> P) =
-      let
-        open Conversionals
-        val conv = CDEEP (Development.lookupDefinition development lbl)
-      in
-        [ Context.map conv H >> conv P
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
+    structure LevelSolver =
+      LevelSolver
+        (SyntaxWithUniverses
+          (type label = Development.label
+           structure Syntax = Syntax))
+
+    structure SequentLevelSolver = SequentLevelSolver
+      (structure Solver = LevelSolver
+       structure Abt = Syntax
+       structure Sequent = Sequent)
 
     fun Unfolds (development, lbls) (H >> P) =
       let
         open Conversionals
         infix CTHEN
         val conv =
-          foldl (fn (lbl, conv) =>
-            conv CTHEN CDEEP (Development.lookupDefinition development lbl)
-          ) CID lbls
+          foldl (fn ((lbl, ok), acc) =>
+            let
+              val k = case ok of SOME k => k | NONE => Level.base
+              val conv =
+                LevelSolver.subst (LevelSolver.Level.yank k)
+                  o CDEEP (Development.lookupDefinition development lbl)
+            in
+              acc CTHEN conv
+            end) CID lbls
       in
         [ Context.map conv H >> conv P
         ] BY (fn [D] => D
@@ -871,10 +879,11 @@ struct
       let
         val {statement, evidence} = Development.lookupTheorem development lbl
         val H' >> P' = statement
+        val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
+        val substitution = LevelSolver.Level.resolve constraints
+        val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
       in
-        if Context.subcontext (H', H) andalso Syntax.eq (P, P')
-        then [] BY (fn _ => Susp.force evidence)
-        else raise Refine
+        [] BY (fn _ => shovedEvidence)
       end
 
     fun Admit (H >> P) =

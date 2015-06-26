@@ -9,7 +9,7 @@ struct
 
   datatype t =
       LEMMA of label * meta
-    | UNFOLD of label list * meta
+    | UNFOLD of (label * level option) list * meta
     | CUSTOM_TACTIC of label * meta
     | WITNESS of term * meta
     | HYPOTHESIS of int * meta

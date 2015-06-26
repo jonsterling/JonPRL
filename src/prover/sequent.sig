@@ -3,6 +3,8 @@ sig
   type term
 
   structure Context : CONTEXT
+  sharing type Context.Syntax.t = term
+
   type name = Context.name
   type context = Context.context
 
