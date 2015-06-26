@@ -240,13 +240,18 @@ module CwF where
   ext θ M x with fst M x | snd M x
   ... | ._ , _ , prf | refl = θ x , _ , prf
 
-  -- without uniqueness...
-  law : ∀ {Γ Δ}
+  ctx-cmp-ump : ∀ {Γ Δ}
     → (γ : Sub Δ Γ)
     → (A : Ty Γ)
     → (M : Tm Δ (A *ty[ γ ]))
-    → Σ[ θ ∶ Sub Δ (Γ ▸ A) ] θ ≡ ext γ M
-  law γ A M = ext γ M , refl
+    → Σ[ θ ∶ Sub Δ (Γ ▸ A) ]
+      ( θ ≡ ext γ M
+      × wkn A ∘ θ ≡ γ )
+  ctx-cmp-ump {Δ = Δ} γ A M = ext γ M , refl , fun-ext wkn-prf
+    where
+      wkn-prf : (x : Δ) → (wkn A ∘ ext γ M) x ≡ γ x
+      wkn-prf x with fst M x | snd M x
+      wkn-prf x | ._ , _ , prf | refl = prf
 
   Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
   Σ↓ θ M = dom M ↓ θ ∘ map M
