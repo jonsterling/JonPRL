@@ -31,7 +31,7 @@ struct
   local
     fun go [] = 0
       | go (x :: xs) =
-          if (foldl (fn (y, b) => b andalso x = y) true xs) then
+          if List.all (fn y => x = y) xs then
             x
           else
             raise LevelError
