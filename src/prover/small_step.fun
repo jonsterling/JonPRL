@@ -14,18 +14,18 @@ struct
 
   fun stepSpreadBeta (P, E) =
     case out P of
-        PAIR $ #[L, R] => R // (L // E)
+        PAIR $ #[L, R] => (E // L) // R
       | _ => raise Stuck (SPREAD $$ #[P, E])
 
   fun stepApBeta (F, A) =
     case out F of
-        LAM $ #[B] => A // B
+        LAM $ #[B] => B // A
       | _ => raise Stuck (AP $$ #[F, A])
 
   fun stepDecideBeta (S, L, R) =
     case out S of
-        INL $ #[A] => A // L
-      | INR $ #[B] => B // R
+        INL $ #[A] => L // A
+      | INR $ #[B] => R // B
       | _ => raise Stuck (DECIDE $$ #[S, L, R])
 
   fun step e =
