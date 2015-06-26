@@ -12,10 +12,10 @@ id : {A : Set} → A → A
 id x = x
 
 infixr 9 _∘_
-_∘_ :
-    {A : Set}
-  → {B : A → Set}
-  → {C : {x : A} → B x → Set}
+_∘_ : ∀ {a b c}
+  → {A : Set a}
+  → {B : A → Set b}
+  → {C : {x : A} → B x → Set c}
   → (g : (∀ {x} (y : B x) → C y))
   → (f : (x : A) → B x)
   → ((x : A) → C (f x))
