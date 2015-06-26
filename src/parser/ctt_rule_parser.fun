@@ -155,6 +155,18 @@ struct
     fn w => symbol "symmetry"
       wth (fn name => fn pos => SYMMETRY {name = name, pos = pos})
 
+  val parseCEqualRefl : tactic_parser =
+    fn w => symbol "sreflexivity"
+      wth (fn name => fn pos => CEQUAL_REFL {name = name, pos = pos})
+
+  val parseCEqualSym : tactic_parser =
+    fn w => symbol "ssymmetry"
+      wth (fn name => fn pos => CEQUAL_SYM {name = name, pos = pos})
+
+  val parseCEqualStep : tactic_parser =
+    fn w => symbol "step"
+      wth (fn name => fn pos => CEQUAL_STEP {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -215,6 +227,9 @@ struct
       || parseAssumption w
       || parseAssert w
       || parseSymmetry w
+      || parseCEqualRefl w
+      || parseCEqualSym w
+      || parseCEqualStep w
 
   val parse : world -> Tactic.t charParser =
     fn w => !! (tacticParsers w)

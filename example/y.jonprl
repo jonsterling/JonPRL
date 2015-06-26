@@ -1,0 +1,13 @@
+Operator Y : (0).
+[Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
+
+Theorem test : [ceq(λ(x.x); λ(x.x))] {
+  sreflexivity
+}.
+
+Theorem y-is-fix-point : [
+    ∀(U<0>; A.
+    ∀(Π(A; _.A); f .
+    ceq(Y(f); ap(f;Y(f)))))] {
+  auto; unfold <Y>; step; sreflexivity
+}.

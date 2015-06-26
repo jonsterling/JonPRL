@@ -42,6 +42,9 @@ struct
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
       | SYMMETRY a => an a EqSym
+      | CEQUAL_REFL a => an a CEqRefl
+      | CEQUAL_SYM a => an a CEqSym
+      | CEQUAL_STEP a => an a CEqStep
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))

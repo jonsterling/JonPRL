@@ -40,6 +40,9 @@ struct
     | ASSERT of {assertion : term,
                  name : name option} * meta
     | SYMMETRY of meta
+    | CEQUAL_REFL of meta
+    | CEQUAL_SYM of meta
+    | CEQUAL_STEP of meta
     | TRY of t
     | LIMIT of t
     | ORELSE of t list * meta

@@ -99,6 +99,7 @@ struct
     | eq (AP, AP) = true
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
+    | eq (CEQUAL, CEQUAl) = true
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
@@ -317,7 +318,7 @@ struct
         || string "∀" return ISECT
         || string "⋂" return ISECT
         || string "=" return EQ
-        || string "~" return CEQUAL
+        || string "ceq" return CEQUAL
         || string "∈" return MEM
         || string "subset" return SUBSET
         || string "so_apply" return SO_APPLY
