@@ -168,7 +168,7 @@ module CwF where
     π₂ : obj → dom g
     π₂ = fst ∘ snd
 
-    eq : (E : obj) → map g (fst (snd E)) ≡ map f (fst E)
+    eq : (E : obj) → (map g ∘ π₂) E ≡ (map f ∘ π₁) E
     eq = snd ∘ snd
 
   pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
@@ -178,10 +178,10 @@ module CwF where
   syntax pull {I} f g = f ×[ I ] g
 
   sect : ∀ {I} → 𝔉 I → Set
-  sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
+  sect f = Σ[ f⁻¹ ∶ (_ → dom f) ] Π[ i ∶ _ ] (map f ∘ f⁻¹) i ≡ i
 
   _* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
-  _* {I} {J} f i = (I ↓ f) ×[ J ] i ↓ fst
+  f * = λ i → (_ ↓ f) ×[ _ ] i ↓ fst
 
   Ctx : Set₁
   Ctx = Set
@@ -193,14 +193,14 @@ module CwF where
   Ty = 𝔉
 
   Tm : (Γ : Ctx) (A : Ty Γ) → Ctx
-  Tm _ A = sect A
+  Tm _ = sect
 
   Sub : Ctx → Ctx → Set
   Sub Δ Γ = Δ → Γ
 
   infix 1 _▸_
-  _▸_ : (Γ : Ctx) (A : Ty Γ) → Ctx
-  Γ ▸ A = Σ Γ (A ⁻¹)
+  _▸_ : (Γ : Ctx) → Ty Γ → Ctx
+  _▸_ Γ = Σ Γ ∘ fiber
 
   --           θ : Sub Δ Γ
   --           A : Ty Γ
