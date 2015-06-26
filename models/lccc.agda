@@ -152,17 +152,33 @@ module Hyperdoctrine where
   I = ∃⊣ Δ ⊤-𝒫
 
 module CwF where
+  fiber : ∀ {I} → 𝔉 I → 𝒫 I
+  fiber f = λ i → Σ[ e ∶ dom f ] map f e ≡ i
+
   _⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
-  f ⁻¹ = λ i → Σ[ e ∶ dom f ] map f e ≡ i
+  _⁻¹ = fiber
 
-  Pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
-  Pull f g = Σ[ x ∶ dom f ] Σ[ y ∶ dom g ] map f x ≡ map g y
+  module pullM {I} {f g : 𝔉 I} where
+    obj : Set
+    obj = Σ (dom f) (fiber g ∘ map f)
 
-  infix 1 Pull
-  syntax Pull {I} f g = f ×[ I ] g
+    π₁ : obj → dom f
+    π₁ = fst
 
-  Sect : ∀ {I} → 𝔉 I → Set
-  Sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
+    π₂ : obj → dom g
+    π₂ = fst ∘ snd
+
+    eq : (E : obj) → map g (fst (snd E)) ≡ map f (fst E)
+    eq = snd ∘ snd
+
+  pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
+  pull f g = pullM.obj {f = f} {g = g}
+
+  infix 1 pull
+  syntax pull {I} f g = f ×[ I ] g
+
+  sect : ∀ {I} → 𝔉 I → Set
+  sect {I} f = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] map f (f⁻¹ i) ≡ i
 
   _* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
   _* {I} {J} f i = (I ↓ f) ×[ J ] i ↓ fst
@@ -177,7 +193,7 @@ module CwF where
   Ty = 𝔉
 
   Tm : (Γ : Ctx) (A : Ty Γ) → Ctx
-  Tm _ A = Sect A
+  Tm _ A = sect A
 
   Sub : Ctx → Ctx → Set
   Sub Δ Γ = Δ → Γ
@@ -208,15 +224,15 @@ module CwF where
   wkn A = map A ∘ fst ∘ snd
 
   var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
-  var Γ A = M , sec where
+  var Γ A = M , prf where
     M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
     M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
-    sec : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
-    sec (._ , _ , refl) = refl
+    prf : Π[ x ∶ Γ ▸ A ] map (A *ty[ wkn A ]) (M x) ≡ x
+    prf (._ , _ , refl) = refl
 
   ext : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
   ext θ M x with fst M x | snd M x
-  ... | ._ , _ , sec | refl = θ x , _ , sym sec
+  ... | ._ , _ , prf | refl = θ x , _ , prf
 
   -- without uniqueness...
   law : ∀ {Γ Δ}
