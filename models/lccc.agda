@@ -173,6 +173,8 @@ module CwF where
 
     eq : (E : obj) → (map g ∘ π₂) E ≡ (map f ∘ π₁) E
     eq = snd ∘ snd
+  open pullM
+    using (π₁; π₂)
 
   pull : ∀ {I} → 𝔉 I → 𝔉 I → Set
   pull f g = pullM.obj {f = f} {g = g}
@@ -225,7 +227,7 @@ module CwF where
   A *ty[ θ ] = (θ *) A
 
   wkn : {Γ : Ctx} (A : Ty Γ) → Sub (Γ ▸ A) Γ
-  wkn A = map A ∘ fst ∘ snd
+  wkn A = map A ∘ π₂
 
   var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
   var Γ A = M , prf where
