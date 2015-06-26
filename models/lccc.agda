@@ -109,8 +109,8 @@ module Hyperdoctrine where
   δ : ∀ {X} → X → X × X
   δ x = x , x
 
-  Θ : ∀ {X} → 𝒫 (X × X)
-  Θ = ∃⊣ δ (λ _ → Unit)
+  I : ∀ {X} → 𝒫 (X × X)
+  I = ∃⊣ δ (λ _ → Unit)
 
 module CwF where
   _⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
