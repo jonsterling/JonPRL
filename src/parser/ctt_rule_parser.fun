@@ -175,11 +175,11 @@ struct
       wth (fn name => fn pos => SYMMETRY {name = name, pos = pos})
 
   val parseCEqualRefl : tactic_parser =
-    fn w => symbol "sreflexivity"
+    fn w => symbol "creflexivity"
       wth (fn name => fn pos => CEQUAL_REFL {name = name, pos = pos})
 
   val parseCEqualSym : tactic_parser =
-    fn w => symbol "ssymmetry"
+    fn w => symbol "csymmetry"
       wth (fn name => fn pos => CEQUAL_SYM {name = name, pos = pos})
 
   val parseCEqualStep : tactic_parser =
