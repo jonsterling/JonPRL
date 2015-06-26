@@ -36,6 +36,8 @@ sig
       | REDUCE of int option * meta
       | MEM_CD of meta
       | ASSUMPTION of meta
+      | ASSERT of {assertion : term,
+                   name : name option} * meta
       | SYMMETRY of meta
       | TRY of t
       | LIMIT of t
