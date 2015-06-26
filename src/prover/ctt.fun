@@ -556,7 +556,7 @@ struct
         val M = Context.rebind H M
         val hasHiddenVariables =
           foldl
-            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden)
+            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden handle _ => false)
             false
             (freeVariables M)
         val _ =
