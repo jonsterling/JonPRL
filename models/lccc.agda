@@ -94,6 +94,7 @@ Lan : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set
 Lan {X} _⇒_ f φ y = ∫↑[ x ∶ X ] (f x ⇒ y) ⊗ φ x
 
 module Hyperdoctrine where
+  infix 1 _∈_
   _∈_ : ∀ {I} → I → 𝒫 I → Set
   x ∈ φ = φ x
 
@@ -109,7 +110,7 @@ module Hyperdoctrine where
 
   infix 0 _∩_
   _∩_ : ∀ {I} → 𝒫 I → 𝒫 I → Set
-  ψ ∩ φ = ∀ {i} → i ∈ ψ → i ∈ φ
+  ψ ∩ φ = ∀ {i} → i ∈ ψ × i ∈ φ
 
   _* : ∀ {X Y} → (X → Y) → (𝒫 Y → 𝒫 X)
   f * = λ φ → φ ∘ f
