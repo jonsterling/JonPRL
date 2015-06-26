@@ -78,5 +78,6 @@ struct
       )
       | CUSTOM _ $ _ => raise Stuck e (* Require unfolding elsewhere *)
       | ` _ => raise Stuck e (* Cannot step an open term *)
-      | _ \ _ =>raise Stuck e (* Cannot step a binder *)
+      | _ \ _ => raise Stuck e (* Cannot step a binder *)
+      | _ => raise Stuck e
 end
