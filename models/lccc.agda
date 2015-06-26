@@ -89,10 +89,10 @@ open 𝔉
 
 -- NOTE: large extensions are possible here with Yoneda embeddings for homs
 
-Ran : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
+Ran : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (𝒫 X → 𝒫 U)
 Ran {X} _⇒_ f φ y = ∫↓[ x ∶ X ] (y ⇒ f x) ⋔ φ x
 
-Lan : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (X → Set) → (U → Set)
+Lan : ∀ {X : Set} {U : Set} → (U → U → Set) → (X → U) → (𝒫 X → 𝒫 U)
 Lan {X} _⇒_ f φ y = ∫↑[ x ∶ X ] (f x ⇒ y) ⊗ φ x
 
 module Hyperdoctrine where
@@ -247,8 +247,7 @@ module CwF where
     → (A : Ty Γ)
     → (M : Tm Δ (A *ty[ γ ]))
     → Σ[ θ ∶ Sub Δ (Γ ▸ A) ]
-      ( θ ≡ ext γ M
-      × wkn A ∘ θ ≡ γ )
+      ( θ ≡ ext γ M × wkn A ∘ θ ≡ γ )
   ctx-cmp-ump {Δ = Δ} γ A M = ext γ M , refl , fun-ext wkn-prf
     where
       wkn-prf : (x : Δ) → (wkn A ∘ ext γ M) x ≡ γ x
