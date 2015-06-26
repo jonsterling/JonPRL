@@ -25,6 +25,10 @@ struct
        | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => AX $$ #[]
        | EQ_SYM $ _ => ax
+       | CEQUAL_EQ $ _ => ax
+       | CEQUAL_REFL $ _ => ax
+       | CEQUAL_SYM $ _ => ax
+       | CEQUAL_STEP $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
