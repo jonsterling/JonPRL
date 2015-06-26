@@ -855,25 +855,20 @@ struct
        structure Abt = Syntax
        structure Sequent = Sequent)
 
-    fun Unfold (development, lbl, ok) (H >> P) =
-      let
-        val k = case ok of SOME k => k | NONE => Level.base
-        open Conversionals
-        val conv = LevelSolver.subst (LevelSolver.Level.yank k) o CDEEP (Development.lookupDefinition development lbl)
-      in
-        [ Context.map conv H >> conv P
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
-
     fun Unfolds (development, lbls) (H >> P) =
       let
         open Conversionals
         infix CTHEN
         val conv =
-          foldl (fn ((lbl, _), conv) =>
-            conv CTHEN CDEEP (Development.lookupDefinition development lbl)
-          ) CID lbls
+          foldl (fn ((lbl, ok), acc) =>
+            let
+              val k = case ok of SOME k => k | NONE => Level.base
+              val conv =
+                LevelSolver.subst (LevelSolver.Level.yank k)
+                  o CDEEP (Development.lookupDefinition development lbl)
+            in
+              acc CTHEN conv
+            end) CID lbls
       in
         [ Context.map conv H >> conv P
         ] BY (fn [D] => D
