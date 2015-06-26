@@ -63,7 +63,14 @@ struct
               STEP S' => DECIDE $$ #[S', L, R]
             | CANON => stepDecideBeta (S, L, R)
         )
-      | SO_APPLY $ #[L, R] => raise Stuck e
+      | SO_APPLY $ #[L, R] => (
+          case out L of
+            x \ L => STEP (subst R x L)
+           | _ =>
+             case step L of
+               CANON => raise Stuck (SO_APPLY $$ #[L, R])
+              | STEP L' => STEP (SO_APPLY $$ #[L', R])
+      )
       | CUSTOM _ $ _ => raise Stuck e (* Require unfolding elsewhere *)
       | ` _ => raise Stuck e (* Cannot step an open term *)
       | _ \ _ =>raise Stuck e (* Cannot step a binder *)
