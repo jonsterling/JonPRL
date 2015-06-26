@@ -95,7 +95,7 @@ struct
            ConsView.Empty => R
          | ConsView.Cons (lbl, (A, vis), tel) =>
              go (tel, H')
-               (List.@ (R, Solver.generateConstraints (A, Context.lookup H lbl)))
+               (R @ Solver.generateConstraints (A, Context.lookup H lbl))
   in
     fun ctxGenerateConstraints (H, H') = go (H, H') []
   end

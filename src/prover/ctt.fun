@@ -886,8 +886,9 @@ struct
         val H' >> P' = statement
         val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
         val substitution = LevelSolver.Level.resolve constraints
+        val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
       in
-        [] BY (fn _ => LevelSolver.subst substitution (Susp.force evidence))
+        [] BY (fn _ => shovedEvidence)
       end
 
     fun Admit (H >> P) =
