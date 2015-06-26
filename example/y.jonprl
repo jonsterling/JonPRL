@@ -2,26 +2,26 @@ Operator Y : (0).
 [Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
 
 Theorem test : [ceq(λ(x.x); λ(x.x))] {
-  creflexivity
+  auto
 }.
 
 Theorem y-is-fix-point : [
-    ∀(U{i}; A.
-    ∀(Π(A; _.A); f .
-    ceq(Y(f); ap(f;Y(f)))))] {
-  auto; unfold <Y>; step; creflexivity
+  ∀(U{i}; A. ∀(Π(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
+] {
+  auto; unfold <Y>; step; auto
 }.
 
 Theorem transitive : [
-   ∀(U{i}; A.
-   ∀(∀(A; _.A); f.
-   ∀(∀(A; _.A); g.
-   ∀(Π(A; _.A); h.
-   ∀(ceq(f; g); _.
-   ∀(ceq(g; h); _.
-   ceq(f; h)))))))] {
+  ∀(U{i}; A.
+  ∀(∀(A; _.A); f.
+  ∀(∀(A; _.A); g.
+  ∀(Π(A; _.A); h.
+  ∀(ceq(f; g); _.
+  ∀(ceq(g; h); _.
+  ceq(f; h)))))))
+] {
   auto;
   chyp-subst → #5 [c. ceq(c; h)];
   chyp-subst ← #6 [c. ceq(g; c)];
-  creflexivity
+  auto
 }.
