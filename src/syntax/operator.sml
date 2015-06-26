@@ -25,7 +25,6 @@ struct
     | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
-    | CEQUAL
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -109,7 +108,6 @@ struct
     | eq (INL, INL) = true
     | eq (INR, INR) = true
     | eq (DECIDE, DECIDE) = true
-    | eq (CEQUAL, CEQUAL) = true
     | eq _ = false
 
   fun arity O =
@@ -186,7 +184,6 @@ struct
 
        | EQ => #[0,0,0]
        | MEM => #[0,0]
-       | CEQUAL => #[0, 0]
 
        | SUBSET => #[0,1]
 
@@ -260,7 +257,6 @@ struct
        | ISECT => "⋂"
        | EQ => "="
        | MEM => "∈"
-       | CEQUAL => "~"
        | PLUS => "+"
        | INL => "inl"
        | INR => "inr"
@@ -305,7 +301,6 @@ struct
         || string "∀" return ISECT
         || string "⋂" return ISECT
         || string "=" return EQ
-        || string "~" return CEQUAL
         || string "∈" return MEM
         || string "subset" return SUBSET
         || string "so_apply" return SO_APPLY
