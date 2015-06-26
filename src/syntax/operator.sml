@@ -13,7 +13,7 @@ struct
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
-    | ADMIT
+    | ADMIT | ASSERT
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -81,6 +81,7 @@ struct
     | eq (SUBSET_ELIM, SUBSET_ELIM) = true
     | eq (SUBSET_MEMBER_EQ, SUBSET_MEMBER_EQ) = true
     | eq (ADMIT, ADMIT) = true
+    | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
     | eq (VOID, VOID) = true
     | eq (UNIT, UNIT) = true
@@ -164,6 +165,7 @@ struct
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
        | ADMIT => #[]
+       | ASSERT => #[0, 1]
 
        | UNIV i => #[]
        | VOID => #[]
@@ -237,6 +239,7 @@ struct
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
+       | ASSERT => "assert"
 
        | SUBSET_EQ => "subset⁼"
        | SUBSET_INTRO => "subset-intro"

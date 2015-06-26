@@ -39,6 +39,8 @@ struct
       | REDUCE (i, a) => an a (CttUtil.Reduce i)
       | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption
+      | ASSERT ({assertion = t, name = name}, a) =>
+        an a (Assert (t, name))
       | SYMMETRY a => an a EqSym
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
