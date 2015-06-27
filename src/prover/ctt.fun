@@ -56,7 +56,7 @@ struct
         val (x, E) = unbind (Context.rebind H xE)
         val x' = Context.fresh (H, x)
         val H' = Context.insert H x' Visibility.Visible (Context.rebind H A)
-        val E' = Context.rebind H (subst (``x') x E)
+        val E' = subst (``x') x E
       in
         (H', x', E')
       end

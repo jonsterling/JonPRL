@@ -2,7 +2,7 @@ signature DEVELOPMENT_AST =
 sig
   type label
 
-  structure Syntax : ABT
+  structure Syntax : ABT_UTIL
     where type Operator.t = label OperatorType.operator
 
   structure Pattern : ABT

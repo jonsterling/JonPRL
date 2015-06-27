@@ -14,7 +14,7 @@ Operator isContr : (0).
 ||| There is just one function void ⇒ A for any A.
 Theorem abort-unique : [⋂(U{i}; A. unique(Π(void; _. A); _. unit))] {
   unfold <unique>; auto;
-  intro [λ(_. baaaaaaaaaaaaaaaaang)]; auto;
+  intro [λ(x. x)]; auto;
   ext; auto
 }.
 
@@ -22,6 +22,6 @@ Theorem abort-unique : [⋂(U{i}; A. unique(Π(void; _. A); _. unit))] {
 ||| proof is just in the derivation)
 Theorem void-fun-contr : [⋂(U{i}; A. isContr(Π(void; _. A)))] {
   unfold <isContr>; auto;
-  intro [λ(_. welp)]; auto;
+  intro [λ(x. x)]; auto;
   ext; auto
 }.

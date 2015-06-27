@@ -35,5 +35,6 @@ sig
   val eq : context * context -> bool
   val subcontext : context * context -> bool
 
+  exception Open of term
   val rebind : context -> term -> term
 end
