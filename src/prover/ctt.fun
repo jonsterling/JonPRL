@@ -834,14 +834,15 @@ struct
 
     fun Assert (term, name) (H >> P) =
       let
-        val k =
+        val z =
             case name of
-                SOME k => k
+                SOME z => z
               | NONE => Context.fresh (H, Variable.named "H")
+        val term' = Context.rebind H term
       in
-        [ H >> term
-        , H @@ (k, term) >> P
-        ] BY (fn [D, E] => ASSERT $$ #[D, k \\ E]
+        [ H >> term'
+        , H @@ (z, term') >> P
+        ] BY (fn [D, E] => ASSERT $$ #[D, z \\ E]
                | _ => raise Refine)
       end
 
