@@ -567,7 +567,7 @@ struct
         val #[M, N, U] = P ^! EQ
         val #[] = U ^! BASE
       in
-        [H >> CEQUAL $$ #[M, N]
+        [ H >> CEQUAL $$ #[M, N]
         ] BY (fn [D] => BASE_MEMBER_EQ $$ #[D]
                | _ => raise Refine)
       end
@@ -1101,25 +1101,25 @@ struct
           end
 
       in
-      fun CEqStruct (H >> P) =
-        let
-          val #[M, N] = P ^! CEQUAL
-          val (oper, subterms) = asApp M
-          val subterms' = N ^! oper
-          val pairs =
-              Vector.tabulate (Vector.length subterms,
-                               (fn i => (Vector.sub(subterms, i),
-                                         Vector.sub(subterms', i))))
-          val (boundVars, subgoals) =
-              ListPair.unzip (toList (Vector.map (newSubGoal H []) pairs))
-          val boundVars = Vector.fromList boundVars
-        in
-          subgoals BY (fn Ds =>
-                          CEQUAL_STRUCT (Vector.map List.length boundVars)
-                            $$ bindVars boundVars (Vector.fromList Ds)
-                          handle _ => raise Refine)
+        fun CEqStruct (H >> P) =
+          let
+            val #[M, N] = P ^! CEQUAL
+            val (oper, subterms) = asApp M
+            val subterms' = N ^! oper
+            val pairs =
+                Vector.tabulate (Vector.length subterms,
+                                 (fn i => (Vector.sub(subterms, i),
+                                           Vector.sub(subterms', i))))
+            val (boundVars, subgoals) =
+                ListPair.unzip (toList (Vector.map (newSubGoal H []) pairs))
+            val boundVars = Vector.fromList boundVars
+          in
+            subgoals BY (fn Ds =>
+                            CEQUAL_STRUCT (Vector.map List.length boundVars)
+                              $$ bindVars boundVars (Vector.fromList Ds)
+                            handle _ => raise Refine)
+          end
         end
-      end
     end
 
     local
