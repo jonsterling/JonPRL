@@ -996,14 +996,22 @@ struct
                  | _ => raise Refine)
         end
 
+      local
+          fun bothStuck M N =
+            (Semantics.step M; raise Refine)
+            handle Semantics.Stuck _ =>
+                   (Semantics.step N; raise Refine)
+                   handle Semantics.Stuck _ => ()
+      in
       fun CEqRefl (H >> P) =
         let
           val #[M, N] = P ^! CEQUAL
-          val _ = unify M N
+          val () = (unify M N; ()) handle Refine => bothStuck M N
         in
             [] BY (fn [] => CEQUAL_REFL $$ #[]
                    | _  => raise Refine)
         end
+      end
 
       fun CEqSym (H >> P) =
         let
