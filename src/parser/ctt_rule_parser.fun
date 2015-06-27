@@ -186,6 +186,10 @@ struct
     fn w => symbol "step"
       wth (fn name => fn pos => CEQUAL_STEP {name = name, pos = pos})
 
+  val parseCEqualStruct : tactic_parser =
+    fn w => symbol "cstruct"
+      wth (fn name => fn pos => CEQUAL_STRUCT {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -249,6 +253,7 @@ struct
       || parseCEqualRefl w
       || parseCEqualSym w
       || parseCEqualStep w
+      || parseCEqualStruct w
       || parseCEqSubst w
       || parseCHypSubst w
 

@@ -10,7 +10,7 @@ struct
 
 
   exception Stuck of Syn.t
-  datatype t = STEP of Syn.t | CANON
+  datatype t = STEP of Syn.t | CANON | NEUTRAL
 
   fun stepSpreadBeta (P, E) =
     case out P of
@@ -36,19 +36,19 @@ struct
       | AX $ _ => CANON
       | PROD $ _ => CANON
       | PAIR $ _ => CANON
-      | SPREAD $ #[P, E] =>
-        STEP (
+      | SPREAD $ #[P, E] => (
           case step P of
-              STEP P' => SPREAD $$ #[P', E]
-            | CANON => stepSpreadBeta (P, E)
-        )
+              STEP P' => STEP (SPREAD $$ #[P', E])
+            | CANON => STEP (stepSpreadBeta (P, E))
+            | NEUTRAL => NEUTRAL
+      )
       | FUN $ _ => CANON
       | LAM $ _ => CANON
-      | AP $ #[L, R] =>
-        STEP (
+      | AP $ #[L, R] => (
           case step L of
-              STEP L' => AP $$ #[L', R]
-            | CANON => stepApBeta (L, R)
+              STEP L' => STEP (AP $$ #[L', R])
+            | CANON => STEP (stepApBeta (L, R))
+            | NEUTRAL => NEUTRAL
         )
       | ISECT $ _ => CANON
       | EQ $ _ => CANON
@@ -57,11 +57,11 @@ struct
       | PLUS $ _ => CANON
       | INL $ _ => CANON
       | INR $ _ => CANON
-      | DECIDE $ #[S, L, R] =>
-        STEP (
+      | DECIDE $ #[S, L, R] => (
           case step S of
-              STEP S' => DECIDE $$ #[S', L, R]
-            | CANON => stepDecideBeta (S, L, R)
+              STEP S' => STEP (DECIDE $$ #[S', L, R])
+            | CANON => STEP (stepDecideBeta (S, L, R))
+            | NEUTRAL => NEUTRAL
         )
       | SO_APPLY $ #[L, R] => (
           (* This can't come up but I don't think it's wrong
@@ -73,12 +73,18 @@ struct
             x \ L => STEP (subst R x L)
            | _ =>
              case step L of
-               CANON => raise Stuck (SO_APPLY $$ #[L, R])
-              | STEP L' => STEP (SO_APPLY $$ #[L', R])
+                 CANON => raise Stuck (SO_APPLY $$ #[L, R])
+               | STEP L' => STEP (SO_APPLY $$ #[L', R])
+               | NEUTRAL => NEUTRAL
       )
-      | CUSTOM _ $ _ => STEP e (* Require unfolding elsewhere *)
-      | ` _ => raise Stuck e (* Cannot step an open term *)
-      | _ \ _ => raise Stuck e (* Cannot step a binder *)
+      | CUSTOM _ $ _ => NEUTRAL (* Require unfolding elsewhere *)
+      | ` _ => NEUTRAL (* Cannot step an open term *)
+      | x \ e => (
+        case step e of
+            STEP e' => STEP (x \\ e')
+          | NEUTRAL => NEUTRAL
+          | CANON => NEUTRAL
+      )
       | _ => raise Stuck e
 end
 

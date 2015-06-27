@@ -15,7 +15,8 @@ struct
 
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
-    | CEQUAL_SUBST | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
+    | CEQUAL_SUBST | CEQUAL_STRUCT of int Vector.vector
+    | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -71,6 +72,7 @@ struct
     | eq (CEQUAL_SYM, CEQUAL_SYM) = true
     | eq (CEQUAL_STEP, CEQUAL_STEP) = true
     | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
+    | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -134,6 +136,7 @@ struct
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
        | CEQUAL_SUBST => #[0, 0]
+       | CEQUAL_STRUCT arity => arity
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -229,6 +232,7 @@ struct
        | CEQUAL_SYM => "~-sym"
        | CEQUAL_STEP => "~-step"
        | CEQUAL_SUBST => "~-subst"
+       | CEQUAL_STRUCT _ => "~-struct"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"

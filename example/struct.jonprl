@@ -1,0 +1,8 @@
+Operator complex : (1; 1; 2; 0; 1).
+
+Theorem complex-ceq : [
+  ceq(complex(x.x                       ; x.unit; x.y.y; <>; x.<>);
+      complex(x.spread(pair(x;x); x._.x); x.unit; x.y.y; <>; x.<>))
+] {
+  cstruct; reduce; creflexivity
+}.
