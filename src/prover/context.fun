@@ -86,6 +86,8 @@ struct
   val subcontext : context * context -> bool =
     Telescope.subtelescope (fn ((a, vis), (b, vis')) => vis = vis' andalso Syntax.eq (a, b))
 
+  exception Open of term
+
   fun rebind ctx tm =
     let
       open Telescope.SnocView
@@ -98,10 +100,10 @@ struct
           go vs StringListDict.empty
         end
 
-      fun go Empty tbl tm = tm
+      fun go Empty tbl tm = (tbl, tm)
         | go (Snoc (ctx', v, (a,vis))) tbl tm =
            if StringListDict.isEmpty tbl then
-             tm
+             (tbl, tm)
            else
              let
                val vstr = V.toString v
@@ -113,8 +115,10 @@ struct
                       go (out ctx') (StringListDict.remove tbl vstr)
                       (Syntax.subst (Syntax.``v) v' tm)
              end
+      val (tbl, tm') = go (out ctx) (makeVarTable (Syntax.freeVariables tm)) tm
+      val () = if StringListDict.isEmpty tbl then () else raise Open tm
     in
-      go (out ctx) (makeVarTable (Syntax.freeVariables tm)) tm
+      tm'
     end
 end
 

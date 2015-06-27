@@ -7,9 +7,17 @@ struct
   fun eval_decl D ast =
     case ast of
         THEOREM (lbl, term, tac) =>
-        Development.prove D (lbl,
-                             Sequent.>> (Sequent.Context.empty, term),
-                             TacticEval.eval D tac)
+        let
+          val vars = Syntax.freeVariables term
+          val () =
+              case vars of
+                  [] => ()
+                | _ => raise Context.Open term
+        in
+          Development.prove D (lbl,
+                               Sequent.>> (Sequent.Context.empty, term),
+                               TacticEval.eval D tac)
+        end
       | OPERATOR (lbl, arity) => D
       | TACTIC (lbl, tac) =>
         Development.defineTactic D (lbl, TacticEval.eval D tac)
