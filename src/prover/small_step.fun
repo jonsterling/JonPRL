@@ -79,7 +79,12 @@ struct
       )
       | CUSTOM _ $ _ => NEUTRAL (* Require unfolding elsewhere *)
       | ` _ => NEUTRAL (* Cannot step an open term *)
-      | _ \ _ => raise Stuck e (* Cannot step a binder *)
+      | x \ e => (
+        case step e of
+            STEP e' => STEP (x \\ e')
+          | NEUTRAL => NEUTRAL
+          | CANON => NEUTRAL
+      )
       | _ => raise Stuck e
 end
 
