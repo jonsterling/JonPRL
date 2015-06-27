@@ -54,6 +54,7 @@ struct
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
        ORELSE CEqRefl
+       ORELSE CEqStruct
        ORELSE BaseIntro
 
   fun take2 (x::y::_) = SOME (x,y)
