@@ -15,7 +15,7 @@ struct
 
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
-    | CEQUAL_SUBST
+    | CEQUAL_SUBST | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
     | UNIV of Level.t
@@ -27,7 +27,7 @@ struct
     | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
-    | CEQUAL
+    | CEQUAL | BASE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -87,9 +87,14 @@ struct
     | eq (IND_SUBSET_INTRO, IND_SUBSET_INTRO) = true
     | eq (SUBSET_ELIM, SUBSET_ELIM) = true
     | eq (SUBSET_MEMBER_EQ, SUBSET_MEMBER_EQ) = true
+    | eq (BASE_EQ, BASE_EQ) = true
+    | eq (BASE_INTRO, BASE_INTRO) = true
+    | eq (BASE_ELIM_EQ, BASE_ELIM_EQ) = true
+    | eq (BASE_MEMBER_EQ, BASE_MEMBER_EQ) =true
     | eq (ADMIT, ADMIT) = true
     | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
+    | eq (BASE, BASE) = true
     | eq (VOID, VOID) = true
     | eq (UNIT, UNIT) = true
     | eq (AX, AX) = true
@@ -131,6 +136,11 @@ struct
        | CEQUAL_SUBST => #[0, 0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
+
+       | BASE_EQ => #[]
+       | BASE_INTRO => #[]
+       | BASE_ELIM_EQ => #[1]
+       | BASE_MEMBER_EQ => #[0]
 
        | UNIT_EQ => #[]
        | UNIT_INTRO => #[]
@@ -180,6 +190,7 @@ struct
        | ASSERT => #[0, 1]
 
        | UNIV i => #[]
+       | BASE => #[]
        | VOID => #[]
        | UNIT => #[]
        | AX => #[]
@@ -223,6 +234,11 @@ struct
        | UNIT_ELIM => "unit-elim"
        | AX_EQ => "⬧⁼"
 
+       | BASE_EQ => "base⁼"
+       | BASE_INTRO => "base-intro"
+       | BASE_ELIM_EQ => "base-elim⁼"
+       | BASE_MEMBER_EQ => "base-member⁼"
+
        | PROD_EQ => "prod⁼"
        | PROD_INTRO => "prod-intro"
        | IND_PROD_INTRO => "independent-prod-intro"
@@ -265,6 +281,7 @@ struct
        | SUBSET_MEMBER_EQ => "subset-member-eq"
 
        | UNIV i => "U{" ^ Level.toString i ^ "}"
+       | BASE => "base"
        | VOID => "void"
        | UNIT => "unit"
        | AX => "⬧"
@@ -306,6 +323,7 @@ struct
 
     val extensionalParseOperator : t charParser =
       parseUniv
+        || string "base" return BASE
         || string "void" return VOID
         || string "unit" return UNIT
         || string "<>" return AX
