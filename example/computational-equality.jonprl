@@ -10,7 +10,7 @@ Theorem test2 : [ceq(spread(λ(x.x); x.y.x); spread(λ(x.x); x.y.y))] {
 }.
 
 Theorem test3 : [ceq(λ(x.x); λ(x.spread(pair(x;x); x._.x)))] {
-  cstruct; csymmetry; step; creflexivity
+  auto; csymmetry; step; auto
 }.
 
 Theorem y-is-fix-point : [
@@ -25,12 +25,21 @@ Theorem transitive : [
   ∀(base; c.
   ∀(=(a; b; base); _.
   ∀(=(b; c; base); _.
-    =(a; c; base))))))
+  =(a; c; base))))))
 ] {
   auto;
   elim #4;
   elim #5;
   chyp-subst → #6 [h. ceq(h;c)];
   chyp-subst ← #7 [h. ceq(b;h)];
-  creflexivity
+  auto
+}.
+
+Operator complex : (1; 1; 2; 0; 1).
+
+Theorem complex-ceq : [
+  ceq(complex(x.x; x.unit; x.y.y; <>; x.<>);
+      complex(x.spread(pair(x;x); x._.x); x.unit; x.y.y; <>; x.<>))
+] {
+  auto; reduce; auto
 }.
