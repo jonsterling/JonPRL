@@ -5,6 +5,10 @@ Theorem test : [ceq(λ(x.x); λ(x.x))] {
   auto
 }.
 
+Theorem test2 : [ceq(spread(λ(x.x); x.y.x); spread(λ(x.x); x.y.y))] {
+  auto
+}.
+
 Theorem y-is-fix-point : [
   ∀(U{i}; A. ∀(Π(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
 ] {
