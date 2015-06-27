@@ -568,7 +568,7 @@ struct
         val #[] = U ^! BASE
       in
         [H >> CEQUAL $$ #[M, N]
-        ] BY (fn [D] => BASE_INTRO $$ #[D]
+        ] BY (fn [D] => BASE_MEMBER_EQ $$ #[D]
                | _ => raise Refine)
       end
 
