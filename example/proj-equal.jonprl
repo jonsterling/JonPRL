@@ -11,5 +11,5 @@ Theorem proj-equal : [∀(U{i}; A.
             spread(pair(a'; b'); x.y.x);
             A)];
   [hyp-subst → #7 [h. =(spread(h; x.y.x); spread(pair(a'; b'); x.y.x); A)],
-   id]; reduce; auto; hypothesis #8
+   id]; reduce; auto
 }.
