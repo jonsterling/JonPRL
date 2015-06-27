@@ -1,0 +1,15 @@
+Theorem proj-equal : [∀(U{i}; A.
+                      ∀(U{i}; B.
+                      ∀(A; a.
+                      ∀(A; a'.
+                      ∀(B; b.
+                      ∀(B; b'.
+                      ∀(=(pair(a;b);pair(a';b');Σ(A; _.B)); _.
+                        =(a;a';A))))))))] {
+  auto;
+  assert [=(spread(pair(a; b); x.y.x);
+            spread(pair(a'; b'); x.y.x);
+            A)];
+  [hyp-subst → #7 [h. =(spread(h; x.y.x); spread(pair(a'; b'); x.y.x); A)],
+   id]; reduce; auto; hypothesis #8
+}.
