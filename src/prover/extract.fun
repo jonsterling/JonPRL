@@ -30,6 +30,7 @@ struct
        | CEQUAL_SYM $ _ => ax
        | CEQUAL_STEP $ _ => ax
        | CEQUAL_SUBST $ #[D, E] => extract E
+       | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
 
        | BASE_INTRO $ _ => ax
        | BASE_EQ $ _ => ax
