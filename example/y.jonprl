@@ -12,16 +12,17 @@ Theorem y-is-fix-point : [
 }.
 
 Theorem transitive : [
-  ∀(U{i}; A.
-  ∀(∀(A; _.A); f.
-  ∀(∀(A; _.A); g.
-  ∀(Π(A; _.A); h.
-  ∀(ceq(f; g); _.
-  ∀(ceq(g; h); _.
-  ceq(f; h)))))))
+  ∀(base; a.
+  ∀(base; b.
+  ∀(base; c.
+  ∀(=(a; b; base); _.
+  ∀(=(b; c; base); _.
+    =(a; c; base))))))
 ] {
   auto;
-  chyp-subst → #5 [c. ceq(c; h)];
-  chyp-subst ← #6 [c. ceq(g; c)];
-  auto
+  elim #4;
+  elim #5;
+  chyp-subst → #6 [h. ceq(h;c)];
+  chyp-subst ← #7 [h. ceq(b;h)];
+  creflexivity
 }.
