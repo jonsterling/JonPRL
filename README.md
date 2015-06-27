@@ -78,3 +78,69 @@ before it with a dot. For example, the identity function is written
 refers back to it, and the first projection of a pair `P` is written
 `spread(P; x.y.x)`. The semicolon separates arguments to `spread`.
 
+### Top-level declarations
+
+JonPRL provides four top-level declarations:
+
+ * `Operator` gives the binding structure of a new operator.
+ * `=def=` defines the meaning of an operator in terms of the existing operators.
+ * `Theorem` declares a theorem, and allows it to be proven.
+ * `Tactic` defines a tactic in terms of the built-in tactics.
+
+### Built-in operators
+
+Together with the syntax for binding trees, the built-in operators of
+JonPRL constitute the core type theory. In this section, eac of the
+operators is presented together with its arity and a brief informal
+description.
+
+#### Unit
+
+The unit type is written `unit()` and its trivial inhabitant is written
+`<>()`.
+
+#### Functions
+
+Functions are introduced with `λ(0;1)` and eliminated with `ap(0;0)`
+(application). `Π(0;1)` gives the type of functions.
+
+#### Pairs
+
+Pairs are introduced with `pair(0;0)` and eliminated with
+`spread(0;1;1)`. The type of pairs is given by `Σ(0;1)`.
+
+#### Sums
+
+Sums are introduced with `inl(0)` and `inr(0)`. They are eliminated
+with `decide(0;1;1)`. The type of sums is built with `+(0;0)`.
+
+#### The empty type
+
+The empty type is built with `void()`.
+
+#### Equality
+
+Equality is written `=(0;0;0)`, where the first two arguments are the
+equal terms and the third argument is the type in which they are
+equal.
+
+#### Second-order variables
+
+Unlike some other implementations of type theory that use the same
+syntax for function application and filling in second-order variables,
+JonPRL's second-order variables must be applied using the
+`so_apply(0;0)` operator.
+
+As an example, unique existence might be defined as follows:
+```
+Operator ex_uni : (0;1).
+
+[ex_uni(T;P)] =def= [Σ(T; x. Σ(so_apply(P;x);_.∀(T;y. Π(so_apply(P;y); _.=(x;y;T)))))].
+```
+
+Note that `P` is applied to `x` and `y` using `so_apply` rather than
+`ap`, which is reserved for function application.
+
+#### TODO
+
+The following operators exist but are not yet documented: `base`, `ceq`, `∈`, `subset`, `⋂`.
