@@ -543,6 +543,50 @@ struct
                | _ => raise Refine)
       end
 
+    fun BaseEq (H >> P) =
+      let
+        val #[M, N, U] = P ^! EQ
+        val #[] = M ^! BASE
+        val #[] = N ^! BASE
+        val (UNIV _, _) = asApp U
+      in
+        [] BY (fn [] => BASE_EQ $$ #[]
+                | _ => raise Refine)
+      end
+
+    fun BaseIntro (H >> P) =
+      let
+        val #[] = P ^! BASE
+      in
+        [] BY (fn [] => BASE_INTRO $$ #[]
+                | _ => raise Refine)
+      end
+
+    fun BaseMemberEq (H >> P) =
+      let
+        val #[M, N, U] = P ^! EQ
+        val #[] = U ^! BASE
+      in
+        [H >> CEQUAL $$ #[M, N]
+        ] BY (fn [D] => BASE_INTRO $$ #[D]
+               | _ => raise Refine)
+      end
+
+    fun BaseElimEq (i, z) (H >> P) =
+      let
+        val eq = Context.nth H (i - 1)
+        val #[M, N, U] = Context.lookup H eq ^! EQ
+        val #[] = U ^! BASE
+        val z =
+            case z of
+                SOME z => z
+              | NONE => Context.fresh (H, Variable.named "H")
+      in
+        [H @@ (z, CEQUAL $$ #[M, N]) >> P
+        ] BY (fn [D] => BASE_ELIM_EQ $$ #[z \\ D]
+               | _ => raise Refine)
+      end
+
     fun MemCD (H >> P) =
       let
         val #[M, A] = P ^! MEM
