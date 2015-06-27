@@ -76,7 +76,7 @@ struct
                CANON => raise Stuck (SO_APPLY $$ #[L, R])
               | STEP L' => STEP (SO_APPLY $$ #[L', R])
       )
-      | CUSTOM _ $ _ => raise Stuck e (* Require unfolding elsewhere *)
+      | CUSTOM _ $ _ => STEP e (* Require unfolding elsewhere *)
       | ` _ => raise Stuck e (* Cannot step an open term *)
       | _ \ _ => raise Stuck e (* Cannot step a binder *)
       | _ => raise Stuck e
