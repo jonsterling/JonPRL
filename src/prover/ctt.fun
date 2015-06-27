@@ -1028,7 +1028,8 @@ struct
           val M' =
               case Semantics.step M handle Semantics.Stuck _ => raise Refine of
                   Semantics.STEP M' => M'
-                | CANON => raise Refine
+                | Semantics.CANON => raise Refine
+                | Semantics.NEUTRAL => raise Refine
         in
           [ H >> CEQUAL $$ #[M', N]
           ] BY (fn [D] => CEQUAL_STEP $$ #[D]
