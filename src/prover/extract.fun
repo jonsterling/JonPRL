@@ -31,6 +31,11 @@ struct
        | CEQUAL_STEP $ _ => ax
        | CEQUAL_SUBST $ #[D, E] => extract E
 
+       | BASE_INTRO $ _ => ax
+       | BASE_EQ $ _ => ax
+       | BASE_MEMBER_EQ $ _ => ax
+       | BASE_ELIM_EQ $ #[D] => extract (D // ax)
+
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
        | IND_PROD_INTRO $ #[D,E] => PAIR $$ #[extract D, extract E]

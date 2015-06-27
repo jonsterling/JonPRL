@@ -54,6 +54,7 @@ struct
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
        ORELSE CEqRefl
+       ORELSE BaseIntro
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -66,6 +67,7 @@ struct
   fun Elim {target, names, term} =
     (VoidElim THEN Hypothesis target)
       ORELSE UnitElim target
+      ORELSE_LAZY (fn _ => BaseElimEq (target, list_at (names, 0)))
       ORELSE_LAZY (fn _ => PlusElim (target, take2 names))
       ORELSE_LAZY (fn _ => ProdElim (target, take2 names))
       ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
@@ -86,6 +88,8 @@ struct
         ORELSE PlusEq
         ORELSE InlEq level
         ORELSE InrEq level
+        ORELSE BaseEq
+        ORELSE BaseMemberEq
         ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
                                       (List.nth (terms, 1),
                                        List.nth (terms, 2),
