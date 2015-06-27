@@ -1065,6 +1065,61 @@ struct
               end
         end
 
+      local
+        (* Create a new subgoal by walking along the pairs
+         * of terms and unbind each term together. As we go
+         * we add the new variables to the context as we go
+         * and keep track of all the variables we bind.
+         *
+         * In the end you get a new goal and a list of variables in the
+         * order that they were created.
+         *)
+        fun newSubGoal H vs (t1, t2) =
+          case (out t1, out t2) of
+              (x \ t1', y \ t2') =>
+              newSubGoal (H @@ (x, BASE $$ #[]))
+                         (x :: vs)
+                         (t1', subst (``x) y t2')
+            | (_, _) =>
+              (List.rev vs, H >> CEQUAL $$ #[t1, t2])
+
+        fun toList v = Vector.foldr op:: nil v
+
+        (* Each derivation needs to bind the variables from the
+         * context so all we do is take a vector of lists of variables
+         * and a vector of terms and bind all the variables in one list
+         * in the corresponding term.
+         *)
+        fun bindVars vars terms =
+          let
+            fun go [] t = t
+              | go (v :: vs) t = go vs (v \\ t)
+          in
+            Vector.tabulate (Vector.length terms,
+                             fn i => go (Vector.sub (vars, i))
+                                        (Vector.sub (terms, i)))
+          end
+
+      in
+      fun CEqStruct (H >> P) =
+        let
+          val #[M, N] = P ^! CEQUAL
+          val (oper, subterms) = asApp M
+          val subterms' = N ^! oper
+          val pairs =
+              Vector.tabulate (Vector.length subterms,
+                               (fn i => (Vector.sub(subterms, i),
+                                         Vector.sub(subterms', i))))
+          val (boundVars, subgoals) =
+              ListPair.unzip (toList (Vector.map (newSubGoal H []) pairs))
+          val boundVars = Vector.fromList boundVars
+        in
+          subgoals BY (fn Ds =>
+                          CEQUAL_STRUCT (Vector.map List.length boundVars)
+                            $$ bindVars boundVars (Vector.fromList Ds)
+                          handle _ => raise Refine)
+        end
+      end
     end
 
     local
