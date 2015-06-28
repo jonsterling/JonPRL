@@ -133,6 +133,17 @@ struct
            O $ _ => if operatorIrrelevant O then () else raise Refine
          | _ => raise Refine
 
+    fun eliminationTarget i (H >> P) =
+      let
+        val z = Context.nth H (i - 1)
+        val (A, visibility) = Context.lookupVisibility H z
+      in
+        case visibility of
+             Visibility.Hidden =>
+              (assertIrrelevant (H, P); z)
+           | Visibility.Visible => z
+      end
+
     fun inferLevel (H, P) =
       case out P of
            UNIV l $ _ => Level.succ l
@@ -239,7 +250,7 @@ struct
 
     fun UnitElim i (H >> P) =
       let
-        val x = Context.nth H (i - 1)
+        val x = eliminationTarget i (H >> P)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctxSubst H ax x
@@ -324,7 +335,7 @@ struct
     fun FunElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H (i - 1)
+        val f = eliminationTarget i (H >> P)
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -419,7 +430,7 @@ struct
     fun IsectElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H (i - 1)
+        val f = eliminationTarget i (H >> P)
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -523,7 +534,7 @@ struct
       end
 
     fun SubsetElim (i, onames) (H >> P) =
-      SubsetElim_ (Context.nth H (i - 1), onames) (H >> P)
+      SubsetElim_ (eliminationTarget i (H >> P), onames) (H >> P)
 
     fun SubsetMemberEq (oz, ok) (H >> P) =
       let
@@ -555,7 +566,7 @@ struct
 
     fun NatElim (i, onames) (H >> C) =
       let
-        val z = Context.nth H (i - 1)
+        val z = eliminationTarget i (H >> C)
         val (n,ih) =
           case onames of
                SOME names => names
