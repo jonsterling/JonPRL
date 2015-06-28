@@ -90,9 +90,11 @@ JonPRL provides four top-level declarations:
 ### Built-in operators
 
 Together with the syntax for binding trees, the built-in operators of
-JonPRL constitute the core type theory. In this section, eac of the
+JonPRL constitute the core type theory, in combination with the rules 
+for CTT which are built into JonPRL's refiner. In this section, several of the
 operators is presented together with its arity and a brief informal
-description.
+description. An arity is a list of the valences of an operator's subterms;
+*valence* is the number of variables to bind.
 
 #### Unit
 
