@@ -63,6 +63,8 @@ struct
       | PLUS $ _ => CANON
       | INL $ _ => CANON
       | INR $ _ => CANON
+      | ZERO $ _ => CANON
+      | SUCC $ _ => CANON
       | DECIDE $ #[S, L, R] =>
           (case step S of
               STEP S' => STEP (DECIDE $$ #[S', L, R])
