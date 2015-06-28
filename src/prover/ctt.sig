@@ -175,8 +175,6 @@ sig
 
   structure Conversions :
   sig
-    val ApBeta : conv
-    val SpreadBeta : conv
-    val DecideBeta : conv
+    val Step : conv
   end
 end

@@ -1198,18 +1198,10 @@ struct
   struct
     open Conversionals Conv
 
-    val ApBeta : conv = reductionRule
-      (fn AP $ #[LAM $ #[xE], N] => xE // into N
-        | _ => raise Conv)
-
-    val SpreadBeta : conv = reductionRule
-      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
-        | _ => raise Conv)
-
-    val DecideBeta : conv = reductionRule
-      (fn DECIDE $ #[INL $ #[E], N, M] => (into N // E)
-        | DECIDE $ #[INR $ #[E], N, M] => (into M // E)
-        | _ => raise Conv)
+    val Step : conv = fn M =>
+      case Semantics.step M of
+           Semantics.STEP M' => M'
+         | _ => raise Conv
   end
 end
 
