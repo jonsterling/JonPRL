@@ -108,7 +108,7 @@ struct
     | eq (AP, AP) = true
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
-    | eq (CEQUAL, CEQUAl) = true
+    | eq (CEQUAL, CEQUAL) = true
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
