@@ -107,7 +107,7 @@ Functions are introduced with `λ(0;1)` and eliminated with `ap(0;0)`
 #### Pairs
 
 Pairs are introduced with `pair(0;0)` and eliminated with
-`spread(0;1;1)`. The type of pairs is given by `Σ(0;1)`.
+`spread(0;2)`. The type of pairs is given by `Σ(0;1)`.
 
 #### Sums
 
