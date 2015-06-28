@@ -178,7 +178,7 @@ struct
        | DECIDE_EQ => #[0, 2, 2]
 
        | NAT_EQ => #[]
-       | NAT_ELIM => #[1,0,2]
+       | NAT_ELIM => #[0,0,2]
        | ZERO_EQ => #[]
        | SUCC_EQ => #[0]
        | NATREC_EQ => #[0,0,2]

@@ -66,14 +66,19 @@ struct
   fun list_at (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   fun Elim {target, names, term} =
-    (VoidElim THEN Hypothesis target)
-      ORELSE UnitElim target
-      ORELSE_LAZY (fn _ => BaseElimEq (target, list_at (names, 0)))
-      ORELSE_LAZY (fn _ => PlusElim (target, take2 names))
-      ORELSE_LAZY (fn _ => ProdElim (target, take2 names))
-      ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
-      ORELSE_LAZY (fn _ => IsectElim (target, valOf term, take2 names))
-      ORELSE SubsetElim (target, take2 names)
+    let
+      val twoNames = take2 names
+    in
+      (VoidElim THEN Hypothesis target)
+        ORELSE UnitElim target
+        ORELSE_LAZY (fn _ => BaseElimEq (target, list_at (names, 0)))
+        ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
+        ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
+        ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
+        ORELSE NatElim (target, twoNames)
+        ORELSE SubsetElim (target, twoNames)
+    end
 
   fun EqCD {names, level, terms} =
     let
@@ -111,6 +116,8 @@ struct
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
         ORELSE NatEq
+        ORELSE ZeroEq
+        ORELSE SuccEq
         ORELSE Cum level
         ORELSE EqInSupertype
     end

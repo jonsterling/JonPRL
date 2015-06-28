@@ -553,6 +553,49 @@ struct
         [] BY mkEvidence NAT_EQ
       end
 
+    fun NatElim (i, onames) (H >> C) =
+      let
+        val z = Context.nth H (i - 1)
+        val (n,ih) =
+          case onames of
+               SOME names => names
+             | NONE =>
+                 (Context.fresh (H, Variable.named "n"),
+                  Context.fresh (H, Variable.named "ih"))
+
+        val zero = ZERO $$ #[]
+        val succn = SUCC $$ #[``n]
+
+        val J = Context.empty @@ (n, NAT $$ #[]) @@ (ih, subst (``n) z C)
+        val H' = ctxSubst (Context.interposeAfter H (z, J)) succn z
+      in
+        [ ctxSubst H zero z >> subst zero z C
+        , H' >> subst succn z C
+        ] BY (fn [D,E] => NAT_ELIM $$ #[``z, D, n \\ (ih \\ E)]
+               | _ => raise Refine)
+      end
+
+    fun ZeroEq (H >> P) =
+      let
+        val #[zero1, zero2, nat] = P ^! EQ
+        val #[] = nat ^! NAT
+        val #[] = zero1 ^! ZERO
+        val #[] = zero2 ^! ZERO
+      in
+        [] BY mkEvidence ZERO_EQ
+      end
+
+    fun SuccEq (H >> P) =
+      let
+        val #[succ1, succ2, nat] = P ^! EQ
+        val #[] = nat ^! NAT
+        val #[M] = succ1 ^! SUCC
+        val #[N] = succ2 ^! SUCC
+      in
+        [ H >> EQ $$ #[M, N, NAT $$ #[]]
+        ] BY mkEvidence SUCC_EQ
+      end
+
     fun BaseEq (H >> P) =
       let
         val #[M, N, U] = P ^! EQ

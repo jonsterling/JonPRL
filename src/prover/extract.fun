@@ -78,6 +78,9 @@ struct
        | SUBSET_MEMBER_EQ $ _ => ax
 
        | NAT_EQ $ _ => ax
+       | NAT_ELIM $ #[z, D, xyE] => NATREC $$ #[z, extract D, extract xyE]
+       | ZERO_EQ $ _ => ax
+       | SUCC_EQ $ _ => ax
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

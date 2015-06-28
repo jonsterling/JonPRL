@@ -128,7 +128,17 @@ sig
     val SubsetElim : int * (name * name) option -> tactic
     val SubsetMemberEq : name option * Level.t option -> tactic
 
+    (* H >> nat = nat ∈ U{k} *)
     val NatEq : tactic
+
+    (* H, z : nat, H' >> C[z]
+     *   H, z : nat, H' >> C[0]
+     *   H, z : nat, i : nat, p : C[i], H' >> C[s(i)]
+     *)
+    val NatElim : int * (name * name) option -> tactic
+
+    val ZeroEq : tactic
+    val SuccEq : tactic
 
     val BaseEq : tactic
     val BaseIntro : tactic

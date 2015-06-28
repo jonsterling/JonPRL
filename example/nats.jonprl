@@ -1,0 +1,3 @@
+Theorem nat-example : [nat] {
+  witness [succ(zero)]; auto
+}.
