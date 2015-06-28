@@ -13,7 +13,7 @@ struct
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
-    | NAT_EQ | NAT_INTRO_ZERO | NAT_INTRO_SUCC | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
+    | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
@@ -124,8 +124,6 @@ struct
     | eq (INR_EQ, INR_EQ) = true
     | eq (DECIDE_EQ, DECIDE_EQ) = true
     | eq (NAT_EQ, NAT_EQ) = true
-    | eq (NAT_INTRO_ZERO, NAT_INTRO_ZERO) = true
-    | eq (NAT_INTRO_SUCC, NAT_INTRO_SUCC) = true
     | eq (NAT_ELIM, NAT_ELIM) = true
     | eq (ZERO_EQ, ZERO_EQ) = true
     | eq (SUCC_EQ, SUCC_EQ) = true
@@ -180,8 +178,6 @@ struct
        | DECIDE_EQ => #[0, 2, 2]
 
        | NAT_EQ => #[]
-       | NAT_INTRO_ZERO => #[]
-       | NAT_INTRO_SUCC => #[0]
        | NAT_ELIM => #[1,0,2]
        | ZERO_EQ => #[]
        | SUCC_EQ => #[0]
@@ -292,8 +288,6 @@ struct
        | DECIDE_EQ => "decide-eq"
 
        | NAT_EQ => "nat-eq"
-       | NAT_INTRO_ZERO => "nat-intro-zero"
-       | NAT_INTRO_SUCC => "nat-intro-succ"
        | NAT_ELIM => "nat-elim"
        | ZERO_EQ => "zero-eq"
        | SUCC_EQ => "succ-eq"

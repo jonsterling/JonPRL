@@ -78,8 +78,6 @@ struct
        | SUBSET_MEMBER_EQ $ _ => ax
 
        | NAT_EQ $ _ => ax
-       | NAT_INTRO_ZERO $ _ => ZERO $$ #[]
-       | NAT_INTRO_SUCC $ #[D] => SUCC $$ #[extract D]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

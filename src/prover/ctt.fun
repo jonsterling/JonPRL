@@ -553,22 +553,6 @@ struct
         [] BY mkEvidence NAT_EQ
       end
 
-    fun NatIntroZero (H >> P) =
-      let
-        val #[] = P ^! NAT
-      in
-        [] BY mkEvidence NAT_INTRO_ZERO
-      end
-
-    fun NatIntroSucc (H >> P) =
-      let
-        val #[] = P ^! NAT
-      in
-        [ H >> NAT $$ #[]
-        ] BY mkEvidence NAT_INTRO_SUCC
-      end
-
-
     fun BaseEq (H >> P) =
       let
         val #[M, N, U] = P ^! EQ
