@@ -1,3 +1,11 @@
 Theorem nat-example : [nat] {
   witness [succ(zero)]; auto
 }.
+
+Theorem minus-one : [Π(nat; _. nat)] {
+  intro <n>; [id, auto];
+  elim #1;
+  [ witness [zero]
+  , hypothesis #2
+  ]; auto
+}.

@@ -24,6 +24,7 @@ struct
            ^ "\n\n" ^ prettyException error
        | TacticEval.RemainingSubgoals goals =>
            ("Remaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals)
+       | Syntax.Malformed msg => "Syntax error: " ^ msg
        | _ => exnMessage E
 
   fun loadFile (initialDevelopment, name) : Development.world =
