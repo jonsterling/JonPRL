@@ -1,7 +1,7 @@
 JonPRL is a proof refinement logic in the sense of λ-PRL or
 [Nuprl](http://www.nuprl.org); JonPRL inherits its [computational type
 theory](http://www.sciencedirect.com/science/article/pii/S1570868305000704)
-from Constable, Bates, Harper, Allen, Bickford, Howe, Smith and many other names.
+from Constable, Bates, Harper, Allen, Bickford, Howe, Smith and many other names. Computational Type Theory is baseed on a meaning explanation similar to the ones which Martin-Löf introduced in 1979, to which I have written a self-contained introduction, [Type Theory and its Meaning Explanations](http://www.jonmsterling.com/pdfs/meaning-explanations.pdf).
 
 ### Discussion and Questions ###
 
