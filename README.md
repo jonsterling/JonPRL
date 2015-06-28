@@ -1,7 +1,7 @@
 JonPRL is a proof refinement logic in the sense of λ-PRL or
 [Nuprl](http://www.nuprl.org); JonPRL inherits its [computational type
 theory](http://www.sciencedirect.com/science/article/pii/S1570868305000704)
-from Allen, Bickford, Constable, Harper and many other names.
+from Constable, Bates, Harper, Allen, Bickford, Howe, Smith and many other names.
 
 ### Discussion and Questions ###
 
