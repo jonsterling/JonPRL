@@ -9,3 +9,7 @@ Theorem minus-one : [Π(nat; _. nat)] {
   , hypothesis #2
   ]; auto
 }.
+
+Theorem natrec-test : [=(natrec(succ(succ(zero)); zero; n. ih. n); succ(zero); nat)] {
+  reduce; auto
+}.

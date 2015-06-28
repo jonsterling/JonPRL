@@ -357,33 +357,37 @@ struct
     val parseUniv : t charParser =
       string "U" >> middle (string "{") Level.parse (string "}") wth UNIV
 
+    fun choices xs =
+      foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
+
     val extensionalParseOperator : t charParser =
-      parseUniv
-        || string "base" return BASE
-        || string "void" return VOID
-        || string "unit" return UNIT
-        || string "<>" return AX
-        || string "Σ" return PROD
-        || string "+" return PLUS
-        || string "inl" return INL
-        || string "inr" return INR
-        || string "decide" return DECIDE
-        || string "pair" return PAIR
-        || string "spread" return SPREAD
-        || string "Π" return FUN
-        || string "λ" return LAM
-        || string "ap" return AP
-        || string "∀" return ISECT
-        || string "⋂" return ISECT
-        || string "=" return EQ
-        || string "ceq" return CEQUAL
-        || string "∈" return MEM
-        || string "subset" return SUBSET
-        || string "so_apply" return SO_APPLY
-        || string "nat" return NAT
-        || string "zero" return ZERO
-        || string "succ" return SUCC
-        || string "natrec" return NATREC
+      choices
+        [parseUniv,
+         string "base" return BASE,
+         string "void" return VOID,
+         string "unit" return UNIT,
+         string "<>" return AX,
+         string "Σ" return PROD,
+         string "+" return PLUS,
+         string "inl" return INL,
+         string "inr" return INR,
+         string "decide" return DECIDE,
+         string "pair" return PAIR,
+         string "spread" return SPREAD,
+         string "Π" return FUN,
+         string "λ" return LAM,
+         string "ap" return AP,
+         string "∀" return ISECT,
+         string "⋂" return ISECT,
+         string "=" return EQ,
+         string "ceq" return CEQUAL,
+         string "∈" return MEM,
+         string "subset" return SUBSET,
+         string "so_apply" return SO_APPLY,
+         string "nat" return NAT,
+         string "zero" return ZERO,
+         string "succ" return SUCC,
+         string "natrec" return NATREC]
 
     fun intensionalParseOperator lookup =
       Label.parseLabel -- (fn lbl =>
