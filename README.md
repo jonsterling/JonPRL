@@ -101,7 +101,7 @@ The unit type is written `unit()` and its trivial inhabitant is written
 
 #### Functions
 
-Functions are introduced with `λ(0;1)` and eliminated with `ap(0;0)`
+Functions are introduced with `λ(1)` and eliminated with `ap(0;0)`
 (application). `Π(0;1)` gives the type of functions.
 
 #### Pairs
