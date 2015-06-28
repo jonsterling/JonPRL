@@ -110,6 +110,7 @@ struct
                [M, N] => IsectMemberCaseEq (SOME M, N)
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
+        ORELSE NatEq
         ORELSE Cum level
         ORELSE EqInSupertype
     end

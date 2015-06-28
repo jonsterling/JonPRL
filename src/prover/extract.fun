@@ -77,6 +77,10 @@ struct
        | SUBSET_ELIM $ #[R, stD] => extract (stD // R) // ax
        | SUBSET_MEMBER_EQ $ _ => ax
 
+       | NAT_EQ $ _ => ax
+       | NAT_INTRO_ZERO $ _ => ZERO $$ #[]
+       | NAT_INTRO_SUCC $ #[D] => SUCC $$ #[extract D]
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D

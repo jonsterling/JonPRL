@@ -128,6 +128,10 @@ sig
     val SubsetElim : int * (name * name) option -> tactic
     val SubsetMemberEq : name option * Level.t option -> tactic
 
+    val NatEq : tactic
+    val NatIntroZero : tactic
+    val NatIntroSucc : tactic
+
     val BaseEq : tactic
     val BaseIntro : tactic
     val BaseMemberEq : tactic
