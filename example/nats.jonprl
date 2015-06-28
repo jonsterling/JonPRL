@@ -13,3 +13,47 @@ Theorem minus-one : [Π(nat; _. nat)] {
 Theorem natrec-test : [=(natrec(succ(succ(zero)); zero; n. ih. n); succ(zero); nat)] {
   reduce; auto
 }.
+
+Operator plus : (0;0).
+[plus(M; N)] =def= [natrec(M; N; _.n.succ(n))].
+
+Tactic t {
+  unfold <plus>; auto; elim #1; reduce; auto
+}.
+
+Theorem plus-id-left : [∀(nat; n. =(plus(zero; n); n; nat))] {
+  refine <t>
+}.
+
+Theorem plus-id-right : [∀(nat; n. =(plus(n; zero); n; nat))] {
+  refine <t>
+}.
+
+Theorem succ-right : [
+  ∀(nat; n. ∀(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
+] {
+  refine <t>
+}.
+
+Theorem plus-commutes : [
+  ∀(nat; n.∀(nat; m. =(plus(n; m); plus(m; n); nat)))
+] {
+  ||| Kick off the induction and do the boring computation thingies.
+  refine <t>;
+
+  ||| The base case immeidately follows from plus-id-right
+  [(assert [∀(nat; n. =(plus(n; zero); n; nat))];
+    [lemma <plus-id-right>, id];
+    elim #3 [m]; auto; unfold <plus>;
+    hyp-subst → #4 [h.=(m;h;nat)];
+    auto),
+   id];
+
+  ||| In order to prove this we first rewrite by succ-right from which our
+  ||| result follows from reflexivity.
+  assert [∀(nat; n. ∀(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))];
+  [lemma <succ-right>, id];
+  elim #5 [m]; auto; elim #6 [n']; unfold <plus>; auto;
+  hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
+  auto
+}.
