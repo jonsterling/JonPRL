@@ -143,6 +143,10 @@ Operator ex_uni : (0;1).
 Note that `P` is applied to `x` and `y` using `so_apply` rather than
 `ap`, which is reserved for function application.
 
+#### Computational Equivalence
+
+The elements of `base()` are all closed terms. Their equality is `ceq(0;0)`, which denotes [Howe's computational equivalence](http://www.nuprl.org/KB/show.php?ShowPub=Howe89). Two terms are computationally equivalent if they both diverge or if they run to equivalent results. Computational equivalence is a congruence, which means that one can also prove that two terms are computationally equivalent if their subterms are computationally equivalent.
+
 #### TODO
 
-The following operators exist but are not yet documented: `base`, `ceq`, `∈`, `subset`, `⋂`.
+The following operators exist but are not yet documented: `∈`, `subset`, `⋂`.
