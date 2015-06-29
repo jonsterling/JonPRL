@@ -234,17 +234,11 @@ module CwF where
   wkn A = 𝔉.map A ∘ π₂
 
   var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
-  var Γ A = M , prf
-    where
-      M : (Γ ▸ A) → (dom (A *ty[ wkn A ]))
-      M (._ , _ , refl) = (map A _ , _ , refl) , _ , refl
-
-      prf : Π[ x ∶ Γ ▸ A ] (map (A *ty[ wkn A ]) ∘ M) x ≡ x
-      prf (._ , _ , refl) = refl
+  var Γ A = (λ x → x , π₂ x , refl) , (λ _ → refl)
 
   ext : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
-  ext θ M x with fst M x | snd M x
-  ... | ._ , _ , prf | refl = θ x , _ , prf
+  ext {A = A} θ M x = (θ ∘ π₁) base , π₂ base , pullM.eq base
+    where base = sectM.map (A *ty[ θ ]) M x
 
   infix 0 ⟨_,_⟩
   ⟨_,_⟩ : ∀ {Γ Δ} {A : Ty Γ} (θ : Sub Δ Γ) → Tm Δ (A *ty[ θ ]) → Sub Δ (Γ ▸ A)
@@ -260,7 +254,7 @@ module CwF where
     where
       wkn-prf : (x : Δ) → (wkn A ∘ ⟨ γ , M ⟩) x ≡ γ x
       wkn-prf x with fst M x | snd M x
-      wkn-prf x | ._ , _ , prf | refl = prf
+      wkn-prf x | ._ , _ , φ-A | refl = φ-A
 
   Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
   Σ↓ θ M = dom M ↓ θ ∘ 𝔉.map M
