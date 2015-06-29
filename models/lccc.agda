@@ -182,8 +182,12 @@ module CwF where
   infix 1 pull
   syntax pull {I} f g = f ×[ I ] g
 
-  sect : ∀ {I} → 𝔉 I → Set
-  sect f = Σ[ f⁻¹ ∶ (_ → dom f) ] Π[ i ∶ _ ] (map f ∘ f⁻¹) i ≡ i
+  module sectM {I} (f : 𝔉 I) where
+    obj : Set
+    obj = Σ[ f⁻¹ ∶ (I → dom f) ] Π[ i ∶ I ] (𝔉.map f ∘ f⁻¹) i ≡ i
+
+    map : obj → (I → dom f)
+    map = fst
 
   _* : ∀ {I J} → (I → J) → (𝔉 J → 𝔉 I)
   f * = λ i → (_ ↓ f) ×[ _ ] i ↓ fst
@@ -198,7 +202,7 @@ module CwF where
   Ty = 𝔉
 
   Tm : (Γ : Ctx) (A : Ty Γ) → Ctx
-  Tm _ = sect
+  Tm _ = sectM.obj
 
   Sub : Ctx → Ctx → Set
   Sub Δ Γ = Δ → Γ
