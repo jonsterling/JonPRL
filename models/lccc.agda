@@ -253,8 +253,8 @@ module CwF where
   ctx-cmp-ump {Δ = Δ} γ A M = ⟨ γ , M ⟩ , refl , fun-ext wkn-prf
     where
       wkn-prf : (x : Δ) → (wkn A ∘ ⟨ γ , M ⟩) x ≡ γ x
-      wkn-prf x with fst M x | snd M x
-      wkn-prf x | ._ , _ , φ-A | refl = φ-A
+      wkn-prf x with pullM.eq (sectM.map (A *ty[ γ ]) M x)
+      ... | φ-× rewrite snd M x = φ-×
 
   Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
   Σ↓ θ M = dom M ↓ θ ∘ 𝔉.map M
