@@ -100,6 +100,7 @@ struct
                                       (List.nth (terms, 1),
                                        List.nth (terms, 2),
                                        take3 names))
+        ORELSE_LAZY (fn _ => NatRecEq (List.nth (terms, 0), take2 names))
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable

@@ -1,4 +1,4 @@
-Theorem nat-example : [nat] {
+Theorem natp-example : [nat] {
   witness [succ(zero)]; auto
 }.
 
@@ -55,5 +55,5 @@ Theorem plus-commutes : [
   [lemma <succ-right>, id];
   elim #5 [m]; auto; elim #6 [n']; unfold <plus>; auto;
   hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
-  auto
+  auto; eq-cd [h.nat]; auto
 }.
