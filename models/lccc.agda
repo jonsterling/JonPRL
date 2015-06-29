@@ -85,7 +85,7 @@ record 𝔉 (I : Set) : Set₁ where
   field
     dom : Set
     map : dom → I
-open 𝔉
+open 𝔉 using (dom)
 
 -- NOTE: large extensions are possible here with Yoneda embeddings for homs
 
@@ -156,14 +156,14 @@ module CwF where
     fun-ext : {A B : Set} {f g : A → B} → (∀ x → f x ≡ g x) → f ≡ g
 
   fiber : ∀ {I} → 𝔉 I → 𝒫 I
-  fiber f = λ i → Σ[ e ∶ dom f ] map f e ≡ i
+  fiber f = λ i → Σ[ e ∶ dom f ] 𝔉.map f e ≡ i
 
   _⁻¹ : ∀ {I} → 𝔉 I → 𝒫 I
   _⁻¹ = fiber
 
   module pullM {I} {f g : 𝔉 I} where
     obj : Set
-    obj = Σ (dom f) (fiber g ∘ map f)
+    obj = Σ (dom f) (fiber g ∘ 𝔉.map f)
 
     π₁ : obj → dom f
     π₁ = fst
@@ -171,7 +171,7 @@ module CwF where
     π₂ : obj → dom g
     π₂ = fst ∘ snd
 
-    eq : (E : obj) → (map g ∘ π₂) E ≡ (map f ∘ π₁) E
+    eq : (E : obj) → (𝔉.map g ∘ π₂) E ≡ (𝔉.map f ∘ π₁) E
     eq = snd ∘ snd
   open pullM
     using (π₁; π₂)
@@ -227,7 +227,7 @@ module CwF where
   A *ty[ θ ] = (θ *) A
 
   wkn : {Γ : Ctx} (A : Ty Γ) → Sub (Γ ▸ A) Γ
-  wkn A = map A ∘ π₂
+  wkn A = 𝔉.map A ∘ π₂
 
   var : (Γ : Ctx) (A : Ty Γ) → Tm (Γ ▸ A) (A *ty[ wkn A ])
   var Γ A = M , prf
@@ -259,7 +259,7 @@ module CwF where
       wkn-prf x | ._ , _ , prf | refl = prf
 
   Σ↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
-  Σ↓ θ M = dom M ↓ θ ∘ map M
+  Σ↓ θ M = dom M ↓ θ ∘ 𝔉.map M
 
   Π↓ : ∀ {Δ Γ} → Sub Δ Γ → (Ty Δ → Ty Γ)
   Π↓ θ M = {!!}
