@@ -133,6 +133,17 @@ struct
            O $ _ => if operatorIrrelevant O then () else raise Refine
          | _ => raise Refine
 
+    fun eliminationTarget i (H >> P) =
+      let
+        val z = Context.nth H (i - 1)
+        val (A, visibility) = Context.lookupVisibility H z
+      in
+        case visibility of
+             Visibility.Hidden =>
+              (assertIrrelevant (H, P); z)
+           | Visibility.Visible => z
+      end
+
     fun inferLevel (H, P) =
       case out P of
            UNIV l $ _ => Level.succ l
@@ -239,7 +250,7 @@ struct
 
     fun UnitElim i (H >> P) =
       let
-        val x = Context.nth H (i - 1)
+        val x = eliminationTarget i (H >> P)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctxSubst H ax x
@@ -324,7 +335,7 @@ struct
     fun FunElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H (i - 1)
+        val f = eliminationTarget i (H >> P)
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -419,7 +430,7 @@ struct
     fun IsectElim (i, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = Context.nth H (i - 1)
+        val f = eliminationTarget i (H >> P)
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -523,7 +534,7 @@ struct
       end
 
     fun SubsetElim (i, onames) (H >> P) =
-      SubsetElim_ (Context.nth H (i - 1), onames) (H >> P)
+      SubsetElim_ (eliminationTarget i (H >> P), onames) (H >> P)
 
     fun SubsetMemberEq (oz, ok) (H >> P) =
       let
@@ -540,6 +551,87 @@ struct
         , H >> xT // s
         , H @@ (z,S) >> MEM $$ #[xT // ``z, UNIV k $$ #[]]
         ] BY (fn [D, E, F] => SUBSET_MEMBER_EQ $$ #[D, E, z \\ F]
+               | _ => raise Refine)
+      end
+
+    fun NatEq (H >> P) =
+      let
+        val #[nat1, nat2, univ] = P ^! EQ
+        val (UNIV _, _) = asApp univ
+        val #[] = nat1 ^! NAT
+        val #[] = nat2 ^! NAT
+      in
+        [] BY mkEvidence NAT_EQ
+      end
+
+    fun NatElim (i, onames) (H >> C) =
+      let
+        val z = eliminationTarget i (H >> C)
+        val (n,ih) =
+          case onames of
+               SOME names => names
+             | NONE =>
+                 (Context.fresh (H, Variable.named "n"),
+                  Context.fresh (H, Variable.named "ih"))
+
+        val zero = ZERO $$ #[]
+        val succn = SUCC $$ #[``n]
+
+        val J = Context.empty @@ (n, NAT $$ #[]) @@ (ih, subst (``n) z C)
+        val H' = ctxSubst (Context.interposeAfter H (z, J)) succn z
+      in
+        [ ctxSubst H zero z >> subst zero z C
+        , H' >> subst succn z C
+        ] BY (fn [D,E] => NAT_ELIM $$ #[``z, D, n \\ (ih \\ E)]
+               | _ => raise Refine)
+      end
+
+    fun ZeroEq (H >> P) =
+      let
+        val #[zero1, zero2, nat] = P ^! EQ
+        val #[] = nat ^! NAT
+        val #[] = zero1 ^! ZERO
+        val #[] = zero2 ^! ZERO
+      in
+        [] BY mkEvidence ZERO_EQ
+      end
+
+    fun SuccEq (H >> P) =
+      let
+        val #[succ1, succ2, nat] = P ^! EQ
+        val #[] = nat ^! NAT
+        val #[M] = succ1 ^! SUCC
+        val #[N] = succ2 ^! SUCC
+      in
+        [ H >> EQ $$ #[M, N, NAT $$ #[]]
+        ] BY mkEvidence SUCC_EQ
+      end
+
+    fun NatRecEq (ozC, onames) (H >> P) =
+      let
+        val #[rec1, rec2, A] = P ^! EQ
+        val #[n, zero, succ] = rec1 ^! NATREC
+        val #[n', zero', succ'] = rec1 ^! NATREC
+
+        val zC =
+          case ozC of
+               SOME zC => unify (zC // n) A
+             | NONE => Variable.named "z" \\ A
+
+        val (npred, ih) =
+            case onames of
+                NONE =>
+                (Context.fresh (H, Variable.named "n'"),
+                 Context.fresh (H, Variable.named "ih"))
+              | SOME names => names
+        val H' = H @@ (npred, NAT $$ #[]) @@ (ih, zC // (`` npred))
+        val succSubst = (succ // ``npred) // ``ih
+        val succSubst' = (succ' // ``npred) // ``ih
+      in
+        [ H >> EQ $$ #[n, n', NAT $$ #[]]
+        , H >> EQ $$ #[zero, zero', zC // (ZERO $$ #[])]
+        , H' >> EQ $$ #[succSubst, succSubst', zC // (SUCC $$ #[`` npred])]
+        ] BY (fn [N, D, E] => NATREC_EQ $$ #[N, D, npred \\ (ih \\ E)]
                | _ => raise Refine)
       end
 
@@ -1145,18 +1237,10 @@ struct
   struct
     open Conversionals Conv
 
-    val ApBeta : conv = reductionRule
-      (fn AP $ #[LAM $ #[xE], N] => xE // into N
-        | _ => raise Conv)
-
-    val SpreadBeta : conv = reductionRule
-      (fn SPREAD $ #[PAIR $ #[M,N], xyE] => (into xyE // M) // N
-        | _ => raise Conv)
-
-    val DecideBeta : conv = reductionRule
-      (fn DECIDE $ #[INL $ #[E], N, M] => (into N // E)
-        | DECIDE $ #[INR $ #[E], N, M] => (into M // E)
-        | _ => raise Conv)
+    val Step : conv = fn M =>
+      case Semantics.step M of
+           Semantics.STEP M' => M'
+         | _ => raise Conv
   end
 end
 

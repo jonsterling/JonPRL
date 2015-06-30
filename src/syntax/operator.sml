@@ -13,6 +13,8 @@ struct
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
+    | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
+
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of int Vector.vector
@@ -28,6 +30,7 @@ struct
     | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
+    | NAT | ZERO | SUCC | NATREC
     | CEQUAL | BASE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
@@ -120,10 +123,19 @@ struct
     | eq (INL_EQ, INL_EQ) = true
     | eq (INR_EQ, INR_EQ) = true
     | eq (DECIDE_EQ, DECIDE_EQ) = true
+    | eq (NAT_EQ, NAT_EQ) = true
+    | eq (NAT_ELIM, NAT_ELIM) = true
+    | eq (ZERO_EQ, ZERO_EQ) = true
+    | eq (SUCC_EQ, SUCC_EQ) = true
+    | eq (NATREC_EQ, NATREC_EQ) = true
     | eq (PLUS, PLUS) = true
     | eq (INL, INL) = true
     | eq (INR, INR) = true
     | eq (DECIDE, DECIDE) = true
+    | eq (NAT, NAT) = true
+    | eq (ZERO, ZERO) = true
+    | eq (SUCC, SUCC) = true
+    | eq (NATREC, NATREC) = true
     | eq _ = false
 
   fun arity O =
@@ -164,6 +176,12 @@ struct
        | INL_EQ => #[0, 0]
        | INR_EQ => #[0, 0]
        | DECIDE_EQ => #[0, 2, 2]
+
+       | NAT_EQ => #[]
+       | NAT_ELIM => #[0,0,2]
+       | ZERO_EQ => #[]
+       | SUCC_EQ => #[0]
+       | NATREC_EQ => #[0,0,2]
 
        | FUN_EQ => #[0,1]
        | FUN_INTRO => #[1,0]
@@ -207,6 +225,10 @@ struct
        | INL => #[0]
        | INR => #[0]
        | DECIDE => #[0, 1, 1]
+       | NAT => #[]
+       | ZERO => #[]
+       | SUCC => #[0]
+       | NATREC => #[0,0,2]
 
        | ISECT => #[0,1]
 
@@ -265,6 +287,12 @@ struct
        | INR_EQ => "inr-eq"
        | DECIDE_EQ => "decide-eq"
 
+       | NAT_EQ => "nat-eq"
+       | NAT_ELIM => "nat-elim"
+       | ZERO_EQ => "zero-eq"
+       | SUCC_EQ => "succ-eq"
+       | NATREC_EQ => "natrec-eq"
+
        | ISECT_EQ => "isect⁼"
        | ISECT_INTRO => "isect-intro"
        | ISECT_ELIM => "isect-elim"
@@ -303,6 +331,10 @@ struct
        | INL => "inl"
        | INR => "inr"
        | DECIDE => "decide"
+       | NAT => "nat"
+       | ZERO => "zero"
+       | SUCC => "succ"
+       | NATREC => "natrec"
 
        | SUBSET => "subset"
 
@@ -325,29 +357,37 @@ struct
     val parseUniv : t charParser =
       string "U" >> middle (string "{") Level.parse (string "}") wth UNIV
 
+    fun choices xs =
+      foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
+
     val extensionalParseOperator : t charParser =
-      parseUniv
-        || string "base" return BASE
-        || string "void" return VOID
-        || string "unit" return UNIT
-        || string "<>" return AX
-        || string "Σ" return PROD
-        || string "+" return PLUS
-        || string "inl" return INL
-        || string "inr" return INR
-        || string "decide" return DECIDE
-        || string "pair" return PAIR
-        || string "spread" return SPREAD
-        || string "Π" return FUN
-        || string "λ" return LAM
-        || string "ap" return AP
-        || string "∀" return ISECT
-        || string "⋂" return ISECT
-        || string "=" return EQ
-        || string "ceq" return CEQUAL
-        || string "∈" return MEM
-        || string "subset" return SUBSET
-        || string "so_apply" return SO_APPLY
+      choices
+        [parseUniv,
+         string "base" return BASE,
+         string "void" return VOID,
+         string "unit" return UNIT,
+         string "<>" return AX,
+         string "Σ" return PROD,
+         string "+" return PLUS,
+         string "inl" return INL,
+         string "inr" return INR,
+         string "decide" return DECIDE,
+         string "pair" return PAIR,
+         string "spread" return SPREAD,
+         string "Π" return FUN,
+         string "λ" return LAM,
+         string "ap" return AP,
+         string "∀" return ISECT,
+         string "⋂" return ISECT,
+         string "=" return EQ,
+         string "ceq" return CEQUAL,
+         string "∈" return MEM,
+         string "subset" return SUBSET,
+         string "so_apply" return SO_APPLY,
+         string "nat" return NAT,
+         string "zero" return ZERO,
+         string "succ" return SUCC,
+         string "natrec" return NATREC]
 
     fun intensionalParseOperator lookup =
       Label.parseLabel -- (fn lbl =>

@@ -1,0 +1,10 @@
+Operator Top : ().
+[Top] =def= [⋂(void; _. void)].
+
+Theorem anything-in-top : [⋂(base; E. ∈(E; Top))] {
+  unfold <Top>; auto
+}.
+
+Theorem top-singleton : [⋂(Top; E. ⋂(Top; F. =(E; F; Top)))] {
+  unfold <Top>; auto
+}.

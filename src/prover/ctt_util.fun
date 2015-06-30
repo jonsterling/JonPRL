@@ -63,21 +63,26 @@ struct
   fun take3 (x::y::z::_) = SOME (x,y,z)
     | take3 _ = NONE
 
-  fun list_at (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
+  fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   fun Elim {target, names, term} =
-    (VoidElim THEN Hypothesis target)
-      ORELSE UnitElim target
-      ORELSE_LAZY (fn _ => BaseElimEq (target, list_at (names, 0)))
-      ORELSE_LAZY (fn _ => PlusElim (target, take2 names))
-      ORELSE_LAZY (fn _ => ProdElim (target, take2 names))
-      ORELSE_LAZY (fn _ => FunElim (target, valOf term, take2 names))
-      ORELSE_LAZY (fn _ => IsectElim (target, valOf term, take2 names))
-      ORELSE SubsetElim (target, take2 names)
+    let
+      val twoNames = take2 names
+    in
+      (VoidElim THEN Hypothesis target)
+        ORELSE UnitElim target
+        ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
+        ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
+        ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
+        ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
+        ORELSE NatElim (target, twoNames)
+        ORELSE SubsetElim (target, twoNames)
+    end
 
   fun EqCD {names, level, terms} =
     let
-      val freshVariable = list_at (names, 0)
+      val freshVariable = listAt (names, 0)
     in
       AxEq
         ORELSE EqEq
@@ -95,14 +100,15 @@ struct
                                       (List.nth (terms, 1),
                                        List.nth (terms, 2),
                                        take3 names))
+        ORELSE NatRecEq (listAt (terms, 0), take2 names)
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable
         ORELSE SubsetEq freshVariable
         ORELSE PairEq (freshVariable, level)
         ORELSE LamEq (freshVariable, level)
-        ORELSE ApEq (list_at (terms, 0))
-        ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
+        ORELSE ApEq (listAt (terms, 0))
+        ORELSE SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
         ORELSE SubsetMemberEq (freshVariable, level)
         ORELSE IsectMemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
@@ -110,6 +116,9 @@ struct
                [M, N] => IsectMemberCaseEq (SOME M, N)
              | [N] => IsectMemberCaseEq (NONE, N)
              | _ => FAIL)
+        ORELSE NatEq
+        ORELSE ZeroEq
+        ORELSE SuccEq
         ORELSE Cum level
         ORELSE EqInSupertype
     end
@@ -130,8 +139,7 @@ struct
     open Conversions Conversionals
     infix CORELSE
 
-    val Reduce = ApBeta CORELSE SpreadBeta CORELSE DecideBeta
-    val DeepReduce = RewriteGoal (CDEEP Reduce)
+    val DeepReduce = RewriteGoal (CDEEP Step)
   in
     val Auto =
       LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)

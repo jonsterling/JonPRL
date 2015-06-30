@@ -78,8 +78,8 @@ struct
     fun var sigma = identifier wth (fn x => `` (SymbolTable.named sigma x))
 
     fun abt sigma w () =
-      (force (app sigma w)
-      || force (abs sigma w)
+      (force (abs sigma w)
+      || force (app sigma w)
       || var sigma) ?? "abt"
     and app sigma w () =
       ParseOperator.parseOperator w

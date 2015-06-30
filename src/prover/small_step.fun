@@ -28,6 +28,12 @@ struct
       | INR $ #[B] => R // B
       | _ => raise Stuck (DECIDE $$ #[S, L, R])
 
+  fun stepNatrecBeta (M, Z, xyS) =
+    case out M of
+         ZERO $ #[] => Z
+       | SUCC $ #[N] => (xyS // N) // (NATREC $$ #[N, Z, xyS])
+       | _ => raise Stuck (NATREC $$ #[M, Z, xyS])
+
   fun step e =
     case out e of
         UNIV _ $ _ => CANON
@@ -57,26 +63,31 @@ struct
       | PLUS $ _ => CANON
       | INL $ _ => CANON
       | INR $ _ => CANON
-      | DECIDE $ #[S, L, R] => (
-          case step S of
+      | ZERO $ _ => CANON
+      | SUCC $ _ => CANON
+      | DECIDE $ #[S, L, R] =>
+          (case step S of
               STEP S' => STEP (DECIDE $$ #[S', L, R])
             | CANON => STEP (stepDecideBeta (S, L, R))
-            | NEUTRAL => NEUTRAL
-        )
-      | SO_APPLY $ #[L, R] => (
+            | NEUTRAL => NEUTRAL)
+      | NATREC $ #[M, Z, xyS] =>
+          (case step M of
+                STEP M' => STEP (NATREC $$ #[M', Z, xyS])
+              | CANON => STEP (stepNatrecBeta (M, Z, xyS))
+              | NEUTRAL => NEUTRAL)
+      | SO_APPLY $ #[L, R] =>
           (* This can't come up but I don't think it's wrong
            * Leaving this in here so it's an actual semantics
            * for the core type theory: not just what users
            * can say with the syntax we give.
            *)
-          case out L of
-            x \ L => STEP (subst R x L)
-           | _ =>
-             case step L of
+          (case out L of
+               x \ L => STEP (subst R x L)
+             | _ =>
+             (case step L of
                  CANON => raise Stuck (SO_APPLY $$ #[L, R])
                | STEP L' => STEP (SO_APPLY $$ #[L', R])
-               | NEUTRAL => NEUTRAL
-      )
+               | NEUTRAL => NEUTRAL))
       | CUSTOM _ $ _ => NEUTRAL (* Require unfolding elsewhere *)
       | ` _ => NEUTRAL (* Cannot step an open term *)
       | x \ e => (

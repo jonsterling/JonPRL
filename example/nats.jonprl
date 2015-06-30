@@ -1,0 +1,42 @@
+Theorem natp-example : [nat] {
+  witness [succ(zero)]; auto
+}.
+
+Theorem minus-one : [Π(nat; _. nat)] {
+  intro <n>; [id, auto];
+  elim #1;
+  [ witness [zero]
+  , hypothesis #2
+  ]; auto
+}.
+
+Theorem natrec-test : [=(natrec(succ(succ(zero)); zero; n. ih. n); succ(zero); nat)] {
+  reduce; auto
+}.
+
+Operator plus : (0;0).
+[plus(M; N)] =def= [natrec(M; N; _.n.succ(n))].
+
+Tactic t {
+  unfold <plus>; auto; elim #1; reduce; auto
+}.
+
+Theorem plus-id-left : [∀(nat; n. =(plus(zero; n); n; nat))] {
+  refine <t>
+}.
+
+Theorem plus-id-right : [∀(nat; n. =(plus(n; zero); n; nat))] {
+  refine <t>
+}.
+
+Theorem succ-right : [
+  ∀(nat; n. ∀(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
+] {
+  refine <t>
+}.
+
+Theorem plus-commutes : [
+  ∀(nat; n.∀(nat; m. =(plus(n; m); plus(m; n); nat)))
+] {
+  refine <t>
+}.
