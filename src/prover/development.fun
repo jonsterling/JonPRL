@@ -156,6 +156,13 @@ struct
          Object.Theorem {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
+  fun lookupExtract T lbl =
+    let
+      val {evidence,...} = lookupTheorem T lbl
+    in
+      Extract.extract (Susp.force evidence)
+    end
+
   fun lookupTactic T lbl =
     case Telescope.lookup T lbl of
          Object.Tactic tac => tac
