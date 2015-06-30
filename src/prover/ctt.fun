@@ -567,6 +567,7 @@ struct
     fun NatElim (i, onames) (H >> C) =
       let
         val z = eliminationTarget i (H >> C)
+        val #[] = Context.lookup H z ^! NAT
         val (n,ih) =
           case onames of
                SOME names => names
