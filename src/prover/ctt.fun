@@ -612,7 +612,7 @@ struct
       let
         val #[rec1, rec2, A] = P ^! EQ
         val #[n, zero, succ] = rec1 ^! NATREC
-        val #[n', zero', succ'] = rec1 ^! NATREC
+        val #[n', zero', succ'] = rec2 ^! NATREC
 
         val zC =
           case ozC of
