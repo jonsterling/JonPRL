@@ -219,6 +219,12 @@ struct
       wth (fn (name, lbl) => fn pos =>
              LEMMA (lbl, {name = name, pos = pos}))
 
+  val parseCutLemma : tactic_parser =
+    fn w => symbol "cut-lemma"
+      && brackets parseLabel
+      wth (fn (name, lbl) => fn pos =>
+             CUT_LEMMA (lbl, {name = name, pos = pos}))
+
   val parseUnfold : tactic_parser =
     fn w => symbol "unfold"
       && brackets (separate (parseLabel && opt parseLevel) whiteSpace)
@@ -233,6 +239,7 @@ struct
 
   fun tacticParsers w =
     parseLemma w
+      || parseCutLemma w
       || parseUnfold w
       || parseCustomTactic w
       || parseWitness w

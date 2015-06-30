@@ -44,6 +44,7 @@ struct
     | ASSUMPTION of meta
     | ASSERT of {assertion : term,
                  name : name option} * meta
+    | CUT_LEMMA of label * meta
     | SYMMETRY of meta
     | CEQUAL_REFL of meta
     | CEQUAL_SYM of meta

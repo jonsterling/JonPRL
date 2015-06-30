@@ -23,6 +23,7 @@ struct
   structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
   structure Syntax = Syntax
 
+  structure Sequent = Sequent
   type tactic = Lcf.tactic
   type conv = Conv.conv
   type name = Sequent.name

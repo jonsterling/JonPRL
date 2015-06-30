@@ -5,8 +5,17 @@ sig
 
   type conv
   type world
-  type label
   type tactic
+
+  structure Sequent : SEQUENT
+    where type term = term
+
+  structure Development : DEVELOPMENT
+    where type tactic = tactic
+    where type world = world
+    where type judgement = Sequent.sequent
+
+  type label = Development.label
 
   structure Rules : sig
     (* Pretend you have got a proof. *)
@@ -150,7 +159,7 @@ sig
     val Witness : term -> tactic
 
     val Assumption : tactic
-    val Assert     : term * name option -> tactic
+    val Assert : term * name option -> tactic
     val Hypothesis : int -> tactic
     val HypEq : tactic
     val EqInSupertype : tactic

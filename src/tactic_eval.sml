@@ -45,6 +45,7 @@ struct
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
+      | CUT_LEMMA (lbl, a) => an a (CttUtil.CutLemma (wld, lbl))
       | SYMMETRY a => an a EqSym
       | CEQUAL_REFL a => an a CEqRefl
       | CEQUAL_SYM a => an a CEqSym
