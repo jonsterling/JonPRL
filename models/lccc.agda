@@ -5,6 +5,7 @@ module lccc where
 -- * CCC for 𝒫
 -- * Σ, Π, I, W (?) for 𝔉
 -- * define polynomials in terms of 𝔉 adjoints
+-- * comonadic characterization of weakening/contraction
 
 open import Agda.Primitive
 
