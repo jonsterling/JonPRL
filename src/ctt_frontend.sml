@@ -39,18 +39,13 @@ struct
       val initialContext =
         StringVariableContext.new
           (Development.enumerateOperators initialDevelopment)
-      fun updateDevelopment bindings =
-        List.foldl
-          (fn (bind, wld) => Development.declareOperator wld bind)
-          initialDevelopment
-          (StringVariableContext.enumerateOperators bindings)
 
       open CttDevelopmentParser
     in
       (case CharParser.parseChars (parse initialContext) coordStream of
            Sum.INL e => raise Fail e
          | Sum.INR (bindings, ast) =>
-           DevelopmentAstEval.eval (updateDevelopment bindings) ast)
+           DevelopmentAstEval.eval initialDevelopment ast)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
 end

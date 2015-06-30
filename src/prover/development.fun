@@ -77,6 +77,8 @@ struct
       fun go Empty bind = bind
         | go (Snoc (rest, lbl, Object.Operator {arity, ...})) bind =
           go (out rest) ((lbl, arity) :: bind)
+        | go (Snoc (rest, lbl, Object.Theorem {...})) bind =
+          go (out rest) ((lbl, #[]) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
@@ -162,6 +164,7 @@ struct
   fun lookupOperator T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {arity,...} => arity
+       | Object.Theorem {...} => #[]
        | _ => raise Subscript
 end
 
