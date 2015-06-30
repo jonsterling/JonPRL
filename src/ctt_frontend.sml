@@ -2,15 +2,32 @@ structure CttFrontend =
 struct
   structure Extract = Extract(Syntax)
 
-  fun printDevelopment world =
+  val printDevelopment =
     let
-      open Development.Telescope
-      fun go ConsView.Empty = ()
-        | go (ConsView.Cons (lbl, obj, tele)) =
+      open Development.Telescope.ConsView
+      fun go Empty = ()
+        | go (Cons (lbl, obj, tele)) =
             (print (Development.Object.toString (lbl, obj) ^ "\n\n");
-             go (ConsView.out tele))
+             go (out tele))
     in
-      go (ConsView.out (Development.enumerate world))
+      go o out o Development.enumerate
+    end
+
+  val printOperators =
+    let
+      open Development.Telescope.ConsView Development.Object
+      fun printStep (lbl, arity) =
+        print (Development.Telescope.Label.toString lbl ^ " " ^ Arity.toString arity ^ "\n")
+
+      fun go Empty = ()
+        | go (Cons (lbl, OPERATOR {arity,...}, rest)) =
+          (printStep (lbl, arity); go (out rest))
+        | go (Cons (lbl, THEOREM {...}, rest)) =
+          (printStep (lbl, #[]); go (out rest))
+        | go (Cons (_, _, rest)) =
+          go (out rest)
+    in
+      go o out o Development.enumerate
     end
 
   fun prettyException E =

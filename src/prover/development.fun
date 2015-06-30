@@ -34,19 +34,23 @@ struct
       {statement : judgement,
        script : tactic,
        evidence : evidence Susp.susp}
+
+    type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
       {arity : Arity.t,
-       conversion : (PatternCompiler.rule * (conv Susp.susp)) option}
+       conversion : operator_definition option}
+
+    fun operatorDeclArity {arity,conversion} = arity
 
     datatype t =
-        Theorem of theorem
-      | Tactic of tactic
-      | Operator of operator_decl
+        THEOREM of theorem
+      | TACTIC of tactic
+      | OPERATOR of operator_decl
 
     fun arity_toString v =
       "(" ^ Vector.foldri (fn (i, s1, s2) => if i = (Vector.length v - 1) then s1 else s1 ^ "; " ^ s2) "" (Vector.map Int.toString v) ^ ")"
 
-    fun toString (lbl, Theorem {statement, evidence,...}) =
+    fun toString (lbl, THEOREM {statement, evidence,...}) =
           let
             val evidence' = Susp.force evidence
           in
@@ -55,9 +59,9 @@ struct
               ^ Evidence.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
-      | toString (lbl, Tactic _) =
+      | toString (lbl, TACTIC _) =
           "Tactic " ^ Telescope.Label.toString lbl ^ "."
-      | toString (lbl, Operator {arity, conversion}) =
+      | toString (lbl, OPERATOR {arity, conversion}) =
           "Operator " ^ Telescope.Label.toString lbl
             ^ " : " ^ arity_toString arity
             ^ "."
@@ -71,19 +75,21 @@ struct
   type object = Object.t
   type world = object Telescope.telescope
   fun enumerate t = t
+
   fun enumerateOperators t =
     let
       open Telescope.SnocView
       fun go Empty bind = bind
-        | go (Snoc (rest, lbl, Object.Operator {arity, ...})) bind =
+        | go (Snoc (rest, lbl, Object.OPERATOR {arity, ...})) bind =
           go (out rest) ((lbl, arity) :: bind)
-        | go (Snoc (rest, lbl, Object.Theorem {...})) bind =
+        | go (Snoc (rest, lbl, Object.THEOREM {...})) bind =
           go (out rest) ((lbl, #[]) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
       go (out t) []
     end
+
 
   val empty = Telescope.empty
 
@@ -92,7 +98,7 @@ struct
       val (subgoals, validation) = tac goal
     in
       case subgoals of
-           [] => Telescope.snoc T (lbl, Object.Theorem
+           [] => Telescope.snoc T (lbl, Object.THEOREM
                   {statement = goal,
                    script = tac,
                    evidence = Susp.delay (fn _ => validation [])})
@@ -100,10 +106,10 @@ struct
     end
 
   fun defineTactic T (lbl, tac) =
-    Telescope.snoc T (lbl, Object.Tactic tac)
+    Telescope.snoc T (lbl, Object.TACTIC tac)
 
   fun declareOperator T (lbl, arity) =
-    Telescope.snoc T (lbl, Object.Operator {arity = arity, conversion = NONE})
+    Telescope.snoc T (lbl, Object.OPERATOR {arity = arity, conversion = NONE})
 
   local
     open PatternSyntax
@@ -137,9 +143,9 @@ struct
             raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
       in
         case Telescope.lookup T lbl of
-             Object.Operator {arity,conversion = NONE} =>
+             Object.OPERATOR {arity,conversion = NONE} =>
                Telescope.modify T (lbl, fn _ =>
-                 Object.Operator
+                 Object.OPERATOR
                   {arity = arity,
                    conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))})
            | _ => raise Subscript
@@ -148,12 +154,12 @@ struct
 
   fun lookupDefinition T lbl =
     case Telescope.lookup T lbl of
-         Object.Operator {conversion = SOME (_, conv),...} => Susp.force conv
+         Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
        | _ => raise Subscript
 
   fun lookupTheorem T lbl =
     case Telescope.lookup T lbl of
-         Object.Theorem {statement,evidence,...} => {statement = statement, evidence = evidence}
+         Object.THEOREM {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
   fun lookupExtract T lbl =
@@ -165,13 +171,13 @@ struct
 
   fun lookupTactic T lbl =
     case Telescope.lookup T lbl of
-         Object.Tactic tac => tac
+         Object.TACTIC tac => tac
        | _ => raise Subscript
 
   fun lookupOperator T lbl =
     case Telescope.lookup T lbl of
-         Object.Operator {arity,...} => arity
-       | Object.Theorem {...} => #[]
+         Object.OPERATOR {arity,...} => arity
+       | Object.THEOREM {...} => #[]
        | _ => raise Subscript
 end
 

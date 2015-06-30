@@ -20,10 +20,17 @@ sig
   structure Telescope : TELESCOPE
   type label = Telescope.label
 
-  (* TODO: don't include this in this signature *)
   structure Object :
   sig
-    type t
+    type theorem
+    type operator_decl
+    val operatorDeclArity : operator_decl -> Arity.t
+
+    datatype t =
+        THEOREM of theorem
+      | TACTIC of tactic
+      | OPERATOR of operator_decl
+
     val toString : label * t -> string
   end
 
