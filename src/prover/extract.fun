@@ -81,6 +81,7 @@ struct
        | NAT_ELIM $ #[z, D, xyE] => NATREC $$ #[z, extract D, extract xyE]
        | ZERO_EQ $ _ => ax
        | SUCC_EQ $ _ => ax
+       | NATREC_EQ $ _ => ax
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

@@ -607,6 +607,30 @@ struct
         ] BY mkEvidence SUCC_EQ
       end
 
+    fun NatRecEq (zC, onames) (H >> P) =
+      let
+        val #[rec1, rec2, out] = P ^! EQ
+        val #[n, zero, succ] = rec1 ^! NATREC
+        val #[n', zero', succ'] = rec1 ^! NATREC
+
+        val _ = unify (zC // n) out
+        val (npred, ih) =
+            case onames of
+                NONE =>
+                (Context.fresh (H, Variable.named "n'"),
+                 Context.fresh (H, Variable.named "ih"))
+              | SOME names => names
+        val H' = H @@ (npred, NAT $$ #[]) @@ (ih, zC // (`` npred))
+        val succSubst = (succ // ``npred) // ``ih
+        val succSubst' = (succ' // ``npred) // ``ih
+      in
+        [ H >> EQ $$ #[n, n', NAT $$ #[]]
+        , H >> EQ $$ #[zero, zero', zC // (ZERO $$ #[])]
+        , H' >> EQ $$ #[succSubst, succSubst', zC // (SUCC $$ #[`` npred])]
+        ] BY (fn [N, D, E] => NATREC_EQ $$ #[N, D, npred \\ (ih \\ E)]
+               | _ => raise Refine)
+      end
+
     fun BaseEq (H >> P) =
       let
         val #[M, N, U] = P ^! EQ
