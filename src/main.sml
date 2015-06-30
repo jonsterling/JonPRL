@@ -7,23 +7,11 @@ struct
     | LIST_TACTICS
 
   val listOfTactics =
-    ["intro",
-     "elim",
-     "eq-cd",
-     "ext",
-     "symmetry",
-     "creflexivty",
-     "csymmetry",
-     "step",
-     "cstruct",
-     "assumption",
-     "assert",
-     "mem-cd",
-     "auto",
-     "reduce",
-     "lemma",
-     "unfold",
-     "refine"]
+    ["intro", "elim", "eq-cd", "ext", "symmetry",
+     "creflexivty", "csymmetry", "step", "cstruct",
+     "assumption", "assert", "mem-cd", "auto", "reduce",
+     "lemma", "unfold", "refine", "witness", "hypothesis",
+     "hyp-subst", "id", "fail", "trace", "cum"]
 
   local
     fun go [] = PRINT_DEVELOPMENT
