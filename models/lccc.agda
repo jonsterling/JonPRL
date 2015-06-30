@@ -1,5 +1,11 @@
 module lccc where
 
+-- TODO:
+-- * hyperdoctrine comprehension for 𝒫
+-- * CCC for 𝒫
+-- * Σ, Π, I, W (?) for 𝔉
+-- * define polynomials in terms of 𝔉 adjoints
+
 open import Agda.Primitive
 
 Π : (A : Set) (B : A → Set) → Set
