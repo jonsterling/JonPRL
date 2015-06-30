@@ -151,11 +151,11 @@ Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
 ||| Polynomials (non-indexed)
 
 Operator Polynomial : ().
-Operator base : (0).
+Operator base-space : (0).
 Operator fam : (0).
 
-[Polynomial] =def= [Σ(U{i}; Base. Fam(Base))].
-[base(E)] =def= [fst(E)].
+[Polynomial] =def= [Σ(U{i}; B. Fam(B))].
+[base-space(E)] =def= [fst(E)].
 [fam(E)] =def= [snd(E)].
 
 Theorem Polynomial_wf : [∈(Polynomial; U{i'})] {
@@ -178,12 +178,12 @@ Theorem Embed_wf : [
 
 Operator Ext : (0;0).
 
-[Ext(p;X)] =def= [Σ(base(p); b. ap(Embed(X); Fiber(base(p); fam(p); b)))].
+[Ext(p;X)] =def= [Σ(base-space(p); b. unit)].
 
 Theorem Ext_wf : [
   ∀(Polynomial; p. ∀(U{i}; X. ∈(Ext(p;X); U{i'})))
 ] {
-  unfold <Polynomial Ext Fam base Embed CTT Fiber fam dom map fst snd>; refine <autoR>;
+  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; refine <autoR>;
   unfold <snd>; refine <autoR>
 }.
 
