@@ -63,7 +63,7 @@ struct
   fun take3 (x::y::z::_) = SOME (x,y,z)
     | take3 _ = NONE
 
-  fun list_at (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
+  fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   fun Elim {target, names, term} =
     let
@@ -71,7 +71,7 @@ struct
     in
       (VoidElim THEN Hypothesis target)
         ORELSE UnitElim target
-        ORELSE_LAZY (fn _ => BaseElimEq (target, list_at (names, 0)))
+        ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
@@ -82,7 +82,7 @@ struct
 
   fun EqCD {names, level, terms} =
     let
-      val freshVariable = list_at (names, 0)
+      val freshVariable = listAt (names, 0)
     in
       AxEq
         ORELSE EqEq
@@ -100,15 +100,15 @@ struct
                                       (List.nth (terms, 1),
                                        List.nth (terms, 2),
                                        take3 names))
-        ORELSE_LAZY (fn _ => NatRecEq (List.nth (terms, 0), take2 names))
+        ORELSE NatRecEq (listAt (terms, 0), take2 names)
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable
         ORELSE SubsetEq freshVariable
         ORELSE PairEq (freshVariable, level)
         ORELSE LamEq (freshVariable, level)
-        ORELSE ApEq (list_at (terms, 0))
-        ORELSE SpreadEq (list_at (terms, 0), list_at (terms, 1), take3 names)
+        ORELSE ApEq (listAt (terms, 0))
+        ORELSE SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
         ORELSE SubsetMemberEq (freshVariable, level)
         ORELSE IsectMemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>

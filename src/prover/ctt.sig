@@ -139,7 +139,7 @@ sig
 
     val ZeroEq : tactic
     val SuccEq : tactic
-    val NatRecEq : term * (name * name) option -> tactic
+    val NatRecEq : term option * (name * name) option -> tactic
 
     val BaseEq : tactic
     val BaseIntro : tactic

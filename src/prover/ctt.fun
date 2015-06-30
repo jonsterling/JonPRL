@@ -607,13 +607,17 @@ struct
         ] BY mkEvidence SUCC_EQ
       end
 
-    fun NatRecEq (zC, onames) (H >> P) =
+    fun NatRecEq (ozC, onames) (H >> P) =
       let
-        val #[rec1, rec2, out] = P ^! EQ
+        val #[rec1, rec2, A] = P ^! EQ
         val #[n, zero, succ] = rec1 ^! NATREC
         val #[n', zero', succ'] = rec1 ^! NATREC
 
-        val _ = unify (zC // n) out
+        val zC =
+          case ozC of
+               SOME zC => unify (zC // n) A
+             | NONE => Variable.named "z" \\ A
+
         val (npred, ih) =
             case onames of
                 NONE =>
