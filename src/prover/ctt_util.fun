@@ -6,7 +6,8 @@ functor CttUtil
    structure Ctt : CTT
       where type tactic = Lcf.tactic
       where type conv = Conv.conv
-      where type term = Syntax.t) : CTT_UTIL =
+      where type term = Syntax.t
+      where type name = Syntax.Variable.t) : CTT_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
@@ -40,8 +41,7 @@ struct
      level : Level.t option}
 
   fun Intro {term,rule,freshVariable,level} =
-     MemCD
-       ORELSE UnitIntro
+     UnitIntro
        ORELSE Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
                                 0 => PlusIntroL level
@@ -56,6 +56,7 @@ struct
        ORELSE CEqRefl
        ORELSE CEqStruct
        ORELSE BaseIntro
+       ORELSE MemCD
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -153,6 +154,24 @@ struct
           go n
         end
   end
+
+  local
+    structure Tacticals = Tacticals (Lcf)
+    open Tacticals Sequent
+    infix THENL >>
+  in
+    fun CutLemma (world, lbl) =
+      let
+        val {statement,...} = Ctt.Development.lookupTheorem world lbl
+        val H >> P = statement
+        val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
+        val name = Syntax.Variable.named (Ctt.Development.Telescope.Label.toString lbl)
+      in
+        Assert (P, SOME name)
+          THENL [Lemma (world, lbl), ID]
+      end
+  end
+
 end
 
 structure CttUtil = CttUtil

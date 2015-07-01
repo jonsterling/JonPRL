@@ -1,7 +1,5 @@
 structure CttFrontend =
 struct
-  structure Extract = Extract(Syntax)
-
   val printDevelopment =
     let
       open Development.Telescope.ConsView

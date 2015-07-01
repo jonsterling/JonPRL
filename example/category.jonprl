@@ -109,7 +109,10 @@ Tactic lawcat_unfold {
 }.
 
 Theorem LawCat_wf : [∀(RawCat; RC. ∈(LawCat(RC); U{i}))] {
-  *{refine <lawcat_unfold>; refine <autoR>}.
+  intro @i';
+  [ *{refine <lawcat_unfold>; refine <autoR>}
+  , lemma <RawCat_wf>
+  ]
 }.
 
 Operator Cat : ().
@@ -133,9 +136,10 @@ Theorem InitialRawCat : [RawCat] {
 
 Theorem InitialCat : [Cat] {
   unfold <Cat>;
-  intro [InitialRawCat] @i; unfold <InitialRawCat>;
-  *{refine <lawcat_unfold>; auto; reduce};
-  elim #1; auto.
+  intro [InitialRawCat] @i;
+  unfold <InitialRawCat>;
+  [id, id, cut-lemma <LawCat_wf>; elim #2 [C]];
+  *{refine <lawcat_unfold>; auto; reduce}
 }.
 
 Theorem TerminalRawCat : [RawCat] {

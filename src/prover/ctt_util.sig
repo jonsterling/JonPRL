@@ -29,5 +29,6 @@ sig
   val Ext : ext_args -> tactic
 
   val Reduce : int option -> tactic
+  val CutLemma : Development.world * Development.label -> tactic
 
 end
