@@ -10,7 +10,7 @@ struct
     ["intro", "elim", "eq-cd", "ext", "symmetry",
      "creflexivty", "csymmetry", "step", "cstruct",
      "assumption", "assert", "mem-cd", "auto", "reduce",
-     "lemma", "unfold", "refine", "witness", "hypothesis",
+     "lemma", "cut-lemma", "unfold", "refine", "witness", "hypothesis",
      "hyp-subst", "id", "fail", "trace", "cum"]
 
   local
