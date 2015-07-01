@@ -42,8 +42,7 @@ Theorem plus-commutes : [
   unfold <plus>; intro; [intro, auto]; [id, auto]; elim #1; reduce;
 
   ||| The base case immeidately follows from plus-id-right
-  [(assert [∀(nat; n. =(plus(n; zero); n; nat))];
-    [lemma <plus-id-right>, id];
+  [(cut-lemma <plus-id-right>;
     elim #3 [m]; auto; unfold <plus>;
     hyp-subst → #4 [h.=(m;h;nat)];
     auto),
@@ -51,8 +50,7 @@ Theorem plus-commutes : [
 
   ||| In order to prove this we first rewrite by succ-right from which our
   ||| result follows from reflexivity.
-  assert [∀(nat; n. ∀(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))];
-  [lemma <succ-right>, id];
+  cut-lemma <succ-right>;
   elim #5 [m]; auto; elim #6 [n']; unfold <plus>; auto;
   hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
   auto; eq-cd; auto
