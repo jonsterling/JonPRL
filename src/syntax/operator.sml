@@ -35,6 +35,14 @@ struct
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
+
+  val publicOperators =
+    [UNIV Level.base, VOID, UNIT, AX,
+     PROD, PAIR, SPREAD, FUN, LAM, AP,
+     ISECT, EQ, MEM, SUBSET,
+     PLUS, INL, INR, DECIDE,
+     NAT, ZERO, SUCC, NATREC,
+     CEQUAL, BASE, SO_APPLY]
 end
 
 signature CTT_OPERATOR =
@@ -316,7 +324,7 @@ struct
        | BASE => "base"
        | VOID => "void"
        | UNIT => "unit"
-       | AX => "⬧"
+       | AX => "<>"
        | PROD => "Σ"
        | PAIR => "pair"
        | SPREAD => "spread"
@@ -325,7 +333,7 @@ struct
        | AP => "ap"
        | ISECT => "⋂"
        | EQ => "="
-       | CEQUAL => "~"
+       | CEQUAL => "ceq"
        | MEM => "∈"
        | PLUS => "+"
        | INL => "inl"
