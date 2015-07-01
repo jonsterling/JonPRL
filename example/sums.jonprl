@@ -9,16 +9,16 @@ Tactic constructor {
 }.
 
 Theorem commutative :
-        [∀(U{i}; A.
-         ∀(U{i}; B.
+        [⋂(U{i}; A.
+         ⋂(U{i}; B.
          equiv(+(A; B); +(B; A))))] {
   unfold <equiv>; auto; elim #3; refine <constructor>
 }.
 
 Theorem plus-assoc :
-        [∀(U{i}; A.
-         ∀(U{i}; B.
-         ∀(U{i}; C.
+        [⋂(U{i}; A.
+         ⋂(U{i}; B.
+         ⋂(U{i}; C.
          equiv(+(A; +(B; C)); +(+(A; B); C)))))] {
   unfold <equiv>; auto; elim #4;
   [id; id, elim #5, elim #5, intro #1; intro #1];
@@ -28,13 +28,13 @@ Theorem plus-assoc :
 }.
 
 Theorem void-idr :
-        [∀(U{i}; A.
+        [⋂(U{i}; A.
            equiv(+(A; void); A))] {
   unfold <equiv>; auto; [elim #2, intro #0]; auto.
 }.
 
 Theorem void-idl :
-        [∀(U{i}; A.
+        [⋂(U{i}; A.
            equiv(+(void; A); A))] {
   unfold <equiv>; auto; [elim #2, intro #1]; auto.
 }.

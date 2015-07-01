@@ -394,7 +394,6 @@ struct
          string "Π" return FUN,
          string "λ" return LAM,
          string "ap" return AP,
-         string "∀" return ISECT,
          string "⋂" return ISECT,
          string "=" return EQ,
          string "ceq" return CEQUAL,

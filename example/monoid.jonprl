@@ -14,9 +14,9 @@ Operator Monoid : ().
 [car(M)] =def= [spread(M; x.y.x)].
 [ze(M)] =def= [spread(spread(M; x.y.y); x.y.x)].
 [op(M;X;Y)] =def= [ap(ap(spread(spread(M; x.y.y); x.y.y);X);Y)].
-[LeftUnit(M)] =def= [∀(car(M); m. =(m; op(M; ze(M); m); car(M)))].
-[RightUnit(M)] =def= [∀(car(M); m. =(op(M; ze(M); m); m; car(M)))].
-[Assoc(M)] =def= [∀(car(M); x. ∀(car(M); y. ∀(car(M); z. =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M)))))].
+[LeftUnit(M)] =def= [⋂(car(M); m. =(m; op(M; ze(M); m); car(M)))].
+[RightUnit(M)] =def= [⋂(car(M); m. =(op(M; ze(M); m); m; car(M)))].
+[Assoc(M)] =def= [⋂(car(M); x. ⋂(car(M); y. ⋂(car(M); z. =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M)))))].
 
 [MonoidLaws(M)] =def= [Σ(LeftUnit(M); _. Σ(RightUnit(M); _. Assoc(M)))].
 [Monoid] =def= [subset(MonoidSig; M. MonoidLaws(M))].
@@ -29,7 +29,7 @@ Theorem MonoidSig-wf : [∈(MonoidSig; U{i'})] {
   refine <monoid-sig-unfold>; auto.
 }.
 
-Theorem car-wf : [∀(MonoidSig; M. ∈(car(M); U{i}))] {
+Theorem car-wf : [⋂(MonoidSig; M. ∈(car(M); U{i}))] {
   refine <monoid-sig-unfold>; auto.
 }.
 
@@ -45,19 +45,19 @@ Tactic monoid-simplify {
   *{ refine <monoid-unfold>; reduce; auto }.
 }.
 
-Theorem LeftUnit-wf : [∀(MonoidSig; M. ∈(LeftUnit(M); U{i}))] {
+Theorem LeftUnit-wf : [⋂(MonoidSig; M. ∈(LeftUnit(M); U{i}))] {
   refine <monoid-simplify>.
 }.
 
-Theorem RightUnit-wf : [∀(MonoidSig; M. ∈(RightUnit(M);U{i}))] {
+Theorem RightUnit-wf : [⋂(MonoidSig; M. ∈(RightUnit(M);U{i}))] {
   refine <monoid-simplify>.
 }.
 
-Theorem Assoc-wf : [∀(MonoidSig; M. ∈(Assoc(M); U{i}))] {
+Theorem Assoc-wf : [⋂(MonoidSig; M. ∈(Assoc(M); U{i}))] {
   refine <monoid-simplify>.
 }.
 
-Theorem MonoidLaws-wf : [∀(MonoidSig; M. ∈(MonoidLaws(M); U{i}))] {
+Theorem MonoidLaws-wf : [⋂(MonoidSig; M. ∈(MonoidLaws(M); U{i}))] {
   refine <monoid-simplify>.
 }.
 

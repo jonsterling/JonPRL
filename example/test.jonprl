@@ -45,8 +45,8 @@ Theorem test9 : [=(inl(<>); inl(<>); +(unit; void))] {
   auto
 }.
 
-Theorem test10 : [∀(U{i}; A.
-                  ∀(U{i}; B.
+Theorem test10 : [⋂(U{i}; A.
+                  ⋂(U{i}; B.
                   Π(+(A; B); _. +(B; A))))] {
   auto; elim #3; [intro #1, intro #0]; auto
 }.
@@ -56,7 +56,7 @@ Theorem test11 :
   reduce; auto
 }.
 
-Theorem axiom-of-choice : [∀(U{i}; A. ∀(U{i}; B. ∀(Π(A; _. Π(B; _. U{i})); Q. Π(Π(A; c. Σ(B; b. ap(ap(Q;c);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
+Theorem axiom-of-choice : [⋂(U{i}; A. ⋂(U{i}; B. ⋂(Π(A; _. Π(B; _. U{i})); Q. Π(Π(A; c. Σ(B; b. ap(ap(Q;c);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
   auto; intro [λ(w. spread(ap(φ;w); x.y.x))]; auto;
   elim #4 [a]; auto; reduce;
   hyp-subst ← #7 [h. ap(ap(Q;a); spread(h; x.y.x))]; auto;

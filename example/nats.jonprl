@@ -21,22 +21,22 @@ Tactic t {
   unfold <plus>; auto; elim #1; reduce; auto
 }.
 
-Theorem plus-id-left : [∀(nat; n. =(plus(zero; n); n; nat))] {
+Theorem plus-id-left : [⋂(nat; n. =(plus(zero; n); n; nat))] {
   refine <t>
 }.
 
-Theorem plus-id-right : [∀(nat; n. =(plus(n; zero); n; nat))] {
+Theorem plus-id-right : [⋂(nat; n. =(plus(n; zero); n; nat))] {
   refine <t>
 }.
 
 Theorem succ-right : [
-  ∀(nat; n. ∀(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
+  ⋂(nat; n. ⋂(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
 ] {
   refine <t>
 }.
 
 Theorem plus-commutes : [
-  ∀(nat; n.∀(nat; m. =(plus(n; m); plus(m; n); nat)))
+  ⋂(nat; n.⋂(nat; m. =(plus(n; m); plus(m; n); nat)))
 ] {
   ||| Kick off the induction and do the boring computation thingies.
   unfold <plus>; intro; [intro, auto]; [id, auto]; elim #1; reduce;

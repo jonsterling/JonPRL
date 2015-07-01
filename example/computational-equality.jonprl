@@ -14,17 +14,17 @@ Theorem test3 : [ceq(λ(x.x); λ(x.spread(pair(x;x); x._.x)))] {
 }.
 
 Theorem y-is-fix-point : [
-  ∀(U{i}; A. ∀(Π(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
+  ⋂(U{i}; A. ⋂(Π(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
 ] {
   auto; unfold <Y>; step; auto
 }.
 
 Theorem transitive : [
-  ∀(base; a.
-  ∀(base; b.
-  ∀(base; c.
-  ∀(=(a; b; base); _.
-  ∀(=(b; c; base); _.
+  ⋂(base; a.
+  ⋂(base; b.
+  ⋂(base; c.
+  ⋂(=(a; b; base); _.
+  ⋂(=(b; c; base); _.
   =(a; c; base))))))
 ] {
   auto;
