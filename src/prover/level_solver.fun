@@ -25,14 +25,13 @@ struct
           end
       | go H (x \ E, y \ F) R = go (insert H x y) (out E, out F) R
       | go H (O1 $ ES1, O2 $ ES2) R =
-          (case (getLevelParameter O1, getLevelParameter O2) of
+        if Operator.eq (O1, O2) then
+            case (getLevelParameter O1, getLevelParameter O2) of
                 (SOME k, SOME l) => goes H (ES1, ES2) (Level.unify (k,l) :: R)
-              | (NONE, NONE) =>
-                  if Operator.eq (O1, O2) then
-                    goes H (ES1, ES2) R
-                  else
-                    raise LevelSolver
-              | _ => raise LevelSolver)
+              | (NONE, NONE) => goes H (ES1, ES2) R
+              | _ => raise LevelSolver
+        else
+            raise LevelSolver
       | go _ _ _ = raise LevelSolver
     and goes H (xs, ys) R =
           let
