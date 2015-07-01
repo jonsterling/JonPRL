@@ -44,7 +44,7 @@ struct
     val i'''' = Level.succ i'''
   in
     val publicOperators =
-      [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i''''
+      [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i'''',
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD, FUN, LAM, AP,
        ISECT, EQ, MEM, SUBSET,
