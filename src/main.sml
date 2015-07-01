@@ -7,11 +7,31 @@ struct
     | LIST_TACTICS
 
   val listOfTactics =
-    ["intro", "elim", "eq-cd", "ext", "symmetry",
-     "creflexivty", "csymmetry", "step", "cstruct",
-     "assumption", "assert", "mem-cd", "auto", "reduce",
-     "lemma", "cut-lemma", "unfold", "refine", "witness", "hypothesis",
-     "hyp-subst", "id", "fail", "trace", "cum"]
+    ["intro [TERM]? #NUM? <NAME*>?",
+     "elim #NUM [TERM]? <NAME*>?",
+     "eq-cd [TERM*]? <NAME*>? @LEVEL?",
+     "ext <NAME>? @LEVEL?",
+     "symmetry",
+     "creflexivty",
+     "csymmetry",
+     "step",
+     "cstruct",
+     "assumption",
+     "assert [TERM] <NAME>?",
+     "mem-cd",
+     "auto",
+     "reduce NUM?",
+     "lemma <NAME>",
+     "cut-lemma <NAME>",
+     "unfold <(NAME @NUM)+>",
+     "refine <NAME>",
+     "witness [TERM]",
+     "hypothesis #NUM",
+     "hyp-subst (←|→) #NUM [TERM] @NUM?",
+     "id",
+     "fail",
+     "trace \"MESSAGE\"",
+     "cum @NUM?"]
 
   local
     fun go [] = PRINT_DEVELOPMENT
