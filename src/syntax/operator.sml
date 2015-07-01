@@ -36,13 +36,22 @@ struct
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
 
-  val publicOperators =
-    [UNIV Level.base, VOID, UNIT, AX,
-     PROD, PAIR, SPREAD, FUN, LAM, AP,
-     ISECT, EQ, MEM, SUBSET,
-     PLUS, INL, INR, DECIDE,
-     NAT, ZERO, SUCC, NATREC,
-     CEQUAL, BASE, SO_APPLY]
+  local
+    val i = Level.base
+    val i' = Level.succ i
+    val i'' = Level.succ i'
+    val i''' = Level.succ i''
+    val i'''' = Level.succ i'''
+  in
+    val publicOperators =
+      [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i''''
+       VOID, UNIT, AX,
+       PROD, PAIR, SPREAD, FUN, LAM, AP,
+       ISECT, EQ, MEM, SUBSET,
+       PLUS, INL, INR, DECIDE,
+       NAT, ZERO, SUCC, NATREC,
+       CEQUAL, BASE, SO_APPLY]
+  end
 end
 
 signature CTT_OPERATOR =
