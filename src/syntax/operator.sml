@@ -17,7 +17,7 @@ struct
 
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
-    | CEQUAL_SUBST | CEQUAL_STRUCT of int Vector.vector
+    | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
