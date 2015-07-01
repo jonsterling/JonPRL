@@ -77,6 +77,8 @@ struct
       fun go Empty bind = bind
         | go (Snoc (rest, lbl, Object.Operator {arity, ...})) bind =
           go (out rest) ((lbl, arity) :: bind)
+        | go (Snoc (rest, lbl, Object.Theorem {...})) bind =
+          go (out rest) ((lbl, #[]) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
@@ -154,6 +156,13 @@ struct
          Object.Theorem {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
+  fun lookupExtract T lbl =
+    let
+      val {evidence,...} = lookupTheorem T lbl
+    in
+      Extract.extract (Susp.force evidence)
+    end
+
   fun lookupTactic T lbl =
     case Telescope.lookup T lbl of
          Object.Tactic tac => tac
@@ -162,6 +171,7 @@ struct
   fun lookupOperator T lbl =
     case Telescope.lookup T lbl of
          Object.Operator {arity,...} => arity
+       | Object.Theorem {...} => #[]
        | _ => raise Subscript
 end
 

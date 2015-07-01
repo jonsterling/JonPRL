@@ -10,8 +10,8 @@ Theorem minus-one : [Π(nat; _. nat)] {
   ]; auto
 }.
 
-Theorem natrec-test : [=(natrec(succ(succ(zero)); zero; n. ih. n); succ(zero); nat)] {
-  reduce; auto
+Theorem minus-one-test : [=(ap(minus-one; succ(succ(zero))); succ(zero); nat)] {
+  unfold <minus-one>; reduce; auto
 }.
 
 Operator plus : (0;0).

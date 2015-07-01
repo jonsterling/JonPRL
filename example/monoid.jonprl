@@ -64,3 +64,26 @@ Theorem MonoidLaws-wf : [∀(MonoidSig; M. ∈(MonoidLaws(M); U{i}))] {
 Theorem Monoid-wf : [∈(Monoid; U{i'})] {
   refine <monoid-simplify>.
 }.
+
+Theorem UnitMonoidStruct : [MonoidSig] {
+  unfold <MonoidSig>;
+  intro [unit]; auto;
+  intro [<>] ; auto.
+}.
+
+Theorem UnitMonoid : [Monoid] {
+  unfold <Monoid>;
+  intro [UnitMonoidStruct] @i; unfold <UnitMonoidStruct>;
+  refine <monoid-simplify>;
+  elim #1; auto.
+}.
+
+Theorem UnitMonoid-LeftUnit : [LeftUnit(UnitMonoidStruct)] {
+  unfold <UnitMonoidStruct>;
+  refine <monoid-simplify>; elim #1; auto.
+}.
+
+Theorem UnitMonoid-RightUnit : [RightUnit(UnitMonoidStruct)] {
+  unfold <UnitMonoidStruct>;
+  refine <monoid-simplify>; elim #1; auto.
+}.

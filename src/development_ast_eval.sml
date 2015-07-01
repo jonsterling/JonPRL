@@ -18,7 +18,8 @@ struct
                                Sequent.>> (Sequent.Context.empty, term),
                                TacticEval.eval D tac)
         end
-      | OPERATOR (lbl, arity) => D
+      | OPERATOR (lbl, arity) =>
+        Development.declareOperator D (lbl, arity)
       | TACTIC (lbl, tac) =>
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>

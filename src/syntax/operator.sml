@@ -115,7 +115,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
-    | eq (SO_APPLY,SO_APPLY) = true
+    | eq (SO_APPLY, SO_APPLY) = true
     | eq (PLUS_EQ, PLUS_EQ) = true
     | eq (PLUS_INTROL, PLUS_INTROL) = true
     | eq (PLUS_INTROR, PLUS_INTROR) = true
@@ -350,12 +350,12 @@ struct
     val parseInt =
       repeat1 digit wth valOf o Int.fromString o String.implode
 
-    fun angles p =
-      middle (string "<") p (string ">")
-        || middle (string "〈") p  (string "〉")
+    fun braces p = middle (string "{") p (string "}")
 
     val parseUniv : t charParser =
-      string "U" >> middle (string "{") Level.parse (string "}") wth UNIV
+      string "U"
+        >> braces Level.parse
+        wth UNIV
 
     fun choices xs =
       foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
@@ -397,6 +397,6 @@ struct
 
     fun parseOperator lookup =
       intensionalParseOperator lookup
-        || extensionalParseOperator
+      || extensionalParseOperator
   end
 end

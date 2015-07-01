@@ -994,17 +994,32 @@ struct
        structure Abt = Syntax
        structure Sequent = Sequent)
 
-    fun Unfolds (development, lbls) (H >> P) =
+    local
+      open Conversionals
+      infix CTHEN
+
+      fun convTheorem lbl world M =
+        case out M of
+            CUSTOM {label,...} $ _ =>
+            if Development.Telescope.Label.eq (label, lbl) then
+                Development.lookupExtract world lbl
+            else
+                raise Conv.Conv
+          | _ => raise Conv.Conv
+
+      fun convLabel lbl world =
+        Development.lookupDefinition world lbl
+          handle Subscript => convTheorem lbl world
+    in
+    fun Unfolds (world, lbls) (H >> P) =
       let
-        open Conversionals
-        infix CTHEN
         val conv =
           foldl (fn ((lbl, ok), acc) =>
             let
               val k = case ok of SOME k => k | NONE => Level.base
               val conv =
                 LevelSolver.subst (LevelSolver.Level.yank k)
-                  o CDEEP (Development.lookupDefinition development lbl)
+                  o CDEEP (convLabel lbl world)
             in
               acc CTHEN conv
             end) CID lbls
@@ -1013,10 +1028,11 @@ struct
         ] BY (fn [D] => D
                | _ => raise Refine)
       end
+    end
 
-    fun Lemma (development, lbl) (H >> P) =
+    fun Lemma (world, lbl) (H >> P) =
       let
-        val {statement, evidence} = Development.lookupTheorem development lbl
+        val {statement, evidence} = Development.lookupTheorem world lbl
         val H' >> P' = statement
         val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
         val substitution = LevelSolver.Level.resolve constraints

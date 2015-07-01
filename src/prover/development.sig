@@ -51,6 +51,7 @@ sig
 
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
+  val lookupExtract : world -> label -> term
 
   (* lookup a custom tactic *)
   val lookupTactic : world -> label -> tactic

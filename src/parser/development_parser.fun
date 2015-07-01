@@ -59,7 +59,7 @@ struct
       && parseTm [] w
       && braces (!! (TacticScript.parse w))
       wth (fn (thm, (M, (tac, pos))) =>
-             (w, DevelopmentAst.THEOREM
+             (declareOperator w (thm, #[]), DevelopmentAst.THEOREM
                (thm, M, Tactic.COMPLETE (tac, {name = "COMPLETE", pos = pos}))))
 
   val parseInt =
