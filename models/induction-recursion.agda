@@ -54,15 +54,6 @@ syntax cont S (λ s → P) = s ∶ S ◃ P
 
 {-# NO_TERMINATION_CHECK #-}
 mutual
-  -- A fan on an IR code is the least fixpoint of the code's extension
-  data Fan {I : Set} (c : IR I I) : Set where
-    sup : dom (⟦ c ⟧ (Fan c) ↓ fan-idx) → Fan c
-
-  fan-idx : ∀ {I} {c : IR I I} → Fan c → I
-  fan-idx {c = c} (sup x) = π (⟦ c ⟧ (Fan c) ↓ fan-idx) x
-
-{-# NO_TERMINATION_CHECK #-}
-mutual
   -- A spread on an IR code is the greatest fixpoint of the code's extension
   data Spread {I : Set} (c : IR I I) : Set where
     inf : ∞ dom (⟦ c ⟧ Spread c ↓ spread-idx) → Spread c
@@ -74,27 +65,8 @@ mutual
 NatC : IR Unit Unit
 NatC = b ∶ 𝔹 ◃ So b
 
-ℕ = Fan NatC
-
-ze : ℕ
-ze = sup (ff , absurd , ⟨⟩)
-
-su : ℕ → ℕ
-su n = sup (tt , (λ _ → n) , ⟨⟩)
-
 ℕ∞ = Spread NatC
 
 infinity : ℕ∞
 infinity = inf (♯ (tt , (λ _ → infinity) , ⟨⟩))
 
-ChoiceSequence : Set
-ChoiceSequence = Spread (_ ∶ ℕ ◃ Unit)
-
-ones : ChoiceSequence
-ones = inf (♯ (su ze , (λ _ → ones) , ⟨⟩))
-
-nats : ChoiceSequence
-nats = go ze
-  where
-    go : ℕ → ChoiceSequence
-    go i = inf (♯ (i , (λ _ → go (su i)) , ⟨⟩))
