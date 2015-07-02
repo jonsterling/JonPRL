@@ -19,7 +19,7 @@ struct
      "assumption",
      "assert [TERM] <NAME>?",
      "mem-cd",
-     "auto",
+     "auto NUM?",
      "reduce NUM?",
      "lemma <NAME>",
      "cut-lemma <NAME>",

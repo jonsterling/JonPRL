@@ -22,6 +22,7 @@ struct
 
   type intro_args =
     {term : term option,
+     invertible : bool,
      rule : int option,
      freshVariable : name option,
      level : Level.t option}
@@ -33,6 +34,7 @@ struct
 
   type eq_cd_args =
     {names : name list,
+     invertible : bool,
      level : Level.t option,
      terms : term list}
 
@@ -40,7 +42,7 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
-  fun Intro {term,rule,freshVariable,level} =
+  fun Intro {term,rule,invertible,freshVariable,level} =
      UnitIntro
        ORELSE Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
@@ -54,9 +56,13 @@ struct
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
        ORELSE CEqRefl
-       ORELSE CEqStruct
        ORELSE BaseIntro
        ORELSE MemCD
+       ORELSE
+       (if not invertible then
+            CEqStruct
+        else
+            FAIL)
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -81,7 +87,7 @@ struct
         ORELSE SubsetElim (target, twoNames)
     end
 
-  fun EqCD {names, level, terms} =
+  fun EqCD {names, level, invertible, terms} =
     let
       val freshVariable = listAt (names, 0)
     in
@@ -97,19 +103,12 @@ struct
         ORELSE InrEq level
         ORELSE BaseEq
         ORELSE BaseMemberEq
-        ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
-                                      (List.nth (terms, 1),
-                                       List.nth (terms, 2),
-                                       take3 names))
-        ORELSE NatRecEq (listAt (terms, 0), take2 names)
         ORELSE FunEq freshVariable
         ORELSE IsectEq freshVariable
         ORELSE ProdEq freshVariable
         ORELSE SubsetEq freshVariable
         ORELSE PairEq (freshVariable, level)
         ORELSE LamEq (freshVariable, level)
-        ORELSE ApEq (listAt (terms, 0))
-        ORELSE SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
         ORELSE SubsetMemberEq (freshVariable, level)
         ORELSE IsectMemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
@@ -122,18 +121,43 @@ struct
         ORELSE SuccEq
         ORELSE Cum level
         ORELSE EqInSupertype
+        ORELSE
+        (if not invertible then
+             NatRecEq (listAt (terms, 0), take2 names)
+               ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
+                                             (List.nth (terms, 1),
+                                              List.nth (terms, 2),
+                                              take3 names))
+               ORELSE SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
+               ORELSE ApEq (listAt (terms, 0))
+         else
+             FAIL)
+
     end
 
   fun Ext {freshVariable, level} =
     FunExt (freshVariable, level)
 
   local
-    val AutoEqCD =
-      EqCD {names = [], level = NONE, terms = []}
+    val InvAutoEqCD = EqCD {names = [],
+                            level = NONE,
+                            invertible = true,
+                            terms = []}
+    val AutoEqCD = EqCD {names = [],
+                         level = NONE,
+                         invertible = false,
+                         terms = []}
 
     val AutoVoidElim = VoidElim THEN Assumption
+
+    val InvAutoIntro = Intro {term = NONE,
+                              rule = NONE,
+                              invertible = true,
+                              freshVariable = NONE,
+                              level = NONE}
     val AutoIntro = Intro {term = NONE,
                            rule = NONE,
+                           invertible = false,
                            freshVariable = NONE,
                            level = NONE}
 
@@ -142,8 +166,13 @@ struct
 
     val DeepReduce = RewriteGoal (CDEEP Step)
   in
-    val Auto =
-      LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
+    fun FinAuto 0 = LIMIT (InvAutoIntro ORELSE AutoVoidElim ORELSE InvAutoEqCD)
+      | FinAuto n = FinAuto 0 THEN (AutoIntro ORELSE AutoEqCD) THEN FinAuto (n - 1)
+
+    val InfAuto = LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
+
+    fun Auto NONE = InfAuto
+      | Auto (SOME n) = FinAuto n
 
     fun Reduce NONE = LIMIT DeepReduce
       | Reduce (SOME n) =
