@@ -1,11 +1,12 @@
 signature CTT_UTIL =
 sig
   include CTT
-  val Auto : tactic
+  val Auto : int option -> tactic
 
   type intro_args =
     {term : term option,
      rule : int option,
+     invertible : bool,
      freshVariable : name option,
      level : Level.t option}
 
@@ -17,6 +18,7 @@ sig
   type eq_cd_args =
     {names : name list,
      level : Level.t option,
+     invertible : bool,
      terms : term list}
 
   type ext_args =

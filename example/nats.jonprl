@@ -18,7 +18,7 @@ Operator plus : (0;0).
 [plus(M; N)] =def= [natrec(M; N; _.n.succ(n))].
 
 Tactic t {
-  unfold <plus>; auto; elim #1; reduce; auto
+  unfold <plus>; auto 0; elim #1; reduce; auto 0.
 }.
 
 Theorem plus-id-left : [⋂(nat; n. =(plus(zero; n); n; nat))] {
@@ -39,7 +39,7 @@ Theorem plus-commutes : [
   ⋂(nat; n.⋂(nat; m. =(plus(n; m); plus(m; n); nat)))
 ] {
   ||| Kick off the induction and do the boring computation thingies.
-  unfold <plus>; intro; [intro, auto]; [id, auto]; elim #1; reduce;
+  refine <t>;
 
   ||| The base case immeidately follows from plus-id-right
   [(cut-lemma <plus-id-right>;

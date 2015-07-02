@@ -30,16 +30,20 @@ struct
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (CttUtil.Intro {term = term,
                              rule = rule,
+                             invertible = false,
                              freshVariable = freshVariable,
                              level = level})
       | ELIM ({target, term, names}, a) =>
         an a (CttUtil.Elim {target = target, term = term, names = names})
       | EQ_CD ({names, terms, level}, a) =>
-        an a (CttUtil.EqCD {names = names, terms = terms, level = level})
+        an a (CttUtil.EqCD {names = names,
+                            invertible = false,
+                            terms = terms,
+                            level = level})
       | EXT ({freshVariable, level}, a) =>
         an a (CttUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
-      | AUTO a => an a CttUtil.Auto
+      | AUTO (oi, a) => an a (CttUtil.Auto oi)
       | REDUCE (i, a) => an a (CttUtil.Reduce i)
       | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption

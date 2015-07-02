@@ -205,8 +205,8 @@ struct
       wth (fn name => fn pos => MEM_CD {name = name, pos = pos})
 
   val parseAuto : tactic_parser =
-    fn w => symbol "auto"
-      wth (fn name => fn pos => AUTO {name = name, pos = pos})
+    fn w => symbol "auto" && opt parseInt
+      wth (fn (name, oi) => fn pos => AUTO (oi, {name = name, pos = pos}))
 
   val parseReduce : tactic_parser =
     fn w => symbol "reduce"
