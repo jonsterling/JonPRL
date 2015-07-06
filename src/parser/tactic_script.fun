@@ -33,7 +33,7 @@ struct
               TRACE (msg, {name = name, pos = pos}))
 
   fun parseScript w () : tactic charParser =
-    separate1 ((squares (commaSep ($ (parseScript w))) wth Sum.INR)
+    separate ((squares (commaSep ($ (parseScript w))) wth Sum.INR)
                    <|> ($ (plain w) wth Sum.INL)) semi
     wth THEN
 
