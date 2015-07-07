@@ -52,9 +52,13 @@ sig
       | TRY of t
       | LIMIT of t
       | ORELSE of t list * meta
-      | THEN of (t, t list) Sum.sum list
+      | THEN of then_tactic list
       | ID of meta
       | FAIL of meta
       | TRACE of string * meta
       | COMPLETE of t * meta
+    and then_tactic =
+        APPLY of t
+      | LIST of t list
+      | FOCUS of int * t
 end

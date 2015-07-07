@@ -31,7 +31,8 @@ struct
      "id",
      "fail",
      "trace \"MESSAGE\"",
-     "cum @NUM?"]
+     "cum @NUM?",
+     "focus NUM #{TACTIC}"]
 
   local
     fun go [] = PRINT_DEVELOPMENT
