@@ -60,8 +60,9 @@ struct
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
       | THEN ts =>
         List.foldl
-          (fn (Sum.INL x, rest) => T.THEN (rest, (eval wld) x)
-            | (Sum.INR xs, rest) => T.THENL (rest, map (eval wld) xs))
+          (fn (APPLY x, rest) => T.THEN (rest, eval wld x)
+            | (LIST xs, rest) => T.THENL (rest, map (eval wld) xs)
+            | (FOCUS (i, x), rest) => T.THENF (rest, i, eval wld x))
           T.ID
           ts
       | ID a => an a T.ID

@@ -42,11 +42,12 @@ Theorem plus-commutes : [
   refine <t>;
 
   ||| The base case immeidately follows from plus-id-right
-  [(cut-lemma <plus-id-right>;
+  focus 0 #{
+    cut-lemma <plus-id-right>;
     elim #3 [m]; auto; unfold <plus>;
     hyp-subst → #4 [h.=(m;h;nat)];
-    auto),
-   id];
+    auto
+  };
 
   ||| In order to prove this we first rewrite by succ-right from which our
   ||| result follows from reflexivity.

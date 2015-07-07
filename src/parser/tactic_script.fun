@@ -19,6 +19,9 @@ struct
 
   val pipe = symbol "|"
 
+  val parseInt =
+    repeat1 digit wth valOf o Int.fromString o String.implode
+
   val parseId : tactic charParser =
     !! (symbol "id") wth (fn (name, pos) =>
       ID {name = name, pos = pos})
@@ -33,8 +36,9 @@ struct
               TRACE (msg, {name = name, pos = pos}))
 
   fun parseScript w () : tactic charParser =
-    separate ((squares (commaSep ($ (parseScript w))) wth Sum.INR)
-                   <|> ($ (plain w) wth Sum.INL)) semi
+    separate ((squares (commaSep ($ (parseScript w))) wth LIST)
+                   <|> ($ (plain w) wth APPLY)
+                   <|> $ (parseFocus w) wth FOCUS) semi
     wth THEN
 
   and plain w () =
@@ -46,6 +50,11 @@ struct
       || parseId
       || parseFail
       || parseTrace
+
+  and parseFocus w () =
+      symbol "focus" && parseInt &&
+      whiteSpace >> middle (symbol "#{") ($ (parseScript w)) (symbol "}")
+      wth (fn (_, (i, t)) => (i, t))
 
   and parseTry w () =
     middle (symbol "?{") ($ (parseScript w)) (symbol "}")
