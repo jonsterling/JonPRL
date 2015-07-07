@@ -52,8 +52,8 @@ struct
       || parseTrace
 
   and parseFocus w () =
-      symbol "focus" && parseInt
-      && middle (symbol "#{") ($ (parseScript w)) (symbol "}")
+      symbol "focus" && parseInt &&
+      whiteSpace >> middle (symbol "#{") ($ (parseScript w)) (symbol "}")
       wth (fn (_, (i, t)) => (i, t))
 
   and parseTry w () =
