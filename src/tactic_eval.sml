@@ -19,12 +19,12 @@ struct
         an a (Development.lookupTactic wld lbl)
       | WITNESS (t, a) => an a (Witness t)
       | HYPOTHESIS (i, a) => an a (Hypothesis i)
-      | EQ_SUBST ({left, right, level}, a) =>
-        an a (EqSubst (left, right, level))
+      | EQ_SUBST ({equality, domain, level}, a) =>
+        an a (EqSubst (equality, domain, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
         an a (HypEqSubst (dir, index, domain, level))
-      | CEQ_SUBST ({left, right}, a) =>
-        an a (CEqSubst (left, right))
+      | CEQ_SUBST ({equality, domain}, a) =>
+        an a (CEqSubst (equality, domain))
       | CHYP_SUBST ({dir, index, domain}, a) =>
         an a (HypCEqSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>

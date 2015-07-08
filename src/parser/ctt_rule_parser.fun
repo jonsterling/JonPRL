@@ -67,7 +67,7 @@ struct
     fn w => symbol "subst"
       && parseTm w && parseTm w && opt parseLevel
       wth (fn (name, (M, (N, k))) => fn pos =>
-              EQ_SUBST ({left = M, right = N, level = k},
+              EQ_SUBST ({equality = M, domain = N, level = k},
                         {name = name, pos = pos}))
 
   val parseDir =
@@ -91,7 +91,7 @@ struct
     fn w => symbol "csubst"
       && parseTm w && parseTm w
       wth (fn (name, (M, N)) => fn pos =>
-              CEQ_SUBST ({left = M, right = N},
+              CEQ_SUBST ({equality = M, domain = N},
                          {name = name, pos = pos}))
 
   val parseCHypSubst : tactic_parser =
