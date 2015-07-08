@@ -1,10 +1,10 @@
 Operator Top : ().
-[Top] =def= [⋂(void; _. void)].
+[Top] =def= [isect(void; _. void)].
 
-Theorem anything-in-top : [⋂(base; E. ∈(E; Top))] {
+Theorem anything-in-top : [isect(base; E. member(E; Top))] {
   unfold <Top>; auto
 }.
 
-Theorem top-singleton : [⋂(Top; E. ⋂(Top; F. =(E; F; Top)))] {
+Theorem top-singleton : [isect(Top; E. isect(Top; F. =(E; F; Top)))] {
   unfold <Top>; auto
 }.

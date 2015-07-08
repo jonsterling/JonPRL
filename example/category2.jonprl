@@ -1,8 +1,8 @@
 Operator Fn : (0;0).
-[Fn(A;B)] =def= [Π(A; _. B)].
+[Fn(A;B)] =def= [fun(A; _. B)].
 
 Operator Prod : (0;0).
-[Prod(A;B)] =def= [Σ(A; _. B)].
+[Prod(A;B)] =def= [prod(A; _. B)].
 
 Operator fst : (0).
 Operator snd : (0).
@@ -13,12 +13,12 @@ Operator snd : (0).
 Operator RawCat : ().
 
 [RawCat] =def= [
-  Σ(U{i}; Obj.
-  Σ(U{i}; Arr.
-  Σ(Fn(Arr;Obj); Src.
-  Σ(Fn(Arr;Obj); Trg.
-  Σ(Π(Obj; X. subset(Arr; f. Prod(=(ap(Src;f);X;Obj); =(ap(Trg;f);X;Obj)))); Idn.
-  Π(Arr; f. Π(subset(Arr; g. =(ap(Src;g);ap(Trg;f);Obj)); g. subset(Arr; fg. =(ap(Src;fg);ap(Trg;g);Obj))))
+  prod(U{i}; Obj.
+  prod(U{i}; Arr.
+  prod(Fn(Arr;Obj); Src.
+  prod(Fn(Arr;Obj); Trg.
+  prod(fun(Obj; X. subset(Arr; f. Prod(=(ap(Src;f);X;Obj); =(ap(Trg;f);X;Obj)))); Idn.
+  fun(Arr; f. fun(subset(Arr; g. =(ap(Src;g);ap(Trg;f);Obj)); g. subset(Arr; fg. =(ap(Src;fg);ap(Trg;g);Obj))))
 )))))
 ].
 
@@ -42,27 +42,27 @@ Tactic rawcat-unfold {
   *{unfold <RawCat Fn Prod obj arr src trg hom idn seq fst snd>}
 }.
 
-Theorem obj-wf : [⋂(RawCat; C. ∈(obj(C); U{i}))] {
+Theorem obj-wf : [isect(RawCat; C. member(obj(C); U{i}))] {
   refine <rawcat-unfold>; auto
 }.
 
-Theorem arr-wf : [⋂(RawCat; C. ∈(arr(C); U{i}))] {
+Theorem arr-wf : [isect(RawCat; C. member(arr(C); U{i}))] {
   refine <rawcat-unfold>; auto
 }.
 
-Theorem src-wf : [⋂(RawCat; C. ⋂(arr(C); f. ∈(src(C;f); obj(C))))] {
+Theorem src-wf : [isect(RawCat; C. isect(arr(C); f. member(src(C;f); obj(C))))] {
   refine <rawcat-unfold>; auto
 }.
 
-Theorem trg-wf : [⋂(RawCat; C. ⋂(arr(C); f. ∈(trg(C;f); obj(C))))] {
+Theorem trg-wf : [isect(RawCat; C. isect(arr(C); f. member(trg(C;f); obj(C))))] {
   refine <rawcat-unfold>; auto
 }.
 
-Theorem hom-wf : [⋂(RawCat; C. ⋂(obj(C); X. ⋂(obj(C); Y. ∈(hom(C;X;Y); U{i}))))] {
+Theorem hom-wf : [isect(RawCat; C. isect(obj(C); X. isect(obj(C); Y. member(hom(C;X;Y); U{i}))))] {
   refine <rawcat-unfold>; auto
 }.
 
-Theorem RawCat-wf : [∈(RawCat; U{i'})] {
+Theorem RawCat-wf : [member(RawCat; U{i'})] {
   refine <rawcat-unfold>; auto;
 }.
 
@@ -70,5 +70,5 @@ Theorem InitialRawCat : [RawCat] {
   refine <rawcat-unfold>;
   intro [void]; auto;
   intro [void]; auto;
-  *{intro [λ(x.welp)]; auto}.
+  *{intro [lam(x.welp)]; auto}.
 }.

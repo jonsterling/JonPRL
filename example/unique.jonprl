@@ -4,24 +4,24 @@
 
 Operator unique : (0;1).
 [unique(A; B)] =def= [
-  Σ(A; x. subset(so_apply(B;x); _. ⋂(A; y. ⋂(so_apply(B;y); _. =(x;y;A)))))
+  prod(A; x. subset(so_apply(B;x); _. isect(A; y. isect(so_apply(B;y); _. =(x;y;A)))))
 ].
 
 ||| unique inhabitation
 Operator isContr : (0).
-[isContr(A)] =def= [subset(A; x. ⋂(A; y. =(x; y; A)))].
+[isContr(A)] =def= [subset(A; x. isect(A; y. =(x; y; A)))].
 
 ||| There is just one function void ⇒ A for any A.
-Theorem abort-unique : [⋂(U{i}; A. unique(Π(void; _. A); _. unit))] {
+Theorem abort-unique : [isect(U{i}; A. unique(fun(void; _. A); _. unit))] {
   unfold <unique>; auto;
-  intro [λ(x. x)]; auto;
+  intro [lam(x. x)]; auto;
   ext; auto
 }.
 
 ||| using isContr: the realizer is just the unique function (the uniqueness
 ||| proof is just in the derivation)
-Theorem void-fun-contr : [⋂(U{i}; A. isContr(Π(void; _. A)))] {
+Theorem void-fun-contr : [isect(U{i}; A. isContr(fun(void; _. A)))] {
   unfold <isContr>; auto;
-  intro [λ(x. x)]; auto;
+  intro [lam(x. x)]; auto;
   ext; auto
 }.

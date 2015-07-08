@@ -2,7 +2,7 @@ Theorem natp-example : [nat] {
   witness [succ(zero)]; auto
 }.
 
-Theorem minus-one : [Π(nat; _. nat)] {
+Theorem minus-one : [fun(nat; _. nat)] {
   intro <n>; [id, auto];
   elim #1;
   [ witness [zero]
@@ -21,22 +21,22 @@ Tactic t {
   unfold <plus>; auto 0; elim #1; reduce; auto 0.
 }.
 
-Theorem plus-id-left : [⋂(nat; n. =(plus(zero; n); n; nat))] {
+Theorem plus-id-left : [isect(nat; n. =(plus(zero; n); n; nat))] {
   refine <t>
 }.
 
-Theorem plus-id-right : [⋂(nat; n. =(plus(n; zero); n; nat))] {
+Theorem plus-id-right : [isect(nat; n. =(plus(n; zero); n; nat))] {
   refine <t>
 }.
 
 Theorem succ-right : [
-  ⋂(nat; n. ⋂(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
+  isect(nat; n. isect(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
 ] {
   refine <t>
 }.
 
 Theorem plus-commutes : [
-  ⋂(nat; n.⋂(nat; m. =(plus(n; m); plus(m; n); nat)))
+  isect(nat; n.isect(nat; m. =(plus(n; m); plus(m; n); nat)))
 ] {
   ||| Kick off the induction and do the boring computation thingies.
   refine <t>;

@@ -5,13 +5,13 @@ Operator idn : (0;0).
 Operator cmp : (0;0;0;0;0;0).
 
 [RawCat] =def= [
-  Σ(U{i}; Obj.
-  Σ(Π(Obj; A. Π(Obj; B. U{i})); Hom.
-  Σ(Π(Obj; A.
+  prod(U{i}; Obj.
+  prod(fun(Obj; A. fun(Obj; B. U{i})); Hom.
+  prod(fun(Obj; A.
     ap(ap(Hom; A); A)); Idn.
-  Σ(Π(Obj; A. Π(Obj; B. Π(Obj; C.
-    Π(ap(ap(Hom; B); C); g.
-    Π(ap(ap(Hom; A); B); f.
+  prod(fun(Obj; A. fun(Obj; B. fun(Obj; C.
+    fun(ap(ap(Hom; B); C); g.
+    fun(ap(ap(Hom; A); B); f.
       ap(ap(Hom; A); C)))))); Cmp.
   unit))))
 ].
@@ -29,86 +29,86 @@ Tactic autoR {
   reduce; *{auto; reduce}.
 }.
 
-Theorem RawCat_wf : [∈(RawCat; U{i'})] {
+Theorem RawCat_wf : [member(RawCat; U{i'})] {
   refine <rawcat_unfold>; auto.
 }.
 
 
-Theorem obj_wf : [⋂(RawCat; RC. ∈(obj(RC); U{i}))] {
+Theorem obj_wf : [isect(RawCat; RC. member(obj(RC); U{i}))] {
   refine <rawcat_unfold>; auto.
 }.
 
 Theorem hom_wf : [
-  ⋂(RawCat; RC.
-  ⋂(obj(RC); A.
-  ⋂(obj(RC); B.
-    ∈(hom(RC;A;B); U{i}))))
+  isect(RawCat; RC.
+  isect(obj(RC); A.
+  isect(obj(RC); B.
+    member(hom(RC;A;B); U{i}))))
 ] {
   refine <rawcat_unfold>; refine <autoR>.
 }.
 
 Theorem idn_wf : [
-  ⋂(RawCat; RC.
-  ⋂(obj(RC); A.
-    ∈(idn(RC;A); hom(RC;A;A))))
+  isect(RawCat; RC.
+  isect(obj(RC); A.
+    member(idn(RC;A); hom(RC;A;A))))
 ] {
   refine <rawcat_unfold>; refine <autoR>.
 }.
 
 Theorem cmp_wf : [
-  ⋂(RawCat; RC.
-  ⋂(obj(RC); X.
-  ⋂(obj(RC); Y.
-  ⋂(obj(RC); Z.
-  ⋂(hom(RC; Y; Z); f.
-  ⋂(hom(RC; X; Y); g.
-    ∈(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))))))))
+  isect(RawCat; RC.
+  isect(obj(RC); X.
+  isect(obj(RC); Y.
+  isect(obj(RC); Z.
+  isect(hom(RC; Y; Z); f.
+  isect(hom(RC; X; Y); g.
+    member(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))))))))
 ] {
   refine <rawcat_unfold>; refine <autoR>.
 }.
 
 Operator LeftIdentity : (0).
-[LeftIdentity(C)] =def= [⋂(obj(C); A. ⋂(obj(C); B. ⋂(hom(C;A;B); f. =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B)))))].
+[LeftIdentity(C)] =def= [isect(obj(C); A. isect(obj(C); B. isect(hom(C;A;B); f. =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B)))))].
 
 Operator RightIdentity : (0).
-[RightIdentity(C)] =def= [⋂(obj(C); A. ⋂(obj(C); B. ⋂(hom(C;A;B); f. =(cmp(C;A;A;B; f; idn(C;A)); f; hom(C;A;B)))))].
+[RightIdentity(C)] =def= [isect(obj(C); A. isect(obj(C); B. isect(hom(C;A;B); f. =(cmp(C;A;A;B; f; idn(C;A)); f; hom(C;A;B)))))].
 
 Operator CmpAssoc : (0).
 [CmpAssoc(C)] =def= [
-  ⋂(obj(C); W.
-  ⋂(obj(C); X.
-  ⋂(obj(C); Y.
-  ⋂(obj(C); Z.
-  ⋂(hom(C;W;X); f.
-  ⋂(hom(C;X;Y); g.
-  ⋂(hom(C;Y;Z); h.
+  isect(obj(C); W.
+  isect(obj(C); X.
+  isect(obj(C); Y.
+  isect(obj(C); Z.
+  isect(hom(C;W;X); f.
+  isect(hom(C;X;Y); g.
+  isect(hom(C;Y;Z); h.
     =(cmp(C;W;X;Z; cmp(C;X;Y;Z; h;g); f);
       cmp(C;W;Y;Z; h; cmp(C;W;X;Y; g;f));
       hom(C;W;Z))
   )))))))
 ].
 
-Theorem LeftIdentity_wf : [⋂(RawCat; RC. ∈(LeftIdentity(RC); U{i}))] {
+Theorem LeftIdentity_wf : [isect(RawCat; RC. member(LeftIdentity(RC); U{i}))] {
   unfold <LeftIdentity>; refine <rawcat_unfold>; refine <autoR>.
 }.
 
-Theorem RightIdentity_wf : [⋂(RawCat; RC. ∈(RightIdentity(RC); U{i}))] {
+Theorem RightIdentity_wf : [isect(RawCat; RC. member(RightIdentity(RC); U{i}))] {
   unfold <RightIdentity>; refine <rawcat_unfold>; refine <autoR>.
 }.
 
-Theorem CmpAssoc_wf : [⋂(RawCat; RC. ∈(CmpAssoc(RC); U{i}))] {
+Theorem CmpAssoc_wf : [isect(RawCat; RC. member(CmpAssoc(RC); U{i}))] {
   unfold <CmpAssoc>; *{refine <rawcat_unfold>; refine <autoR>}.
 }.
 
 Operator LawCat : (0).
-[LawCat(RC)] =def= [Σ(LeftIdentity(RC); _. Σ(RightIdentity(RC); _. CmpAssoc(RC)))].
+[LawCat(RC)] =def= [prod(LeftIdentity(RC); _. prod(RightIdentity(RC); _. CmpAssoc(RC)))].
 
 Tactic lawcat_unfold {
   unfold <LeftIdentity RightIdentity CmpAssoc LawCat>;
   refine <rawcat_unfold>.
 }.
 
-Theorem LawCat_wf : [⋂(RawCat; RC. ∈(LawCat(RC); U{i}))] {
+Theorem LawCat_wf : [isect(RawCat; RC. member(LawCat(RC); U{i}))] {
   intro @i';
   [ *{refine <lawcat_unfold>; refine <autoR>}
   , lemma <RawCat_wf>
@@ -122,7 +122,7 @@ Tactic cat_unfold {
   unfold <Cat>; refine <lawcat_unfold>.
 }.
 
-Theorem Cat-wf : [∈(Cat; U{i'})] {
+Theorem Cat-wf : [member(Cat; U{i'})] {
   *{refine <cat_unfold>; auto};
   elim #1; refine <autoR>
 }.
@@ -130,8 +130,8 @@ Theorem Cat-wf : [∈(Cat; U{i'})] {
 Theorem InitialRawCat : [RawCat] {
   unfold <RawCat>;
   intro [void]; auto;
-  intro [λ(A. λ(B. void))]; auto;
-  witness [pair(λ(A. <>); pair(λ(A. <>); <>))]; auto.
+  intro [lam(A. lam(B. void))]; auto;
+  witness [pair(lam(A. <>); pair(lam(A. <>); <>))]; auto.
 }.
 
 Theorem InitialCat : [Cat] {
@@ -145,7 +145,7 @@ Theorem InitialCat : [Cat] {
 Theorem TerminalRawCat : [RawCat] {
   unfold <RawCat>;
   intro [unit]; refine <autoR>;
-  intro [λ(A. λ(B. unit))]; refine <autoR>;
+  intro [lam(A. lam(B. unit))]; refine <autoR>;
 }.
 
 Theorem TerminalCat : [Cat] {

@@ -1,10 +1,10 @@
 ||| Each sequent has its own universe hierarchy. It is valid to make any uniform
 ||| substitution on level variables.
-Theorem lower : [Π(U{i}; _. U{i'})] {
+Theorem lower : [fun(U{i}; _. U{i'})] {
   auto; witness [unit]; auto
 }.
 
 ||| We can use the <lower> theorem by substituting it's level variable i ↦ i'.
-Theorem higher : [Π(U{i'}; _. U{i''})] {
+Theorem higher : [fun(U{i'}; _. U{i''})] {
   lemma <lower>
 }.

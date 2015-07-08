@@ -1,30 +1,30 @@
 Operator Y : (0).
-[Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
+[Y(f)] =def= [ap(lam(x.ap(f;ap(x;x)));lam(x.ap(f;ap(x;x))))].
 
-Theorem test : [ceq(λ(x.x); λ(x.x))] {
+Theorem test : [ceq(lam(x.x); lam(x.x))] {
   auto
 }.
 
-Theorem test2 : [ceq(spread(λ(x.x); x.y.x); spread(λ(x.x); x.y.y))] {
+Theorem test2 : [ceq(spread(lam(x.x); x.y.x); spread(lam(x.x); x.y.y))] {
   auto
 }.
 
-Theorem test3 : [ceq(λ(x.x); λ(x.spread(pair(x;x); x._.x)))] {
+Theorem test3 : [ceq(lam(x.x); lam(x.spread(pair(x;x); x._.x)))] {
   auto; csymmetry; step; auto
 }.
 
 Theorem y-is-fix-point : [
-  ⋂(U{i}; A. ⋂(Π(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
+  isect(U{i}; A. isect(fun(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
 ] {
   auto; unfold <Y>; step; auto
 }.
 
 Theorem transitive : [
-  ⋂(base; a.
-  ⋂(base; b.
-  ⋂(base; c.
-  ⋂(=(a; b; base); _.
-  ⋂(=(b; c; base); _.
+  isect(base; a.
+  isect(base; b.
+  isect(base; c.
+  isect(=(a; b; base); _.
+  isect(=(b; c; base); _.
   =(a; c; base))))))
 ] {
   auto;
