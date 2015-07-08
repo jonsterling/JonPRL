@@ -1148,6 +1148,8 @@ struct
 
       fun CEqSubst (eq, xC) (H >> P) =
         let
+          val xC = Context.rebind H xC
+          val eq = Context.rebind H eq
           val #[M, N] = eq ^! CEQUAL
           val _ = unify P (xC // M)
         in
