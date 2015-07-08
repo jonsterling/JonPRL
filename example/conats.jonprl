@@ -17,31 +17,37 @@ Operator conatF : (0).
 Operator conat : ().
 [conat] =def= [⋂(nat; n.iterate(n; x.conatF(x); top))].
 
+Operator czero : ().
+[czero] =def= [inl(<>)].
+
+Operator csucc : (0).
+[csucc(M)] =def= [inr(M)].
+
+Operator Y : (0).
+[Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
+
+Operator omega : ().
+[omega] =def= [Y(λ(x.csucc(x)))].
+
 Tactic unfolds {
-  *{unfold <conat iterate conatF top>}
+  *{unfold <conat czero csucc iterate conatF top omega Y>}
 }.
 
 Tactic rauto {
   *{reduce; auto} ||| May not terminate but shh
 }.
 
-Theorem zero-wf : [∈(inl(<>); conat)] {
+Theorem zero-wf : [∈(czero; conat)] {
   refine <unfolds>; refine <rauto>; elim #1; refine <rauto>
 }.
 
-Theorem succ-wf : [⋂(conat; x. ∈(inr(x); conat))] {
+Theorem succ-wf : [⋂(conat; x. ∈(csucc(x); conat))] {
   refine <unfolds>; auto;
   elim #2; focus 1 #{elim #1 [n']};
   refine <rauto>;
   hyp-subst ← #6 [h.=(h; h; natrec(n'; ⋂(void; _.void); _.x.+(unit;x)))];
   refine <rauto>
 }.
-
-Operator Y : (0).
-[Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
-
-Operator omega : ().
-[omega] =def= [Y(λ(x.inr(x)))].
 
 Theorem omega-wf : [∈(omega; conat)] {
   refine <unfolds>; unfold <omega Y>; auto; elim #1;
