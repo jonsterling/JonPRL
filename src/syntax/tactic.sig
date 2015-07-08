@@ -12,15 +12,15 @@ sig
       | CUSTOM_TACTIC of label * meta
       | WITNESS of term * meta
       | HYPOTHESIS of int * meta
-      | EQ_SUBST of {left : term,
-                     right : term,
+      | EQ_SUBST of {equality : term,
+                     domain : term,
                      level : level option} * meta
       | HYP_SUBST of {dir : Dir.dir,
                       index : int,
                       domain : term,
                       level : level option} * meta
-      | CEQ_SUBST of {left : term,
-                      right : term} * meta
+      | CEQ_SUBST of {equality : term,
+                      domain : term} * meta
       | CHYP_SUBST of {dir : Dir.dir,
                        index : int,
                        domain : term} * meta
