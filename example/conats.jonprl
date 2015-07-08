@@ -1,6 +1,3 @@
-Operator iterate : (0; 1; 0).
-[iterate(N; F; B)] =def= [natrec(N; B; _.x.so_apply(F; x))].
-
 Operator top : ().
 [top] =def= [⋂(void; _.void)].
 
@@ -11,11 +8,15 @@ Theorem top-is-top :
   unfold <top>; auto
 }.
 
+Operator corec : (1).
+[corec(F)] =def= [⋂(nat; n. natrec(n; top; _.x. so_apply(F;x)))].
+
 Operator conatF : (0).
 [conatF(X)] =def= [+(unit; X)].
 
+(* conats are the greatest fixed point of the polynomial functor X + 1 *)
 Operator conat : ().
-[conat] =def= [⋂(nat; n.iterate(n; x.conatF(x); top))].
+[conat] =def= [corec(R. conatF(R))].
 
 Operator czero : ().
 [czero] =def= [inl(<>)].
@@ -26,11 +27,12 @@ Operator csucc : (0).
 Operator Y : (0).
 [Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
 
+
 Operator omega : ().
 [omega] =def= [Y(λ(x.csucc(x)))].
 
 Tactic unfolds {
-  *{unfold <conat czero csucc iterate conatF top omega Y>}
+  *{unfold <corec conat czero csucc conatF top omega Y>}
 }.
 
 Tactic rauto {
