@@ -24,12 +24,12 @@ Operator czero : ().
 Operator csucc : (0).
 [csucc(M)] =def= [inr(M)].
 
-Operator Y : (0).
-[Y(f)] =def= [ap(lam(x.ap(f;ap(x;x)));lam(x.ap(f;ap(x;x))))].
+Operator Y : (1).
+[Y(f)] =def= [ap(lam(x.so_apply(f;ap(x;x)));lam(x.so_apply(f;ap(x;x))))].
 
 
 Operator omega : ().
-[omega] =def= [Y(lam(x.csucc(x)))].
+[omega] =def= [Y(x.csucc(x))].
 
 Tactic unfolds {
   *{unfold <corec conat czero csucc conatF top omega Y>}
@@ -54,8 +54,8 @@ Theorem succ-wf : [isect(conat; x. member(csucc(x); conat))] {
 Theorem omega-wf : [member(omega; conat)] {
   refine <unfolds>; unfold <omega Y>; auto; elim #1;
   focus 0 #{reduce 1; auto};
-  csubst [ceq(ap(lam(x.ap(lam(x.inr(x));ap(x;x)));lam(x.ap(lam(x.inr(x));ap(x;x))));
-              inr(ap(lam(x.ap(lam(x.inr(x));ap(x;x)));lam(x.ap(lam(x.inr(x));ap(x;x))))))]
+  csubst [ceq(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))));
+              inr(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))))))]
          [h.=(h;h; natrec(succ(n'); isect(void; _. void); _.x.+(unit; x)))];
-  [step; step; auto, reduce 1; auto]
+  [step, reduce 1]; auto
 }.
