@@ -1,0 +1,61 @@
+Operator top : ().
+[top] =def= [⋂(void; _.void)].
+
+Theorem top-is-top :
+  [⋂(base; x.
+   ⋂(base; y.
+   =(x; y; top)))] {
+  unfold <top>; auto
+}.
+
+Operator corec : (1).
+[corec(F)] =def= [⋂(nat; n. natrec(n; top; _.x. so_apply(F;x)))].
+
+Operator conatF : (0).
+[conatF(X)] =def= [+(unit; X)].
+
+(* conats are the greatest fixed point of the polynomial functor X + 1 *)
+Operator conat : ().
+[conat] =def= [corec(R. conatF(R))].
+
+Operator czero : ().
+[czero] =def= [inl(<>)].
+
+Operator csucc : (0).
+[csucc(M)] =def= [inr(M)].
+
+Operator Y : (0).
+[Y(f)] =def= [ap(λ(x.ap(f;ap(x;x)));λ(x.ap(f;ap(x;x))))].
+
+
+Operator omega : ().
+[omega] =def= [Y(λ(x.csucc(x)))].
+
+Tactic unfolds {
+  *{unfold <corec conat czero csucc conatF top omega Y>}
+}.
+
+Tactic rauto {
+  *{reduce; auto} ||| May not terminate but shh
+}.
+
+Theorem zero-wf : [∈(czero; conat)] {
+  refine <unfolds>; refine <rauto>; elim #1; refine <rauto>
+}.
+
+Theorem succ-wf : [⋂(conat; x. ∈(csucc(x); conat))] {
+  refine <unfolds>; auto;
+  elim #2; focus 1 #{elim #1 [n']};
+  refine <rauto>;
+  hyp-subst ← #6 [h.=(h; h; natrec(n'; ⋂(void; _.void); _.x.+(unit;x)))];
+  refine <rauto>
+}.
+
+Theorem omega-wf : [∈(omega; conat)] {
+  refine <unfolds>; unfold <omega Y>; auto; elim #1;
+  focus 0 #{reduce 1; auto};
+  csubst [ceq(ap(λ(x.ap(λ(x.inr(x));ap(x;x)));λ(x.ap(λ(x.inr(x));ap(x;x))));
+              inr(ap(λ(x.ap(λ(x.inr(x));ap(x;x)));λ(x.ap(λ(x.inr(x));ap(x;x))))))]
+         [h.=(h;h; natrec(succ(n'); ⋂(void; _. void); _.x.+(unit; x)))];
+  [step; step; auto, reduce 1; auto]
+}.
