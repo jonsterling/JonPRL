@@ -127,6 +127,7 @@ struct
          | UNIT => true
          | VOID => true
          | CEQUAL => true
+         | APPROX => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
@@ -1121,6 +1122,14 @@ struct
             [] BY (fn [] => CEQUAL_REFL $$ #[]
                    | _  => raise Refine)
         end
+      fun ApproxRefl (H >> P) =
+        let
+          val #[M, N] = P ^! APPROX
+          val () = (unify M N; ()) handle Refine => bothStuck M N
+        in
+            [] BY (fn [] => APPROX_REFL $$ #[]
+                   | _  => raise Refine)
+        end
       end
 
       fun CEqSym (H >> P) =
@@ -1173,6 +1182,16 @@ struct
                 (CEqSubst (CEQUAL $$ #[N,M], xC)
                           THENL [CEqSym THEN Hypothesis_ z, ID]) (H >> P)
               end
+        end
+
+      fun CEqApprox (H >> P) =
+        let
+          val #[M, N] = P ^! CEQUAL
+        in
+          [ H >> APPROX $$ #[M, N]
+          , H >> APPROX $$ #[N, M]
+          ] BY (fn [D] => CEQUAL_APPROX $$ #[D]
+                 | _ => raise Refine)
         end
 
       local

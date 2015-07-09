@@ -179,6 +179,9 @@ sig
     val CEqSubst : term * term -> tactic
     val HypCEqSubst : Dir.dir * int * term -> tactic
     val CEqStruct : tactic
+    val CEqApprox : tactic
+
+    val ApproxRefl : tactic
 
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end

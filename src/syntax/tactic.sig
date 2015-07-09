@@ -49,6 +49,8 @@ sig
       | CEQUAL_SYM of meta
       | CEQUAL_STEP of meta
       | CEQUAL_STRUCT of meta
+      | CEQUAL_APPROX of meta
+      | APPROX_REFL of meta
       | TRY of t
       | LIMIT of t
       | ORELSE of t list * meta

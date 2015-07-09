@@ -190,6 +190,14 @@ struct
     fn w => symbol "cstruct"
       wth (fn name => fn pos => CEQUAL_STRUCT {name = name, pos = pos})
 
+  val parseCEqualApprox : tactic_parser =
+    fn w => symbol "capprox"
+      wth (fn name => fn pos => CEQUAL_APPROX {name = name, pos = pos})
+
+  val parseApproxRefl : tactic_parser =
+    fn w => symbol "areflexivity"
+      wth (fn name => fn pos => APPROX_REFL {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -262,6 +270,8 @@ struct
       || parseCEqualStep w
       || parseCEqualStruct w
       || parseCEqSubst w
+      || parseCEqualApprox w
+      || parseApproxRefl w
       || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =

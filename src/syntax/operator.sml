@@ -18,6 +18,8 @@ struct
     | ADMIT | ASSERT
     | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
+    | CEQUAL_APPROX
+    | APPROX_REFL
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
@@ -31,7 +33,7 @@ struct
     | SUBSET
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
-    | CEQUAL | BASE
+    | CEQUAL | APPROX | BASE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
     | SO_APPLY
@@ -50,7 +52,7 @@ struct
        ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
-       CEQUAL, BASE, SO_APPLY]
+       CEQUAL, APPROX, BASE, SO_APPLY]
   end
 end
 
@@ -93,6 +95,8 @@ struct
     | eq (CEQUAL_STEP, CEQUAL_STEP) = true
     | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
     | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
+    | eq (CEQUAL_APPROX, CEQUAL_APPROX) = true
+    | eq (APPROX_REFL, APPROX_REFL) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -129,6 +133,7 @@ struct
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
     | eq (CEQUAL, CEQUAL) = true
+    | eq (APPROX, APPROX) = true
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
@@ -166,6 +171,8 @@ struct
        | CEQUAL_STEP => #[0]
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
+       | CEQUAL_APPROX => #[0, 0]
+       | APPROX_REFL => #[]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -251,6 +258,7 @@ struct
 
        | EQ => #[0,0,0]
        | CEQUAL => #[0, 0]
+       | APPROX => #[0, 0]
        | MEM => #[0,0]
 
        | SUBSET => #[0,1]
@@ -272,6 +280,8 @@ struct
        | CEQUAL_STEP => "~-step"
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
+       | CEQUAL_APPROX => "~-~<="
+       | APPROX_REFL => "~<=-refl"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
@@ -343,6 +353,7 @@ struct
        | ISECT => "⋂"
        | EQ => "="
        | CEQUAL => "ceq"
+       | APPROX => "approx"
        | MEM => "∈"
        | PLUS => "+"
        | INL => "inl"
@@ -397,6 +408,7 @@ struct
          string "⋂" return ISECT,
          string "=" return EQ,
          string "ceq" return CEQUAL,
+         string "approx" return APPROX,
          string "∈" return MEM,
          string "subset" return SUBSET,
          string "so_apply" return SO_APPLY,
