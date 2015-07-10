@@ -1114,14 +1114,6 @@ struct
                    (Semantics.step N; raise Refine)
                    handle Semantics.Stuck _ => ()
       in
-      fun CEqRefl (H >> P) =
-        let
-          val #[M, N] = P ^! CEQUAL
-          val () = (unify M N; ()) handle Refine => bothStuck M N
-        in
-            [] BY (fn [] => CEQUAL_REFL $$ #[]
-                   | _  => raise Refine)
-        end
       fun ApproxRefl (H >> P) =
         let
           val #[M, N] = P ^! APPROX

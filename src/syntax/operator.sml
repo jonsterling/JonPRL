@@ -16,7 +16,7 @@ struct
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
     | ADMIT | ASSERT
-    | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
+    | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
     | APPROX_REFL
@@ -90,7 +90,6 @@ struct
     | eq (PAIR_EQ, PAIR_EQ) = true
     | eq (SPREAD_EQ, SPREAD_EQ) = true
     | eq (FUN_EQ, FUN_EQ) = true
-    | eq (CEQUAL_REFL, CEQUAL_REFL) = true
     | eq (CEQUAL_SYM, CEQUAL_SYM) = true
     | eq (CEQUAL_STEP, CEQUAL_STEP) = true
     | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
@@ -166,7 +165,6 @@ struct
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
        | CEQUAL_EQ => #[0, 0]
-       | CEQUAL_REFL => #[]
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
        | CEQUAL_SUBST => #[0, 0]
@@ -275,7 +273,6 @@ struct
 
        | EQ_EQ => "eq⁼"
        | CEQUAL_EQ => "~⁼"
-       | CEQUAL_REFL => "~-refl"
        | CEQUAL_SYM => "~-sym"
        | CEQUAL_STEP => "~-step"
        | CEQUAL_SUBST => "~-subst"

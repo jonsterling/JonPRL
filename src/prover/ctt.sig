@@ -173,7 +173,6 @@ sig
     val EqSym : tactic
 
     val CEqEq : tactic
-    val CEqRefl : tactic
     val CEqSym  : tactic
     val CEqStep : tactic
     val CEqSubst : term * term -> tactic

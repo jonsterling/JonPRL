@@ -42,6 +42,8 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
+  val CEqRefl = CEqApprox THEN ApproxRefl
+
   fun Intro {term,rule,invertible,freshVariable,level} =
      UnitIntro
        ORELSE Assumption

@@ -26,7 +26,6 @@ struct
        | AX_EQ $ _ => AX $$ #[]
        | EQ_SYM $ _ => ax
        | CEQUAL_EQ $ _ => ax
-       | CEQUAL_REFL $ _ => ax
        | CEQUAL_SYM $ _ => ax
        | CEQUAL_STEP $ _ => ax
        | CEQUAL_SUBST $ #[D, E] => extract E
