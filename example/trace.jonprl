@@ -1,8 +1,8 @@
 Theorem sym :
-  [⋂(U{i}; A.
-   ⋂(A; M.
-   ⋂(A; N.
-   ⋂(=(M; N; A); _. =(N; M; A)))))] {
+  [isect(U{i}; A.
+   isect(A; M.
+   isect(A; N.
+   isect(=(M; N; A); _. =(N; M; A)))))] {
    auto; trace "Here's a quick message\n\twith escapes";
    symmetry; auto
 }.

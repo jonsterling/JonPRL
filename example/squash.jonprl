@@ -1,10 +1,10 @@
 Operator squash : (0).
 [squash(A)] =def= [subset(unit; _. A)].
 
-Theorem squash-wf : [⋂(U{i}; A. ∈(squash(A); U{i}))] {
+Theorem squash-wf : [isect(U{i}; A. member(squash(A); U{i}))] {
   unfold <squash>; auto.
 }.
 
-Theorem squash-intro : [⋂(U{i}; A. Π(A; M. squash(A)))] {
+Theorem squash-intro : [isect(U{i}; A. fun(A; M. squash(A)))] {
   unfold <squash>; auto.
 }.
