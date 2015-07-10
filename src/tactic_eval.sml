@@ -55,6 +55,8 @@ struct
       | CEQUAL_SYM a => an a CEqSym
       | CEQUAL_STEP a => an a CEqStep
       | CEQUAL_STRUCT a => an a CEqStruct
+      | CEQUAL_APPROX a => an a CEqApprox
+      | APPROX_REFL a => an a ApproxRefl
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))

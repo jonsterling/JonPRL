@@ -56,6 +56,7 @@ struct
        ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
        ORELSE IndependentSubsetIntro
        ORELSE CEqRefl
+       ORELSE ApproxRefl
        ORELSE BaseIntro
        ORELSE MemCD
        ORELSE

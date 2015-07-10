@@ -1,0 +1,4 @@
+Theorem ceqReflThuApprox : [ ⋂(base; x.ceq(x; x)) ]
+{ intro @i;[id, auto];[];
+  capprox;[areflexivity,areflexivity]
+}.
