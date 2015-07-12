@@ -44,6 +44,7 @@ struct
 
   val CEqRefl = CEqApprox THEN ApproxRefl
 
+  (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} =
      UnitIntro
        ORELSE Assumption

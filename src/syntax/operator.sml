@@ -20,6 +20,7 @@ struct
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
     | APPROX_REFL
+    | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
@@ -28,6 +29,8 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
+    | FIX
+    | CBV
     | ISECT
     | EQ | MEM
     | SUBSET
@@ -48,7 +51,10 @@ struct
     val publicOperators =
       [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i'''',
        VOID, UNIT, AX,
-       PROD, PAIR, SPREAD, FUN, LAM, AP,
+       PROD, PAIR, SPREAD,
+       FUN, LAM, AP,
+       FIX,
+       CBV,
        ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
@@ -96,6 +102,7 @@ struct
     | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
     | eq (CEQUAL_APPROX, CEQUAL_APPROX) = true
     | eq (APPROX_REFL, APPROX_REFL) = true
+    | eq (BOTTOM_DIVERGES, BOTTOM_DIVERGES) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -129,6 +136,8 @@ struct
     | eq (FUN, FUN) = true
     | eq (LAM, LAM) = true
     | eq (AP, AP) = true
+    | eq (FIX, FIX) = true
+    | eq (CBV, CBV) = true
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
     | eq (CEQUAL, CEQUAL) = true
@@ -171,6 +180,7 @@ struct
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
        | APPROX_REFL => #[]
+       | BOTTOM_DIVERGES => #[]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -243,6 +253,8 @@ struct
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | FIX => #[0]
+       | CBV => #[0, 1]
        | PLUS => #[0, 0]
        | INL => #[0]
        | INR => #[0]
@@ -279,6 +291,7 @@ struct
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
        | APPROX_REFL => "~<=-refl"
+       | BOTTOM_DIVERGES => "bottom-div"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
@@ -347,6 +360,8 @@ struct
        | FUN => "Π"
        | LAM => "λ"
        | AP => "ap"
+       | FIX => "fix"
+       | CBV => "cbv"
        | ISECT => "⋂"
        | EQ => "="
        | CEQUAL => "ceq"
@@ -402,6 +417,8 @@ struct
          string "Π" return FUN,
          string "λ" return LAM,
          string "ap" return AP,
+         string "fix" return FIX,
+         string "cbv" return CBV,
          string "⋂" return ISECT,
          string "=" return EQ,
          string "ceq" return CEQUAL,

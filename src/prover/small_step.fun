@@ -34,6 +34,10 @@ struct
        | SUCC $ #[N] => (xyS // N) // (NATREC $$ #[N, Z, xyS])
        | _ => raise Stuck (NATREC $$ #[M, Z, xyS])
 
+  fun stepFix (F) = AP $$ #[F, FIX $$ #[F]]
+
+  fun stepCbv (A, F) = F // A
+
   fun step e =
     case out e of
         UNIV _ $ _ => CANON
@@ -55,7 +59,19 @@ struct
               STEP L' => STEP (AP $$ #[L', R])
             | CANON => STEP (stepApBeta (L, R))
             | NEUTRAL => NEUTRAL
-        )
+      )
+      | FIX $ #[F] => (
+	  case step F of
+	      STEP F' => STEP (FIX $$ #[F'])
+	    | CANON => STEP (stepFix F)
+	    | NEUTRAL => NEUTRAL
+      )
+      | CBV $ #[A, F] => (
+          case step A of
+              STEP A' => STEP (CBV $$ #[A', F])
+            | CANON => STEP (stepCbv (A, F))
+            | NEUTRAL => NEUTRAL
+      )
       | ISECT $ _ => CANON
       | EQ $ _ => CANON
       | MEM $ _ => CANON

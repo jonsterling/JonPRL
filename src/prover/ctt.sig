@@ -182,6 +182,8 @@ sig
 
     val ApproxRefl : tactic
 
+    val BottomDiverges : int -> tactic
+
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end
 

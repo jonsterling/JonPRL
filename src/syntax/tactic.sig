@@ -50,6 +50,7 @@ sig
       | CEQUAL_STRUCT of meta
       | CEQUAL_APPROX of meta
       | APPROX_REFL of meta
+      | BOTTOM_DIVERGES of int * meta
       | TRY of t
       | LIMIT of t
       | ORELSE of t list * meta

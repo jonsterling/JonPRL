@@ -194,6 +194,12 @@ struct
     fn w => symbol "areflexivity"
       wth (fn name => fn pos => APPROX_REFL {name = name, pos = pos})
 
+  val parseBottomDiverges : tactic_parser =
+   fn w => symbol "bot-div"
+		  && parseIndex
+		  wth (fn (name, i) => fn pos =>
+			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -267,6 +273,7 @@ struct
       || parseCEqSubst w
       || parseCEqualApprox w
       || parseApproxRefl w
+      || parseBottomDiverges w
       || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =
