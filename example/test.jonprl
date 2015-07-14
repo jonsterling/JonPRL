@@ -1,43 +1,43 @@
 Operator welp : ().
 [welp] =def= [unit].
 
-Theorem test1 : [Σ(unit; _. Σ(unit; _. unit))] {
+Theorem test1 : [prod(unit; _. prod(unit; _. unit))] {
   *{ intro ; auto }.
 }.
 
 ||| Lemmas defined earlier in the development may be used later on using the 'lemma' tactic.
-Theorem test1' : [Σ(unit; _. Σ(unit; _. unit))] {
+Theorem test1' : [prod(unit; _. prod(unit; _. unit))] {
   lemma <test1>.
 }.
 
 ||| Abstractions may be unfolded using the 'unfold' tactic.
-Theorem test2 : [Π(unit; _. Σ(unit; _. welp))] {
+Theorem test2 : [fun(unit; _. prod(unit; _. welp))] {
   unfold <welp>; auto
 }.
 
-Theorem test3 : [∈(λ(x. x); Π(unit; _. unit))] {
+Theorem test3 : [member(lam(x. x); fun(unit; _. unit))] {
   auto.
 }.
 
-Theorem test4 : [∈(λ(x.pair(x;x)); Π(void;_.void))] {
+Theorem test4 : [member(lam(x.pair(x;x)); fun(void;_.void))] {
   auto.
 }.
 
-Theorem test5 : [Π(void; _. Σ(unit; _.unit))] {
+Theorem test5 : [fun(void; _. prod(unit; _.unit))] {
   auto.
 }.
 
-Theorem test6 : [Π(unit; _. Σ(unit; _.unit))] {
-  witness [λ(x. pair(x;x))]; auto.
+Theorem test6 : [fun(unit; _. prod(unit; _.unit))] {
+  witness [lam(x. pair(x;x))]; auto.
 }.
 
-Theorem test7 : [Π(Σ(void;_.unit); z. void)] {
+Theorem test7 : [fun(prod(void;_.unit); z. void)] {
   auto;
   elim #1;
   auto.
 }.
 
-Theorem test8 : [∈(+(void; void); U{i})] {
+Theorem test8 : [member(+(void; void); U{i})] {
   auto
 }.
 
@@ -45,9 +45,9 @@ Theorem test9 : [=(inl(<>); inl(<>); +(unit; void))] {
   auto
 }.
 
-Theorem test10 : [⋂(U{i}; A.
-                  ⋂(U{i}; B.
-                  Π(+(A; B); _. +(B; A))))] {
+Theorem test10 : [isect(U{i}; A.
+                  isect(U{i}; B.
+                  fun(+(A; B); _. +(B; A))))] {
   auto; elim #3; [intro #1, intro #0]; auto
 }.
 
@@ -56,8 +56,8 @@ Theorem test11 :
   reduce; auto
 }.
 
-Theorem axiom-of-choice : [⋂(U{i}; A. ⋂(U{i}; B. ⋂(Π(A; _. Π(B; _. U{i})); Q. Π(Π(A; c. Σ(B; b. ap(ap(Q;c);b))); φ. Σ(Π(A; _.B); f. Π(A; a. ap(ap(Q;a);ap(f;a))))))))] {
-  auto; intro [λ(w. spread(ap(φ;w); x.y.x))]; auto;
+Theorem axiom-of-choice : [isect(U{i}; A. isect(U{i}; B. isect(fun(A; _. fun(B; _. U{i})); Q. fun(fun(A; c. prod(B; b. ap(ap(Q;c);b))); φ. prod(fun(A; _.B); f. fun(A; a. ap(ap(Q;a);ap(f;a))))))))] {
+  auto; intro [lam(w. spread(ap(φ;w); x.y.x))]; auto;
   elim #4 [a]; auto; reduce;
   hyp-subst ← #7 [h. ap(ap(Q;a); spread(h; x.y.x))]; auto;
   elim #6; reduce; auto

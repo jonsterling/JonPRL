@@ -278,9 +278,9 @@ struct
 
   fun toString O =
     case O of
-         UNIV_EQ i => "U⁼{" ^ Level.toString i ^ "}"
+         UNIV_EQ i => "U-eq{" ^ Level.toString i ^ "}"
        | CUM => "cum"
-       | VOID_EQ => "void⁼"
+       | VOID_EQ => "void-eq"
        | VOID_ELIM => "void-elim"
 
        | EQ_EQ => "eq⁼"
@@ -295,31 +295,31 @@ struct
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
-       | AX_EQ => "⬧⁼"
+       | AX_EQ => "<>-eq"
 
-       | BASE_EQ => "base⁼"
+       | BASE_EQ => "base-eq"
        | BASE_INTRO => "base-intro"
-       | BASE_ELIM_EQ => "base-elim⁼"
-       | BASE_MEMBER_EQ => "base-member⁼"
+       | BASE_ELIM_EQ => "base-elim-eq"
+       | BASE_MEMBER_EQ => "base-member-eq"
 
-       | PROD_EQ => "prod⁼"
+       | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"
        | IND_PROD_INTRO => "independent-prod-intro"
        | PROD_ELIM => "prod-elim"
-       | PAIR_EQ => "pair⁼"
-       | SPREAD_EQ => "spread⁼"
+       | PAIR_EQ => "pair-eq"
+       | SPREAD_EQ => "spread-eq"
 
-       | FUN_EQ => "fun⁼"
+       | FUN_EQ => "fun-eq"
        | FUN_INTRO => "fun-intro"
        | FUN_ELIM => "fun-elim"
-       | LAM_EQ => "lam⁼"
-       | AP_EQ => "ap⁼"
+       | LAM_EQ => "lam-eq"
+       | AP_EQ => "ap-eq"
        | FUN_EXT => "funext"
 
        | PLUS_INTROL => "plus-introl"
        | PLUS_INTROR => "plus-intror"
        | PLUS_ELIM => "plus-elim"
-       | PLUS_EQ => "plus⁼"
+       | PLUS_EQ => "plus-eq"
        | INL_EQ => "inl-eq"
        | INR_EQ => "inr-eq"
        | DECIDE_EQ => "decide-eq"
@@ -330,20 +330,20 @@ struct
        | SUCC_EQ => "succ-eq"
        | NATREC_EQ => "natrec-eq"
 
-       | ISECT_EQ => "isect⁼"
+       | ISECT_EQ => "isect-eq"
        | ISECT_INTRO => "isect-intro"
        | ISECT_ELIM => "isect-elim"
-       | ISECT_MEMBER_EQ => "isect-mem⁼"
+       | ISECT_MEMBER_EQ => "isect-mem-eq"
        | ISECT_MEMBER_CASE_EQ => "isect-mem-case⁼"
 
        | WITNESS => "witness"
-       | HYP_EQ => "hyp⁼"
+       | HYP_EQ => "hyp-eq"
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
        | ASSERT => "assert"
 
-       | SUBSET_EQ => "subset⁼"
+       | SUBSET_EQ => "subset-eq"
        | SUBSET_INTRO => "subset-intro"
        | IND_SUBSET_INTRO => "independent-subset-intro"
        | SUBSET_ELIM => "subset-elim"
@@ -354,11 +354,11 @@ struct
        | VOID => "void"
        | UNIT => "unit"
        | AX => "<>"
-       | PROD => "Σ"
+       | PROD => "prod"
        | PAIR => "pair"
        | SPREAD => "spread"
-       | FUN => "Π"
-       | LAM => "λ"
+       | FUN => "fun"
+       | LAM => "lam"
        | AP => "ap"
        | FIX => "fix"
        | CBV => "cbv"
@@ -366,7 +366,7 @@ struct
        | EQ => "="
        | CEQUAL => "ceq"
        | APPROX => "approx"
-       | MEM => "∈"
+       | MEM => "member"
        | PLUS => "+"
        | INL => "inl"
        | INR => "inr"
@@ -407,15 +407,15 @@ struct
          string "void" return VOID,
          string "unit" return UNIT,
          string "<>" return AX,
-         string "Σ" return PROD,
+         string "prod" return PROD,
          string "+" return PLUS,
          string "inl" return INL,
          string "inr" return INR,
          string "decide" return DECIDE,
          string "pair" return PAIR,
          string "spread" return SPREAD,
-         string "Π" return FUN,
-         string "λ" return LAM,
+         string "fun" return FUN,
+         string "lam" return LAM,
          string "ap" return AP,
          string "fix" return FIX,
          string "cbv" return CBV,
@@ -423,7 +423,7 @@ struct
          string "=" return EQ,
          string "ceq" return CEQUAL,
          string "approx" return APPROX,
-         string "∈" return MEM,
+         string "member" return MEM,
          string "subset" return SUBSET,
          string "so_apply" return SO_APPLY,
          string "nat" return NAT,

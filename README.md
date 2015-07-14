@@ -50,14 +50,20 @@ If you use `pretty-mode`, then you may install the following patterns:
 
 ```elisp
 (pretty-add-keywords
-  'jonprl-mode
-  '(("\\\[" . "⸤")
-    ("\\\]" . "⸥")
-    ("<" . "⟨")
-    (">" . "⟩")
-    ("<>" . "⬧")
-    ("\\<\\(=def=\\)\\>" . "≝")
-    ))
+ 'jonprl-mode
+ '(("\\\[" . "⸤")
+   ("\\\]" . "⸥")
+   ("<" . "⟨")
+   (">" . "⟩")
+   ("<>" . "★")
+   ("\\<isect\\>" . "⋂")
+   ("\\<fun\\>" . "Π")
+   ("\\<prod\\>" . "Σ")
+   ("\\<member\\>" . "∈")
+   ("\\<lam\\>" . "λ")
+   ("\\<\\(=def=\\)\\>" . "≝")
+   ("\\<\\(nat\\)\\>" . "ℕ")
+   ))
 ```
 
 ![screenshot of jonprl-mode](./doc/images/jonprl-screenshot.png)
@@ -90,7 +96,7 @@ JonPRL provides four top-level declarations:
 ### Built-in operators
 
 Together with the syntax for binding trees, the built-in operators of
-JonPRL constitute the core type theory, in combination with the rules 
+JonPRL constitute the core type theory, in combination with the rules
 for CTT which are built into JonPRL's refiner. In this section, several of the
 operators is presented together with its arity and a brief informal
 description. An arity is a list of the valences of an operator's subterms;

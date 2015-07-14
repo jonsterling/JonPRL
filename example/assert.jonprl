@@ -1,5 +1,5 @@
 Theorem trivial-assertion : [unit] {
-  assert [Π(unit; _.unit)];
+  assert [fun(unit; _.unit)];
   [auto, elim #1 [<>]];
   [auto, assumption]
 }.
