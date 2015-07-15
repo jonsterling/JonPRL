@@ -1114,13 +1114,12 @@ struct
                      (Semantics.step N; raise Refine)
                      handle Semantics.Stuck _ => ()
       in
-      fun ApproxRefl (H >> P) =
+        fun ApproxRefl (H >> P) =
           let
-              val #[M, N] = P ^! APPROX
-              val () = (unify M N; ()) handle Refine => bothStuck M N
+            val #[M, N] = P ^! APPROX
+            val () = (unify M N; ()) handle Refine => bothStuck M N
           in
-              [] BY (fn [] => APPROX_REFL $$ #[]
-                    | _  => raise Refine)
+            [] BY mkEvidence APPROX_REFL
           end
       end
 
@@ -1189,21 +1188,21 @@ struct
         end
 
       fun BottomDiverges i (H >> P) =
-          let val x = eliminationTarget i (H >> P)
-	      val h = Context.lookup H x
-              val #[M,N] = h ^! APPROX
-	      val #[] = M ^! AX
-	      val #[B,xA] = N ^! CBV
-	      val (x,A) = unbind xA
-	      val #[] = A ^! AX
-	      val #[L] = B ^! FIX
-	      val #[yF] = L ^! LAM
-	      val (y,f) = unbind yF
-	      val _ = Variable.eq (y, asVariable f)
-          in
-              [] BY (fn [] => BOTTOM_DIVERGES $$ #[]
-                    | _  => raise Refine)
-          end
+        let
+          val x = eliminationTarget i (H >> P)
+          val h = Context.lookup H x
+          val #[M,N] = h ^! APPROX
+          val #[] = M ^! AX
+          val #[B,xA] = N ^! CBV
+          val (x,A) = unbind xA
+          val #[] = A ^! AX
+          val #[L] = B ^! FIX
+          val #[yF] = L ^! LAM
+          val (y,f) = unbind yF
+          val _ = Variable.eq (y, asVariable f)
+        in
+          [] BY mkEvidence BOTTOM_DIVERGES
+        end
 
       local
         (* Create a new subgoal by walking along the pairs
