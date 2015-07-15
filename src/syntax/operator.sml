@@ -23,12 +23,15 @@ struct
     | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
+    | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
+
       (* Computational Type Theory *)
     | UNIV of Level.t
     | VOID
     | UNIT | AX
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
+    | IMAGE
     | FIX
     | CBV
     | ISECT
@@ -53,6 +56,7 @@ struct
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD,
        FUN, LAM, AP,
+       IMAGE,
        FIX,
        CBV,
        ISECT, EQ, MEM, SUBSET,
@@ -123,7 +127,11 @@ struct
     | eq (BASE_EQ, BASE_EQ) = true
     | eq (BASE_INTRO, BASE_INTRO) = true
     | eq (BASE_ELIM_EQ, BASE_ELIM_EQ) = true
-    | eq (BASE_MEMBER_EQ, BASE_MEMBER_EQ) =true
+    | eq (BASE_MEMBER_EQ, BASE_MEMBER_EQ) = true
+    | eq (IMAGE_EQ, IMAGE_EQ) = true
+    | eq (IMAGE_MEM_EQ, IMAGE_MEM_EQ) = true
+    | eq (IMAGE_ELIM, IMAGE_ELIM) = true
+    | eq (IMAGE_EQ_IND, IMAGE_EQ_IND) = true
     | eq (ADMIT, ADMIT) = true
     | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
@@ -137,6 +145,7 @@ struct
     | eq (FUN, FUN) = true
     | eq (LAM, LAM) = true
     | eq (AP, AP) = true
+    | eq (IMAGE, IMAGE) = true
     | eq (FIX, FIX) = true
     | eq (CBV, CBV) = true
     | eq (ISECT, ISECT) = true
@@ -190,6 +199,11 @@ struct
        | BASE_INTRO => #[]
        | BASE_ELIM_EQ => #[1]
        | BASE_MEMBER_EQ => #[0]
+
+       | IMAGE_EQ => #[0,0]
+       | IMAGE_MEM_EQ => #[0,0]
+       | IMAGE_ELIM => #[0]
+       | IMAGE_EQ_IND => #[0,0,0,0]
 
        | UNIT_EQ => #[]
        | UNIT_INTRO => #[]
@@ -255,6 +269,7 @@ struct
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
        | PLUS => #[0, 0]
@@ -304,6 +319,11 @@ struct
        | BASE_INTRO => "base-intro"
        | BASE_ELIM_EQ => "base-elim-eq"
        | BASE_MEMBER_EQ => "base-member-eq"
+
+       | IMAGE_EQ => "image-eq"
+       | IMAGE_MEM_EQ => "image-mem-eq"
+       | IMAGE_ELIM => "image-elim"
+       | IMAGE_EQ_IND => "image-eq-ind"
 
        | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"
@@ -363,6 +383,7 @@ struct
        | FUN => "fun"
        | LAM => "lam"
        | AP => "ap"
+       | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
        | ISECT => "⋂"
@@ -420,6 +441,7 @@ struct
          string "fun" return FUN,
          string "lam" return LAM,
          string "ap" return AP,
+         string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,
          string "isect" return ISECT,

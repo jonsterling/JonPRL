@@ -682,6 +682,77 @@ struct
                | _ => raise Refine)
       end
 
+    fun ImageEq (H >> P) =
+      let
+        val #[M, N, U] = P ^! EQ
+        val #[A1,f1] = M ^! IMAGE
+        val #[A2,f2] = N ^! IMAGE
+        val (UNIV _, _) = asApp U
+      in
+          [ H >> EQ $$ #[f1, f2, BASE $$ #[]]
+	  , H >> EQ $$ #[A1, A2, U]
+	  ] BY mkEvidence IMAGE_EQ
+      end
+
+    fun ImageMemEq (H >> P) =
+      let
+        val #[M, N, U] = P ^! EQ
+        val #[f1,a1] = M ^! AP
+        val #[f2,a2] = N ^! AP
+        val #[A,f] = U ^! IMAGE
+	val true = Syntax.eq (f,f1)
+	val true = Syntax.eq (f,f2)
+      in
+          [ H >> EQ $$ #[a1, a2, A]
+	  , H >> EQ $$ #[f, f, BASE $$ #[]]
+	  ] BY mkEvidence IMAGE_MEM_EQ
+      end
+
+    fun ImageElim (i, onames) (H >> P) =
+      let
+        val x = eliminationTarget i (H >> P)
+        val #[A,F] = Context.lookup H x ^! IMAGE
+	val w =
+	    case onames of
+		SOME names => names
+	      | NONE => Context.fresh (H, Variable.named "w")
+        val H' = Context.insert H w Visibility.Hidden A
+	val P' = (x \\ P) // (AP $$ #[F, ``w])
+        (* substitute x for (f w) in J *)
+      in
+          [ H >> P'
+	  ] BY mkEvidence IMAGE_ELIM
+      end
+
+    fun ImageEqInd (i,onames) (H >> P) =
+      let
+        val x = eliminationTarget i (H >> P)
+        val #[T2',AP1,U] = Context.lookup H x ^! EQ
+	val (a,b,y,z) =
+	    case onames of
+		SOME names => names
+	      | NONE => (Context.fresh (H, Variable.named "a"),
+			 Context.fresh (H, Variable.named "b"),
+			 Context.fresh (H, Variable.named "y"),
+			 Context.fresh (H, Variable.named "z"))
+        val #[A,f] = U ^! IMAGE
+        val #[T2, AP2, T] = P ^! EQ
+        val #[F,T1] = AP1 ^! AP
+        val #[F',T1'] = AP2 ^! AP
+	val true = Syntax.eq (T2,T2')
+	val true = Syntax.eq (F,F')
+	val true = Syntax.eq (T1,T1')
+	val base = BASE $$ #[]
+	val fa = AP $$ #[F,``a]
+	val fb = AP $$ #[F,``b]
+      in
+          [ H >> EQ $$ #[F, F, base]
+	  , H >> EQ $$ #[T1, T1, A]
+	  , H >> EQ $$ #[AP1, AP1, T]
+	  , H @@ (a,base) @@ (b,base) @@ (y, EQ $$ #[fa,fa,T]) @@ (z,EQ $$ #[``a,``b,A]) >> EQ $$ #[fa,fb,T]
+	  ] BY mkEvidence IMAGE_EQ_IND
+      end
+
     fun MemCD (H >> P) =
       let
         val #[M, A] = P ^! MEM
@@ -1196,8 +1267,7 @@ struct
         in
           [ H >> APPROX $$ #[M, N]
           , H >> APPROX $$ #[N, M]
-          ] BY (fn [D] => CEQUAL_APPROX $$ #[D]
-                 | _ => raise Refine)
+          ] BY mkEvidence CEQUAL_APPROX
         end
 
       fun BottomDiverges i (H >> P) =

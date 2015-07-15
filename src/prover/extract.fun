@@ -39,6 +39,11 @@ struct
        | BASE_MEMBER_EQ $ _ => ax
        | BASE_ELIM_EQ $ #[D] => extract (D // ax)
 
+       | IMAGE_EQ $ _ => ax
+       | IMAGE_MEM_EQ $ _ => ax
+       | IMAGE_ELIM $ #[t] => t
+       | IMAGE_EQ_IND $ _ => ax
+
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]
        | IND_PROD_INTRO $ #[D,E] => PAIR $$ #[extract D, extract E]
