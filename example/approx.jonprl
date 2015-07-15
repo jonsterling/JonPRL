@@ -15,8 +15,6 @@ Operator not : (0).
 
 Theorem bottom-diverges : [ not(has-value(bottom)) ] {
   unfold <not has-value bottom>;
-  intro @i;
-    [ bot-div #1
-    , auto
-    ]
+  auto;
+  bot-div #1
 }.

@@ -19,7 +19,7 @@ struct
     | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
-    | APPROX_REFL
+    | APPROX_EQ | APPROX_REFL
     | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
@@ -101,6 +101,7 @@ struct
     | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
     | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
     | eq (CEQUAL_APPROX, CEQUAL_APPROX) = true
+    | eq (APPROX_EQ, APPROX_EQ) = true
     | eq (APPROX_REFL, APPROX_REFL) = true
     | eq (BOTTOM_DIVERGES, BOTTOM_DIVERGES) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
@@ -179,6 +180,7 @@ struct
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
+       | APPROX_EQ => #[0,0]
        | APPROX_REFL => #[]
        | BOTTOM_DIVERGES => #[]
        | VOID_EQ => #[]
@@ -290,6 +292,7 @@ struct
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
+       | APPROX_EQ => "~<=-eq"
        | APPROX_REFL => "~<=-refl"
        | BOTTOM_DIVERGES => "bottom-div"
        | UNIT_EQ => "unit⁼"

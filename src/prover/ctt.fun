@@ -1107,6 +1107,19 @@ struct
                  | _ => raise Refine)
         end
 
+      fun ApproxEq (H >> P) =
+        let
+          val #[approx1, approx2, univ] = P ^! EQ
+          val (UNIV _, _) = asApp univ
+          val #[M,N] = approx1 ^! APPROX
+          val #[M',N'] = approx2 ^! APPROX
+          val base = BASE $$ #[]
+        in
+          [ H >> EQ $$ #[M,M',base]
+          , H >> EQ $$ #[N,N',base]
+          ] BY mkEvidence APPROX_EQ
+        end
+
       local
           fun bothStuck M N =
               (Semantics.step M; raise Refine)

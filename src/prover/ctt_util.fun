@@ -98,6 +98,7 @@ struct
       AxEq
         ORELSE EqEq
         ORELSE CEqEq
+        ORELSE ApproxEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq
