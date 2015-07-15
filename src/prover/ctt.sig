@@ -173,7 +173,6 @@ sig
     val EqSym : tactic
 
     val CEqEq : tactic
-    val CEqRefl : tactic
     val CEqSym  : tactic
     val CEqStep : tactic
     val CEqSubst : term * term -> tactic
@@ -181,7 +180,10 @@ sig
     val CEqStruct : tactic
     val CEqApprox : tactic
 
+    val ApproxEq : tactic
     val ApproxRefl : tactic
+
+    val BottomDiverges : int -> tactic
 
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end

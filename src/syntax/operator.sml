@@ -16,10 +16,11 @@ struct
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
     | ADMIT | ASSERT
-    | CEQUAL_EQ | CEQUAL_REFL | CEQUAL_SYM | CEQUAL_STEP
+    | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
-    | APPROX_REFL
+    | APPROX_EQ | APPROX_REFL
+    | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
       (* Computational Type Theory *)
@@ -28,6 +29,8 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD
     | FUN | LAM | AP
+    | FIX
+    | CBV
     | ISECT
     | EQ | MEM
     | SUBSET
@@ -48,7 +51,10 @@ struct
     val publicOperators =
       [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i'''',
        VOID, UNIT, AX,
-       PROD, PAIR, SPREAD, FUN, LAM, AP,
+       PROD, PAIR, SPREAD,
+       FUN, LAM, AP,
+       FIX,
+       CBV,
        ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
@@ -90,13 +96,14 @@ struct
     | eq (PAIR_EQ, PAIR_EQ) = true
     | eq (SPREAD_EQ, SPREAD_EQ) = true
     | eq (FUN_EQ, FUN_EQ) = true
-    | eq (CEQUAL_REFL, CEQUAL_REFL) = true
     | eq (CEQUAL_SYM, CEQUAL_SYM) = true
     | eq (CEQUAL_STEP, CEQUAL_STEP) = true
     | eq (CEQUAL_SUBST, CEQUAL_SUBST) = true
     | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
     | eq (CEQUAL_APPROX, CEQUAL_APPROX) = true
+    | eq (APPROX_EQ, APPROX_EQ) = true
     | eq (APPROX_REFL, APPROX_REFL) = true
+    | eq (BOTTOM_DIVERGES, BOTTOM_DIVERGES) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
     | eq (FUN_ELIM, FUN_ELIM) = true
     | eq (LAM_EQ, LAM_EQ) = true
@@ -130,6 +137,8 @@ struct
     | eq (FUN, FUN) = true
     | eq (LAM, LAM) = true
     | eq (AP, AP) = true
+    | eq (FIX, FIX) = true
+    | eq (CBV, CBV) = true
     | eq (ISECT, ISECT) = true
     | eq (EQ, EQ) = true
     | eq (CEQUAL, CEQUAL) = true
@@ -166,13 +175,14 @@ struct
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
        | CEQUAL_EQ => #[0, 0]
-       | CEQUAL_REFL => #[]
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
+       | APPROX_EQ => #[0,0]
        | APPROX_REFL => #[]
+       | BOTTOM_DIVERGES => #[]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -245,6 +255,8 @@ struct
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | FIX => #[0]
+       | CBV => #[0, 1]
        | PLUS => #[0, 0]
        | INL => #[0]
        | INR => #[0]
@@ -273,16 +285,17 @@ struct
        | VOID_EQ => "void-eq"
        | VOID_ELIM => "void-elim"
 
-       | EQ_EQ => "eq-eq"
-       | CEQUAL_EQ => "~-eq"
-       | CEQUAL_REFL => "~-refl"
+       | EQ_EQ => "eq⁼"
+       | CEQUAL_EQ => "~⁼"
        | CEQUAL_SYM => "~-sym"
        | CEQUAL_STEP => "~-step"
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
+       | APPROX_EQ => "~<=-eq"
        | APPROX_REFL => "~<=-refl"
-       | UNIT_EQ => "unit-eq"
+       | BOTTOM_DIVERGES => "bottom-div"
+       | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"
        | AX_EQ => "<>-eq"
@@ -350,7 +363,9 @@ struct
        | FUN => "fun"
        | LAM => "lam"
        | AP => "ap"
-       | ISECT => "isect"
+       | FIX => "fix"
+       | CBV => "cbv"
+       | ISECT => "⋂"
        | EQ => "="
        | CEQUAL => "ceq"
        | APPROX => "approx"
@@ -405,6 +420,8 @@ struct
          string "fun" return FUN,
          string "lam" return LAM,
          string "ap" return AP,
+         string "fix" return FIX,
+         string "cbv" return CBV,
          string "isect" return ISECT,
          string "=" return EQ,
          string "ceq" return CEQUAL,

@@ -174,10 +174,6 @@ struct
     fn w => symbol "symmetry"
       wth (fn name => fn pos => SYMMETRY {name = name, pos = pos})
 
-  val parseCEqualRefl : tactic_parser =
-    fn w => symbol "creflexivity"
-      wth (fn name => fn pos => CEQUAL_REFL {name = name, pos = pos})
-
   val parseCEqualSym : tactic_parser =
     fn w => symbol "csymmetry"
       wth (fn name => fn pos => CEQUAL_SYM {name = name, pos = pos})
@@ -197,6 +193,12 @@ struct
   val parseApproxRefl : tactic_parser =
     fn w => symbol "areflexivity"
       wth (fn name => fn pos => APPROX_REFL {name = name, pos = pos})
+
+  val parseBottomDiverges : tactic_parser =
+   fn w => symbol "bot-div"
+		  && parseIndex
+		  wth (fn (name, i) => fn pos =>
+			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
@@ -265,13 +267,13 @@ struct
       || parseAssumption w
       || parseAssert w
       || parseSymmetry w
-      || parseCEqualRefl w
       || parseCEqualSym w
       || parseCEqualStep w
       || parseCEqualStruct w
       || parseCEqSubst w
       || parseCEqualApprox w
       || parseApproxRefl w
+      || parseBottomDiverges w
       || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =

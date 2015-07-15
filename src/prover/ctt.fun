@@ -1107,29 +1107,33 @@ struct
                  | _ => raise Refine)
         end
 
+      fun ApproxEq (H >> P) =
+        let
+          val #[approx1, approx2, univ] = P ^! EQ
+          val (UNIV _, _) = asApp univ
+          val #[M,N] = approx1 ^! APPROX
+          val #[M',N'] = approx2 ^! APPROX
+          val base = BASE $$ #[]
+        in
+          [ H >> EQ $$ #[M,M',base]
+          , H >> EQ $$ #[N,N',base]
+          ] BY mkEvidence APPROX_EQ
+        end
+
       local
           fun bothStuck M N =
-            (Semantics.step M; raise Refine)
-            handle Semantics.Stuck _ =>
-                   (Semantics.step N; raise Refine)
-                   handle Semantics.Stuck _ => ()
+              (Semantics.step M; raise Refine)
+              handle Semantics.Stuck _ =>
+                     (Semantics.step N; raise Refine)
+                     handle Semantics.Stuck _ => ()
       in
-      fun CEqRefl (H >> P) =
-        let
-          val #[M, N] = P ^! CEQUAL
-          val () = (unify M N; ()) handle Refine => bothStuck M N
-        in
-            [] BY (fn [] => CEQUAL_REFL $$ #[]
-                   | _  => raise Refine)
-        end
-      fun ApproxRefl (H >> P) =
-        let
-          val #[M, N] = P ^! APPROX
-          val () = (unify M N; ()) handle Refine => bothStuck M N
-        in
-            [] BY (fn [] => APPROX_REFL $$ #[]
-                   | _  => raise Refine)
-        end
+        fun ApproxRefl (H >> P) =
+          let
+            val #[M, N] = P ^! APPROX
+            val () = (unify M N; ()) handle Refine => bothStuck M N
+          in
+            [] BY mkEvidence APPROX_REFL
+          end
       end
 
       fun CEqSym (H >> P) =
@@ -1194,6 +1198,23 @@ struct
           , H >> APPROX $$ #[N, M]
           ] BY (fn [D] => CEQUAL_APPROX $$ #[D]
                  | _ => raise Refine)
+        end
+
+      fun BottomDiverges i (H >> P) =
+        let
+          val x = eliminationTarget i (H >> P)
+          val h = Context.lookup H x
+          val #[M,N] = h ^! APPROX
+          val #[] = M ^! AX
+          val #[B,xA] = N ^! CBV
+          val (x,A) = unbind xA
+          val #[] = A ^! AX
+          val #[L] = B ^! FIX
+          val #[yF] = L ^! LAM
+          val (y,f) = unbind yF
+          val _ = Variable.eq (y, asVariable f)
+        in
+          [] BY mkEvidence BOTTOM_DIVERGES
         end
 
       local

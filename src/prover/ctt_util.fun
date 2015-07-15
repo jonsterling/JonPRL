@@ -42,6 +42,9 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
+  val CEqRefl = CEqApprox THEN ApproxRefl
+
+  (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} =
      UnitIntro
        ORELSE Assumption
@@ -95,6 +98,7 @@ struct
       AxEq
         ORELSE EqEq
         ORELSE CEqEq
+        ORELSE ApproxEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq
