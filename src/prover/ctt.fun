@@ -1196,8 +1196,7 @@ struct
         in
           [ H >> APPROX $$ #[M, N]
           , H >> APPROX $$ #[N, M]
-          ] BY (fn [D] => CEQUAL_APPROX $$ #[D]
-                 | _ => raise Refine)
+          ] BY mkEvidence CEQUAL_APPROX
         end
 
       fun BottomDiverges i (H >> P) =
