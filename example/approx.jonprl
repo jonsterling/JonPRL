@@ -1,17 +1,17 @@
-Theorem ceq-refl-thru-approx : [ ⋂(base; x.ceq(x; x)) ]
+Theorem ceq-refl-thru-approx : [ isect(base; x.ceq(x; x)) ]
 {
   intro @i;[id, auto];[];
   capprox;[areflexivity,areflexivity]
 }.
 
 Operator bottom : ().
-[bottom()] =def= [ fix(λ(x.x)) ].
+[bottom()] =def= [ fix(lam(x.x)) ].
 
 Operator has-value : (0).
 [has-value(t)] =def= [ approx(<>;cbv(t;_.<>)) ].
 
 Operator not : (0).
-[not(P)] =def= [ Π(P;_.void) ].
+[not(P)] =def= [ fun(P;_.void) ].
 
 Theorem bottom-diverges : [ not(has-value(bottom)) ] {
   unfold <not has-value bottom>;

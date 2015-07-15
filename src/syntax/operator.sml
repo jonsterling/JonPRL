@@ -419,7 +419,7 @@ struct
          string "ap" return AP,
          string "fix" return FIX,
          string "cbv" return CBV,
-         string "⋂" return ISECT,
+         string "isect" return ISECT,
          string "=" return EQ,
          string "ceq" return CEQUAL,
          string "approx" return APPROX,
