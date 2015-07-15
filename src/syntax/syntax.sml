@@ -76,9 +76,6 @@ struct
            | AP $ #[M, N] =>
                enclose M ^ "[" ^ display N ^ "]"
 
-           | FIX $ #[M] =>
-               "fix(" ^ display M ^ ")"
-
            | PAIR $ #[M, N] =>
                "⟨" ^ display M ^ ", " ^ display N ^ "⟩"
 
