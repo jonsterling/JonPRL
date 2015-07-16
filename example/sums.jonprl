@@ -12,7 +12,7 @@ Theorem commutative :
         [isect(U{i}; A.
          isect(U{i}; B.
          equiv(+(A; B); +(B; A))))] {
-  unfold <equiv>; auto; elim #3; refine <constructor>
+  unfold <equiv>; auto; elim #3; constructor
 }.
 
 Theorem plus-assoc :
@@ -24,7 +24,7 @@ Theorem plus-assoc :
   [id; id, elim #5, elim #5, intro #1; intro #1];
   auto;
   [intro #0, intro #0, id, id, intro #1];
-  refine <constructor>
+  constructor
 }.
 
 Theorem void-idr :

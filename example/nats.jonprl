@@ -22,24 +22,24 @@ Tactic t {
 }.
 
 Theorem plus-id-left : [isect(nat; n. =(plus(zero; n); n; nat))] {
-  refine <t>
+  t
 }.
 
 Theorem plus-id-right : [isect(nat; n. =(plus(n; zero); n; nat))] {
-  refine <t>
+  t
 }.
 
 Theorem succ-right : [
   isect(nat; n. isect(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
 ] {
-  refine <t>
+  t
 }.
 
 Theorem plus-commutes : [
   isect(nat; n.isect(nat; m. =(plus(n; m); plus(m; n); nat)))
 ] {
   ||| Kick off the induction and do the boring computation thingies.
-  refine <t>;
+  t;
 
   ||| The base case immeidately follows from plus-id-right
   focus 0 #{

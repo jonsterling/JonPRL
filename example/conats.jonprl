@@ -40,19 +40,19 @@ Tactic rauto {
 }.
 
 Theorem zero-wf : [member(czero; conat)] {
-  refine <unfolds>; refine <rauto>; elim #1; refine <rauto>
+  unfolds; rauto; elim #1; rauto
 }.
 
 Theorem succ-wf : [isect(conat; x. member(csucc(x); conat))] {
-  refine <unfolds>; auto;
+  unfolds; auto;
   elim #2; focus 1 #{elim #1 [n']};
-  refine <rauto>;
+  rauto;
   hyp-subst ← #6 [h.=(h; h; natrec(n'; isect(void; _.void); _.x.+(unit;x)))];
-  refine <rauto>
+  rauto
 }.
 
 Theorem omega-wf : [member(omega; conat)] {
-  refine <unfolds>; unfold <omega Y>; auto; elim #1;
+  unfolds; unfold <omega Y>; auto; elim #1;
   focus 0 #{reduce 1; auto};
   csubst [ceq(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))));
               inr(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))))))]
