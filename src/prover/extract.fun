@@ -31,6 +31,7 @@ struct
        | CEQUAL_SUBST $ #[D, E] => extract E
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
+       | APPROX_EQ $ _ => ax
        | APPROX_REFL $ _ => ax
        | BOTTOM_DIVERGES $ _ => ax (* could be anything because one hypothesis is false *)
 

@@ -109,13 +109,13 @@ The unit type is written `unit()` and its trivial inhabitant is written
 
 #### Functions
 
-Functions are introduced with `λ(1)` and eliminated with `ap(0;0)`
-(application). `Π(0;1)` gives the type of functions.
+Functions are introduced with `lam(1)` and eliminated with `ap(0;0)`
+(application). `pi(0;1)` gives the type of functions.
 
 #### Pairs
 
 Pairs are introduced with `pair(0;0)` and eliminated with
-`spread(0;2)`. The type of pairs is given by `Σ(0;1)`.
+`spread(0;2)`. The type of pairs is given by `prod(0;1)`.
 
 #### Sums
 
@@ -151,8 +151,14 @@ Note that `P` is applied to `x` and `y` using `so_apply` rather than
 
 #### Computational Equivalence
 
-The elements of `base()` are all closed terms. Their equality is `ceq(0;0)`, which denotes [Howe's computational equivalence](http://www.nuprl.org/KB/show.php?ShowPub=Howe89). Two terms are computationally equivalent if they both diverge or if they run to equivalent results. Computational equivalence is a congruence, which means that one can also prove that two terms are computationally equivalent if their subterms are computationally equivalent.
+The elements of `base()` are all closed terms. Their equality is `ceq(0;0)`,
+which denotes [Howe's computational
+equivalence](http://www.nuprl.org/KB/show.php?ShowPub=Howe89). Two terms are
+computationally equivalent if they both diverge or if they run to equivalent
+results. Computational equivalence is a congruence, which means that one can
+also prove that two terms are computationally equivalent if their subterms are
+computationally equivalent.
 
 #### TODO
 
-The following operators exist but are not yet documented: `∈`, `subset`, `⋂`.
+The following operators exist but are not yet documented: `member`, `subset`, `isect`.

@@ -53,7 +53,10 @@ struct
       val mode = getMode opts
 
       fun loadFile (f, dev) = CttFrontend.loadFile (dev, f)
-      val oworld = SOME (foldl loadFile Development.empty files) handle _ => NONE
+      val oworld =
+        SOME (foldl loadFile Development.empty files)
+          handle E =>
+            (print (exnMessage E); NONE)
     in
       case oworld of
            NONE => 1
@@ -61,9 +64,11 @@ struct
              (case mode of
                    CHECK_DEVELOPMENT => 0
                  | PRINT_DEVELOPMENT =>
-                   (CttFrontend.printDevelopment world; 0)
+                   ((CttFrontend.printDevelopment world; 0)
+                     handle E => (print (exnMessage E); 1))
                  | LIST_OPERATORS =>
-                   (CttFrontend.printOperators world; 0)
+                   ((CttFrontend.printOperators world; 0)
+                     handle E => (print (exnMessage E); 1))
                  | LIST_TACTICS =>
                      (app (fn tac => print (tac ^ "\n")) listOfTactics; 0))
     end
