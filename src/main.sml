@@ -26,7 +26,6 @@ struct
      "lemma <NAME>",
      "cut-lemma <NAME>",
      "unfold <(NAME @NUM)+>",
-     "refine <NAME>",
      "witness [TERM]",
      "hypothesis #NUM",
      "bot-div #NUM",
