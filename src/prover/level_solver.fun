@@ -25,7 +25,7 @@ struct
           end
       | go H (x \ E, y \ F) R = go (insert H x y) (out E, out F) R
       | go H (O1 $ ES1, O2 $ ES2) R =
-        if Operator.eq (O1, O2) then
+        if eqModLevel (O1, O2) then
             case (getLevelParameter O1, getLevelParameter O2) of
                 (SOME k, SOME l) => goes H (ES1, ES2) (Level.unify (k,l) :: R)
               | (NONE, NONE) => goes H (ES1, ES2) R
@@ -70,6 +70,10 @@ struct
   fun getLevelParameter (OperatorType.UNIV k) = SOME k
     | getLevelParameter (OperatorType.UNIV_EQ k) = SOME k
     | getLevelParameter _ = NONE
+
+  fun eqModLevel (OperatorType.UNIV _, OperatorType.UNIV _) = true
+    | eqModLevel (OperatorType.UNIV_EQ _, OperatorType.UNIV_EQ _) = true
+    | eqModLevel (o1, o2) = Operator.eq (o1, o2)
 end
 
 functor SequentLevelSolver

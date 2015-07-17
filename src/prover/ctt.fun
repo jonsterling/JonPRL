@@ -1035,7 +1035,6 @@ struct
     fun Lemma (world, lbl) (H >> P) =
       let
         val {statement, evidence} = Development.lookupTheorem world lbl
-        val H' >> P' = statement
         val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
         val substitution = LevelSolver.Level.resolve constraints
         val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)

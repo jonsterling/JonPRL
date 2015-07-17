@@ -16,4 +16,5 @@ sig
 
   val mapLevel : Level.substitution -> Operator.t -> Operator.t
   val getLevelParameter : Operator.t -> Level.t option
+  val eqModLevel : Operator.t * Operator.t -> bool
 end
