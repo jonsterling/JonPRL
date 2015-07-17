@@ -110,7 +110,7 @@ The unit type is written `unit()` and its trivial inhabitant is written
 #### Functions
 
 Functions are introduced with `lam(1)` and eliminated with `ap(0;0)`
-(application). `pi(0;1)` gives the type of functions.
+(application). `fun(0;1)` gives the type of functions.
 
 #### Pairs
 
