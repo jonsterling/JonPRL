@@ -63,4 +63,6 @@ sig
         APPLY of t
       | LIST of t list
       | FOCUS of int * t
+
+    val listOfTactics : string list
 end
