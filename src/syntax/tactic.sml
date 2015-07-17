@@ -64,4 +64,34 @@ struct
       APPLY of t
     | LIST of t list
     | FOCUS of int * t
+
+  val listOfTactics =
+    ["intro [TERM]? #NUM? <NAME*>?",
+     "elim #NUM [TERM]? <NAME*>?",
+     "eq-cd [TERM*]? <NAME*>? @LEVEL?",
+     "ext <NAME>? @LEVEL?",
+     "symmetry",
+     "capprox",
+     "creflexivty",
+     "areflexivty",
+     "csymmetry",
+     "step",
+     "cstruct",
+     "assumption",
+     "assert [TERM] <NAME>?",
+     "mem-cd",
+     "auto NUM?",
+     "reduce NUM?",
+     "lemma <NAME>",
+     "cut-lemma <NAME>",
+     "unfold <(NAME @NUM)+>",
+     "witness [TERM]",
+     "hypothesis #NUM",
+     "bot-div #NUM",
+     "hyp-subst (←|→) #NUM [TERM] @NUM?",
+     "id",
+     "fail",
+     "trace \"MESSAGE\"",
+     "cum @NUM?",
+     "focus NUM #{TACTIC}"]
 end

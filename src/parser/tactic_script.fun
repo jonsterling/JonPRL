@@ -37,19 +37,19 @@ struct
 
   fun parseScript w () : tactic charParser =
     separate ((squares (commaSep ($ (parseScript w))) wth LIST)
-                   <|> ($ (plain w) wth APPLY)
-                   <|> $ (parseFocus w) wth FOCUS) semi
+                   <|> ($ (parseFocus w) wth FOCUS)
+                   <|> ($ (plain w) wth APPLY)) semi
     wth THEN
 
   and plain w () =
-    RuleParser.parse w
-      || $ (parseTry w)
+    $ (parseTry w)
       || $ (parseRepeat w)
       || $ (parseOrelse w)
       || $ (parseComplete w)
       || parseId
       || parseFail
       || parseTrace
+      || RuleParser.parse w
 
   and parseFocus w () =
       symbol "focus" && parseInt &&

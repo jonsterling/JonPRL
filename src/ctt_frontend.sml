@@ -18,22 +18,18 @@ struct
       print (name ^ " " ^ Arity.toString arity ^ "\n")
 
     val labelToString = Development.Telescope.Label.toString
-
-    fun go Empty = ()
-      | go (Cons (lbl, OPERATOR {arity,...}, rest)) =
-        (printStep (labelToString lbl, arity); go (out rest))
-      | go (Cons (lbl, THEOREM {...}, rest)) =
-        (printStep (labelToString lbl, #[]); go (out rest))
-      | go (Cons (_, _, rest)) =
-        go (out rest)
   in
     fun printOperators world =
       (List.app
-        (fn x =>
-          printStep (Syntax.Operator.toString x, Syntax.Operator.arity x))
-        OperatorType.publicOperators;
-      go (out (Development.enumerate world)))
+         (fn x =>
+           printStep (Syntax.Operator.toString x, Syntax.Operator.arity x))
+         OperatorType.publicOperators;
+       List.app printStep (Development.enumerateOperators world))
   end
+
+  fun printTactics world =
+    List.app (fn x => print (x ^ "\n"))
+             (Tactic.listOfTactics @ Development.enumerateTactics world)
 
   fun prettyException E =
     case E of

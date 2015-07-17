@@ -43,31 +43,31 @@ Tactic rawcat-unfold {
 }.
 
 Theorem obj-wf : [isect(RawCat; C. member(obj(C); U{i}))] {
-  refine <rawcat-unfold>; auto
+  rawcat-unfold; auto
 }.
 
 Theorem arr-wf : [isect(RawCat; C. member(arr(C); U{i}))] {
-  refine <rawcat-unfold>; auto
+  rawcat-unfold; auto
 }.
 
 Theorem src-wf : [isect(RawCat; C. isect(arr(C); f. member(src(C;f); obj(C))))] {
-  refine <rawcat-unfold>; auto
+  rawcat-unfold; auto
 }.
 
 Theorem trg-wf : [isect(RawCat; C. isect(arr(C); f. member(trg(C;f); obj(C))))] {
-  refine <rawcat-unfold>; auto
+  rawcat-unfold; auto
 }.
 
 Theorem hom-wf : [isect(RawCat; C. isect(obj(C); X. isect(obj(C); Y. member(hom(C;X;Y); U{i}))))] {
-  refine <rawcat-unfold>; auto
+  rawcat-unfold; auto
 }.
 
 Theorem RawCat-wf : [member(RawCat; U{i'})] {
-  refine <rawcat-unfold>; auto;
+  rawcat-unfold; auto;
 }.
 
 Theorem InitialRawCat : [RawCat] {
-  refine <rawcat-unfold>;
+  rawcat-unfold;
   intro [void]; auto;
   intro [void]; auto;
   *{intro [lam(x.welp)]; auto}.
