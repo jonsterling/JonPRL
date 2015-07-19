@@ -365,7 +365,7 @@ struct
        | AP => "ap"
        | FIX => "fix"
        | CBV => "cbv"
-       | ISECT => "⋂"
+       | ISECT => "isect"
        | EQ => "="
        | CEQUAL => "ceq"
        | APPROX => "approx"
