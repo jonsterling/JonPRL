@@ -14,6 +14,15 @@ struct
     structure Dict = SplayDict(structure Key = Variable)
     open Dict
 
+    (* go is the main helper functin for [generateConstraints]. For the most
+     * part it simply walks down the ABTs on the left and right and assert
+     * that they are alpha equivalent. The dictionary H specifies pairs of bound
+     * of variables (one from the left and one from the right) that where bound
+     * at the same point.
+     *
+     * The only place where it differs from ABT_UTIL.eq is in the case of
+     * operators
+     *)
     fun go H (` x, ` y) R =
           let
             open Variable
@@ -24,6 +33,11 @@ struct
               raise LevelSolver
           end
       | go H (x \ E, y \ F) R = go (insert H x y) (out E, out F) R
+      (* Since operators may contain levels, we don't want to assert that
+       * they're equal. Rather, we assert they're equal discounting any
+       * embedded levels and then (if they contain levels) unify those levels
+       * and add that to our list of constraints.
+       *)
       | go H (O1 $ ES1, O2 $ ES2) R =
         if eqModLevel (O1, O2) then
             case (getLevelParameter O1, getLevelParameter O2) of
@@ -45,6 +59,10 @@ struct
     fun generateConstraints (M, N) = go empty (out M, out N) []
   end
 
+  (* [subst f M] walks M and add each operator [O $ ES] applies [mapLevel f] to
+   * [O] before proceeding. In this way it applies the substitution to all
+   * possible embedded levels.
+   *)
   fun subst f M =
     case out M of
          ` x => into (` x)
@@ -91,6 +109,11 @@ struct
   open Solver
   type term = Sequent.sequent
 
+  (* [ctxGenerateConstraints] generates level constraints for contexts by
+   * by looking up every member of [H] in [H'] and constraining them using
+   * the supplied [Solver]. Note that this means that we only need to know
+   * that [H] is a subset of [H'], not that they're completely equal.
+   *)
   local
     open Context.Telescope
     fun go (H, H') R =
@@ -107,6 +130,9 @@ struct
     Solver.generateConstraints (C, C')
       @ ctxGenerateConstraints (H, H')
 
+  (* subst uses [Solver.subst] to apply the substitution to everything
+   * in the context as well as the goal.
+   *)
   fun subst f (H >> C) =
     Context.map (Solver.subst f) H >> Solver.subst f C
 end
