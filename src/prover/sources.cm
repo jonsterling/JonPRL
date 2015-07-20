@@ -1,10 +1,10 @@
 group is
   ../syntax/sources.cm
-  ../../lib/sml-abt/abt.cm
-  ../../lib/telescopes/telescopes.cm
-  ../../lib/cmlib/cmlib.cm
-  ../../lib/sml-lcf/lcf.cm
-  ../../lib/sml-conv/conv.cm
+  $libs/sml-abt/abt.cm
+  $libs/telescopes/telescopes.cm
+  $libs/cmlib/cmlib.cm
+  $libs/sml-lcf/lcf.cm
+  $libs/sml-conv/conv.cm
 
   sequent.fun
   sequent.sig

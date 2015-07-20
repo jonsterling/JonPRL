@@ -4,10 +4,13 @@
 [submodule "lib/cmlib"]
 	path = lib/cmlib
 	url = https://github.com/standardml/cmlib.git
-[submodule "lib/parcom"]
-	path = lib/parcom
-	url = https://github.com/standardml/parcom.git
-  ignore = untracked
 [submodule "lib/sml-abt"]
 	path = lib/sml-abt
 	url = https://github.com/jonsterling/sml-abt.git
+[submodule "lib/sml-parcom-wrapper"]
+	path = lib/sml-parcom-wrapper
+	url = https://github.com/jonsterling/sml-parcom-wrapper.git
+  ignore = untracked
+[submodule "lib/sml-abt-parser"]
+	path = lib/sml-abt-parser
+	url = https://github.com/jonsterling/sml-abt-parser.git
