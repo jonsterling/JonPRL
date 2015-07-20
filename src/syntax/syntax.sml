@@ -57,92 +57,64 @@ struct
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
   end
 
-  local
+  structure UnparseAbt : UNPARSE_ABT =
+  struct
     infix $ \
     infix 8 $$ // \\
     open MyOp
-  in
-    val toString =
-    let
-      fun enclose E =
-        case out E of
-             ` x => display E
-           | O $ #[] => display E
-           | _ => "(" ^ display E ^ ")"
 
-      and display E =
-        case out E of
-             ISECT $ #[A,xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "{" ^ Variable.toString x ^ " : " ^ display A ^ "} " ^ display B
-                 else
-                   enclose A ^ " => " ^ display B
-               end
+    structure UnparseAbt = UnparseAbt (structure Abt = Abt and Unparse = Unparse)
+    open UnparseAbt
 
-           | FUN $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "(" ^ Variable.toString x ^ " : " ^ display A ^ ") " ^ display B
-                 else
-                   enclose A ^ " -> " ^ display B
-               end
-
-           | PROD $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "Σ" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
-                 else
-                   enclose A ^ " × " ^ display B
-               end
-
-           | SUBSET $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "{" ^ Variable.toString x ^ " ∈ " ^ display A ^ " | " ^ display B ^ "}"
-                 else
-                   "{" ^ display A ^ " | " ^ display B ^ "}"
-               end
-
-
-           | LAM $ #[xE] =>
-               let
-                 val (x, E) = unbind xE
-               in
-                 "λ" ^ dvar (x, E) ^ ". " ^ display E
-               end
-
-           | AP $ #[M, N] =>
-               enclose M ^ "[" ^ display N ^ "]"
-
-           | PAIR $ #[M, N] =>
-               "⟨" ^ display M ^ ", " ^ display N ^ "⟩"
-
-           | MEM $ #[M, A] =>
-               display M ^ " ∈ " ^ display A
-
-           | EQ $ #[M, N, A] =>
-               display M ^ " = " ^ display N ^ " ∈ " ^ display A
-
-           | UNIV i $ #[] =>
-               "U{" ^ Level.toString i ^ "}"
-
-           | _ => toStringOpen display E
-
-      and dvar (x, E) =
-        if hasFree (E, x) then Variable.toString x else "_"
-    in
-      display
-    end
+    exception X
+    fun unparseAbt t =
+      case out t of
+           AP $ #[M, N] => Unparse.adj (unparseAbt M, unparseAbt N)
+         | FUN $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("(" ^ Variable.toString x ^ ":" ^ toString A ^ ") " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 9, "->") (unparseAbt A, unparseAbt B)
+             end
+         | ISECT $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("{" ^ Variable.toString x ^ ":" ^ toString A ^ "} " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 9, "=>") (unparseAbt A, unparseAbt B)
+             end
+         | PROD $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("{" ^ Variable.toString x ^ ":" ^ toString A ^ "} " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 10, "*") (unparseAbt A, unparseAbt B)
+             end
+         | SUBSET $ #[A, xB] =>
+             let
+               val (x, B) = unbind xB
+             in
+               Unparse.atom
+                 ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
+             end
+         | PAIR $ #[M,N] =>
+             Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
+         | _ => inner t
+    and inner t = UnparseAbt.extensibleUnparseAbt unparseAbt t
+    and toString t = Unparse.parens (Unparse.done (unparseAbt t))
   end
+
+  val toString = UnparseAbt.toString
 end
 
 structure Conv = Conv(Syntax)
