@@ -1,37 +1,37 @@
 Operator welp : ().
 [welp] =def= [unit].
 
-Theorem test1 : [prod(unit; _. prod(unit; _. unit))] {
+Theorem test1 : [unit * unit * unit] {
   *{ intro ; auto }.
 }.
 
 ||| Lemmas defined earlier in the development may be used later on using the 'lemma' tactic.
-Theorem test1' : [prod(unit; _. prod(unit; _. unit))] {
+Theorem test1' : [unit * unit * unit] {
   lemma <test1>.
 }.
 
 ||| Abstractions may be unfolded using the 'unfold' tactic.
-Theorem test2 : [fun(unit; _. prod(unit; _. welp))] {
+Theorem test2 : [unit -> unit * welp] {
   unfold <welp>; auto
 }.
 
-Theorem test3 : [member(lam(x. x); fun(unit; _. unit))] {
+Theorem test3 : [member(lam(x. x); unit -> unit)] {
   auto.
 }.
 
-Theorem test4 : [member(lam(x.<x,x>); fun(void;_.void))] {
+Theorem test4 : [member(lam(x.<x,x>); void -> void)] {
   auto.
 }.
 
-Theorem test5 : [fun(void; _. prod(unit; _.unit))] {
+Theorem test5 : [void -> unit * unit] {
   auto.
 }.
 
-Theorem test6 : [fun(unit; _. prod(unit; _.unit))] {
-  witness [lam(x. <x,x>)]; auto.
+Theorem test6 : [unit -> unit * unit * unit] {
+  witness [lam(x. <x,x,x>)]; auto.
 }.
 
-Theorem test7 : [fun(prod(void;_.unit); z. void)] {
+Theorem test7 : [(void * unit) -> void] {
   auto;
   elim #1;
   auto.
@@ -45,7 +45,7 @@ Theorem test9 : [=(inl(<>); inl(<>); +(unit; void))] {
   auto
 }.
 
-Theorem test10 : [isect(U{i}; A. isect(U{i}; B. fun(+(A; B); _. +(B; A))))] {
+Theorem test10 : [{A:U{i}} {B:U{i}} +(A; B) -> +(B; A)] {
   auto; elim #3; [intro #1, intro #0]; auto
 }.
 
@@ -53,7 +53,7 @@ Theorem test11 : [=(decide(inl(<>); x.x; y.y); decide(inr(<>); x.x; y.y); unit)]
   reduce; auto
 }.
 
-Theorem axiom-of-choice : [isect(U{i}; A. isect(U{i}; B. isect(fun(A; _. fun(B; _. U{i})); Q. fun(fun(A; c. prod(B; b. Q c b)); φ. prod(fun(A; _.B); f. fun(A; a. Q a (f a)))))))]
+Theorem axiom-of-choice : [{A:U{i}} {B:U{i}} {Q : A -> B -> U{i}} (φ : (c:A) -> (b:B) * Q c b) (f : A -> B) * (a : A) Q a (f a)]
 {
   auto; intro [lam(w. spread(φ w ; x.y.x))]; auto;
   elim #4 [a]; auto; reduce;
