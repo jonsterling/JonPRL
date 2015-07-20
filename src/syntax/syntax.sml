@@ -95,7 +95,7 @@ struct
              in
                if hasFree (B, x) then
                  Unparse.atom
-                   ("{" ^ Variable.toString x ^ ":" ^ toString A ^ "} " ^ toString B)
+                   ("(" ^ Variable.toString x ^ ":" ^ toString A ^ ") * " ^ toString B)
                else
                  Unparse.infix' (Unparse.Right, 10, "*") (unparseAbt A, unparseAbt B)
              end
