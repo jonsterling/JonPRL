@@ -1,5 +1,5 @@
 Operator squash : (0).
-[squash(A)] =def= [subset(unit; _. A)].
+[squash(A)] =def= [{_:unit | A}].
 
 Theorem squash-wf : [isect(U{i}; A. member(squash(A); U{i}))] {
   unfold <squash>; auto.

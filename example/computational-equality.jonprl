@@ -13,19 +13,15 @@ Theorem test3 : [ceq(lam(x.x); lam(x.spread(pair(x;x); x._.x)))] {
   auto; csymmetry; step; auto
 }.
 
-Theorem y-is-fix-point : [
-  isect(U{i}; A. isect(fun(A; _.A); f . ceq(Y(f); f Y(f))))
-] {
+Theorem y-is-fix-point : [{A:U{i}} {f : A -> A} ceq(Y(f); f Y(f))] {
   auto; unfold <Y>; step; auto
 }.
 
 Theorem transitive : [
-  isect(base; a.
-  isect(base; b.
-  isect(base; c.
-  isect(=(a; b; base); _.
-  isect(=(b; c; base); _.
-  =(a; c; base))))))
+  {a:base} {b:base} {c:base}
+    =(a;b;base)
+    => =(b;c;base)
+    => =(a;b;base)
 ] {
   auto;
   elim #4;

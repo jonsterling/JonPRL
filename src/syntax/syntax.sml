@@ -14,6 +14,7 @@ struct
   open ParseAbt OperatorType
 
   local
+    open JonprlTokenParser
     open ParserCombinators CharParser ParserKit
     infix 2 wth suchthat return guard when
     infixr 1 ||
@@ -22,10 +23,32 @@ struct
     infixr 3 &&
     infix $$ \\
   in
-    fun parseRaw w st = ParseAbt.extensibleParseAbt w (parseAbt w) st
-    and parenthetical w st () = string "(" >> parseAbt w st << string ")" << spaces
-    and expItem w st = (parseRaw w st || $ (parenthetical w st)) wth Atm
-    and parseAbt w st = parsefixityadj (expItem w st) Left (fn (M,N) => AP $$ #[M,N])
+    val indFunOpr =
+      (spaces >> symbol "->" >> spaces) return Infix (Right, 9, fn (A,B) => FUN $$ #[A, Variable.named "_" \\ B])
+    val indIsectOpr =
+      (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "_" \\ B])
+    val indProdOpr =
+      (spaces >> symbol "*" >> spaces) return Infix (Right, 10, fn (A,B) => PROD $$ #[A, Variable.named "_" \\ B])
+
+    fun parseRaw w st () =
+      fancySubset w st
+      || fancyProd w st
+      || fancyFun w st
+      || fancyIsect w st
+      || ParseAbt.extensibleParseAbt w (parseAbt w) st
+    and fancyQuantifier w st (wrap, sep, oper) =
+      wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
+        parseAbt w st' wth (fn B =>
+          oper $$ #[A, x \\ B]))
+    and fancyFun w st = fancyQuantifier w st (parens, opt (symbol "->") return (), FUN)
+    and fancyIsect w st = fancyQuantifier w st (braces, opt (symbol "->") return (), ISECT)
+    and fancyProd w st = fancyQuantifier w st (parens, symbol "*" return (), PROD)
+    and fancySubset w st = braces (fancyQuantifier w st (fn x => x, symbol "|" return (), SUBSET))
+    and parenthetical w st () = parens (parseAbt w st)
+    and fixityItem w st =
+      alt [indFunOpr, indIsectOpr, indProdOpr] wth Opr
+      || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
+    and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
   end
 
   local
@@ -47,7 +70,10 @@ struct
                let
                  val (x, B) = unbind xB
                in
-                 "⋂" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
+                 if hasFree (B, x) then
+                   "{" ^ Variable.toString x ^ " : " ^ display A ^ "} " ^ display B
+                 else
+                   enclose A ^ " => " ^ display B
                end
 
            | FUN $ #[A, xB] =>
@@ -55,9 +81,9 @@ struct
                  val (x, B) = unbind xB
                in
                  if hasFree (B, x) then
-                   "Π" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
+                   "(" ^ Variable.toString x ^ " : " ^ display A ^ ") " ^ display B
                  else
-                   enclose A ^ " => " ^ display B
+                   enclose A ^ " -> " ^ display B
                end
 
            | PROD $ #[A, xB] =>

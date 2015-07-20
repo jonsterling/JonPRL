@@ -10,16 +10,16 @@ Operator Assoc : (0).
 
 Operator Monoid : ().
 
-[MonoidSig] =def= [prod(U{i}; A. prod(A; zero. fun(A; m. fun(A; n. A))))].
+[MonoidSig] =def= [(A:U{i}) * A * (A -> A -> A)].
 [car(M)] =def= [spread(M; x.y.x)].
 [ze(M)] =def= [spread(spread(M; x.y.y); x.y.x)].
 [op(M;X;Y)] =def= [spread(spread(M; x.y.y); x.y.y) X Y].
-[LeftUnit(M)] =def= [isect(car(M); m. =(m; op(M; ze(M); m); car(M)))].
-[RightUnit(M)] =def= [isect(car(M); m. =(op(M; ze(M); m); m; car(M)))].
-[Assoc(M)] =def= [isect(car(M); x. isect(car(M); y. isect(car(M); z. =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M)))))].
+[LeftUnit(M)] =def= [{m:car(M)} =(m; op(M; ze(M); m); car(M))].
+[RightUnit(M)] =def= [{m:car(M)} =(op(M; ze(M); m); m; car(M))].
+[Assoc(M)] =def= [{x:car(M)} {y:car(M)} {z:car(M)} =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M))].
 
-[MonoidLaws(M)] =def= [prod(LeftUnit(M); _. prod(RightUnit(M); _. Assoc(M)))].
-[Monoid] =def= [subset(MonoidSig; M. MonoidLaws(M))].
+[MonoidLaws(M)] =def= [LeftUnit(M) * RightUnit(M) * Assoc(M)].
+[Monoid] =def= [{M : MonoidSig | MonoidLaws(M)}].
 
 Tactic monoid-sig-unfold {
   unfold <MonoidSig car op ze>
@@ -29,7 +29,7 @@ Theorem MonoidSig-wf : [member(MonoidSig; U{i'})] {
   monoid-sig-unfold; auto.
 }.
 
-Theorem car-wf : [isect(MonoidSig; M. member(car(M); U{i}))] {
+Theorem car-wf : [{M:MonoidSig} member(car(M); U{i})] {
   monoid-sig-unfold; auto.
 }.
 
@@ -45,19 +45,19 @@ Tactic monoid-simplify {
   *{ monoid-unfold; reduce; auto }.
 }.
 
-Theorem LeftUnit-wf : [isect(MonoidSig; M. member(LeftUnit(M); U{i}))] {
+Theorem LeftUnit-wf : [{M:MonoidSig} member(LeftUnit(M); U{i})] {
   monoid-simplify.
 }.
 
-Theorem RightUnit-wf : [isect(MonoidSig; M. member(RightUnit(M);U{i}))] {
+Theorem RightUnit-wf : [{M:MonoidSig} member(RightUnit(M);U{i})] {
   monoid-simplify.
 }.
 
-Theorem Assoc-wf : [isect(MonoidSig; M. member(Assoc(M); U{i}))] {
+Theorem Assoc-wf : [{M:MonoidSig} member(Assoc(M); U{i})] {
   monoid-simplify.
 }.
 
-Theorem MonoidLaws-wf : [isect(MonoidSig; M. member(MonoidLaws(M); U{i}))] {
+Theorem MonoidLaws-wf : [{M:MonoidSig} member(MonoidLaws(M); U{i})] {
   monoid-simplify.
 }.
 

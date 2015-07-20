@@ -1,15 +1,13 @@
 Operator top : ().
-[top] =def= [isect(void; _.void)].
+[top] =def= [void => void].
 
 Theorem top-is-top :
-  [isect(base; x.
-   isect(base; y.
-   =(x; y; top)))] {
+  [{x:base} {y:base} =(x; y; top)] {
   unfold <top>; auto
 }.
 
 Operator corec : (1).
-[corec(F)] =def= [isect(nat; n. natrec(n; top; _.x. so_apply(F;x)))].
+[corec(F)] =def= [{n:nat} natrec(n; top; _.x. so_apply(F;x))].
 
 Operator conatF : (0).
 [conatF(X)] =def= [+(unit; X)].
@@ -43,11 +41,11 @@ Theorem zero-wf : [member(czero; conat)] {
   unfolds; rauto; elim #1; rauto
 }.
 
-Theorem succ-wf : [isect(conat; x. member(csucc(x); conat))] {
+Theorem succ-wf : [{x:conat} member(csucc(x); conat)] {
   unfolds; auto;
   elim #2; focus 1 #{elim #1 [n']};
   rauto;
-  hyp-subst ← #6 [h.=(h; h; natrec(n'; isect(void; _.void); _.x.+(unit;x)))];
+  hyp-subst ← #6 [h.=(h; h; natrec(n'; void => void; _.x.+(unit;x)))];
   rauto
 }.
 
@@ -56,6 +54,6 @@ Theorem omega-wf : [member(omega; conat)] {
   focus 0 #{reduce 1; auto};
   csubst [ceq(lam(x.inr(x x)) lam(x.inr(x x));
               inr(lam(x.inr(x x))  lam(x.inr(x x))))]
-         [h.=(h;h; natrec(succ(n'); isect(void; _. void); _.x.+(unit; x)))];
+         [h.=(h;h; natrec(succ(n'); void => void; _.x.+(unit; x)))];
   [step, reduce 1]; auto
 }.
