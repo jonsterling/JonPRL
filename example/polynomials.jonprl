@@ -57,13 +57,13 @@ Theorem Ran_wf : [
   isect(U{i}; E. isect(U{i}; B. isect(fun(E; _. B); f. isect(fun(E; _. U{i}); φ. isect(B; b.
     member(Ran(E;B;f;φ;b); U{i}))))))
 ] {
-  unfold <Ran Power End Paths>; refine <autoR>.
+  unfold <Ran Power End Paths>; autoR.
 }.
 Theorem Lan_wf : [
   isect(U{i}; E. isect(U{i}; B. isect(fun(E; _. B); f. isect(fun(E; _. U{i}); φ. isect(B; b.
     member(Lan(E;B;f;φ;b); U{i}))))))
 ] {
-  unfold <Lan Copower Coend Paths>; refine <autoR>.
+  unfold <Lan Copower Coend Paths>; autoR.
 }.
 
 ||| Fam
@@ -85,7 +85,7 @@ Theorem dom_wf : [isect(U{i}; B. isect(Fam(B); f. member(dom(f); U{i})))] {
 Theorem map_wf : [
   isect(U{i}; B. isect(Fam(B); f. isect(dom(f); x. member(map(f;x); B))))
 ] {
-  unfold <Fam dom map fst snd>; refine <autoR>.
+  unfold <Fam dom map fst snd>; autoR.
 }.
 
 ||| Fibers of a bundle over a point
@@ -97,7 +97,7 @@ Operator Fiber : (0;0;0).
 Theorem Fiber_wf : [
   isect(U{i}; B. isect(Fam(B); f. isect(B; b. member(Fiber(B;f;b); U{i}))))
 ] {
-  unfold <Fam Fiber dom map fst snd>; refine <autoR>.
+  unfold <Fam Fiber dom map fst snd>; autoR.
 }.
 
 ||| Quantifier adjoints
@@ -116,19 +116,19 @@ Theorem Exists_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
     member(ap(Exists(X;Y;f);φ); fun(Y; _. U{i}))))))
 ] {
-  unfold <Exists Lan Coend Copower Paths>; refine <autoR>.
+  unfold <Exists Lan Coend Copower Paths>; autoR.
 }.
 Theorem Invert_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(Y; _. U{i}); φ.
     member(ap(Invert(f);φ); fun(X; _. U{i}))))))
 ] {
-  unfold <Invert>; refine <autoR>.
+  unfold <Invert>; autoR.
 }.
 Theorem Forall_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
     member(ap(Forall(X;Y;f);φ); fun(Y; _. U{i}))))))
 ] {
-  unfold <Forall Ran End Power Paths>; refine <autoR>
+  unfold <Forall Ran End Power Paths>; autoR
 }.
 
 ||| Examples
@@ -144,7 +144,7 @@ Operator Θ : (0;0).
 
 ||| <> = <> member unit
 Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
-  unfold <Θ δ Exists Lan Coend Copower Paths>; refine <autoR>;
+  unfold <Θ δ Exists Lan Coend Copower Paths>; autoR;
   intro [<>]; auto.
 }.
 
@@ -171,7 +171,7 @@ Operator Embed : (0).
 Theorem Embed_wf : [
   isect(U{i}; B. isect(U{i}; X. member(ap(Embed(B); X); U{i})))
 ] {
-  unfold <Embed CTT>; refine <autoR>.
+  unfold <Embed CTT>; autoR.
 }.
 
 ||| Extension functors of polynomials
@@ -183,8 +183,8 @@ Operator Ext : (0;0).
 Theorem Ext_wf : [
   isect(Polynomial; p. isect(U{i}; X. member(Ext(p;X); U{i'})))
 ] {
-  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; refine <autoR>;
-  unfold <snd>; refine <autoR>
+  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; autoR;
+  unfold <snd>; autoR
 }.
 
 ||| Fam pullbacks
@@ -197,5 +197,5 @@ Theorem Pullback_wf : [
   isect(U{i}; B. isect(Fam(B); f. isect(Fam(B); g.
     member(Pullback(B;f;g); U{i}))))
 ] {
-  unfold <Pullback Fam Fiber map dom fst snd>; refine <autoR>.
+  unfold <Pullback Fam Fiber map dom fst snd>; autoR.
 }.

@@ -45,8 +45,11 @@ struct
      val reservedNames = ["Theorem", "Tactic", "Operator"])
   open TP
 
-  fun parseTm fvs = squares o Syntax.parseAbt fvs o lookupOperator
-  val parsePattern = squares o Pattern.parseAbt [] o lookupOperator
+  fun parseTm fvs w =
+    squares (Syntax.parseAbt (lookupOperator w) (Syntax.initialState fvs))
+
+  fun parsePattern w =
+    squares (Pattern.parseAbt (lookupOperator w) (Pattern.initialState []))
 
   val parseName =
     identifier

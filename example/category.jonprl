@@ -30,12 +30,12 @@ Tactic autoR {
 }.
 
 Theorem RawCat_wf : [member(RawCat; U{i'})] {
-  refine <rawcat_unfold>; auto.
+  rawcat_unfold; auto.
 }.
 
 
 Theorem obj_wf : [isect(RawCat; RC. member(obj(RC); U{i}))] {
-  refine <rawcat_unfold>; auto.
+  rawcat_unfold; auto.
 }.
 
 Theorem hom_wf : [
@@ -44,7 +44,7 @@ Theorem hom_wf : [
   isect(obj(RC); B.
     member(hom(RC;A;B); U{i}))))
 ] {
-  refine <rawcat_unfold>; refine <autoR>.
+  rawcat_unfold; autoR.
 }.
 
 Theorem idn_wf : [
@@ -52,7 +52,7 @@ Theorem idn_wf : [
   isect(obj(RC); A.
     member(idn(RC;A); hom(RC;A;A))))
 ] {
-  refine <rawcat_unfold>; refine <autoR>.
+  rawcat_unfold; autoR.
 }.
 
 Theorem cmp_wf : [
@@ -64,7 +64,7 @@ Theorem cmp_wf : [
   isect(hom(RC; X; Y); g.
     member(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))))))))
 ] {
-  refine <rawcat_unfold>; refine <autoR>.
+  rawcat_unfold; autoR.
 }.
 
 Operator LeftIdentity : (0).
@@ -89,15 +89,15 @@ Operator CmpAssoc : (0).
 ].
 
 Theorem LeftIdentity_wf : [isect(RawCat; RC. member(LeftIdentity(RC); U{i}))] {
-  unfold <LeftIdentity>; refine <rawcat_unfold>; refine <autoR>.
+  unfold <LeftIdentity>; rawcat_unfold; autoR.
 }.
 
 Theorem RightIdentity_wf : [isect(RawCat; RC. member(RightIdentity(RC); U{i}))] {
-  unfold <RightIdentity>; refine <rawcat_unfold>; refine <autoR>.
+  unfold <RightIdentity>; rawcat_unfold; autoR.
 }.
 
 Theorem CmpAssoc_wf : [isect(RawCat; RC. member(CmpAssoc(RC); U{i}))] {
-  unfold <CmpAssoc>; *{refine <rawcat_unfold>; refine <autoR>}.
+  unfold <CmpAssoc>; *{rawcat_unfold; autoR}.
 }.
 
 Operator LawCat : (0).
@@ -105,12 +105,12 @@ Operator LawCat : (0).
 
 Tactic lawcat_unfold {
   unfold <LeftIdentity RightIdentity CmpAssoc LawCat>;
-  refine <rawcat_unfold>.
+  rawcat_unfold.
 }.
 
 Theorem LawCat_wf : [isect(RawCat; RC. member(LawCat(RC); U{i}))] {
   intro @i';
-  [ *{refine <lawcat_unfold>; refine <autoR>}
+  [ *{lawcat_unfold; autoR}
   , lemma <RawCat_wf>
   ]
 }.
@@ -119,12 +119,12 @@ Operator Cat : ().
 [Cat] =def= [subset(RawCat; C. LawCat(C))].
 
 Tactic cat_unfold {
-  unfold <Cat>; refine <lawcat_unfold>.
+  unfold <Cat>; lawcat_unfold.
 }.
 
 Theorem Cat-wf : [member(Cat; U{i'})] {
-  *{refine <cat_unfold>; auto};
-  elim #1; refine <autoR>
+  *{cat_unfold; auto};
+  elim #1; autoR
 }.
 
 Theorem InitialRawCat : [RawCat] {
@@ -139,18 +139,18 @@ Theorem InitialCat : [Cat] {
   intro [InitialRawCat] @i;
   unfold <InitialRawCat>;
   [id, id, cut-lemma <LawCat_wf>; elim #2 [C]];
-  *{refine <lawcat_unfold>; auto; reduce}
+  *{lawcat_unfold; auto; reduce}
 }.
 
 Theorem TerminalRawCat : [RawCat] {
   unfold <RawCat>;
-  intro [unit]; refine <autoR>;
-  intro [lam(A. lam(B. unit))]; refine <autoR>;
+  intro [unit]; autoR;
+  intro [lam(A. lam(B. unit))]; autoR;
 }.
 
 Theorem TerminalCat : [Cat] {
   unfold <Cat>;
   intro [TerminalRawCat] <C> @i; unfold <TerminalRawCat>;
-  *{refine <lawcat_unfold>; auto; reduce};
+  *{lawcat_unfold; auto; reduce};
   elim #3; auto
 }.

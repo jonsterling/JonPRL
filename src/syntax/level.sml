@@ -2,6 +2,9 @@ structure Level :> LEVEL =
 struct
   exception LevelError
 
+  (* This structure gives an abstract type which may be converted
+   * to and from integers >= 0.
+   *)
   structure T :>
   sig
     eqtype t
@@ -22,8 +25,23 @@ struct
 
   type t = T.t
 
+  (* Constraints are represented as the difference between two
+   * levels. So a constraint of 5 means we tried to unify level i
+   * with level i'''''
+   *)
   type constraint = int
+
+  (* A substitution here is represented as a map across integers.
+   * The idea being that all a substitution can do is move a level
+   * up a certain number of levels or down a certain number of levels.
+   * So in practice all substitutions are functions adding or
+   * subtracting a constant amount.
+   *)
   type substitution = int -> int
+
+  (* All operations on universes are defined on the underling integer
+   * representation.
+   *)
 
   fun max (i, j) = T.into (Int.max (T.out i, T.out j))
 

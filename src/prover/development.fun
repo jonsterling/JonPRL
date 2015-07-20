@@ -90,6 +90,19 @@ struct
       go (out t) []
     end
 
+  fun enumerateTactics t =
+    let
+      open Telescope.SnocView
+      fun go Empty bind = bind
+        | go (Snoc (rest, lbl, Object.TACTIC _)) bind =
+          go (out rest) (lbl :: bind)
+        | go (Snoc (rest, lbl, Object.THEOREM {...})) bind =
+          go (out rest) bind
+        | go (Snoc (rest, lbl, Object.OPERATOR {...})) bind =
+          go (out rest) bind
+    in
+      go (out t) []
+    end
 
   val empty = Telescope.empty
 
