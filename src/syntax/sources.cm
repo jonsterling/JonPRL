@@ -1,10 +1,10 @@
 group is
-  ../../lib/sml-abt/abt.cm
-  ../../lib/sml-parcom-wrapper/parcom.cm (bind:(anchor:libs value:../../lib))
-  ../../lib/sml-abt-parser/abt-parser.cm (bind:(anchor:libs value:../../lib))
-  ../../lib/telescopes/telescopes.cm
-  ../../lib/cmlib/cmlib.cm
-  ../../lib/sml-conv/conv.cm
+  $libs/sml-abt/abt.cm
+  $libs/sml-parcom-wrapper/parcom.cm
+  $libs/sml-abt-parser/abt-parser.cm
+  $libs/telescopes/telescopes.cm
+  $libs/cmlib/cmlib.cm
+  $libs/sml-conv/conv.cm
 
   level.sig
   level.sml

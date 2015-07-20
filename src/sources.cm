@@ -7,9 +7,9 @@ group is
   ../lib/sml-abt-parser/abt-parser.cm (bind:(anchor:libs value:../lib))
   ../lib/cmlib/cmlib.cm
 
-  parser/sources.cm
-  syntax/sources.cm
-  prover/sources.cm
+  parser/sources.cm (bind:(anchor:libs value:../lib))
+  syntax/sources.cm (bind:(anchor:libs value:../lib))
+  prover/sources.cm (bind:(anchor:libs value:../lib))
 
   tactic_eval.sml
   development_ast_eval.sml
