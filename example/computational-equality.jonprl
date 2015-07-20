@@ -1,5 +1,5 @@
 Operator Y : (0).
-[Y(f)] =def= [ap(lam(x.ap(f;ap(x;x)));lam(x.ap(f;ap(x;x))))].
+[Y(f)] =def= [lam(x.f (x x)) lam(x.f (x x))].
 
 Theorem test : [ceq(lam(x.x); lam(x.x))] {
   auto
@@ -14,7 +14,7 @@ Theorem test3 : [ceq(lam(x.x); lam(x.spread(pair(x;x); x._.x)))] {
 }.
 
 Theorem y-is-fix-point : [
-  isect(U{i}; A. isect(fun(A; _.A); f . ceq(Y(f); ap(f; Y(f)))))
+  isect(U{i}; A. isect(fun(A; _.A); f . ceq(Y(f); f Y(f))))
 ] {
   auto; unfold <Y>; step; auto
 }.

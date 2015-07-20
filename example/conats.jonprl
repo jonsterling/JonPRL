@@ -25,7 +25,7 @@ Operator csucc : (0).
 [csucc(M)] =def= [inr(M)].
 
 Operator Y : (1).
-[Y(f)] =def= [ap(lam(x.so_apply(f;ap(x;x)));lam(x.so_apply(f;ap(x;x))))].
+[Y(f)] =def= [lam(x.so_apply(f; x x)) lam(x.so_apply(f; x x))].
 
 
 Operator omega : ().
@@ -54,8 +54,8 @@ Theorem succ-wf : [isect(conat; x. member(csucc(x); conat))] {
 Theorem omega-wf : [member(omega; conat)] {
   unfolds; unfold <omega Y>; auto; elim #1;
   focus 0 #{reduce 1; auto};
-  csubst [ceq(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))));
-              inr(ap(lam(x.inr(ap(x;x))); lam(x.inr(ap(x;x))))))]
+  csubst [ceq(lam(x.inr(x x)) lam(x.inr(x x));
+              inr(lam(x.inr(x x))  lam(x.inr(x x))))]
          [h.=(h;h; natrec(succ(n'); isect(void; _. void); _.x.+(unit; x)))];
   [step, reduce 1]; auto
 }.

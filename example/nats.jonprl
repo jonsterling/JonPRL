@@ -10,7 +10,7 @@ Theorem minus-one : [fun(nat; _. nat)] {
   ]; auto
 }.
 
-Theorem minus-one-test : [=(ap(minus-one; succ(succ(zero))); succ(zero); nat)] {
+Theorem minus-one-test : [=(minus-one succ(succ(zero)); succ(zero); nat)] {
   unfold <minus-one>; reduce; auto
 }.
 

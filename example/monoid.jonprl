@@ -13,7 +13,7 @@ Operator Monoid : ().
 [MonoidSig] =def= [prod(U{i}; A. prod(A; zero. fun(A; m. fun(A; n. A))))].
 [car(M)] =def= [spread(M; x.y.x)].
 [ze(M)] =def= [spread(spread(M; x.y.y); x.y.x)].
-[op(M;X;Y)] =def= [ap(ap(spread(spread(M; x.y.y); x.y.y);X);Y)].
+[op(M;X;Y)] =def= [spread(spread(M; x.y.y); x.y.y) X Y].
 [LeftUnit(M)] =def= [isect(car(M); m. =(m; op(M; ze(M); m); car(M)))].
 [RightUnit(M)] =def= [isect(car(M); m. =(op(M; ze(M); m); m; car(M)))].
 [Assoc(M)] =def= [isect(car(M); x. isect(car(M); y. isect(car(M); z. =(op(M;op(M;x;y);z); op(M;x;op(M;y;z));car(M)))))].

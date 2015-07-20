@@ -25,8 +25,8 @@ Operator Copower : (0;0).
 Operator End : (0;0).
 Operator Coend : (0;0).
 
-[End(U;Hom)] =def= [fun(U; A. ap(ap(Hom; A); A))].
-[Coend(U;Hom)] =def= [prod(U; A. ap(ap(Hom; A); A))].
+[End(U;Hom)] =def= [fun(U; A. Hom A A)].
+[Coend(U;Hom)] =def= [prod(U; A. Hom A A)].
 
 Tactic autoR {
   reduce; *{(intro | eq-cd); reduce}
@@ -50,8 +50,8 @@ Theorem Coend_wf : [
 Operator Ran : (0;0;0;0;0).
 Operator Lan : (0;0;0;0;0).
 
-[Ran(E;B;f;φ;b)] =def= [End(E; lam(X. lam(Y. Power(Paths(B; b; ap(f;X)); ap(φ;Y)))))].
-[Lan(E;B;f;φ;b)] =def= [Coend(E; lam(X. lam(Y. Copower(Paths(B; ap(f;X); b); ap(φ;Y)))))].
+[Ran(E;B;f;φ;b)] =def= [End(E; lam(X. lam(Y. Power(Paths(B; b; f X); φ Y))))].
+[Lan(E;B;f;φ;b)] =def= [Coend(E; lam(X. lam(Y. Copower(Paths(B; f X; b); φ Y))))].
 
 Theorem Ran_wf : [
   isect(U{i}; E. isect(U{i}; B. isect(fun(E; _. B); f. isect(fun(E; _. U{i}); φ. isect(B; b.
@@ -74,7 +74,7 @@ Operator map : (0;0).
 
 [Fam(B)] =def= [prod(U{i}; Dom. fun(Dom; _. B))].
 [dom(f)] =def= [fst(f)].
-[map(f;b)] =def= [ap(snd(f); b)].
+[map(f;b)] =def= [snd(f) b].
 
 Theorem Fam_wf : [isect(U{i}; B. member(Fam(B); U{i'}))] {
   unfold <Fam>; auto
@@ -109,24 +109,24 @@ Operator Forall : (0;0;0).
 ||| Exists ⊣ Invert ⊣ Forall
 
 [Exists(X;Y;f)] =def= [lam(φ. lam(y. Lan(X;Y;f;φ;y)))].
-[Invert(f)] =def= [lam(φ. lam(x. ap(φ;ap(f;x))))].
+[Invert(f)] =def= [lam(φ. lam(x. φ (f x)))].
 [Forall(X;Y;f)] =def= [lam(φ. lam(y. Ran(X;Y;f;φ;y)))].
 
 Theorem Exists_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
-    member(ap(Exists(X;Y;f);φ); fun(Y; _. U{i}))))))
+    member(Exists(X;Y;f) φ; fun(Y; _. U{i}))))))
 ] {
   unfold <Exists Lan Coend Copower Paths>; autoR.
 }.
 Theorem Invert_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(Y; _. U{i}); φ.
-    member(ap(Invert(f);φ); fun(X; _. U{i}))))))
+    member(Invert(f) φ; fun(X; _. U{i}))))))
 ] {
   unfold <Invert>; autoR.
 }.
 Theorem Forall_wf : [
   isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
-    member(ap(Forall(X;Y;f);φ); fun(Y; _. U{i}))))))
+    member(Forall(X;Y;f) φ; fun(Y; _. U{i}))))))
 ] {
   unfold <Forall Ran End Power Paths>; autoR
 }.
@@ -140,7 +140,7 @@ Operator Θ : (0;0).
 [δ] =def= [lam(x.pair(x; x))].
 
 ||| equality from left adjoint to substitution
-[Θ(X;p)] =def= [ap(ap(Exists(X;prod(X;_.X); δ); lam(_. unit)); p)].
+[Θ(X;p)] =def= [Exists(X;prod(X;_.X); δ) lam(_. unit) p].
 
 ||| <> = <> member unit
 Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
@@ -169,7 +169,7 @@ Operator Embed : (0).
 [Embed(B)] =def= [lam(A. CTT(A;B))].
 
 Theorem Embed_wf : [
-  isect(U{i}; B. isect(U{i}; X. member(ap(Embed(B); X); U{i})))
+  isect(U{i}; B. isect(U{i}; X. member(Embed(B) X; U{i})))
 ] {
   unfold <Embed CTT>; autoR.
 }.

@@ -7,19 +7,18 @@ Operator cmp : (0;0;0;0;0;0).
 [RawCat] =def= [
   prod(U{i}; Obj.
   prod(fun(Obj; A. fun(Obj; B. U{i})); Hom.
-  prod(fun(Obj; A.
-    ap(ap(Hom; A); A)); Idn.
+  prod(fun(Obj; A. Hom A A); Idn.
   prod(fun(Obj; A. fun(Obj; B. fun(Obj; C.
-    fun(ap(ap(Hom; B); C); g.
-    fun(ap(ap(Hom; A); B); f.
-      ap(ap(Hom; A); C)))))); Cmp.
+    fun(Hom B C; g.
+    fun(Hom A B; f.
+      Hom A C))))); Cmp.
   unit))))
 ].
 
 [obj(C)] =def= [spread(C; x.y.x)].
-[hom(C;A;B)] =def= [ap(ap(spread(spread(C; x.y.y); x.y.x); A); B)].
-[idn(C;A)] =def= [ap(spread(spread(spread(C; x.y.y); x.y.y); x.y.x); A)].
-[cmp(C;X;Y;Z;f;g)] =def= [ap(ap(ap(ap(ap(spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x); X); Y); Z); f); g)].
+[hom(C;A;B)] =def= [spread(spread(C; x.y.y); x.y.x) A B].
+[idn(C;A)] =def= [spread(spread(spread(C; x.y.y); x.y.y); x.y.x) A].
+[cmp(C;X;Y;Z;f;g)] =def= [spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x) X Y Z f g].
 
 Tactic rawcat_unfold {
   unfold <RawCat obj hom idn cmp>.

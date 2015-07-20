@@ -14,6 +14,21 @@ struct
   open ParseAbt OperatorType
 
   local
+    open ParserCombinators CharParser ParserKit
+    infix 2 wth suchthat return guard when
+    infixr 1 ||
+    infixr 4 << >>
+    infix 2 -- ##
+    infixr 3 &&
+    infix $$ \\
+  in
+    fun parseRaw w st = ParseAbt.extensibleParseAbt w (parseAbt w) st
+    and parenthetical w st () = string "(" >> parseAbt w st << string ")" << spaces
+    and expItem w st = (parseRaw w st || $ (parenthetical w st)) wth Atm
+    and parseAbt w st = parsefixityadj (expItem w st) Left (fn (M,N) => AP $$ #[M,N])
+  end
+
+  local
     infix $ \
     infix 8 $$ // \\
     open MyOp
