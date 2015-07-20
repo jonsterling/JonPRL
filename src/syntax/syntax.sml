@@ -66,7 +66,6 @@ struct
     structure UnparseAbt = UnparseAbt (structure Abt = Abt and Unparse = Unparse)
     open UnparseAbt
 
-    exception X
     fun unparseAbt t =
       case out t of
            AP $ #[M, N] => Unparse.adj (unparseAbt M, unparseAbt N)
