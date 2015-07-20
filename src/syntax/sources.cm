@@ -2,6 +2,7 @@ group is
   $libs/sml-abt/abt.cm
   $libs/sml-parcom-wrapper/parcom.cm
   $libs/sml-abt-parser/abt-parser.cm
+  $libs/sml-unparse/unparse.cm
   $libs/telescopes/telescopes.cm
   $libs/cmlib/cmlib.cm
   $libs/sml-conv/conv.cm
