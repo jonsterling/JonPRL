@@ -48,8 +48,8 @@ struct
   type 'a intensional_parser = world -> 'a charParser
   type tactic_parser = (Pos.t -> Tactic.t) intensional_parser
 
-  val parseTm : ParseSyntax.t intensional_parser =
-    squares o ParseSyntax.parseAbt [] o lookupOperator
+  fun parseTm w =
+    squares (ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState []))
 
   val parseCum : tactic_parser =
     fn w => tactic "cum"
@@ -137,7 +137,7 @@ struct
              names = names})
 
   val parseTerms : term list intensional_parser =
-    fn w => opt (squares (commaSep1 (ParseSyntax.parseAbt [] (lookupOperator w))))
+    fn w => opt (squares (commaSep1 (ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState []))))
     wth (fn oxs => getOpt (oxs, []))
 
   val parseEqCdArgs =
