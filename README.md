@@ -102,35 +102,26 @@ operators is presented together with its arity and a brief informal
 description. An arity is a list of the valences of an operator's subterms;
 *valence* is the number of variables to bind.
 
-#### Unit
+| abstract form   | concrete form         | description                                     |
+|-----------------|-----------------------|-------------------------------------------------|
+| `unit()`        | `unit`                | The unit type                                   |
+| `<>()`          | `<>`                  | The trivial inhabitant of `unit`                |
+| `fun(0;1)`      | `(x:A) B`, `A -> B`   | The dependent function type                     |
+| `lam(1)`        | `lam(x.E)`            | The lambda abstraction                          |
+| `ap(0;0)`       | `M N`                 | Function application                            |
+| `isect(0;1)`    | `{x:A} B`, `A => B`   | The family intersection type                    |
+| `prod(0;1)`     | `(x:A) * B`, `A * B`  | The dependent pair type                         |
+| `pair(0;0)`     | `<M,N>`               | The pair operator                               |
+| `spread(0;2)`   | `spread(M; x.y.E)`    | Pattern matching for pairs                      |
+| `subset(0;1)`   | `{x:A | B}`           | The set comprehension type                      |
+| `+(0;0)`        | `+(A;B)`              | The disjoint union type                         |
+| `inl(0)`        | `inl(M)`              | The left union introduction form                |
+| `inr(0)`        | `inr(M)`              | The right union introduction form               |
+| `decide(0;1;1)` | `decide(M; l.E; r.F)` | Pattern matching for disjoint unions            |
+| `void()`        | `void`                | The empty type                                  |
+| `=(0;0;0)`      | `=(M;N;A)`            | The equality type (`M,N` are equal at type `A`) |
+| `member(0;0)`   | `member(M;A)`         | The membership type (`M` is a member of `A`)    |
 
-The unit type is written `unit()` and its trivial inhabitant is written
-`<>()`.
-
-#### Functions
-
-Functions are introduced with `lam(1)` and eliminated with `ap(0;0)`
-(application). `fun(0;1)` gives the type of functions.
-
-#### Pairs
-
-Pairs are introduced with `pair(0;0)` and eliminated with
-`spread(0;2)`. The type of pairs is given by `prod(0;1)`.
-
-#### Sums
-
-Sums are introduced with `inl(0)` and `inr(0)`. They are eliminated
-with `decide(0;1;1)`. The type of sums is built with `+(0;0)`.
-
-#### The empty type
-
-The empty type is built with `void()`.
-
-#### Equality
-
-Equality is written `=(0;0;0)`, where the first two arguments are the
-equal terms and the third argument is the type in which they are
-equal.
 
 #### Second-order variables
 
@@ -143,7 +134,7 @@ As an example, unique existence might be defined as follows:
 ```
 Operator ex_uni : (0;1).
 
-[ex_uni(T;P)] =def= [Σ(T; x. Σ(so_apply(P;x);_.∀(T;y. Π(so_apply(P;y); _.=(x;y;T)))))].
+[ex_uni(T;P)] =def= [(x:T) * so_apply(P;x) * {y:T} so_apply(P;y) => =(x;y;T)].
 ```
 
 Note that `P` is applied to `x` and `y` using `so_apply` rather than
@@ -158,7 +149,3 @@ computationally equivalent if they both diverge or if they run to equivalent
 results. Computational equivalence is a congruence, which means that one can
 also prove that two terms are computationally equivalent if their subterms are
 computationally equivalent.
-
-#### TODO
-
-The following operators exist but are not yet documented: `member`, `subset`, `isect`.
