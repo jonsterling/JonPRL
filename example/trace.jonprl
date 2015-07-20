@@ -1,8 +1,4 @@
-Theorem sym :
-  [isect(U{i}; A.
-   isect(A; M.
-   isect(A; N.
-   isect(=(M; N; A); _. =(N; M; A)))))] {
-   auto; trace "Here's a quick message\n\twith escapes";
-   symmetry; auto
+Theorem sym : [{A:U{i}} {M:A} {N:A} =(M; N; A) => =(N; M; A)] {
+  auto; trace "Here's a quick message\n\twith escapes";
+  symmetry; auto
 }.

@@ -1,15 +1,12 @@
-Theorem proj-equal : [isect(U{i}; A.
-                      isect(U{i}; B.
-                      isect(A; a.
-                      isect(A; a'.
-                      isect(B; b.
-                      isect(B; b'.
-                      isect(=(pair(a;b);pair(a';b');prod(A; _.B)); _.
-                        =(a;a';A))))))))] {
+Theorem proj-equal : [
+  {A:U{i}} {B:U{i}} {a:A} {a':A} {b:B} {b':B}
+    =(<a,b>; <a',b'>; A * B) => =(a;a';A)
+] {
   auto;
-  assert [=(spread(pair(a; b); x.y.x);
-            spread(pair(a'; b'); x.y.x);
+  assert [=(spread(<a,b>; x.y.x);
+            spread(<a',b'>; x.y.x);
             A)];
-  [hyp-subst → #7 [h. =(spread(h; x.y.x); spread(pair(a'; b'); x.y.x); A)],
-   id]; reduce; auto
+  focus 0 #{hyp-subst → #7 [h. =(spread(h; x.y.x); spread(<a',b'>; x.y.x); A)]};
+  reduce;
+  auto
 }.

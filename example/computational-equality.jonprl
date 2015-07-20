@@ -9,7 +9,7 @@ Theorem test2 : [ceq(spread(lam(x.x); x.y.x); spread(lam(x.x); x.y.y))] {
   auto
 }.
 
-Theorem test3 : [ceq(lam(x.x); lam(x.spread(pair(x;x); x._.x)))] {
+Theorem test3 : [ceq(lam(x.x); lam(x.spread(<x,x>; x._.x)))] {
   auto; csymmetry; step; auto
 }.
 
@@ -35,7 +35,7 @@ Operator complex : (1; 1; 2; 0; 1).
 
 Theorem complex-ceq : [
   ceq(complex(x.x; x.unit; x.y.y; <>; x.<>);
-      complex(x.spread(pair(x;x); x._.x); x.unit; x.y.y; <>; x.<>))
+      complex(x.spread(<x,x>; x._.x); x.unit; x.y.y; <>; x.<>))
 ] {
   auto; reduce; auto
 }.

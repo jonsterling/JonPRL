@@ -35,6 +35,7 @@ struct
       || fancyProd w st
       || fancyFun w st
       || fancyIsect w st
+      || fancyPair w st
       || ParseAbt.extensibleParseAbt w (parseAbt w) st
     and fancyQuantifier w st (wrap, sep, oper) =
       wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
@@ -44,6 +45,11 @@ struct
     and fancyIsect w st = fancyQuantifier w st (braces, opt (symbol "->") return (), ISECT)
     and fancyProd w st = fancyQuantifier w st (parens, symbol "*" return (), PROD)
     and fancySubset w st = braces (fancyQuantifier w st (fn x => x, symbol "|" return (), SUBSET))
+    and fancyPair w st =
+      brackets (commaSep (parseAbt w st)) wth rev --
+        (fn [] => fail "Not enough components to product"
+          | [x] => fail "Not enough components to product"
+          | x::xs => succeed (foldl (fn (a,P) => PAIR $$ #[a,P]) x xs))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
       alt [indFunOpr, indIsectOpr, indProdOpr] wth Opr

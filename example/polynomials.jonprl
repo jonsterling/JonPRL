@@ -137,13 +137,13 @@ Operator δ : ().
 Operator Θ : (0;0).
 
 ||| diagonal
-[δ] =def= [lam(x.pair(x; x))].
+[δ] =def= [lam(x.<x, x>)].
 
 ||| equality from left adjoint to substitution
 [Θ(X;p)] =def= [Exists(X;prod(X;_.X); δ) lam(_. unit) p].
 
 ||| <> = <> member unit
-Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
+Theorem eq_unit_unit : [Θ(unit; <<>,<>>)] {
   unfold <Θ δ Exists Lan Coend Copower Paths>; autoR;
   intro [<>]; auto.
 }.

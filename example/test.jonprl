@@ -19,7 +19,7 @@ Theorem test3 : [member(lam(x. x); fun(unit; _. unit))] {
   auto.
 }.
 
-Theorem test4 : [member(lam(x.pair(x;x)); fun(void;_.void))] {
+Theorem test4 : [member(lam(x.<x,x>); fun(void;_.void))] {
   auto.
 }.
 
@@ -28,7 +28,7 @@ Theorem test5 : [fun(void; _. prod(unit; _.unit))] {
 }.
 
 Theorem test6 : [fun(unit; _. prod(unit; _.unit))] {
-  witness [lam(x. pair(x;x))]; auto.
+  witness [lam(x. <x,x>)]; auto.
 }.
 
 Theorem test7 : [fun(prod(void;_.unit); z. void)] {

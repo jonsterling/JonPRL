@@ -117,8 +117,7 @@ Theorem Cat-wf : [member(Cat; U{i'})] {
 Theorem InitialRawCat : [RawCat] {
   unfold <RawCat>;
   intro [void]; auto;
-  intro [lam(A. lam(B. void))]; auto;
-  witness [pair(lam(A. <>); pair(lam(A. <>); <>))]; auto.
+  intro [lam(A. lam(B. void))]; auto
 }.
 
 Theorem InitialCat : [Cat] {

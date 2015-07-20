@@ -1,5 +1,5 @@
 Operator equiv : (0; 0).
-[equiv(A; B)] =def= [prod(fun(A; _.B); _. fun(B; _.A))].
+[equiv(A; B)] =def= [(A -> B) * (B -> A)].
 
 ||| Try the first introduction rule and if we can't
 ||| immediately solve the goal backtrack and try the
@@ -8,18 +8,11 @@ Tactic constructor {
    (!{intro #0; auto} | !{intro #1; auto})
 }.
 
-Theorem commutative :
-        [isect(U{i}; A.
-         isect(U{i}; B.
-         equiv(+(A; B); +(B; A))))] {
+Theorem commutative : [{A:U{i}} {B:U{i}} equiv(+(A; B); +(B; A))] {
   unfold <equiv>; auto; elim #3; constructor
 }.
 
-Theorem plus-assoc :
-        [isect(U{i}; A.
-         isect(U{i}; B.
-         isect(U{i}; C.
-         equiv(+(A; +(B; C)); +(+(A; B); C)))))] {
+Theorem plus-assoc : [{A:U{i}} {B:U{i}} {C:U{i}} equiv(+(A; +(B; C)); +(+(A; B); C))] {
   unfold <equiv>; auto; elim #4;
   [id; id, elim #5, elim #5, intro #1; intro #1];
   auto;
@@ -27,14 +20,10 @@ Theorem plus-assoc :
   constructor
 }.
 
-Theorem void-idr :
-        [isect(U{i}; A.
-           equiv(+(A; void); A))] {
+Theorem void-idr : [{A:U{i}} equiv(+(A; void); A)] {
   unfold <equiv>; auto; [elim #2, intro #0]; auto.
 }.
 
-Theorem void-idl :
-        [isect(U{i}; A.
-           equiv(+(void; A); A))] {
+Theorem void-idl : [{A:U{i}} equiv(+(void; A); A)] {
   unfold <equiv>; auto; [elim #2, intro #1]; auto.
 }.
