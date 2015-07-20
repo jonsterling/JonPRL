@@ -200,6 +200,11 @@ struct
 		  wth (fn (name, i) => fn pos =>
 			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 
+  val parseImageEq : tactic_parser =
+   fn w => symbol "image-eq"
+		  wth (fn name => fn pos =>
+			  IMAGE_EQ {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => symbol "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -274,6 +279,7 @@ struct
       || parseCEqualApprox w
       || parseApproxRefl w
       || parseBottomDiverges w
+      || parseImageEq w
       || parseCHypSubst w
 
   val parse : world -> Tactic.t charParser =

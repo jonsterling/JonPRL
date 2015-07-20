@@ -180,10 +180,15 @@ sig
     val CEqStruct : tactic
     val CEqApprox : tactic
 
-    val ApproxEq : tactic
+    val ApproxEq   : tactic
     val ApproxRefl : tactic
 
     val BottomDiverges : int -> tactic
+
+    val ImageEq    : tactic
+    val ImageMemEq : tactic
+    val ImageElim  : int * name option -> tactic
+    val ImageEqInd : int * (name * name * name * name) option -> tactic
 
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end
