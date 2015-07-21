@@ -1,0 +1,8 @@
+Operator squash : (0).
+[squash(t)] =def= [ image(t;lam(x.<>)) ].
+
+Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
+  intro @i';
+  [ *{unfold <squash>;auto;image-eq;auto}
+  , auto]
+}.
