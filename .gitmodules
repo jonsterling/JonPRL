@@ -14,3 +14,6 @@
 [submodule "lib/sml-abt-parser"]
 	path = lib/sml-abt-parser
 	url = https://github.com/jonsterling/sml-abt-parser.git
+[submodule "lib/sml-unparse"]
+	path = lib/sml-unparse
+	url = https://github.com/jonsterling/sml-unparse.git

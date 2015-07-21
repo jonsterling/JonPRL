@@ -5,21 +5,17 @@ Operator idn : (0;0).
 Operator cmp : (0;0;0;0;0;0).
 
 [RawCat] =def= [
-  prod(U{i}; Obj.
-  prod(fun(Obj; A. fun(Obj; B. U{i})); Hom.
-  prod(fun(Obj; A.
-    ap(ap(Hom; A); A)); Idn.
-  prod(fun(Obj; A. fun(Obj; B. fun(Obj; C.
-    fun(ap(ap(Hom; B); C); g.
-    fun(ap(ap(Hom; A); B); f.
-      ap(ap(Hom; A); C)))))); Cmp.
-  unit))))
+  (Obj:U{i})
+  * (Hom : Obj -> Obj -> U{i})
+  * (Idn : (A:Obj) Hom A A)
+  * (Cmp : (A:Obj) (B:Obj) (C:Obj) Hom B C -> Hom A B -> Hom A C)
+  * unit
 ].
 
 [obj(C)] =def= [spread(C; x.y.x)].
-[hom(C;A;B)] =def= [ap(ap(spread(spread(C; x.y.y); x.y.x); A); B)].
-[idn(C;A)] =def= [ap(spread(spread(spread(C; x.y.y); x.y.y); x.y.x); A)].
-[cmp(C;X;Y;Z;f;g)] =def= [ap(ap(ap(ap(ap(spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x); X); Y); Z); f); g)].
+[hom(C;A;B)] =def= [spread(spread(C; x.y.y); x.y.x) A B].
+[idn(C;A)] =def= [spread(spread(spread(C; x.y.y); x.y.y); x.y.x) A].
+[cmp(C;X;Y;Z;f;g)] =def= [spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x) X Y Z f g].
 
 Tactic rawcat_unfold {
   unfold <RawCat obj hom idn cmp>.
@@ -34,81 +30,72 @@ Theorem RawCat_wf : [member(RawCat; U{i'})] {
 }.
 
 
-Theorem obj_wf : [isect(RawCat; RC. member(obj(RC); U{i}))] {
+Theorem obj_wf : [{RC:RawCat} member(obj(RC); U{i})] {
   rawcat_unfold; auto.
 }.
 
 Theorem hom_wf : [
-  isect(RawCat; RC.
-  isect(obj(RC); A.
-  isect(obj(RC); B.
-    member(hom(RC;A;B); U{i}))))
+  {RC:RawCat} {A:obj(RC)} {B:obj(RC)} member(hom(RC;A;B); U{i})
 ] {
   rawcat_unfold; autoR.
 }.
 
 Theorem idn_wf : [
-  isect(RawCat; RC.
-  isect(obj(RC); A.
-    member(idn(RC;A); hom(RC;A;A))))
+  {RC:RawCat} {A:obj(RC)} member(idn(RC; A); hom(RC; A; A))
 ] {
   rawcat_unfold; autoR.
 }.
 
 Theorem cmp_wf : [
-  isect(RawCat; RC.
-  isect(obj(RC); X.
-  isect(obj(RC); Y.
-  isect(obj(RC); Z.
-  isect(hom(RC; Y; Z); f.
-  isect(hom(RC; X; Y); g.
-    member(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))))))))
+  {RC:RawCat}
+  {X:obj(RC)}
+  {Y:obj(RC)}
+  {Z:obj(RC)}
+  {f:hom(RC; Y; Z)}
+  {g:hom(RC; X; Y)}
+    member(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))
 ] {
   rawcat_unfold; autoR.
 }.
 
 Operator LeftIdentity : (0).
-[LeftIdentity(C)] =def= [isect(obj(C); A. isect(obj(C); B. isect(hom(C;A;B); f. =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B)))))].
+[LeftIdentity(C)] =def= [{A:obj(C)} {B:obj(C)} {f:hom(C;A;B)} =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B))].
 
 Operator RightIdentity : (0).
-[RightIdentity(C)] =def= [isect(obj(C); A. isect(obj(C); B. isect(hom(C;A;B); f. =(cmp(C;A;A;B; f; idn(C;A)); f; hom(C;A;B)))))].
+[RightIdentity(C)] =def= [{A:obj(C)} {B:obj(C)} {f:hom(C;A;B)} =(cmp(C;A;A;B; f; idn(C;A)); f; hom(C;A;B))].
 
 Operator CmpAssoc : (0).
 [CmpAssoc(C)] =def= [
-  isect(obj(C); W.
-  isect(obj(C); X.
-  isect(obj(C); Y.
-  isect(obj(C); Z.
-  isect(hom(C;W;X); f.
-  isect(hom(C;X;Y); g.
-  isect(hom(C;Y;Z); h.
+  {W:obj(C)} {X:obj(C)} {Y:obj(C)} {Z:obj(C)}
+  {f:hom(C;W;X)}
+  {g:hom(C;X;Y)}
+  {h:hom(C;Y;Z)}
     =(cmp(C;W;X;Z; cmp(C;X;Y;Z; h;g); f);
       cmp(C;W;Y;Z; h; cmp(C;W;X;Y; g;f));
       hom(C;W;Z))
-  )))))))
 ].
 
-Theorem LeftIdentity_wf : [isect(RawCat; RC. member(LeftIdentity(RC); U{i}))] {
+Theorem LeftIdentity_wf : [{RC:RawCat} member(LeftIdentity(RC); U{i})] {
   unfold <LeftIdentity>; rawcat_unfold; autoR.
 }.
 
-Theorem RightIdentity_wf : [isect(RawCat; RC. member(RightIdentity(RC); U{i}))] {
+Theorem RightIdentity_wf : [{RC:RawCat} member(RightIdentity(RC); U{i})] {
   unfold <RightIdentity>; rawcat_unfold; autoR.
 }.
 
-Theorem CmpAssoc_wf : [isect(RawCat; RC. member(CmpAssoc(RC); U{i}))] {
+Theorem CmpAssoc_wf : [{RC:RawCat} member(CmpAssoc(RC); U{i})] {
   unfold <CmpAssoc>; *{rawcat_unfold; autoR}.
 }.
 
 Operator LawCat : (0).
-[LawCat(RC)] =def= [prod(LeftIdentity(RC); _. prod(RightIdentity(RC); _. CmpAssoc(RC)))].
+[LawCat(RC)] =def= [LeftIdentity(RC) * RightIdentity(RC) * CmpAssoc(RC)].
 
 Tactic lawcat_unfold {
   unfold <LeftIdentity RightIdentity CmpAssoc LawCat>;
   rawcat_unfold.
 }.
 
-Theorem LawCat_wf : [isect(RawCat; RC. member(LawCat(RC); U{i}))] {
+Theorem LawCat_wf : [{RC:RawCat} member(LawCat(RC); U{i})] {
   intro @i';
   [ *{lawcat_unfold; autoR}
   , lemma <RawCat_wf>
@@ -116,7 +103,7 @@ Theorem LawCat_wf : [isect(RawCat; RC. member(LawCat(RC); U{i}))] {
 }.
 
 Operator Cat : ().
-[Cat] =def= [subset(RawCat; C. LawCat(C))].
+[Cat] =def= [{C : RawCat | LawCat(C)}].
 
 Tactic cat_unfold {
   unfold <Cat>; lawcat_unfold.
@@ -130,8 +117,7 @@ Theorem Cat-wf : [member(Cat; U{i'})] {
 Theorem InitialRawCat : [RawCat] {
   unfold <RawCat>;
   intro [void]; auto;
-  intro [lam(A. lam(B. void))]; auto;
-  witness [pair(lam(A. <>); pair(lam(A. <>); <>))]; auto.
+  intro [lam(A. lam(B. void))]; auto
 }.
 
 Theorem InitialCat : [Cat] {

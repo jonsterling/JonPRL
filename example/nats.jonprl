@@ -2,7 +2,7 @@ Theorem natp-example : [nat] {
   witness [succ(zero)]; auto
 }.
 
-Theorem minus-one : [fun(nat; _. nat)] {
+Theorem minus-one : [nat -> nat] {
   intro <n>; [id, auto];
   elim #1;
   [ witness [zero]
@@ -10,7 +10,7 @@ Theorem minus-one : [fun(nat; _. nat)] {
   ]; auto
 }.
 
-Theorem minus-one-test : [=(ap(minus-one; succ(succ(zero))); succ(zero); nat)] {
+Theorem minus-one-test : [=(minus-one succ(succ(zero)); succ(zero); nat)] {
   unfold <minus-one>; reduce; auto
 }.
 
@@ -21,22 +21,22 @@ Tactic t {
   unfold <plus>; auto 0; elim #1; reduce; auto 0.
 }.
 
-Theorem plus-id-left : [isect(nat; n. =(plus(zero; n); n; nat))] {
+Theorem plus-id-left : [{n:nat} =(plus(zero; n); n; nat)] {
   t
 }.
 
-Theorem plus-id-right : [isect(nat; n. =(plus(n; zero); n; nat))] {
+Theorem plus-id-right : [{n:nat} =(plus(n; zero); n; nat)] {
   t
 }.
 
 Theorem succ-right : [
-  isect(nat; n. isect(nat; m. =(plus(n; succ(m)); succ(plus(n; m)); nat)))
+  {n:nat} {m:nat} =(plus(n; succ(m)); succ(plus(n; m)); nat)
 ] {
   t
 }.
 
 Theorem plus-commutes : [
-  isect(nat; n.isect(nat; m. =(plus(n; m); plus(m; n); nat)))
+  {n:nat} {m:nat} =(plus(n; m); plus(m; n); nat)
 ] {
   ||| Kick off the induction and do the boring computation thingies.
   t;
@@ -55,5 +55,4 @@ Theorem plus-commutes : [
   elim #5 [m]; auto; elim #6 [n']; unfold <plus>; auto;
   hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
   auto; eq-cd; auto
-
 }.

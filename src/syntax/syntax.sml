@@ -14,88 +14,106 @@ struct
   open ParseAbt OperatorType
 
   local
+    open JonprlTokenParser
+    open ParserCombinators CharParser ParserKit
+    infix 2 wth suchthat return guard when
+    infixr 1 ||
+    infixr 4 << >>
+    infix 2 -- ##
+    infixr 3 &&
+    infix $$ \\
+  in
+    val indFunOpr =
+      (spaces >> symbol "->" >> spaces) return Infix (Right, 9, fn (A,B) => FUN $$ #[A, Variable.named "_" \\ B])
+    val indIsectOpr =
+      (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "_" \\ B])
+    val indProdOpr =
+      (spaces >> symbol "*" >> spaces) return Infix (Right, 10, fn (A,B) => PROD $$ #[A, Variable.named "_" \\ B])
+
+    fun parseRaw w st () =
+      fancySubset w st
+      || fancyProd w st
+      || fancyFun w st
+      || fancyIsect w st
+      || fancyPair w st
+      || ParseAbt.extensibleParseAbt w (parseAbt w) st
+    and fancyQuantifier w st (wrap, sep, oper) =
+      wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
+        parseAbt w st' wth (fn B =>
+          oper $$ #[A, x \\ B]))
+    and fancyFun w st = fancyQuantifier w st (parens, opt (symbol "->") return (), FUN)
+    and fancyIsect w st = fancyQuantifier w st (braces, opt (symbol "->") return (), ISECT)
+    and fancyProd w st = fancyQuantifier w st (parens, symbol "*" return (), PROD)
+    and fancySubset w st = braces (fancyQuantifier w st (fn x => x, symbol "|" return (), SUBSET))
+    and fancyPair w st =
+      brackets (commaSep (parseAbt w st)) wth rev --
+        (fn [] => fail "Not enough components to product"
+          | [x] => fail "Not enough components to product"
+          | x::xs => succeed (foldl (fn (a,P) => PAIR $$ #[a,P]) x xs))
+    and parenthetical w st () = parens (parseAbt w st)
+    and fixityItem w st =
+      alt [indFunOpr, indIsectOpr, indProdOpr] wth Opr
+      || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
+    and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
+  end
+
+  structure UnparseAbt : UNPARSE_ABT =
+  struct
     infix $ \
     infix 8 $$ // \\
     open MyOp
-  in
-    val toString =
-    let
-      fun enclose E =
-        case out E of
-             ` x => display E
-           | O $ #[] => display E
-           | _ => "(" ^ display E ^ ")"
 
-      and display E =
-        case out E of
-             ISECT $ #[A,xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 "⋂" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
-               end
+    structure UnparseAbt = UnparseAbt (structure Abt = Abt and Unparse = Unparse)
+    open UnparseAbt
 
-           | FUN $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "Π" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
-                 else
-                   enclose A ^ " => " ^ display B
-               end
-
-           | PROD $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "Σ" ^ Variable.toString x ^ " ∈ " ^ display A ^ ". " ^ display B
-                 else
-                   enclose A ^ " × " ^ display B
-               end
-
-           | SUBSET $ #[A, xB] =>
-               let
-                 val (x, B) = unbind xB
-               in
-                 if hasFree (B, x) then
-                   "{" ^ Variable.toString x ^ " ∈ " ^ display A ^ " | " ^ display B ^ "}"
-                 else
-                   "{" ^ display A ^ " | " ^ display B ^ "}"
-               end
-
-
-           | LAM $ #[xE] =>
-               let
-                 val (x, E) = unbind xE
-               in
-                 "λ" ^ dvar (x, E) ^ ". " ^ display E
-               end
-
-           | AP $ #[M, N] =>
-               enclose M ^ "[" ^ display N ^ "]"
-
-           | PAIR $ #[M, N] =>
-               "⟨" ^ display M ^ ", " ^ display N ^ "⟩"
-
-           | MEM $ #[M, A] =>
-               display M ^ " ∈ " ^ display A
-
-           | EQ $ #[M, N, A] =>
-               display M ^ " = " ^ display N ^ " ∈ " ^ display A
-
-           | UNIV i $ #[] =>
-               "U{" ^ Level.toString i ^ "}"
-
-           | _ => toStringOpen display E
-
-      and dvar (x, E) =
-        if hasFree (E, x) then Variable.toString x else "_"
-    in
-      display
-    end
+    fun unparseAbt t =
+      case out t of
+           AP $ #[M, N] => Unparse.adj (unparseAbt M, unparseAbt N)
+         | FUN $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("(" ^ Variable.toString x ^ ":" ^ toString A ^ ") " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 9, "->") (unparseAbt A, unparseAbt B)
+             end
+         | ISECT $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("{" ^ Variable.toString x ^ ":" ^ toString A ^ "} " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 9, "=>") (unparseAbt A, unparseAbt B)
+             end
+         | PROD $ #[A, xB] =>
+             let
+               val (x,B) = unbind xB
+             in
+               if hasFree (B, x) then
+                 Unparse.atom
+                   ("(" ^ Variable.toString x ^ ":" ^ toString A ^ ") * " ^ toString B)
+               else
+                 Unparse.infix' (Unparse.Right, 10, "*") (unparseAbt A, unparseAbt B)
+             end
+         | SUBSET $ #[A, xB] =>
+             let
+               val (x, B) = unbind xB
+             in
+               Unparse.atom
+                 ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
+             end
+         | PAIR $ #[M,N] =>
+             Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
+         | _ => inner t
+    and inner t = UnparseAbt.extensibleUnparseAbt unparseAbt t
+    and toString t = Unparse.parens (Unparse.done (unparseAbt t))
   end
+
+  val toString = UnparseAbt.toString
 end
 
 structure Conv = Conv(Syntax)

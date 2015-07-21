@@ -9,7 +9,7 @@ Operator snd : (0).
 Operator CTT : (0;0).
 Operator Paths : (0;0;0).
 
-[CTT(A;B)] =def= [fun(A; _. B)].
+[CTT(A;B)] =def= [A -> B].
 [Paths(A;x;y)] =def= [=(x;y;A)].
 
 ||| Power / Copower
@@ -17,30 +17,28 @@ Operator Paths : (0;0;0).
 Operator Power : (0;0).
 Operator Copower : (0;0).
 
-[Power(A;B)] =def= [fun(A; _. B)].
-[Copower(A;B)] =def= [prod(A; _. B)].
+[Power(A;B)] =def= [A -> B].
+[Copower(A;B)] =def= [A * B].
 
 ||| End / Coend
 
 Operator End : (0;0).
 Operator Coend : (0;0).
 
-[End(U;Hom)] =def= [fun(U; A. ap(ap(Hom; A); A))].
-[Coend(U;Hom)] =def= [prod(U; A. ap(ap(Hom; A); A))].
+[End(U;Hom)] =def= [(A:U) Hom A A].
+[Coend(U;Hom)] =def= [(A:U) * Hom A A].
 
 Tactic autoR {
   reduce; *{(intro | eq-cd); reduce}
 }.
 
 Theorem End_wf : [
-  isect(U{i}; U. isect(fun(U; _. fun(U; _. U{i})); Hom.
-    member(End(U;Hom); U{i})))
+  {U:U{i}} {Hom : U -> U -> U{i}} member(End(U;Hom); U{i})
 ] {
   unfold <End>; auto.
 }.
 Theorem Coend_wf : [
-  isect(U{i}; U. isect(fun(U; _. fun(U; _. U{i})); Hom.
-    member(Coend(U;Hom); U{i})))
+  {U:U{i}} {Hom : U -> U -> U{i}} member(Coend(U;Hom); U{i})
 ] {
   unfold <Coend>; auto.
 }.
@@ -50,18 +48,18 @@ Theorem Coend_wf : [
 Operator Ran : (0;0;0;0;0).
 Operator Lan : (0;0;0;0;0).
 
-[Ran(E;B;f;φ;b)] =def= [End(E; lam(X. lam(Y. Power(Paths(B; b; ap(f;X)); ap(φ;Y)))))].
-[Lan(E;B;f;φ;b)] =def= [Coend(E; lam(X. lam(Y. Copower(Paths(B; ap(f;X); b); ap(φ;Y)))))].
+[Ran(E;B;f;φ;b)] =def= [End(E; lam(X. lam(Y. Power(Paths(B; b; f X); φ Y))))].
+[Lan(E;B;f;φ;b)] =def= [Coend(E; lam(X. lam(Y. Copower(Paths(B; f X; b); φ Y))))].
 
 Theorem Ran_wf : [
-  isect(U{i}; E. isect(U{i}; B. isect(fun(E; _. B); f. isect(fun(E; _. U{i}); φ. isect(B; b.
-    member(Ran(E;B;f;φ;b); U{i}))))))
+  {E:U{i}} {B:U{i}} {f : E -> B} {φ : E -> U{i}} {b:B}
+    member(Ran(E;B;f;φ;b); U{i})
 ] {
   unfold <Ran Power End Paths>; autoR.
 }.
 Theorem Lan_wf : [
-  isect(U{i}; E. isect(U{i}; B. isect(fun(E; _. B); f. isect(fun(E; _. U{i}); φ. isect(B; b.
-    member(Lan(E;B;f;φ;b); U{i}))))))
+  {E:U{i}} {B:U{i}} {f : E -> B} {φ : E -> U{i}} {b:B}
+    member(Lan(E;B;f;φ;b); U{i})
 ] {
   unfold <Lan Copower Coend Paths>; autoR.
 }.
@@ -72,18 +70,18 @@ Operator Fam : (0).
 Operator dom : (0).
 Operator map : (0;0).
 
-[Fam(B)] =def= [prod(U{i}; Dom. fun(Dom; _. B))].
+[Fam(B)] =def= [(Dom:U{i}) * Dom -> B].
 [dom(f)] =def= [fst(f)].
-[map(f;b)] =def= [ap(snd(f); b)].
+[map(f;b)] =def= [snd(f) b].
 
-Theorem Fam_wf : [isect(U{i}; B. member(Fam(B); U{i'}))] {
+Theorem Fam_wf : [{B:U{i}} member(Fam(B); U{i'})] {
   unfold <Fam>; auto
 }.
-Theorem dom_wf : [isect(U{i}; B. isect(Fam(B); f. member(dom(f); U{i})))] {
+Theorem dom_wf : [{B:U{i}} {f:Fam(B)} member(dom(f); U{i})] {
   unfold <Fam map dom fst>; auto
 }.
 Theorem map_wf : [
-  isect(U{i}; B. isect(Fam(B); f. isect(dom(f); x. member(map(f;x); B))))
+  {B:U{i}} {f:Fam(B)} {x:dom(f)} member(map(f;x); B)
 ] {
   unfold <Fam dom map fst snd>; autoR.
 }.
@@ -92,10 +90,10 @@ Theorem map_wf : [
 
 Operator Fiber : (0;0;0).
 
-[Fiber(B; f; b)] =def= [prod(dom(f); x. =(b; map(f;x); B))].
+[Fiber(B; f; b)] =def= [(x : dom(f)) * =(b; map(f; x); B)].
 
 Theorem Fiber_wf : [
-  isect(U{i}; B. isect(Fam(B); f. isect(B; b. member(Fiber(B;f;b); U{i}))))
+  {B:U{i}} {f:Fam(B)} {b:B} member(Fiber(B;f;b); U{i})
 ] {
   unfold <Fam Fiber dom map fst snd>; autoR.
 }.
@@ -109,24 +107,24 @@ Operator Forall : (0;0;0).
 ||| Exists ⊣ Invert ⊣ Forall
 
 [Exists(X;Y;f)] =def= [lam(φ. lam(y. Lan(X;Y;f;φ;y)))].
-[Invert(f)] =def= [lam(φ. lam(x. ap(φ;ap(f;x))))].
+[Invert(f)] =def= [lam(φ. lam(x. φ (f x)))].
 [Forall(X;Y;f)] =def= [lam(φ. lam(y. Ran(X;Y;f;φ;y)))].
 
 Theorem Exists_wf : [
-  isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
-    member(ap(Exists(X;Y;f);φ); fun(Y; _. U{i}))))))
+  {X:U{i}} {Y:U{i}} {f : X -> Y} {φ : X -> U{i}}
+    member(Exists(X;Y;f) φ; Y -> U{i})
 ] {
   unfold <Exists Lan Coend Copower Paths>; autoR.
 }.
 Theorem Invert_wf : [
-  isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(Y; _. U{i}); φ.
-    member(ap(Invert(f);φ); fun(X; _. U{i}))))))
+{X:U{i}} {Y:U{i}} {f : X -> Y} {φ : Y -> U{i}}
+    member(Invert(f) φ; X -> U{i})
 ] {
   unfold <Invert>; autoR.
 }.
 Theorem Forall_wf : [
-  isect(U{i}; X. isect(U{i}; Y. isect(fun(X; _. Y); f. isect(fun(X; _. U{i}); φ.
-    member(ap(Forall(X;Y;f);φ); fun(Y; _. U{i}))))))
+  {X:U{i}} {Y:U{i}} {f : X -> Y} {φ : X -> U{i}}
+    member(Forall(X;Y;f) φ; Y -> U{i})
 ] {
   unfold <Forall Ran End Power Paths>; autoR
 }.
@@ -137,13 +135,13 @@ Operator δ : ().
 Operator Θ : (0;0).
 
 ||| diagonal
-[δ] =def= [lam(x.pair(x; x))].
+[δ] =def= [lam(x.<x, x>)].
 
 ||| equality from left adjoint to substitution
-[Θ(X;p)] =def= [ap(ap(Exists(X;prod(X;_.X); δ); lam(_. unit)); p)].
+[Θ(X;p)] =def= [Exists(X;X*X; δ) lam(_. unit) p].
 
 ||| <> = <> member unit
-Theorem eq_unit_unit : [Θ(unit; pair(<>; <>))] {
+Theorem eq_unit_unit : [Θ(unit; <<>,<>>)] {
   unfold <Θ δ Exists Lan Coend Copower Paths>; autoR;
   intro [<>]; auto.
 }.
@@ -154,7 +152,7 @@ Operator Polynomial : ().
 Operator base-space : (0).
 Operator fam : (0).
 
-[Polynomial] =def= [prod(U{i}; B. Fam(B))].
+[Polynomial] =def= [(B:U{i}) * Fam(B)].
 [base-space(E)] =def= [fst(E)].
 [fam(E)] =def= [snd(E)].
 
@@ -169,33 +167,31 @@ Operator Embed : (0).
 [Embed(B)] =def= [lam(A. CTT(A;B))].
 
 Theorem Embed_wf : [
-  isect(U{i}; B. isect(U{i}; X. member(ap(Embed(B); X); U{i})))
+  {B:U{i}} {X:U{i}} member(Embed(B) X; U{i})
 ] {
-  unfold <Embed CTT>; autoR.
+  unfold <Embed CTT>; autoR
 }.
 
 ||| Extension functors of polynomials
 
 Operator Ext : (0;0).
 
-[Ext(p;X)] =def= [prod(base-space(p); b. unit)].
+[Ext(p;X)] =def= [base-space(p) * unit].
 
 Theorem Ext_wf : [
-  isect(Polynomial; p. isect(U{i}; X. member(Ext(p;X); U{i'})))
+  {p:Polynomial} {X:U{i}} member(Ext(p;X); U{i'})
 ] {
-  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; autoR;
-  unfold <snd>; autoR
+  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; auto
 }.
 
 ||| Fam pullbacks
 
 Operator Pullback : (0;0;0).
 
-[Pullback(B;f;g)] =def= [prod(dom(f); x. Fiber(B; g; map(f;x)))].
+[Pullback(B;f;g)] =def= [(x : dom(f)) * Fiber(B; g; map(f;x))].
 
 Theorem Pullback_wf : [
-  isect(U{i}; B. isect(Fam(B); f. isect(Fam(B); g.
-    member(Pullback(B;f;g); U{i}))))
+  {B:U{i}} {f:Fam(B)} {g:Fam(B)} member(Pullback(B;f;g); U{i})
 ] {
   unfold <Pullback Fam Fiber map dom fst snd>; autoR.
 }.
