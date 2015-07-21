@@ -6,3 +6,18 @@ Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
   [ *{unfold <squash>;auto;image-eq;auto}
   , auto]
 }.
+
+Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
+  intro @i';[ id, auto ];
+  intro @i;[ id, auto ];
+  unfold <squash>;
+  witness [ap(lam(_.<>);_)];auto;
+  image-mem-eq;auto
+}.
+
+Theorem approx_id_refl_wf : [
+  =(approx(lam(x.x);lam(x.x));approx(lam(x.x);lam(x.x));U{i})
+] {
+  approx-ext-eq;lemma <implies_squash>
+  
+}.

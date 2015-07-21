@@ -199,6 +199,10 @@ struct
     fn w => tactic "areflexivity"
       wth (fn name => fn pos => APPROX_REFL {name = name, pos = pos})
 
+  val parseApproxExtEq : tactic_parser =
+   fn w => tactic "approx-ext-eq"
+		  wth (fn name => fn pos => APPROX_EXT_EQ {name = name, pos = pos})
+
   val parseBottomDiverges : tactic_parser =
    fn w => tactic "bot-div"
 		  && parseIndex
@@ -209,6 +213,11 @@ struct
    fn w => symbol "image-eq"
 		  wth (fn name => fn pos =>
 			  IMAGE_EQ {name = name, pos = pos})
+
+  val parseImageMemEq : tactic_parser =
+   fn w => symbol "image-mem-eq"
+		  wth (fn name => fn pos =>
+			  IMAGE_MEM_EQ {name = name, pos = pos})
 
   val parseAssumption : tactic_parser =
     fn w => tactic "assumption"
@@ -282,7 +291,9 @@ struct
       || parseCEqualApprox w
       || parseApproxRefl w
       || parseBottomDiverges w
+      || parseApproxExtEq w
       || parseImageEq w
+      || parseImageMemEq w
       || parseCHypSubst w
       || parseCustomTactic w
 

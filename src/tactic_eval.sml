@@ -56,10 +56,11 @@ struct
       | CEQUAL_STRUCT a => an a CEqStruct
       | CEQUAL_APPROX a => an a CEqApprox
       | APPROX_REFL a => an a ApproxRefl
+      | APPROX_EXT_EQ a => an a ApproxExtEq
       | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
       | IMAGE_EQ a => an a ImageEq
-      (*| IMAGE_MEM_EQ a => an a ImageMemEq
-      | IMAGE_ELIM a => an a (ImageElim)
+      | IMAGE_MEM_EQ a => an a ImageMemEq
+      (*| IMAGE_ELIM a => an a (ImageElim)
       | IMAGE_EQ_IND a => an a (ImageEqInd)*)
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
