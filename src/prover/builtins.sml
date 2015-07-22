@@ -21,6 +21,7 @@ struct
     val unfoldMember =
       makeConv MEM (fn #[M,A] => EQ $$ #[M,M,A] | _ => raise Conv)
   in
+    (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
     val definitions = unfoldMember
   end
 
