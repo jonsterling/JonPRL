@@ -1,0 +1,12 @@
+language: sml
+before_install:
+  - sudo add-apt-repository ppa:hrzhu/smlnj-backport
+  - sudo apt-get update -qq
+  - sudo apt-get install -y smlnj
+install:
+  - git submodule init
+  - git submodule update --init --recursive
+script:
+  - make smlnj
+  - make test
+
