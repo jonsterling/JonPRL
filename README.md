@@ -13,7 +13,6 @@ JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build.  First
 make sure you have SML/NJ set up properly. Then, install JonPRL's dependencies:
 
 ```sh
-git submodule init
 git submodule update --init --recursive
 ```
 
