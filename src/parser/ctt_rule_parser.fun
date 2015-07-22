@@ -215,10 +215,6 @@ struct
              ASSERT ({assertion = term, name = hyp},
                      {name = name, pos = pos}))
 
-  val parseMemCd : tactic_parser =
-    fn w => tactic "mem-cd"
-      wth (fn name => fn pos => MEM_CD {name = name, pos = pos})
-
   val parseAuto : tactic_parser =
     fn w => tactic "auto" && opt parseInt
       wth (fn (name, oi) => fn pos => AUTO (oi, {name = name, pos = pos}))
@@ -266,7 +262,6 @@ struct
       || parseCum w
       || parseAuto w
       || parseReduce w
-      || parseMemCd w
       || parseAssumption w
       || parseAssert w
       || parseSymmetry w

@@ -35,3 +35,6 @@ group is
 
   pattern_compiler.fun
   pattern_compiler.sig
+
+  builtins.sig
+  builtins.sml

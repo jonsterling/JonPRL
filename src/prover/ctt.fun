@@ -17,7 +17,10 @@ functor Ctt
 
    structure Conv : CONV where type term = Syntax.t
    structure Semantics : SMALL_STEP where type syn = Syntax.t
-   sharing type Development.term = Syntax.t) : CTT =
+   sharing type Development.term = Syntax.t
+   structure Builtins : BUILTINS
+     where type Conv.term = Conv.term
+     where type label = Development.label) : CTT =
 struct
   structure Lcf = Lcf
   structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
@@ -43,9 +46,10 @@ struct
   infix $ \
   infix 8 $$ // \\
 
+  exception Refine
+
   structure Rules =
   struct
-    exception Refine
     open Sequent
     infix >>
 
@@ -682,15 +686,6 @@ struct
                | _ => raise Refine)
       end
 
-    fun MemCD (H >> P) =
-      let
-        val #[M, A] = P ^! MEM
-      in
-        [ H >> EQ $$ #[M, M, A]
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
-
     fun Witness M (H >> P) =
       let
         val M = Context.rebind H M
@@ -1003,15 +998,16 @@ struct
       fun convTheorem lbl world M =
         case out M of
             CUSTOM {label,...} $ _ =>
-            if Development.Telescope.Label.eq (label, lbl) then
+              if Development.Telescope.Label.eq (label, lbl) then
                 Development.lookupExtract world lbl
-            else
+              else
                 raise Conv.Conv
           | _ => raise Conv.Conv
 
       fun convLabel lbl world =
-        Development.lookupDefinition world lbl
-          handle Subscript => convTheorem lbl world
+        Builtins.unfold lbl
+          handle _ => Development.lookupDefinition world lbl
+            handle Subscript => convTheorem lbl world
     in
     fun Unfolds (world, lbls) (H >> P) =
       let
@@ -1308,4 +1304,5 @@ structure Ctt = Ctt
    structure Conv = Conv
    structure Semantics = Semantics
    structure Sequent = Sequent
-   structure Development = Development)
+   structure Development = Development
+   structure Builtins = Builtins)

@@ -7,6 +7,8 @@ sig
   type world
   type tactic
 
+  exception Refine
+
   structure Sequent : SEQUENT
     where type term = term
 
@@ -155,7 +157,6 @@ sig
     val BaseMemberEq : tactic
     val BaseElimEq : int * name option -> tactic
 
-    val MemCD : tactic
     val Witness : term -> tactic
 
     val Assumption : tactic

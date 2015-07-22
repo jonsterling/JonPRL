@@ -3,11 +3,6 @@ signature PARSE_CTT =
     where type Operator.t = string OperatorType.operator
     where type ParseOperator.world = string -> Arity.t
 
-signature PARSE_PATTERN =
-  PARSE_ABT
-    where type Operator.t = string PatternOperatorType.operator
-    where type ParseOperator.world = string -> Arity.t
-
 functor DevelopmentParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
