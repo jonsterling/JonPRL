@@ -1,0 +1,9 @@
+Tactic simpleSolve {
+    @{ [X |- X] => assumption
+     }
+}.
+
+Theorem match_example : [{A : U{i}} {B : U{i}} A -> B -> A] {
+  intro; [intro, auto]; [intro, auto]; [intro, auto]; [id, auto];
+  simpleSolve
+}.

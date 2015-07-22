@@ -34,7 +34,7 @@ struct
 
   (* OK this is just awful. But it's the simplest working idea I have. *)
   fun subset H 0 = [[]]
-    | subset [] _ = raise Mismatch (* Ran out of subsets to try *)
+    | subset [] _ = []
     | subset (x :: xs) n =
       subset xs n @ List.map (fn xs => x :: xs) (subset xs (n - 1))
 
