@@ -102,6 +102,7 @@ struct
       val goal = convertInCtx H goal
       val hyps = List.map (convertInCtx H) hyps
       val sol  = Unify.unify (goal, convert P)
+                   handle Unify.Mismatch _ => raise Mismatch
 
       fun go [] = raise Mismatch
         | go (hs :: subsets) =
