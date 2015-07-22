@@ -6,6 +6,10 @@ sig
     type level
     type meta = TacticMetadata.metadata
 
+    type branch
+    datatype ctx_pattern = CtxPattern of {goal : term,
+                                          hyps : term list}
+
     datatype t =
         LEMMA of label * meta
       | UNFOLD of (label * level option) list * meta
@@ -58,10 +62,12 @@ sig
       | FAIL of meta
       | TRACE of string * meta
       | COMPLETE of t * meta
+      | MATCH of (ctx_pattern * branch) list
     and then_tactic =
         APPLY of t
       | LIST of t list
       | FOCUS of int * t
 
+    val substBranch : (name * term) list -> branch -> t
     val listOfTactics : string list
 end
