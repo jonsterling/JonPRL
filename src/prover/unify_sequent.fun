@@ -4,6 +4,8 @@ struct
   exception Mismatch
 
   structure Sequent = Sequent
+  structure Rebind  = Rebind(Sequent.Context.Syntax)
+
   open Sequent
   infix >>
 
@@ -52,6 +54,7 @@ struct
     let
       open MetaAbt
       val ctxVars = List.map #1 (Context.listItems H)
+      val M = Rebind.rebind ctxVars M
       val freeVars =
           diff Context.Syntax.Variable.eq
                (Context.Syntax.freeVariables M)

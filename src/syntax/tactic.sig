@@ -68,6 +68,7 @@ sig
       | LIST of t list
       | FOCUS of int * t
 
+    val branch : t -> branch
     val substBranch : (name * term) list -> branch -> t
     val listOfTactics : string list
 end
