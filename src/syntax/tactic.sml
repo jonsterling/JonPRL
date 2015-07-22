@@ -40,7 +40,6 @@ struct
     | CUM of level option * meta
     | AUTO of int option * meta
     | REDUCE of int option * meta
-    | MEM_CD of meta
     | ASSUMPTION of meta
     | ASSERT of {assertion : term,
                  name : name option} * meta
@@ -79,7 +78,6 @@ struct
      "cstruct",
      "assumption",
      "assert [TERM] <NAME>?",
-     "mem-cd",
      "auto NUM?",
      "reduce NUM?",
      "lemma <NAME>",

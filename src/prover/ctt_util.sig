@@ -1,7 +1,7 @@
 signature CTT_UTIL =
 sig
   include CTT
-  val Auto : int option -> tactic
+  val Auto : world * int option -> tactic
 
   type intro_args =
     {term : term option,
@@ -29,9 +29,9 @@ sig
   val Elim : elim_args -> tactic
   val EqCD : eq_cd_args -> tactic
   val Ext : ext_args -> tactic
-  val UnfoldHead : Development.world -> tactic
+  val UnfoldHead : world -> tactic
 
   val Reduce : int option -> tactic
-  val CutLemma : Development.world * Development.label -> tactic
+  val CutLemma : world * Development.label -> tactic
 
 end

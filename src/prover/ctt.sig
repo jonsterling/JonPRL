@@ -157,7 +157,6 @@ sig
     val BaseMemberEq : tactic
     val BaseElimEq : int * name option -> tactic
 
-    val MemCD : tactic
     val Witness : term -> tactic
 
     val Assumption : tactic

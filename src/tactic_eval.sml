@@ -43,9 +43,8 @@ struct
       | EXT ({freshVariable, level}, a) =>
         an a (CttUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
-      | AUTO (oi, a) => an a (CttUtil.Auto oi)
+      | AUTO (oi, a) => an a (CttUtil.Auto (wld, oi))
       | REDUCE (i, a) => an a (CttUtil.Reduce i)
-      | MEM_CD a => an a MemCD
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))

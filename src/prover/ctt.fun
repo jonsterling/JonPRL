@@ -686,15 +686,6 @@ struct
                | _ => raise Refine)
       end
 
-    fun MemCD (H >> P) =
-      let
-        val #[M, A] = P ^! MEM
-      in
-        [ H >> EQ $$ #[M, M, A]
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
-
     fun Witness M (H >> P) =
       let
         val M = Context.rebind H M
