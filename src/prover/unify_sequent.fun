@@ -1,4 +1,4 @@
-functor UnifySequent(structure Sequent : SEQUENT) :>
+functor UnifySequent(Sequent : SEQUENT) :>
   UNIFY_SEQUENT where Sequent = Sequent =
 struct
   exception Mismatch

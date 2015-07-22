@@ -193,6 +193,13 @@ sig
     val ImageEqInd : int * (name * name * name * name) option -> tactic
 
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
+
+    (* Match a single branch of a [match goal]. This needs to
+     * be primitive because it needs access to the structure of
+     * the sequent. It doesn't construct it's own validations
+     * though. Perhaps we should move this out to ctt_util.
+     *)
+    val MatchSingle : term list * term * ((name * term) list -> tactic) -> tactic
   end
 
   structure Conversions :

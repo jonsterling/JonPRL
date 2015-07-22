@@ -25,11 +25,17 @@ sig
     {freshVariable : name option,
      level : Level.t option}
 
+  type match_args =
+       {hyps   : term list,
+        goal   : term,
+        branch : (name * term) list -> tactic} list
+
   val Intro : intro_args -> tactic
   val Elim : elim_args -> tactic
   val EqCD : eq_cd_args -> tactic
   val Ext : ext_args -> tactic
   val UnfoldHead : world -> tactic
+  val Match : match_args -> tactic
 
   val Reduce : int option -> tactic
   val CutLemma : world * Development.label -> tactic
