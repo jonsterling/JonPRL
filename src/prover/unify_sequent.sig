@@ -1,14 +1,15 @@
 signature UNIFY_SEQUENT =
 sig
-    structure Sequent : SEQUENT
+  structure Sequent : SEQUENT
 
-    exception Mismatch
+  exception Mismatch
 
-    type input  = {hyps : Sequent.term list,
-                   goal : Sequent.term}
-    type output =
-         {matched : Sequent.name list,
-          subst   : (Sequent.Context.Syntax.Variable.t * Sequent.term) list}
+  type input =
+       {hyps : term list,
+        goal : term}
+  type output =
+       {matched : name list,
+        subst : (Context.Syntax.Variable.t * term) list}
 
-    val unify : input * Sequent.sequent -> output
+  val unify : input * Sequent.sequent -> output
 end

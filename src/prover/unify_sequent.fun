@@ -7,10 +7,12 @@ struct
   open Sequent
   infix >>
 
-  type input  = {hyps : term list,
-                 goal : term}
-  type output = {matched : name list,
-                 subst   : (Context.Syntax.Variable.t * term) list}
+  type input =
+       {hyps : term list,
+        goal : term}
+  type output =
+       {matched : name list,
+        subst : (Context.Syntax.Variable.t * term) list}
 
   (* Unification stuff *)
   structure Meta = MetaAbt(Context.Syntax)
