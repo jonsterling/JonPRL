@@ -11,9 +11,7 @@ functor PatternCompiler
 
    type label
    structure PatternSyntax : ABT_UTIL
-     where type Operator.t = label PatternOperatorType.operator
-
-   val customOperator : label * Arity.t -> SoTerm.Operator.t
+     where type Operator.t = SoTerm.Operator.t
 
    sharing type Conv.term = SoTerm.t
    sharing type SoTerm.Variable.t = PatternSyntax.Variable.t) : PATTERN_COMPILER =
@@ -38,10 +36,10 @@ struct
 
   fun computeChart (pat, N) : chart =
     case (P.out pat, S.out N) of
-         (P.$ (PatternOperatorType.APP (lbl,arity), es), S.$ (oper, es')) =>
+         (P.$ (pato, es), S.$ (oper, es')) =>
            let
              val _ =
-               if S.Operator.eq (customOperator (lbl, arity), oper) then
+               if S.Operator.eq (pato, oper) then
                  ()
                else
                  raise InvalidTemplate
@@ -73,15 +71,15 @@ struct
   in
     fun compile ({definiendum, definiens} : rule) = fn (M : S.t) =>
       let
-        val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum
-        val S.$ (Mop, Margs) = S.out M
+        val P.$ (Pop, _) = P.out definiendum
+        val S.$ (Mop, _) = S.out M
         val chart = computeChart (definiendum, M)
       in
         case S.out definiens of
              S.` x => (Dict.lookup chart x handle _ => S.``x)
            | S.$ (outop, outargs) =>
                let
-                 val _ = if S.Operator.eq (customOperator (lbl, arity), Mop) then () else raise Conv
+                 val _ = if S.Operator.eq (Pop, Mop) then () else raise Conv
                  open S
                  infix $ $$ \ \\ //
                  fun go H (p $ es) = p $$ Vector.map (go' H) es
@@ -117,6 +115,4 @@ structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
    structure PatternSyntax = PatternSyntax
    structure SoTerm = SoTerm
-   type label = string
-   fun customOperator (lbl, arity) =
-     OperatorType.CUSTOM {label = lbl, arity = arity})
+   type label = string)

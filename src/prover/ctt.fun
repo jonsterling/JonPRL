@@ -1003,9 +1003,9 @@ struct
       fun convTheorem lbl world M =
         case out M of
             CUSTOM {label,...} $ _ =>
-            if Development.Telescope.Label.eq (label, lbl) then
+              if Development.Telescope.Label.eq (label, lbl) then
                 Development.lookupExtract world lbl
-            else
+              else
                 raise Conv.Conv
           | _ => raise Conv.Conv
 

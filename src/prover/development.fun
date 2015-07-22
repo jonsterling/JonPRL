@@ -12,7 +12,8 @@ functor Development
    structure Telescope : TELESCOPE
    sharing type PatternCompiler.pattern = PatternSyntax.t
    sharing type PatternSyntax.Variable.t = Syntax.Variable.t
-   val asCustomOperator : PatternSyntax.Operator.t -> Telescope.label
+   sharing type PatternSyntax.Operator.t = Syntax.Operator.t
+   val operatorToLabel : Syntax.Operator.t -> Telescope.label
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -125,16 +126,6 @@ struct
     Telescope.snoc T (lbl, Object.OPERATOR {arity = arity, conversion = NONE})
 
   local
-    open PatternSyntax
-    infix $
-  in
-    fun ruleGetLabel {definiendum, definiens} =
-      case out definiendum of
-           operator $ _ => asCustomOperator operator
-         | _ => raise Fail "invalid rewrite rule"
-  end
-
-  local
     structure Set = SplaySet(structure Elem = Syntax.Variable)
     val setFromList = foldl (fn (x,S) => Set.insert S x) Set.empty
     fun subset (xs, ys) =
@@ -146,7 +137,8 @@ struct
   in
     fun defineOperator T (rule as {definiendum, definiens}) =
       let
-        val lbl = ruleGetLabel rule
+        val PatternSyntax.$ (oper, _) = PatternSyntax.out definiendum
+        val lbl = operatorToLabel oper
         val LFVs = PatternSyntax.freeVariables definiendum
         val RFVs = Syntax.freeVariables definiens
         val _ =
@@ -154,14 +146,21 @@ struct
             ()
           else
             raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
+        val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
-        case Telescope.lookup T lbl of
-             Object.OPERATOR {arity,conversion = NONE} =>
+        case Telescope.find T lbl of
+             SOME (Object.OPERATOR {arity,conversion = NONE}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
                   {arity = arity,
-                   conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))})
-           | _ => raise Subscript
+                   conversion = conversion})
+           | SOME _ => raise Subscript
+           | NONE =>
+               Telescope.snoc T (lbl,
+                 Object.OPERATOR
+                  {arity = Syntax.Operator.arity oper,
+                   conversion = conversion})
+
       end
   end
 
@@ -194,16 +193,15 @@ struct
        | _ => raise Subscript
 end
 
-structure Development : DEVELOPMENT = Development
-  (structure Syntax = Syntax
-   structure Evidence = Syntax
-   structure PatternSyntax = PatternSyntax
-   structure PatternCompiler = PatternCompiler
-   structure Extract = Extract
-   structure Telescope = Telescope(StringVariable)
-   structure Lcf = Lcf
+structure Development : DEVELOPMENT =
+  Development
+    (structure Syntax = Syntax
+     structure Evidence = Syntax
+     structure PatternSyntax = PatternSyntax
+     structure PatternCompiler = PatternCompiler
+     structure Extract = Extract
+     structure Telescope = Telescope(StringVariable)
+     structure Lcf = Lcf
 
-   open PatternOperatorType
-
-   fun asCustomOperator (APP (lbl, _)) = lbl
-   val goalToString = Sequent.toString)
+     val operatorToLabel = Syntax.Operator.toString
+     val goalToString = Sequent.toString)
