@@ -155,12 +155,7 @@ struct
                   {arity = arity,
                    conversion = conversion})
            | SOME _ => raise Subscript
-           | NONE =>
-               Telescope.snoc T (lbl,
-                 Object.OPERATOR
-                  {arity = Syntax.Operator.arity oper,
-                   conversion = conversion})
-
+           | NONE => raise Fail "Cannot define undeclared operator"
       end
   end
 
