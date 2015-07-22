@@ -70,4 +70,12 @@ struct
       | FAIL a => an a T.FAIL
       | TRACE (msg, a) => an a (T.TRACE msg)
       | COMPLETE (t, a) => an a (T.COMPLETE (eval wld t))
+      | MATCH branches =>
+        CttUtil.Match
+          (List.map
+               (fn (CtxPattern {hyps, goal}, branch) =>
+                   {hyps = hyps,
+                    goal = goal,
+                    branch = (fn subst => eval wld (substBranch subst branch))})
+               branches)
 end

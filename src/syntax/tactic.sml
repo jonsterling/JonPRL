@@ -132,7 +132,7 @@ struct
       and goPat (CtxPattern {goal, hyps}) =
           CtxPattern {goal = apply goal, hyps = List.map apply hyps}
     in
-      raise Fail ""
+      go body
     end
 
   val listOfTactics =
