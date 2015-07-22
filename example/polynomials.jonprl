@@ -29,7 +29,7 @@ Operator Coend : (0;0).
 [Coend(U;Hom)] =def= [(A:U) * Hom A A].
 
 Tactic autoR {
-  reduce; *{(intro | eq-cd); reduce}
+  reduce; *{auto; reduce}
 }.
 
 Theorem End_wf : [
