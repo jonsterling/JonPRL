@@ -46,9 +46,10 @@ struct
   infix $ \
   infix 8 $$ // \\
 
+  exception Refine
+
   structure Rules =
   struct
-    exception Refine
     open Sequent
     infix >>
 

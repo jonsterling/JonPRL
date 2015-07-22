@@ -7,6 +7,8 @@ sig
   type world
   type tactic
 
+  exception Refine
+
   structure Sequent : SEQUENT
     where type term = term
 

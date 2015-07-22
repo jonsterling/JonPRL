@@ -29,6 +29,7 @@ sig
   val Elim : elim_args -> tactic
   val EqCD : eq_cd_args -> tactic
   val Ext : ext_args -> tactic
+  val UnfoldHead : Development.world -> tactic
 
   val Reduce : int option -> tactic
   val CutLemma : Development.world * Development.label -> tactic

@@ -7,7 +7,9 @@ functor CttUtil
       where type tactic = Lcf.tactic
       where type conv = Conv.conv
       where type term = Syntax.t
-      where type name = Syntax.Variable.t) : CTT_UTIL =
+      where type name = Syntax.Variable.t
+   val operatorToLabel : Syntax.Operator.t -> Ctt.Development.label
+   sharing type Lcf.goal = Ctt.Sequent.sequent) : CTT_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
@@ -191,9 +193,15 @@ struct
 
   local
     structure Tacticals = Tacticals (Lcf)
-    open Tacticals Sequent
+    open Tacticals Sequent Syntax
     infix THENL >>
+    infix $
   in
+    fun UnfoldHead world (goal as H >> P) =
+      case out P of
+           oper $ _ => Unfolds (world, [(operatorToLabel oper, NONE)]) goal
+         | _ => raise Refine
+
     fun CutLemma (world, lbl) =
       let
         val {statement,...} = Ctt.Development.lookupTheorem world lbl
@@ -209,4 +217,5 @@ struct
 end
 
 structure CttUtil = CttUtil
-  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt)
+  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt
+   val operatorToLabel = Syntax.Operator.toString)
