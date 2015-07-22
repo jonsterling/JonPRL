@@ -1,25 +1,13 @@
-structure PatternOperatorType =
+functor PatternOperator (Operator : PARSE_OPERATOR) : PARSE_OPERATOR =
 struct
-  datatype ('builtin, 'label) operator =
-      CUSTOM of 'label * Arity.t
-    | BUILTIN of 'builtin
-end
-
-functor PatternOperator
-  (structure Label : PARSE_LABEL
-   structure Builtin : PARSE_OPERATOR
-    where type world = Label.t -> Arity.t) : PARSE_OPERATOR =
-struct
-  open Builtin
+  open Operator
   fun arity oper =
-    Vector.map (fn _ => 0) (Builtin.arity oper)
+    Vector.map (fn _ => 0) (Operator.arity oper)
 end
 
 structure PatternSyntax : PARSE_ABT =
 struct
-  structure PatternOperator = PatternOperator
-    (structure Label = ParseLabel (StringVariable)
-     structure Builtin = Syntax.ParseOperator)
+  structure PatternOperator = PatternOperator (Syntax.ParseOperator)
   structure Abt = Abt
     (structure Operator = PatternOperator
      structure Variable = Syntax.Variable)
