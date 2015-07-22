@@ -5,11 +5,11 @@ sig
   exception Mismatch
 
   type input =
-       {hyps : term list,
-        goal : term}
+       {hyps : Sequent.term list,
+        goal : Sequent.term}
   type output =
-       {matched : name list,
-        subst : (Context.Syntax.Variable.t * term) list}
+       {matched : Sequent.name list,
+        subst : (Sequent.Context.Syntax.Variable.t * Sequent.term) list}
 
   val unify : input * Sequent.sequent -> output
 end
