@@ -68,6 +68,41 @@ struct
     | FOCUS of int * t
   and branch = Branch of {pendingSubst : (name * term) list, body : t}
 
+
+  local
+    open Syntax
+    structure V = Variable
+  in
+    fun rebind subst tm =
+      let
+        fun makeVarTable vs =
+          let
+            fun go [] R = R
+              | go (x::xs) R = go xs (StringListDict.insert R (V.toString x) x)
+          in
+            go vs StringListDict.empty
+          end
+
+        fun go [] tbl tm = (tbl, tm)
+          | go ((v, _) :: subst') tbl tm =
+             if StringListDict.isEmpty tbl then
+               (tbl, tm)
+             else
+               let
+                 val vstr = V.toString v
+               in
+                 case StringListDict.find tbl vstr of
+                      NONE => go subst' tbl tm
+                    | SOME v' =>
+                      go subst' (StringListDict.remove tbl vstr)
+                         (Syntax.subst (Syntax.``v) v' tm)
+               end
+        val (tbl, tm') = go subst (makeVarTable (Syntax.freeVariables tm)) tm
+      in
+        tm'
+      end
+  end
+
   fun substBranch terms (Branch {pendingSubst, body}) =
     let
       fun join (xs, ys) =
@@ -77,7 +112,9 @@ struct
               (fn (v', _) => not (Syntax.Variable.eq (v, v'))) xs)
           ys
       val subst = join (terms, pendingSubst)
-      fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e) e subst
+      fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e)
+                               (rebind subst e)
+                               subst
       fun go t =
         case t of
             WITNESS (term, meta) => WITNESS (apply term, meta)
