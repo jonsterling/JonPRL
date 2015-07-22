@@ -27,6 +27,9 @@ group is
   level_solver.sig
   level_solver.fun
 
+  unify_sequent.sig
+  unify_sequent.fun
+
   lcf.fun
 
   ctt.fun
