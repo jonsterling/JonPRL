@@ -45,26 +45,6 @@ in order, in case of any dependencies.
 Optionally, you may install the [JonPRL Mode for
 Emacs](https://github.com/david-christiansen/jonprl-mode).
 
-If you use `pretty-mode`, then you may install the following patterns:
-
-```elisp
-(pretty-add-keywords
- 'jonprl-mode
- '(("\\\[" . "⸤")
-   ("\\\]" . "⸥")
-   ("<" . "⟨")
-   (">" . "⟩")
-   ("<>" . "★")
-   ("\\<isect\\>" . "⋂")
-   ("\\<fun\\>" . "Π")
-   ("\\<prod\\>" . "Σ")
-   ("\\<member\\>" . "∈")
-   ("\\<lam\\>" . "λ")
-   ("\\<\\(=def=\\)\\>" . "≝")
-   ("\\<\\(nat\\)\\>" . "ℕ")
-   ))
-```
-
 ![screenshot of jonprl-mode](./doc/images/jonprl-screenshot.png)
 
 ### Basic Syntax
