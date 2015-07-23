@@ -13,7 +13,6 @@ sig
   type tactic
 
   type term
-  type pattern
 
   type conv = term -> term
 
@@ -52,7 +51,7 @@ sig
 
   (* extend a development with a new operator *)
   val declareOperator : world -> label * Arity.t -> world
-  val defineOperator : world -> {definiendum : pattern, definiens : term} -> world
+  val defineOperator : world -> {definiendum : term, definiens : term} -> world
 
   (* lookup the definiens *)
   val lookupDefinition : world -> label -> conv
