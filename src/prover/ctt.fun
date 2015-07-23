@@ -1201,16 +1201,12 @@ struct
         let
           val #[approx1, approx2, univ] = P ^! EQ
           val (UNIV _, _) = asApp univ
-          val #[M,N] = approx1 ^! APPROX
-          val #[M',N'] = approx2 ^! APPROX
-	  fun mk_and a b = PROD $$ #[a, Variable.named "_" \\ b]
-	  fun mk_imp a b = FUN $$ #[a, Variable.named "_" \\ b]
-          fun mk_iff a b = mk_and (mk_imp a b) (mk_imp b a)
-	  val v = Variable.named "x"
-	  val id = LAM $$ #[v \\ ``v]
-	  fun mk_squash a = IMAGE $$ #[a, id]
+          val #[_,_] = approx1 ^! APPROX
+          val #[_,_] = approx2 ^! APPROX
+	  val iff = IFF $$ #[approx1, approx2]
+	  val squ = SQUASH $$ #[iff]
         in
-          [ H >> (mk_squash (mk_iff approx1 approx2))
+          [ H >> squ
           ] BY mkEvidence APPROX_EXT_EQ
         end
 

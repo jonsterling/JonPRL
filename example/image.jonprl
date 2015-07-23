@@ -1,6 +1,3 @@
-Operator squash : (0).
-[squash(t)] =def= [ image(t;lam(x.<>)) ].
-
 Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
   intro @i';
   [ *{unfold <squash>;auto;image-eq;auto}
@@ -10,14 +7,22 @@ Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
 Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
   intro @i';[ id, auto ];
   intro @i;[ id, auto ];
-  unfold <squash>;
-  witness [ap(lam(_.<>);_)];auto;
+  witness [ap(lam(_.<>);_)];
+  unfold <squash member>;
   image-mem-eq;auto
 }.
 
 Theorem approx_id_refl_wf : [
-  =(approx(lam(x.x);lam(x.x));approx(lam(x.x);lam(x.x));U{i})
+  =(approx(lam(x.x);lam(x.x));approx(<>;<>);U{i})
 ] {
-  approx-ext-eq;cut-lemma <implies_squash>
-  
+  unfold <member>;
+  approx-ext-eq;
+  cut-lemma <implies_squash>;
+  elim #1 [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
+  [ unfold <iff and implies>; auto
+  , id ];[id];
+  assert [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
+  [ id
+  , elim #2 [H];auto];[id];
+  unfold <iff and implies>; intro; intro; auto
 }.

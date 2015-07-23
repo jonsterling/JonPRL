@@ -29,8 +29,9 @@ struct
     | UNIV of Level.t
     | VOID
     | UNIT | AX
-    | PROD | PAIR | SPREAD
-    | FUN | LAM | AP
+    | PROD | PAIR | SPREAD | AND
+    | FUN | LAM | AP | IMPLIES | IFF
+    | ID | BOT | SQUASH
     | IMAGE
     | FIX
     | CBV
@@ -54,8 +55,9 @@ struct
     val publicOperators =
       [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i'''',
        VOID, UNIT, AX,
-       PROD, PAIR, SPREAD,
-       FUN, LAM, AP,
+       PROD, PAIR, SPREAD, AND,
+       FUN, LAM, AP, IMPLIES, IFF,
+       ID, BOT, SQUASH,
        IMAGE,
        FIX,
        CBV,
@@ -143,9 +145,15 @@ struct
     | eq (PROD, PROD) = true
     | eq (PAIR, PAIR) = true
     | eq (SPREAD, SPREAD) = true
+    | eq (AND, AND) = true
     | eq (FUN, FUN) = true
     | eq (LAM, LAM) = true
     | eq (AP, AP) = true
+    | eq (IMPLIES, IMPLIES) = true
+    | eq (IFF, IFF) = true
+    | eq (ID, ID) = true
+    | eq (BOT, BOT) = true
+    | eq (SQUASH, SQUASH) = true
     | eq (IMAGE, IMAGE) = true
     | eq (FIX, FIX) = true
     | eq (CBV, CBV) = true
@@ -268,9 +276,15 @@ struct
        | PROD => #[0,1]
        | PAIR => #[0,0]
        | SPREAD => #[0,2]
+       | AND => #[0,0]
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | IMPLIES => #[0,0]
+       | IFF => #[0,0]
+       | ID => #[]
+       | BOT => #[]
+       | SQUASH => #[0]
        | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
@@ -383,9 +397,15 @@ struct
        | PROD => "prod"
        | PAIR => "pair"
        | SPREAD => "spread"
+       | AND => "and"
        | FUN => "fun"
        | LAM => "lam"
        | AP => "ap"
+       | IMPLIES => "implies"
+       | IFF => "iff"
+       | ID => "id"
+       | BOT => "bot"
+       | SQUASH => "squash"
        | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
@@ -441,9 +461,15 @@ struct
          string "decide" return DECIDE,
          string "pair" return PAIR,
          string "spread" return SPREAD,
+         string "and" return AND,
          string "fun" return FUN,
          string "lam" return LAM,
          string "ap" return AP,
+         string "implies" return IMPLIES,
+         string "iff" return IFF,
+         string "id" return ID,
+         string "bot" return BOT,
+         string "squash" return SQUASH,
          string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,
