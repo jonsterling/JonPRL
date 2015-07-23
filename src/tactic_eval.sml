@@ -76,6 +76,6 @@ struct
                (fn (CtxPattern {hyps, goal}, branch) =>
                    {hyps = hyps,
                     goal = goal,
-                    branch = (fn subst => eval wld (substBranch subst branch))})
+                    branch = fn subst => eval wld (substBranch subst branch)})
                branches)
 end

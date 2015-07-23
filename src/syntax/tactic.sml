@@ -74,13 +74,15 @@ struct
   structure Rebind = Rebind(Syntax)
   fun substBranch terms (Branch {pendingSubst, body}) =
     let
-      fun join (xs, ys) =
-        xs @
-        List.filter
-          (fn (v, _) => List.all
-              (fn (v', _) => not (Syntax.Variable.eq (v, v'))) xs)
-          ys
-      val subst = join (terms, pendingSubst)
+      fun join (sol1, sol2) =
+        let
+          fun eq ((v, _), (v', _)) = Syntax.Variable.eq (v, v')
+        in
+          sol2 @
+          List.filter (fn x => not (List.exists (fn y => eq (x, y)) sol2)) sol1
+        end
+
+      val subst = join (pendingSubst, terms)
       fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e)
                                (Rebind.rebind (List.map #1 subst) e)
                                subst
@@ -127,7 +129,7 @@ struct
           | MATCH branches =>
             MATCH (List.map (fn (pat, Branch {pendingSubst, body}) =>
                                 (goPat pat,
-                                 Branch {pendingSubst = join (subst, pendingSubst),
+                                 Branch {pendingSubst = join (pendingSubst, subst),
                                          body = body}))
                             branches)
           | TRY t => TRY (go t)

@@ -110,27 +110,20 @@ struct
     | matchCxt sol (t :: ts) hs =
       let
           val len = List.length hs
-          fun go ~1 = NONE
+          fun go 0 = NONE
             | go n =
-            let
-              val ((name, h), hs) = extract (len - n) hs
-              val sol = mergeSol (sol, Unify.unify (applySol sol t, h))
-            in
-              case matchCxt sol ts hs of
-                 SOME (names, sol) => SOME (name :: names, sol)
-               | NONE => go (n - 1)
-            end
-            handle Unify.Mismatch _ => go (n - 1)
+              let
+                val ((name, h), hs) = extract (len - n) hs
+                val sol = mergeSol (sol, Unify.unify (applySol sol t, h))
+              in
+                case matchCxt sol ts hs of
+                    SOME (names, sol) => (SOME (name :: names, sol))
+                  | NONE => go (n - 1)
+              end
+              handle Unify.Mismatch _ => go (n - 1)
       in
         go len
       end
-
-  fun debug x = (
-      print (Int.toString (List.length x) ^ "\n");
-    List.app (fn (v, e) =>
-                 print (MetaAbt.Variable.toString v
-                        ^ " : " ^ MetaAbt.toString e ^ "\n")) x
-  )
 
   fun unify (pat, H >> P) =
     let
@@ -143,13 +136,14 @@ struct
       fun go [] = raise Mismatch
         | go (hs :: subsets) =
           case matchCxt sol hyps hs of
-              SOME (names, finalSol) => (debug finalSol;
+              SOME (names, finalSol) =>
               {matched = names,
-               subst = List.map (fn (v, e) => (v, unconvert e)) sol})
+               subst = List.map (fn (v, e) => (v, unconvert e)) finalSol}
             | NONE => go subsets
-    in
-      go (subset (List.map (fn (n, v, t) => (n, convert t))
+      val subsets = subset (List.map (fn (n, v, t) => (n, convert t))
                            (Context.listItems H))
-                 (List.length hyps))
+                           (List.length hyps)
+    in
+      go subsets
     end
 end

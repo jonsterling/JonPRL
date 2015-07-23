@@ -183,6 +183,7 @@ struct
     ORELSE ApproxExtEq
 
   fun Match [] = FAIL
+    | Match [{hyps, goal, branch}] = MatchSingle (hyps, goal, branch)
     | Match ({hyps, goal, branch} :: branches) =
       MatchSingle (hyps, goal, branch)
       ORELSE_LAZY (fn () => Match branches)
