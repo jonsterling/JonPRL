@@ -149,6 +149,5 @@ end
 
 structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
-   structure PatternSyntax = SoTerm
    structure SoTerm = SoTerm
    type label = string)
