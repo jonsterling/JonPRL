@@ -80,18 +80,6 @@ struct
 
   local
     open Conv Conversionals
-    fun rewriteInstantiations chart M =
-      let
-        open S
-        infix $ $$ \ \\ //
-      in
-        case SoTerm.asInstantiate M of
-             NONE => raise Conv
-           | SOME (E, M) =>
-               (case out E of
-                     `sovar => Chart.lookupLocal chart sovar M
-                   | _ => raise Conv)
-      end
   in
     fun compile ({definiendum, definiens} : rule) = fn (M : S.t) =>
       let
@@ -104,17 +92,25 @@ struct
            | outop $ outargs =>
                let
                  val _ = if Operator.eq (Pop, Mop) then () else raise Conv
-                 fun go H (p $ es) = p $$ Vector.map (go' H) es
-                   | go H (x \ E) = x \\ go' (Set.insert H x) E
-                   | go H (` x) =
-                       if Set.member H x then
-                         `` x
-                       else
-                         Chart.lookupGlobal chart x handle _ => `` x
-                 and go' H E = go H (out (CTRY (rewriteInstantiations chart) E))
-                 val res = go Set.empty (out definiens)
+                 fun go H M =
+                   case SoTerm.asInstantiate M of
+                        NONE =>
+                          (case out M of
+                               p $ es => p $$ Vector.map (go H) es
+                             | x \ E => x \\ go (Set.insert H x) E
+                             | `x =>
+                                 if Set.member H x then
+                                   ``x
+                                 else
+                                   Chart.lookupGlobal chart x handle _ => ``x)
+                      | SOME (F,X) =>
+                          let
+                            val `f = out F
+                          in
+                            Chart.lookupLocal chart f X
+                          end
                in
-                 CDEEP (rewriteInstantiations chart) (go Set.empty (out definiens))
+                 go Set.empty definiens
                end
            | _ => raise Conv
       end
