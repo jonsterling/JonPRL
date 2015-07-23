@@ -26,14 +26,19 @@ struct
 
   exception InvalidTemplate
 
-  datatype 'a point = GLOBAL of 'a | LOCAL of 'a -> 'a
-
   structure Chart =
   struct
     structure Dict = SplayDict(structure Key = S.Variable)
     open Dict
 
-    type chart = S.t point dict
+    datatype 'a point =
+        GLOBAL of 'a
+        (* A "global" point is the definition of a first-order variable *)
+      | LOCAL of 'a -> 'a
+        (* A "local" point is the definition of a second-order variable *)
+
+    type 'a chart = 'a point dict
+
     fun lookupGlobal c x =
       case lookup c x of
            GLOBAL p => p
@@ -48,7 +53,7 @@ struct
   open S
   infix $ $$ \ \\
 
-  fun computeChart (pat, N) : Chart.chart =
+  fun computeChart (pat, N) : S.t Chart.chart =
     case (out pat, out N) of
          (pato $ es, oper $ es') =>
            let
@@ -60,14 +65,20 @@ struct
 
              open Vector
              val zipped = tabulate (length es, fn n => (sub (es, n), sub (es', n)))
-             fun go (`x) E R = Chart.insert R x (GLOBAL (into E))
+
+             (* If we are at a first-order variable, then insert its
+              * substitution into the chart *)
+             fun go (`x) E R = Chart.insert R x (Chart.GLOBAL (into E))
+                 (* At an abstraction, the definiens shall be `x.F[x]`; the
+                  * right hand side shall be y.E. So we insert its second order
+                  * substitution into the chart, i.e. Z !-> [y/x]F. *)
                | go (x \ M) (y \ N) R =
                  (case SoTerm.asInstantiate M of
                        SOME (F,X) =>
                          (case out F of
                                `f =>
                                if eq (``x,X) then
-                                 Chart.insert R f (LOCAL (fn Z => subst Z y N))
+                                 Chart.insert R f (Chart.LOCAL (fn Z => subst Z y N))
                                else
                                  raise InvalidTemplate
                              | _ => raise InvalidTemplate)
@@ -95,15 +106,22 @@ struct
                  fun go H M =
                    case SoTerm.asInstantiate M of
                         NONE =>
+                          (* If we have not reached a second-order application,
+                           * then proceed structurally *)
                           (case out M of
                                p $ es => p $$ Vector.map (go H) es
                              | x \ E => x \\ go (Set.insert H x) E
                              | `x =>
+                                 (* If we have a variable, see if it is from the
+                                  * definiens and insert its substitution,
+                                  * unless it is bound *)
                                  if Set.member H x then
                                    ``x
                                  else
                                    Chart.lookupGlobal chart x handle _ => ``x)
                       | SOME (F,X) =>
+                           (* If we have got a second-order application, then
+                            * apply its substitution *)
                           let
                             val `f = out F
                           in
