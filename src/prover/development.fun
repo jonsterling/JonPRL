@@ -192,7 +192,7 @@ structure Development : DEVELOPMENT =
   Development
     (structure Syntax = Syntax
      structure Evidence = Syntax
-     structure PatternSyntax = PatternSyntax
+     structure PatternSyntax = Syntax
      structure PatternCompiler = PatternCompiler
      structure Extract = Extract
      structure Telescope = Telescope(StringVariable)

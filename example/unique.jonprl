@@ -3,7 +3,7 @@
 ||| belong in the witness.
 
 Operator unique : (0;1).
-[unique(A; B)] =def= [
+[unique(A; x.B[x])] =def= [
   (x:A) * {_ : B[x] | {y:A} B[y] => =(x;y;A)}
 ].
 
