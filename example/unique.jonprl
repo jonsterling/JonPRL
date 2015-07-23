@@ -4,7 +4,7 @@
 
 Operator unique : (0;1).
 [unique(A; B)] =def= [
-  (x:A) * {_ : so_apply(B;x) | {y:A} so_apply(B;y) => =(x;y;A)}
+  (x:A) * {_ : B[x] | {y:A} B[y] => =(x;y;A)}
 ].
 
 ||| unique inhabitation

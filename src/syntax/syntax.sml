@@ -50,9 +50,11 @@ struct
         (fn [] => fail "Not enough components to product"
           | [x] => fail "Not enough components to product"
           | x::xs => succeed (foldl (fn (a,P) => PAIR $$ #[a,P]) x xs))
+    and soAppOpr w st () =
+      squares (parseAbt w st) wth (fn N => Postfix (12, fn M => SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [indFunOpr, indIsectOpr, indProdOpr] wth Opr
+      alt [indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
   end
@@ -108,6 +110,8 @@ struct
              end
          | PAIR $ #[M,N] =>
              Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
+         | SO_APPLY $ #[M,N] =>
+             Unparse.postfix (12, "[" ^ toString N ^ "]") (unparseAbt M)
          | _ => inner t
     and inner t = UnparseAbt.extensibleUnparseAbt unparseAbt t
     and toString t = Unparse.parens (Unparse.done (unparseAbt t))
