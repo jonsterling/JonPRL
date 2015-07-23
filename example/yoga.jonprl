@@ -30,11 +30,11 @@ Operator Coend : (0;0).
 [End(X;P)] =def= [(x:X) P x x].
 [Coend(X;P)] =def= [(x:X) * P x x].
 
-Operator Ran : (0;0;0;0;0;0;0;0).
-Operator Lan : (0;0;0;0;0;0;0;0).
+Operator Ran : (0;0;0;0;0;0;0).
+Operator Lan : (0;0;0;0;0;0;0).
 
-[Ran(X;C;V;cat;hom;g;h;a)] =def= [End(X; lam(x.lam(y. hom (cat a (g x)) (h y))))].
-[Lan(X;C;V;cat;ten;g;h;a)] =def= [Coend(X; lam(x.lam(y. ten (h x) (cat (g y) a))))].
+[Ran(X;C;V;cat;hom;g;h)] =def= [lam(a. End(X; lam(x.lam(y. hom (cat a (g x)) (h y)))))].
+[Lan(X;C;V;cat;ten;g;h)] =def= [lam(a. Coend(X; lam(x.lam(y. ten (h x) (cat (g y) a)))))].
 
 Operator Psh : (0).
 
@@ -57,10 +57,10 @@ Operator LowerStar   : (0;0;0). ||| f ↓* ∈ Psh(X) → Psh(Y)
 
 [Hom] =def= [lam(A.lam(B. A -> B))].
 [Ten] =def= [lam(A.lam(B. A * B))].
-[LowerShriek(X;Y;f)] =def= [lam(φ.lam(x. Lan(X;Y;U{i};Paths(Y);Ten;f;φ;x)))].
+[LowerShriek(X;Y;f)] =def= [lam(φ.lam(x. Lan(X;Y;U{i};Paths(Y);Ten;f;φ) x))].
 [UpperShriek(X;Y;f)] =def= [lam(φ.lam(x. φ (f x)))].
 [UpperStar(X;Y;f)] =def= [UpperShriek(X;Y;f)].
-[LowerStar(X;Y;f)] =def= [lam(φ.lam(x. Ran(X;Y;U{i};Paths(Y);Hom;f;φ;x)))].
+[LowerStar(X;Y;f)] =def= [lam(φ.lam(x. Ran(X;Y;U{i};Paths(Y);Hom;f;φ) x))].
 
 ||| Proofs
 
@@ -78,10 +78,9 @@ Theorem Ran_wf : [
   {hom : U{i} -> V -> U{i}}
   {g : X -> C}
   {h : X -> V}
-  {a : C}
-    member(Ran(X;C;V;cat;hom;g;h;a); U{i})
+    member(Ran(X;C;V;cat;hom;g;h); Psh(C))
 ] {
-  unfold <Ran End>; autoR.
+  unfold <Ran End Psh>; autoR.
 }.
 
 Theorem Lan_wf : [
@@ -90,10 +89,9 @@ Theorem Lan_wf : [
   {ten : V -> U{i} -> U{i}}
   {g : X -> C}
   {h : X -> V}
-  {a : C}
-    member(Lan(X;C;V;cat;ten;g;h;a); U{i})
+    member(Lan(X;C;V;cat;ten;g;h); Psh(C))
 ] {
-  unfold <Lan Coend>; autoR.
+  unfold <Lan Coend Psh>; autoR.
 }.
 
 Theorem Hom_wf : [{A:U{i}} {B:U{i}} member(Hom A B; U{i'})] {
