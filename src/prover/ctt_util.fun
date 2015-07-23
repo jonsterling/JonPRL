@@ -45,9 +45,9 @@ struct
      level : Level.t option}
 
   type match_args =
-       {hyps   : term list,
-        goal   : term,
-        branch : (name * term) list -> tactic} list
+    {hyps   : (name * term) list,
+     goal   : term,
+     branch : (name * term) list -> tactic} list
 
   val CEqRefl = CEqApprox THEN ApproxRefl
 

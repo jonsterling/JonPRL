@@ -5,7 +5,7 @@ sig
   exception Mismatch
 
   type input =
-       {hyps : Sequent.term list,
+       {hyps : (Sequent.name * Sequent.term) list,
         goal : Sequent.term}
   type output =
        {matched : Sequent.name list,

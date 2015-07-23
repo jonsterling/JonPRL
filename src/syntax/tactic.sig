@@ -8,7 +8,7 @@ sig
 
     type branch
     datatype ctx_pattern = CtxPattern of {goal : term,
-                                          hyps : term list}
+                                          hyps : (name * term) list}
 
     datatype t =
         LEMMA of label * meta

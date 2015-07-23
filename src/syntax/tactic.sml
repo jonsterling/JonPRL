@@ -7,7 +7,7 @@ struct
   type level = Level.t
   type meta = TacticMetadata.metadata
 
-  datatype ctx_pattern = CtxPattern of {goal : term, hyps : term list}
+  datatype ctx_pattern = CtxPattern of {goal : term, hyps : (name * term) list}
 
   datatype t =
       LEMMA of label * meta
@@ -86,6 +86,19 @@ struct
       fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e)
                                (Rebind.rebind (List.map #1 subst) e)
                                subst
+      fun applyName v =
+        let
+          val tO =
+            Option.map #2 (List.find ((fn (v', _) => Syntax.Variable.eq (v, v'))) subst)
+        in
+          case tO of
+              NONE => v
+            | SOME e =>
+              case Syntax.out e of
+                  Syntax.` v' => v'
+                | _ => raise Fail "Impossible! Called substBranch on bad subst"
+        end
+
       fun go t =
         case t of
             WITNESS (term, meta) => WITNESS (apply term, meta)
@@ -138,7 +151,8 @@ struct
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | t => t
       and goPat (CtxPattern {goal, hyps}) =
-          CtxPattern {goal = apply goal, hyps = List.map apply hyps}
+          CtxPattern {goal = apply goal,
+                      hyps = List.map (fn (v, e) => (applyName v, apply e)) hyps}
     in
       go body
     end

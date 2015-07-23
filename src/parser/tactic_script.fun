@@ -26,6 +26,8 @@ struct
 
   val pipe = symbol "|"
 
+  val name = identifier wth ParseSyntax.Variable.named
+
   fun parseTm w =
     ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState [])
 
@@ -77,8 +79,9 @@ struct
 
   and parseMatch w () =
     let
+      val hyp = name && symbol ":" && parseTm w wth (fn (n, (_, h)) => (n, h))
       val parsePattern =
-        squares (commaSep (parseTm w) && symbol "|-" && parseTm w)
+        squares (commaSep hyp && symbol "|-" && parseTm w)
         wth (fn (hyps, (_, goal)) => CtxPattern {goal = goal, hyps = hyps})
     in
       middle (symbol "@{")

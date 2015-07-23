@@ -199,7 +199,8 @@ sig
      * the sequent. It doesn't construct it's own validations
      * though. Perhaps we should move this out to ctt_util.
      *)
-    val MatchSingle : term list * term * ((name * term) list -> tactic) -> tactic
+    val MatchSingle : (name * term) list * term * ((name * term) list -> tactic)
+                      -> tactic
   end
 
   structure Conversions :

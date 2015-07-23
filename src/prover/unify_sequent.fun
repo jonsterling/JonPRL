@@ -10,7 +10,7 @@ struct
   infix >>
 
   type input =
-       {hyps : term list,
+       {hyps : (name * term) list,
         goal : term}
   type output =
        {matched : name list,
@@ -70,11 +70,11 @@ struct
       open Context.Syntax
       val free = freeVariables goal
       val (_, hyps) =
-        List.foldl (fn (h, (free, hyps)) =>
+        List.foldl (fn ((name, h), (free, hyps)) =>
                        let
                          val h = Rebind.rebind free h
                        in
-                         (freeVariables h @ free, h :: hyps)
+                         (freeVariables h @ free, (name, h) :: hyps)
                        end)
                    (free, [])
                    hyps
@@ -100,6 +100,23 @@ struct
       sol2 @ diff eq sol1' sol2
     end
 
+  fun add sol (v, e) =
+    let
+      open MetaOperator
+      open MetaAbt
+      val e = applySol sol e
+      val sol =
+        List.map (fn (v', e') => (v', substOperator (fn _ => e) (META v) e'))
+                 sol
+    in
+      case List.find (fn (v', _) => Variable.eq (v, v')) sol of
+         NONE => (v, e) :: sol
+       | SOME (_, e') =>
+         if eq (e, e')
+         then sol
+         else raise Mismatch
+    end
+
   (* Given a a list of terms and set of hypotheses and the current
    * solution, attempt to match the terms against some subset of hypotheses
    * and return
@@ -107,17 +124,18 @@ struct
    *   2. The new solution
    *)
   fun matchCxt sol [] _ = SOME ([], sol)
-    | matchCxt sol (t :: ts) hs =
+    | matchCxt sol ((name, t) :: ts) hs =
       let
           val len = List.length hs
           fun go 0 = NONE
             | go n =
               let
-                val ((name, h), hs) = extract (len - n) hs
+                val ((hname, h), hs) = extract (len - n) hs
                 val sol = mergeSol (sol, Unify.unify (applySol sol t, h))
+                val sol = add sol (name, MetaAbt.into (MetaAbt.` hname))
               in
                 case matchCxt sol ts hs of
-                    SOME (names, sol) => (SOME (name :: names, sol))
+                    SOME (names, sol) => (SOME (hname :: names, sol))
                   | NONE => go (n - 1)
               end
               handle Unify.Mismatch _ => go (n - 1)
@@ -125,11 +143,11 @@ struct
         go len
       end
 
-  fun unify (pat, H >> P) =
+  fun unify ((pat : input), H >> P) =
     let
       val {hyps, goal} = rebindPat pat
       val goal = convertInCtx H goal
-      val hyps = List.map (convertInCtx H) hyps
+      val hyps = List.map (fn (n, e) => (n, convertInCtx H e)) hyps
       val sol = Unify.unify (goal, convert P)
                   handle Unify.Mismatch _ => raise Mismatch
 
