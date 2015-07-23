@@ -13,7 +13,6 @@ JonPRL uses SML/NJ's [CM](http://www.smlnj.org/doc/CM/) for its build.  First
 make sure you have SML/NJ set up properly. Then, install JonPRL's dependencies:
 
 ```sh
-git submodule init
 git submodule update --init --recursive
 ```
 
@@ -45,26 +44,6 @@ in order, in case of any dependencies.
 
 Optionally, you may install the [JonPRL Mode for
 Emacs](https://github.com/david-christiansen/jonprl-mode).
-
-If you use `pretty-mode`, then you may install the following patterns:
-
-```elisp
-(pretty-add-keywords
- 'jonprl-mode
- '(("\\\[" . "⸤")
-   ("\\\]" . "⸥")
-   ("<" . "⟨")
-   (">" . "⟩")
-   ("<>" . "★")
-   ("\\<isect\\>" . "⋂")
-   ("\\<fun\\>" . "Π")
-   ("\\<prod\\>" . "Σ")
-   ("\\<member\\>" . "∈")
-   ("\\<lam\\>" . "λ")
-   ("\\<\\(=def=\\)\\>" . "≝")
-   ("\\<\\(nat\\)\\>" . "ℕ")
-   ))
-```
 
 ![screenshot of jonprl-mode](./doc/images/jonprl-screenshot.png)
 
@@ -121,20 +100,21 @@ description. An arity is a list of the valences of an operator's subterms;
 | `void()`        | `void`                | The empty type                                  |
 | `=(0;0;0)`      | `=(M;N;A)`            | The equality type (`M,N` are equal at type `A`) |
 | `member(0;0)`   | `member(M;A)`         | The membership type (`M` is a member of `A`)    |
+| `so_apply(0;0)` | `F[x]`                | Application for second order variables          |
 
 
 #### Second-order variables
 
-Unlike some other implementations of type theory that use the same
-syntax for function application and filling in second-order variables,
-JonPRL's second-order variables must be applied using the
-`so_apply(0;0)` operator.
+Unlike some other implementations of type theory that use the same syntax for
+function application and filling in second-order variables, JonPRL's
+second-order variables must be applied using the `so_apply(0;0)` operator
+(written using brackets, `F[x]`).
 
 As an example, unique existence might be defined as follows:
 ```
 Operator ex_uni : (0;1).
 
-[ex_uni(T;P)] =def= [(x:T) * so_apply(P;x) * {y:T} so_apply(P;y) => =(x;y;T)].
+[ex_uni(T;P)] =def= [(x:T) * P[x] * {y:T} P[y] => =(x;y;T)].
 ```
 
 Note that `P` is applied to `x` and `y` using `so_apply` rather than

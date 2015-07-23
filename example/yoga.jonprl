@@ -1,0 +1,131 @@
+Tactic autoR {
+  reduce; *{auto; reduce}
+}.
+
+Operator fst : (0).
+Operator snd : (0).
+Operator pairF : (0;0).
+Operator pairFp : (0;0).
+
+[fst(p)] =def= [spread(p; x.y.x)].
+[snd(p)] =def= [spread(p; x.y.x)].
+[pairF(f;g)] =def= [lam(x. pair(f x; g x))].
+[pairFp(f;g)] =def= [lam(x. pairF(f fst(x); g snd(x)))].
+
+Operator CTT : ().
+Operator Paths : (0).
+
+[CTT] =def= [lam(A.lam(B. A -> B))].
+[Paths(A)] =def= [lam(x.lam(y. =(x;y;A)))].
+
+Operator Yo : (0).
+Operator oY : (0).
+
+[Yo(B)] =def= [lam(A. A -> B)].
+[oY(A)] =def= [lam(B. A -> B)].
+
+Operator End : (0;0).
+Operator Coend : (0;0).
+
+[End(X;P)] =def= [(x:X) P x x].
+[Coend(X;P)] =def= [(x:X) * P x x].
+
+Operator Ran : (0;0;0;0;0).
+Operator Lan : (0;0;0;0;0).
+
+[Ran(X;cat;hom;g;h)] =def= [lam(a. End(X; lam(x.lam(y. hom (cat a (g x)) (h y)))))].
+[Lan(X;cat;ten;g;h)] =def= [lam(a. Coend(X; lam(x.lam(y. ten (h x) (cat (g y) a)))))].
+
+Operator Psh : (0).
+
+[Psh(X)] =def= [X -> U{i}].
+
+||| Grothendieck's Yoga of Six Operations
+
+|||        𝒞 ---- f ---> 𝒟
+||| ==============================
+||| 𝒫(𝒞) --[ f ↓! ⊣      ] -> 𝒫(𝒟) ≜ Lan (≡) (⊗) f ≅ λ φ. ∫↑ 𝓍. φ 𝓍 ⊗ (≡) (f 𝓍, -)
+||| 𝒫(𝒞) <-[ f ↑! ≃ f ↑* ] -- 𝒫(𝒟) ≜         - ∘ f ≅ λ φ. φ ∘ f
+||| 𝒫(𝒞) --[      ⊣ f ↓* ] -> 𝒫(𝒟) ≜ Ran (≡) (⋔) f ≅ λ φ. ∫↓ 𝓍. (≡) (-, f 𝓍) ⋔ φ 𝓍
+
+Operator Hom         : ().      ||| ⋔    ∈ U{i} → U{i} → U{i′}
+Operator Ten         : ().      ||| ⊗    ∈ U{i} → U{i} → U{i′}
+Operator LowerShriek : (0;0;0). ||| f ↓! ∈ Psh(X) → Psh(Y)
+Operator UpperShriek : (0;0;0). ||| f ↑! ∈ Psh(X) ← Psh(Y)
+Operator UpperStar   : (0;0;0). ||| f ↑* ∈ Psh(X) ← Psh(Y)
+Operator LowerStar   : (0;0;0). ||| f ↓* ∈ Psh(X) → Psh(Y)
+
+[Hom] =def= [lam(A.lam(B. A -> B))].
+[Ten] =def= [lam(A.lam(B. A * B))].
+[LowerShriek(X;Y;f)] =def= [lam(φ.lam(x. Lan(X;Paths(Y);Ten;f;φ) x))].
+[UpperShriek(X;Y;f)] =def= [lam(φ.lam(x. φ (f x)))].
+[UpperStar(X;Y;f)] =def= [UpperShriek(X;Y;f)].
+[LowerStar(X;Y;f)] =def= [lam(φ.lam(x. Ran(X;Paths(Y);Hom;f;φ) x))].
+
+||| Proofs
+
+Theorem End_wf : [{X:U{i}} {P : X -> X -> U{i}} member(End(X;P); U{i})] {
+  unfold <End>; auto.
+}.
+
+Theorem Coend_wf : [{X:U{i}} {P : X -> X -> U{i}} member(Coend(X;P); U{i})] {
+  unfold <Coend>; auto.
+}.
+
+Theorem Ran_wf : [
+  {X:U{i}} {C:U{i}} {V:U{i}}
+  {cat : C -> C -> U{i}}
+  {hom : U{i} -> V -> U{i}}
+  {g : X -> C}
+  {h : X -> V}
+    member(Ran(X;cat;hom;g;h); Psh(C))
+] {
+  unfold <Ran End Psh>; autoR.
+}.
+
+Theorem Lan_wf : [
+  {X:U{i}} {C:U{i}} {V:U{i}}
+  {cat : C -> C -> U{i}}
+  {ten : V -> U{i} -> U{i}}
+  {g : X -> C}
+  {h : X -> V}
+    member(Lan(X;cat;ten;g;h); Psh(C))
+] {
+  unfold <Lan Coend Psh>; autoR.
+}.
+
+Theorem Hom_wf : [{A:U{i}} {B:U{i}} member(Hom A B; U{i'})] {
+  unfold <Hom>; reduce; auto.
+}.
+
+Theorem Ten_wf : [{A:U{i}} {B:U{i}} member(Ten A B; U{i'})] {
+  unfold <Ten>; reduce; auto.
+}.
+
+Theorem LowerShriek_wf : [
+  {X:U{i}} {Y:U{i}} {f : X -> Y}
+  member(LowerShriek(X;Y;f); Psh(X) -> Psh(Y))
+] {
+  unfold <LowerShriek Lan Paths Ten Coend Psh>; autoR.
+}.
+
+Theorem UpperShriek_wf : [
+  {X:U{i}} {Y:U{i}} {f : X -> Y}
+  member(UpperShriek(X;Y;f); Psh(Y) -> Psh(X))
+] {
+ unfold <UpperShriek Psh>; autoR.
+}.
+
+Theorem UpperStar_wf : [
+  {X:U{i}} {Y:U{i}} {f : X -> Y}
+  member(UpperStar(X;Y;f); Psh(Y) -> Psh(X))
+] {
+ unfold <UpperStar UpperShriek Psh>; autoR.
+}.
+
+Theorem LowerStar_wf : [
+  {X:U{i}} {Y:U{i}} {f : X -> Y}
+  member(LowerStar(X;Y;f); Psh(X) -> Psh(Y))
+] {
+  unfold <LowerStar Ran Paths Hom End Psh>; autoR.
+}.

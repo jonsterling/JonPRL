@@ -3,24 +3,14 @@ signature PARSE_CTT =
     where type Operator.t = string OperatorType.operator
     where type ParseOperator.world = string -> Arity.t
 
-signature PARSE_PATTERN =
-  PARSE_ABT
-    where type Operator.t = string PatternOperatorType.operator
-    where type ParseOperator.world = string -> Arity.t
-
 functor DevelopmentParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
      where type label = ParserContext.label
    structure Syntax : PARSE_ABT
      where type ParseOperator.world = Tactic.label -> Arity.t
-   structure Pattern : PARSE_ABT
-     where type Variable.t = Syntax.Variable.t
-     where type ParseOperator.world = Tactic.label -> Arity.t
-
    structure DevelopmentAst : DEVELOPMENT_AST
      where type Syntax.t = Syntax.t
-     where type Pattern.t = Pattern.t
      where type Tactic.t = Tactic.t
      where type label = ParserContext.label
 
@@ -48,8 +38,7 @@ struct
   fun parseTm fvs w =
     squares (Syntax.parseAbt (lookupOperator w) (Syntax.initialState fvs))
 
-  fun parsePattern w =
-    squares (Pattern.parseAbt (lookupOperator w) (Pattern.initialState []))
+  val parsePattern = parseTm []
 
   val parseName =
     identifier
@@ -85,9 +74,9 @@ struct
               DevelopmentAst.OPERATOR (lbl, arity)))
 
   fun parseOperatorDef w =
-    parsePattern w -- (fn (pat : Pattern.t) =>
-      succeed pat && (symbol "=def=" >> parseTm (Pattern.freeVariables pat) w)
-    ) wth (fn (P : Pattern.t, N : Syntax.t) =>
+    parsePattern w -- (fn pat =>
+      succeed pat && (symbol "=def=" >> parseTm (Syntax.freeVariables pat) w)
+    ) wth (fn (P : Syntax.t, N : Syntax.t) =>
               (w, DevelopmentAst.DEFINITION (P, N)))
 
   fun parseDecl w =
@@ -108,7 +97,6 @@ end
 structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
    structure Tactic = Tactic
-   structure Pattern = PatternSyntax
    structure DevelopmentAst = DevelopmentAst
    structure TacticScript = CttScript
    val stringToLabel = StringVariable.named

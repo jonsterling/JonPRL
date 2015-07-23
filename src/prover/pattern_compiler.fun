@@ -10,91 +10,125 @@ functor PatternCompiler
    structure SoTerm : SO_TERM
 
    type label
-   structure PatternSyntax : ABT_UTIL
-     where type Operator.t = label PatternOperatorType.operator
-
-   val customOperator : label * Arity.t -> SoTerm.Operator.t
-
-   sharing type Conv.term = SoTerm.t
-   sharing type SoTerm.Variable.t = PatternSyntax.Variable.t) : PATTERN_COMPILER =
+   sharing type Conv.term = SoTerm.t) : PATTERN_COMPILER =
 struct
-  structure PatternSyntax = PatternSyntax
-  structure S = AbtUtil(SoTerm) and P = PatternSyntax
+  structure S = AbtUtil(SoTerm)
   type term = S.t
-  type pattern = P.t
+  type pattern = S.t
   type rule = {definiendum : pattern, definiens : term}
   type conv = Conv.conv
   type label = label
 
   structure Set = SplaySet(structure Elem = S.Variable)
-  structure Dict = SplayDict(structure Key = S.Variable)
   structure Conversionals = Conversionals
     (structure Syntax = S
      structure Conv = Conv)
 
   exception InvalidTemplate
 
-  type chart = S.t Dict.dict
+  structure Chart =
+  struct
+    structure Dict = SplayDict(structure Key = S.Variable)
+    open Dict
 
-  fun computeChart (pat, N) : chart =
-    case (P.out pat, S.out N) of
-         (P.$ (PatternOperatorType.APP (lbl,arity), es), S.$ (oper, es')) =>
+    datatype 'a point =
+        GLOBAL of 'a
+        (* A "global" point is the definition of a first-order variable *)
+      | LOCAL of 'a -> 'a
+        (* A "local" point is the definition of a second-order variable *)
+
+    type 'a chart = 'a point dict
+
+    fun lookupGlobal c x =
+      case lookup c x of
+           GLOBAL p => p
+         | _ => raise Subscript
+
+    fun lookupLocal c x =
+      case lookup c x of
+           LOCAL p => p
+         | _ => raise Subscript
+  end
+
+  open S
+  infix $ $$ \ \\
+
+  fun computeChart (pat, N) : S.t Chart.chart =
+    case (out pat, out N) of
+         (pato $ es, oper $ es') =>
            let
              val _ =
-               if S.Operator.eq (customOperator (lbl, arity), oper) then
+               if Operator.eq (pato, oper) then
                  ()
                else
                  raise InvalidTemplate
 
              open Vector
              val zipped = tabulate (length es, fn n => (sub (es, n), sub (es', n)))
-             fun go (P.`x) E R = Dict.insert R x (S.into E)
+
+             (* If we are at a first-order variable, then insert its
+              * substitution into the chart *)
+             fun go (`x) E R = Chart.insert R x (Chart.GLOBAL (into E))
+                 (* At an abstraction, the definiens shall be `x.F[x]`; the
+                  * right hand side shall be y.E. So we insert its second order
+                  * substitution into the chart, i.e. Z !-> [y/x]F. *)
+               | go (x \ M) (y \ N) R =
+                 (case SoTerm.asInstantiate M of
+                       SOME (F,X) =>
+                         (case out F of
+                               `f =>
+                               if eq (``x,X) then
+                                 Chart.insert R f (Chart.LOCAL (fn Z => subst Z y N))
+                               else
+                                 raise InvalidTemplate
+                             | _ => raise InvalidTemplate)
+                     | NONE => raise InvalidTemplate)
                | go _ _ _ = raise InvalidTemplate
            in
-             foldl (fn ((e,e'), R') => go (P.out e) (S.out e') R') Dict.empty zipped
+             foldl (fn ((e,e'), R') => go (out e) (out e') R') Chart.empty zipped
            end
-
        | _ => raise InvalidTemplate
 
   local
     open Conv Conversionals
-    fun rewriteInstantiations chart M =
-      let
-        open S
-        infix $ $$ \ \\ //
-      in
-        case SoTerm.asInstantiate M of
-             NONE => raise Conv
-           | SOME (E, M) =>
-               (case out E of
-                     `sovar => Dict.lookup chart sovar // M
-                   | _ => raise Conv)
-      end
   in
     fun compile ({definiendum, definiens} : rule) = fn (M : S.t) =>
       let
-        val P.$ (PatternOperatorType.APP (lbl, arity), inargs) = P.out definiendum
-        val S.$ (Mop, Margs) = S.out M
+        val Pop $ _ = out definiendum
+        val Mop $ _ = out M
         val chart = computeChart (definiendum, M)
       in
-        case S.out definiens of
-             S.` x => (Dict.lookup chart x handle _ => S.``x)
-           | S.$ (outop, outargs) =>
+        case out definiens of
+             ` x => (Chart.lookupGlobal chart x handle _ => ``x)
+           | outop $ outargs =>
                let
-                 val _ = if S.Operator.eq (customOperator (lbl, arity), Mop) then () else raise Conv
-                 open S
-                 infix $ $$ \ \\ //
-                 fun go H (p $ es) = p $$ Vector.map (go' H) es
-                   | go H (x \ E) = x \\ go' (Set.insert H x) E
-                   | go H (` x) =
-                       if Set.member H x then
-                         `` x
-                       else
-                         Dict.lookup chart x handle _ => `` x
-                 and go' H E = go H (out (CTRY (rewriteInstantiations chart) E))
-                 val res = go Set.empty (out definiens)
+                 val _ = if Operator.eq (Pop, Mop) then () else raise Conv
+                 fun go H M =
+                   case SoTerm.asInstantiate M of
+                        NONE =>
+                          (* If we have not reached a second-order application,
+                           * then proceed structurally *)
+                          (case out M of
+                               p $ es => p $$ Vector.map (go H) es
+                             | x \ E => x \\ go (Set.insert H x) E
+                             | `x =>
+                                 (* If we have a variable, see if it is from the
+                                  * definiens and insert its substitution,
+                                  * unless it is bound *)
+                                 if Set.member H x then
+                                   ``x
+                                 else
+                                   Chart.lookupGlobal chart x handle _ => ``x)
+                      | SOME (F,X) =>
+                           (* If we have got a second-order application, then
+                            * apply its substitution *)
+                          let
+                            val `f = out F
+                          in
+                            Chart.lookupLocal chart f X
+                          end
                in
-                 CDEEP (rewriteInstantiations chart) (go Set.empty (out definiens))
+                 go Set.empty definiens
                end
            | _ => raise Conv
       end
@@ -115,8 +149,5 @@ end
 
 structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
-   structure PatternSyntax = PatternSyntax
    structure SoTerm = SoTerm
-   type label = string
-   fun customOperator (lbl, arity) =
-     OperatorType.CUSTOM {label = lbl, arity = arity})
+   type label = string)

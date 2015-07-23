@@ -18,6 +18,6 @@ Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
 Theorem approx_id_refl_wf : [
   =(approx(lam(x.x);lam(x.x));approx(lam(x.x);lam(x.x));U{i})
 ] {
-  approx-ext-eq;lemma <implies_squash>
+  approx-ext-eq;cut-lemma <implies_squash>
   
 }.

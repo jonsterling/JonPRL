@@ -7,7 +7,7 @@ Theorem top-is-top :
 }.
 
 Operator corec : (1).
-[corec(F)] =def= [{n:nat} natrec(n; top; _.x. so_apply(F;x))].
+[corec(x.F[x])] =def= [{n:nat} natrec(n; top; _.x. F[x])].
 
 Operator conatF : (0).
 [conatF(X)] =def= [+(unit; X)].
@@ -23,8 +23,7 @@ Operator csucc : (0).
 [csucc(M)] =def= [inr(M)].
 
 Operator Y : (1).
-[Y(f)] =def= [lam(x.so_apply(f; x x)) lam(x.so_apply(f; x x))].
-
+[Y(z.f[z])] =def= [lam(x.f[x x]) lam(x.f [(x x)])].
 
 Operator omega : ().
 [omega] =def= [Y(x.csucc(x))].

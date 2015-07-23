@@ -7,7 +7,9 @@ functor CttUtil
       where type tactic = Lcf.tactic
       where type conv = Conv.conv
       where type term = Syntax.t
-      where type name = Syntax.Variable.t) : CTT_UTIL =
+      where type name = Syntax.Variable.t
+   val operatorToLabel : Syntax.Operator.t -> Ctt.Development.label
+   sharing type Lcf.goal = Ctt.Sequent.sequent) : CTT_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
@@ -44,6 +46,30 @@ struct
 
   val CEqRefl = CEqApprox THEN ApproxRefl
 
+  local
+    structure Tacticals = Tacticals (Lcf)
+    open Tacticals Sequent Syntax
+    infix THENL >>
+    infix $
+  in
+    fun UnfoldHead world (goal as H >> P) =
+      case out P of
+           oper $ _ => Unfolds (world, [(operatorToLabel oper, NONE)]) goal
+         | _ => raise Refine
+
+    fun CutLemma (world, lbl) =
+      let
+        val {statement,...} = Ctt.Development.lookupTheorem world lbl
+        val H >> P = statement
+        val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
+        val name = Syntax.Variable.named (Ctt.Development.Telescope.Label.toString lbl)
+      in
+        Assert (P, SOME name)
+          THENL [Lemma (world, lbl), ID]
+      end
+  end
+
+
   (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} =
      UnitIntro
@@ -61,7 +87,6 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRefl
        ORELSE BaseIntro
-       ORELSE MemCD
        ORELSE
        (if not invertible then
             CEqStruct
@@ -171,13 +196,15 @@ struct
 
     val DeepReduce = RewriteGoal (CDEEP Step)
   in
-    fun FinAuto 0 = LIMIT (InvAutoIntro ORELSE AutoVoidElim ORELSE InvAutoEqCD)
-      | FinAuto n = FinAuto 0 THEN (AutoIntro ORELSE AutoEqCD) THEN FinAuto (n - 1)
+    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim ORELSE InvAutoEqCD)
+      | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD) THEN FinAuto (wld, n - 1)
 
-    val InfAuto = LIMIT (AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
+    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
 
-    fun Auto NONE = InfAuto
-      | Auto (SOME n) = FinAuto n
+    fun Auto (wld, opt) =
+      case opt of
+           NONE => InfAuto wld
+         | SOME n => FinAuto (wld, n)
 
     fun Reduce NONE = LIMIT DeepReduce
       | Reduce (SOME n) =
@@ -189,24 +216,8 @@ struct
         end
   end
 
-  local
-    structure Tacticals = Tacticals (Lcf)
-    open Tacticals Sequent
-    infix THENL >>
-  in
-    fun CutLemma (world, lbl) =
-      let
-        val {statement,...} = Ctt.Development.lookupTheorem world lbl
-        val H >> P = statement
-        val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
-        val name = Syntax.Variable.named (Ctt.Development.Telescope.Label.toString lbl)
-      in
-        Assert (P, SOME name)
-          THENL [Lemma (world, lbl), ID]
-      end
-  end
-
 end
 
 structure CttUtil = CttUtil
-  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt)
+  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt
+   val operatorToLabel = Syntax.Operator.toString)

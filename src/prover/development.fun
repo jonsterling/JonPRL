@@ -1,7 +1,6 @@
 functor Development
   (structure Syntax : ABT_UTIL
    structure Evidence : ABT_UTIL
-   structure PatternSyntax : ABT_UTIL
    structure Lcf : LCF
      where type evidence = Evidence.t
    structure PatternCompiler : PATTERN_COMPILER
@@ -10,9 +9,7 @@ functor Development
      where type evidence = Lcf.evidence
      where type term = Syntax.t
    structure Telescope : TELESCOPE
-   sharing type PatternCompiler.pattern = PatternSyntax.t
-   sharing type PatternSyntax.Variable.t = Syntax.Variable.t
-   val asCustomOperator : PatternSyntax.Operator.t -> Telescope.label
+   val operatorToLabel : Syntax.Operator.t -> Telescope.label
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -21,7 +18,6 @@ struct
 
   type label = Telescope.label
   type term = Syntax.t
-  type pattern = PatternSyntax.t
   type judgement = Lcf.goal
   type evidence = Lcf.evidence
   type tactic = Lcf.tactic
@@ -68,7 +64,7 @@ struct
             ^ (case conversion of
                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ PatternSyntax.toString definiendum ^ "⸥ ≝ "
+                       "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
   end
 
@@ -125,16 +121,6 @@ struct
     Telescope.snoc T (lbl, Object.OPERATOR {arity = arity, conversion = NONE})
 
   local
-    open PatternSyntax
-    infix $
-  in
-    fun ruleGetLabel {definiendum, definiens} =
-      case out definiendum of
-           operator $ _ => asCustomOperator operator
-         | _ => raise Fail "invalid rewrite rule"
-  end
-
-  local
     structure Set = SplaySet(structure Elem = Syntax.Variable)
     val setFromList = foldl (fn (x,S) => Set.insert S x) Set.empty
     fun subset (xs, ys) =
@@ -146,22 +132,25 @@ struct
   in
     fun defineOperator T (rule as {definiendum, definiens}) =
       let
-        val lbl = ruleGetLabel rule
-        val LFVs = PatternSyntax.freeVariables definiendum
+        val Syntax.$ (oper, _) = Syntax.out definiendum
+        val lbl = operatorToLabel oper
+        val LFVs = Syntax.freeVariables definiendum
         val RFVs = Syntax.freeVariables definiens
         val _ =
           if subset (RFVs, LFVs) then
             ()
           else
             raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
+        val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
-        case Telescope.lookup T lbl of
-             Object.OPERATOR {arity,conversion = NONE} =>
+        case Telescope.find T lbl of
+             SOME (Object.OPERATOR {arity,conversion = NONE}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
                   {arity = arity,
-                   conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))})
-           | _ => raise Subscript
+                   conversion = conversion})
+           | SOME _ => raise Subscript
+           | NONE => raise Fail "Cannot define undeclared operator"
       end
   end
 
@@ -194,16 +183,14 @@ struct
        | _ => raise Subscript
 end
 
-structure Development : DEVELOPMENT = Development
-  (structure Syntax = Syntax
-   structure Evidence = Syntax
-   structure PatternSyntax = PatternSyntax
-   structure PatternCompiler = PatternCompiler
-   structure Extract = Extract
-   structure Telescope = Telescope(StringVariable)
-   structure Lcf = Lcf
+structure Development : DEVELOPMENT =
+  Development
+    (structure Syntax = Syntax
+     structure Evidence = Syntax
+     structure PatternCompiler = PatternCompiler
+     structure Extract = Extract
+     structure Telescope = Telescope(StringVariable)
+     structure Lcf = Lcf
 
-   open PatternOperatorType
-
-   fun asCustomOperator (APP (lbl, _)) = lbl
-   val goalToString = Sequent.toString)
+     val operatorToLabel = Syntax.Operator.toString
+     val goalToString = Sequent.toString)
