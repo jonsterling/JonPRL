@@ -1,5 +1,5 @@
 Tactic autoR {
-  reduce; *{(intro | eq-cd); reduce}
+  reduce; *{auto; reduce}
 }.
 
 Operator fst : (0).
