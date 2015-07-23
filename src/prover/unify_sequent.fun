@@ -30,7 +30,7 @@ struct
 
   (* Remove one list from another *)
   fun diff eq xs ys =
-    List.filter (fn x => not (List.all (fn y => eq (x, y)) ys)) xs
+    List.filter (fn x => not (List.exists (fn y => eq (x, y)) ys)) xs
 
   (* OK this is just awful. But it's the simplest working idea I have. *)
   fun subset H 0 = [[]]
@@ -65,6 +65,23 @@ struct
                  freeVars
     end
 
+  fun rebindPat {goal, hyps} =
+    let
+      open Context.Syntax
+      val free = freeVariables goal
+      val (_, hyps) =
+        List.foldl (fn (h, (free, hyps)) =>
+                       let
+                         val h = Rebind.rebind free h
+                       in
+                         (freeVariables h @ free, h :: hyps)
+                       end)
+                   (free, [])
+                   hyps
+    in
+      {goal = goal, hyps = hyps}
+    end
+
   fun applySol sol e =
     List.foldl
       (fn ((v, e'), e) =>
@@ -78,11 +95,17 @@ struct
   fun mergeSol (sol1, sol2) =
     let
       fun eq ((v, _), (v', _)) = Context.Syntax.Variable.eq (v, v')
+      val sol1' = List.map (fn (v, e) => (v, applySol sol2 e)) sol1
     in
-      sol2 @ diff eq (List.map (fn (v, e) => (v, applySol sol2 e)) sol1) sol2
+      sol2 @ diff eq sol1' sol2
     end
 
-  (* Given a a list of terms and set of hypotheses *)
+  (* Given a a list of terms and set of hypotheses and the current
+   * solution, attempt to match the terms against some subset of hypotheses
+   * and return
+   *   1. Those hypotheses
+   *   2. The new solution
+   *)
   fun matchCxt sol [] _ = SOME ([], sol)
     | matchCxt sol (t :: ts) hs =
       let
@@ -102,19 +125,27 @@ struct
         go len
       end
 
-  fun unify ({hyps, goal}, H >> P) =
+  fun debug x = (
+      print (Int.toString (List.length x) ^ "\n");
+    List.app (fn (v, e) =>
+                 print (MetaAbt.Variable.toString v
+                        ^ " : " ^ MetaAbt.toString e ^ "\n")) x
+  )
+
+  fun unify (pat, H >> P) =
     let
+      val {hyps, goal} = rebindPat pat
       val goal = convertInCtx H goal
       val hyps = List.map (convertInCtx H) hyps
-      val sol  = Unify.unify (goal, convert P)
-                   handle Unify.Mismatch _ => raise Mismatch
+      val sol = Unify.unify (goal, convert P)
+                  handle Unify.Mismatch _ => raise Mismatch
 
       fun go [] = raise Mismatch
         | go (hs :: subsets) =
           case matchCxt sol hyps hs of
-              SOME (names, finalSol) =>
+              SOME (names, finalSol) => (debug finalSol;
               {matched = names,
-               subst = List.map (fn (v, e) => (v, unconvert e)) sol}
+               subst = List.map (fn (v, e) => (v, unconvert e)) sol})
             | NONE => go subsets
     in
       go (subset (List.map (fn (n, v, t) => (n, convert t))
