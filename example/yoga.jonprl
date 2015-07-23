@@ -78,7 +78,7 @@ Theorem Ran_wf : [
   {hom : U{i} -> V -> U{i}}
   {g : X -> C}
   {h : X -> V}
-    member(Ran(X;cat;hom;g;h); Psh(C))
+  member(Ran(X;cat;hom;g;h); Psh(C))
 ] {
   unfold <Ran End Psh>; autoR.
 }.
@@ -89,7 +89,7 @@ Theorem Lan_wf : [
   {ten : V -> U{i} -> U{i}}
   {g : X -> C}
   {h : X -> V}
-    member(Lan(X;cat;ten;g;h); Psh(C))
+  member(Lan(X;cat;ten;g;h); Psh(C))
 ] {
   unfold <Lan Coend Psh>; autoR.
 }.
