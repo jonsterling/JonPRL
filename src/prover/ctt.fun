@@ -177,6 +177,8 @@ struct
            in
              Level.max (inferLevel (H, A), inferLevel (H', B))
            end
+         | EQ $ #[M,N,A] => inferLevel (H, A)
+         | MEM $ #[M,A] => inferLevel (H, A)
          | ` x =>
             let
               val X = Context.lookup H x
