@@ -1,10 +1,10 @@
-Operator squash : (0).
-[squash(A)] =def= [{_:unit | A}].
+Operator set-squash : (0).
+[set-squash(A)] =def= [{_:unit | A}].
 
-Theorem squash-wf : [{A:U{i}} member(squash(A); U{i})] {
-  unfold <squash>; auto.
+Theorem set-squash-wf : [{A:U{i}} member(set-squash(A); U{i})] {
+  unfold <set-squash>; auto.
 }.
 
-Theorem squash-intro : [{A:U{i}} A -> squash(A)] {
-  unfold <squash>; auto.
+Theorem set-squash-intro : [{A:U{i}} A -> set-squash(A)] {
+  unfold <set-squash>; auto.
 }.
