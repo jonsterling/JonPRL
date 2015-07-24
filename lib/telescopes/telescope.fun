@@ -180,7 +180,7 @@ struct
            names = names})
 
     fun into Empty = empty
-      | into (Cons (tel, lbl, a)) = raise Fail "hole"
+      | into (Cons (lbl, a, tele)) = cons (lbl,a) tele
   end
 
   local
@@ -202,6 +202,20 @@ struct
                vals = go (out (SOME tele)) vals,
                names = names}
           end
+
+    fun remove tele lbl =
+      let
+        fun go Empty = into Empty
+          | go (Cons (lbl', a, tele')) =
+              if Label.eq (lbl, lbl') then
+                go (out tele')
+              else
+                into (Cons (lbl', a, go (out tele')))
+      in
+        go (out tele)
+      end
+
+
 
     fun toString pretty tele =
       let

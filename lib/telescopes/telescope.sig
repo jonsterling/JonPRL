@@ -58,6 +58,7 @@ sig
   val map : 'a telescope -> ('a -> 'b) -> 'b telescope
   val mapAfter : 'a telescope -> label * ('a -> 'a) -> 'a telescope
   val modify : 'a telescope -> label * ('a -> 'a) -> 'a telescope
+  val remove : 'a telescope -> label -> 'a telescope
   val interposeAfter : 'a telescope -> label * 'a telescope -> 'a telescope
 
   (* comparison *)
