@@ -57,11 +57,18 @@ struct
         diff Context.Syntax.Variable.eq
              (List.map #1 (Context.listItems H))
              hypVars
-      val M = Rebind.rebind ctxVars M
+      val M = Rebind.rebindPrefix "'" ctxVars M
       val freeVars =
         diff Context.Syntax.Variable.eq
              (Context.Syntax.freeVariables M)
              ctxVars
+      (* Assert that all free variables are ones we didn't mean to
+       * bind to ones in the context already.
+       *)
+      val () =
+        if List.exists (String.isPrefix "'") (List.map Variable.toString freeVars)
+        then raise Mismatch
+        else ()
     in
       List.foldl (fn (v, M') => subst ($$ (MetaOperator.META v, #[])) v M')
                  (convert M)
@@ -72,17 +79,19 @@ struct
     let
       open Context.Syntax
       val free = freeVariables goal
-      fun rebindName free v =
-        Option.getOpt (List.find (fn v' => Variable.toString v = Variable.toString v')
-                                 free,
-                       v)
+
       val (_, hyps) =
         List.foldl (fn ((name, h), (free, hyps)) =>
                        let
+                         (* This uses actual rebind because we're not dealing
+                          * with anything in the context, we're ensuring that
+                          * within the pattern all identically named variables
+                          * are identical so we needn't worry about 's.
+                          *)
                          val h = Rebind.rebind free h
                          val free = freeVariables h @ free
                        in
-                         (name :: free, (rebindName free name, h) :: hyps)
+                         (name :: free, (name, h) :: hyps)
                        end)
                    (free, [])
                    hyps
