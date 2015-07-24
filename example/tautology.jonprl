@@ -1,0 +1,22 @@
+Tactic tautology-step {
+  @{ [H : P |- P] => hypothesis <H>
+   | [|- unit] => intro
+   | [|- P * Q] => intro
+   | [|- P -> Q] => intro
+   | [|- P => Q] => intro
+   | [H : void |- _] => elim <H>; thin <H>
+   | [H : P * Q |- _] => elim <H>; thin <H>
+   | [H : P + Q |- _] => elim <H>; thin <H>
+   | [H : P -> Q, H' : P |- _] => elim <H> [H']; thin <H>
+   | [|- member(M;A)] => unfold <member>
+   | [|- =(M;N;A)] => eq-cd
+   }
+}.
+
+Tactic tautology {
+  *{ tautology-step }
+}.
+
+Theorem example : [{P:U{i}} {Q:U{i}} (P + Q + void) * (P -> Q) -> unit * Q] {
+  tautology
+}.
