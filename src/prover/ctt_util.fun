@@ -157,6 +157,8 @@ struct
         ORELSE SuccEq
         ORELSE Cum level
         ORELSE EqInSupertype
+        ORELSE ImageEq
+        ORELSE ImageMemEq
         ORELSE
         (if not invertible then
              NatRecEq (listAt (terms, 0), take2 names)
