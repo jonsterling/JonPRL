@@ -1,15 +1,12 @@
 Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
-  [ *{unfold <squash>;auto;auto}
-  intro @i';
-  , auto]
+  unfold <squash>; auto
 }.
 
 Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
-  auto
-  intro @i';[ id, auto ];
-  intro @i;[ id, auto ];
-  witness [ap(lam(_.<>);_)];
+  auto;
+  witness [lam(_.<>) _];
   unfold <squash member>;
+  auto
 }.
 
 Theorem approx_id_refl_wf : [
@@ -19,10 +16,8 @@ Theorem approx_id_refl_wf : [
   approx-ext-eq;
   cut-lemma <implies_squash>;
   elim #1 [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
-  [ unfold <iff and implies>; auto
-  , id ];[id];
+  focus 0 #{ unfold <iff and implies>; auto };
   assert [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
-  [ id
-  , elim #2 [H];auto];[id];
+  focus 1 #{elim #2 [H]; auto};
   unfold <iff and implies>; intro; intro; auto
 }.
