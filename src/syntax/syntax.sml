@@ -28,7 +28,10 @@ struct
     val indIsectOpr =
       (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "_" \\ B])
     val indProdOpr =
-      (spaces >> symbol "*" >> spaces) return Infix (Right, 10, fn (A,B) => PROD $$ #[A, Variable.named "_" \\ B])
+      (spaces >> symbol "*" >> spaces) return Infix (Right, 11, fn (A,B) => PROD $$ #[A, Variable.named "_" \\ B])
+
+    val plusOpr =
+      (spaces >> symbol "+" >> spaces) return Infix (Right, 10, fn (A,B) => PLUS $$ #[A,B])
 
     fun parseRaw w st () =
       fancySubset w st
@@ -54,7 +57,7 @@ struct
       squares (parseAbt w st) wth (fn N => Postfix (12, fn M => SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
+      alt [plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
   end
@@ -108,6 +111,8 @@ struct
                Unparse.atom
                  ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
              end
+         | PLUS $ #[A,B] =>
+             Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
          | PAIR $ #[M,N] =>
              Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
          | SO_APPLY $ #[M,N] =>

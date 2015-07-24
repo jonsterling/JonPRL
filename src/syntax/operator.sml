@@ -414,7 +414,7 @@ struct
        | CEQUAL => "ceq"
        | APPROX => "approx"
        | MEM => "member"
-       | PLUS => "+"
+       | PLUS => "plus"
        | INL => "inl"
        | INR => "inr"
        | DECIDE => "decide"
@@ -455,7 +455,7 @@ struct
          string "unit" return UNIT,
          string "<>" return AX,
          string "prod" return PROD,
-         string "+" return PLUS,
+         string "plus" return PLUS,
          string "inl" return INL,
          string "inr" return INR,
          string "decide" return DECIDE,

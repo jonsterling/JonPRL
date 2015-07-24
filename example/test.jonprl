@@ -37,15 +37,15 @@ Theorem test7 : [(void * unit) -> void] {
   auto.
 }.
 
-Theorem test8 : [member(+(void; void); U{i})] {
+Theorem test8 : [member(void + void; U{i})] {
   auto
 }.
 
-Theorem test9 : [=(inl(<>); inl(<>); +(unit; void))] {
+Theorem test9 : [=(inl(<>); inl(<>); unit + void)] {
   auto
 }.
 
-Theorem test10 : [{A:U{i}} {B:U{i}} +(A; B) -> +(B; A)] {
+Theorem test10 : [{A:U{i}} {B:U{i}} A + B -> B + A] {
   auto; elim #3; [intro #1, intro #0]; auto
 }.
 

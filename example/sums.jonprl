@@ -5,25 +5,37 @@ Operator equiv : (0; 0).
 ||| immediately solve the goal backtrack and try the
 ||| next.
 Tactic constructor {
-   (!{intro #0; auto} | !{intro #1; auto})
+  (!{intro #0; auto} | !{intro #1; auto})
 }.
 
-Theorem commutative : [{A:U{i}} {B:U{i}} equiv(+(A; B); +(B; A))] {
-  unfold <equiv>; auto; elim #3; constructor
+Tactic constructor2 {
+  (!{intro #0; auto; constructor} | !{intro #1; auto; constructor})
 }.
 
-Theorem plus-assoc : [{A:U{i}} {B:U{i}} {C:U{i}} equiv(+(A; +(B; C)); +(+(A; B); C))] {
-  unfold <equiv>; auto; elim #4;
-  [id; id, elim #5, elim #5, intro #1; intro #1];
-  auto;
-  [intro #0, intro #0, id, id, intro #1];
-  constructor
+Tactic elims {
+  *{ @{ [H : P + Q |- _] => elim <H>; thin <H>
+      | [H : void |- _] => elim <H>
+      | [H : P |- P] => hypothesis <H>
+      }
+   }
 }.
 
-Theorem void-idr : [{A:U{i}} equiv(+(A; void); A)] {
-  unfold <equiv>; auto; [elim #2, intro #0]; auto.
+Tactic auto-sums {
+  auto; elims; constructor2
 }.
 
-Theorem void-idl : [{A:U{i}} equiv(+(void; A); A)] {
-  unfold <equiv>; auto; [elim #2, intro #1]; auto.
+Theorem commutative : [{A:U{i}} {B:U{i}} equiv(A + B; B + A)] {
+  auto-sums
+}.
+
+Theorem plus-assoc : [{A:U{i}} {B:U{i}} {C:U{i}} equiv(A + (B + C); (A + B) + C)] {
+  auto-sums
+}.
+
+Theorem void-idr : [{A:U{i}} equiv(A + void; A)] {
+  auto-sums
+}.
+
+Theorem void-idl : [{A:U{i}} equiv(void + A; A)] {
+  auto-sums
 }.

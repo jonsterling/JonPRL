@@ -14,37 +14,37 @@ Theorem minus-one-test : [=(minus-one succ(succ(zero)); succ(zero); nat)] {
   unfold <minus-one>; reduce; auto
 }.
 
-Operator plus : (0;0).
-[plus(M; N)] =def= [natrec(M; N; _.n.succ(n))].
+Operator add : (0;0).
+[add(M; N)] =def= [natrec(M; N; _.n.succ(n))].
 
 Tactic t {
-  unfold <plus>; auto 0; elim #1; reduce; auto 0.
+  unfold <add>; auto 0; elim #1; reduce; auto 0.
 }.
 
-Theorem plus-id-left : [{n:nat} =(plus(zero; n); n; nat)] {
+Theorem add-id-left : [{n:nat} =(add(zero; n); n; nat)] {
   t
 }.
 
-Theorem plus-id-right : [{n:nat} =(plus(n; zero); n; nat)] {
+Theorem add-id-right : [{n:nat} =(add(n; zero); n; nat)] {
   t
 }.
 
 Theorem succ-right : [
-  {n:nat} {m:nat} =(plus(n; succ(m)); succ(plus(n; m)); nat)
+  {n:nat} {m:nat} =(add(n; succ(m)); succ(add(n; m)); nat)
 ] {
   t
 }.
 
-Theorem plus-commutes : [
-  {n:nat} {m:nat} =(plus(n; m); plus(m; n); nat)
+Theorem add-commutes : [
+  {n:nat} {m:nat} =(add(n; m); add(m; n); nat)
 ] {
   ||| Kick off the induction and do the boring computation thingies.
   t;
 
-  ||| The base case immeidately follows from plus-id-right
+  ||| The base case immeidately follows from add-id-right
   focus 0 #{
-    cut-lemma <plus-id-right>;
-    elim #3 [m]; auto; unfold <plus>;
+    cut-lemma <add-id-right>;
+    elim #3 [m]; auto; unfold <add>;
     hyp-subst → #4 [h.=(m;h;nat)];
     auto
   };
@@ -52,7 +52,7 @@ Theorem plus-commutes : [
   ||| In order to prove this we first rewrite by succ-right from which our
   ||| result follows from reflexivity.
   cut-lemma <succ-right>;
-  elim #5 [m]; auto; elim #6 [n']; unfold <plus>; auto;
+  elim #5 [m]; auto; elim #6 [n']; unfold <add>; auto;
   hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
   auto; eq-cd; auto
 }.
