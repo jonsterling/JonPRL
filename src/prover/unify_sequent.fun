@@ -24,7 +24,7 @@ struct
   structure Unify = AbtUnifyOperators
     (structure A = MetaAbt
      structure O = MetaOperator)
-
+  structure Sol = Unify.Solution
 
   (* List utilities we seem to need *)
 
@@ -91,8 +91,8 @@ struct
     end
 
   fun applySol sol e =
-    List.foldl
-      (fn ((v, e'), e) =>
+    Sol.foldl
+      (fn (v, e', e) =>
           MetaAbt.substOperator (fn #[] => e') (MetaOperator.META v) e)
       e
       sol
@@ -102,10 +102,9 @@ struct
    *)
   fun mergeSol (sol1, sol2) =
     let
-      fun eq ((v, _), (v', _)) = Context.Syntax.Variable.eq (v, v')
-      val sol1' = List.map (fn (v, e) => (v, applySol sol2 e)) sol1
+      val sol1' = Sol.map (applySol sol2) sol1
     in
-      sol2 @ diff eq sol1' sol2
+      Sol.union sol2 sol1' (fn (_, e, _) => e)
     end
 
   fun add sol (v, e) =
@@ -113,13 +112,11 @@ struct
       open MetaOperator
       open MetaAbt
       val e = applySol sol e
-      val sol =
-        List.map (fn (v', e') => (v', substOperator (fn _ => e) (META v) e'))
-                 sol
+      val sol = Sol.map (substOperator (fn _ => e) (META v)) sol
     in
-      case List.find (fn (v', _) => Variable.eq (v, v')) sol of
-          NONE => (v, e) :: sol
-        | SOME (_, e') =>
+      case Sol.find sol v of
+          NONE => Sol.insert sol v e
+        | SOME e' =>
           if eq (e, e')
           then sol
           else raise Mismatch
@@ -165,7 +162,7 @@ struct
           case matchCxt sol hyps hs of
               SOME (names, finalSol) =>
               {matched = names,
-               subst = List.map (fn (v, e) => (v, unconvert e)) finalSol}
+               subst = Sol.toList (Sol.map unconvert finalSol)}
             | NONE => go subsets
       val subsets = subset (List.map (fn (n, v, t) => (n, convert t))
                            (Context.listItems H))
