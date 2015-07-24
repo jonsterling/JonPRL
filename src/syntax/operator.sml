@@ -213,7 +213,7 @@ struct
        | IMAGE_EQ => #[0,0]
        | IMAGE_MEM_EQ => #[0,0]
        | IMAGE_ELIM => #[0]
-       | IMAGE_EQ_IND => #[0,0,0,0]
+       | IMAGE_EQ_IND => #[0,0,0,4]
 
        | UNIT_EQ => #[]
        | UNIT_INTRO => #[]

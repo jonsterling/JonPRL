@@ -44,7 +44,8 @@ struct
   open Syntax
   open Operator OperatorType
   infix $ \
-  infix 8 $$ // \\
+  infix 8 $$ //
+  infixr 8 \\
 
   exception Refine
 
@@ -757,7 +758,8 @@ struct
         , H >> EQ $$ #[T1, T1, A]
         , H >> EQ $$ #[AP1, AP1, T]
         , H @@ (a,base) @@ (b,base) @@ (y, EQ $$ #[fa,fa,T]) @@ (z,EQ $$ #[``a,``b,A]) >> EQ $$ #[fa,fb,T]
-        ] BY mkEvidence IMAGE_EQ_IND
+        ] BY (fn [D1,D2,D3,D4] => IMAGE_EQ_IND $$ #[D1,D2,D3, a \\ b \\ y \\ z \\ D4]
+               | _ => raise Refine)
       end
 
     fun Witness M (H >> P) =
