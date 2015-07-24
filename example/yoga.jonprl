@@ -38,15 +38,15 @@ Operator oY : (0).
 
 ||| Ends and extensions
 
-Operator End : (0;0).
-Operator Coend : (0;0).
+Operator End : (0;1).
+Operator Coend : (0;1).
 Operator Ran : (0;0;0;0;0).
 Operator Lan : (0;0;0;0;0).
 
-[End(X;P)] =def= [(x:X) P x x].
-[Coend(X;P)] =def= [(x:X) * P x x].
-[Ran(X;cat;hom;g;h)] =def= [lam(a. End(X; lam(x.lam(y. hom (cat a (g x)) (h y)))))].
-[Lan(X;cat;ten;g;h)] =def= [lam(a. Coend(X; lam(x.lam(y. ten (h x) (cat (g y) a)))))].
+[End(X;x.P[x])] =def= [(x:X) P[x]].
+[Coend(X;x.P[x])] =def= [(x:X) * P[x]].
+[Ran(X;cat;hom;g;h)] =def= [lam(a. End(X; x. hom (cat a (g x)) (h x)))].
+[Lan(X;cat;ten;g;h)] =def= [lam(a. Coend(X; x. ten (h x) (cat (g x) a)))].
 
 Operator Psh : (0).
 
@@ -88,11 +88,11 @@ Operator implies : (0;0).
 
 ||| Proofs
 
-Theorem End_wf : [{X:U{i}} {P : X -> X -> U{i}} member(End(X;P); U{i})] {
+Theorem End_wf : [{X:U{i}} {P : X -> U{i}} member(End(X;x.P x); U{i})] {
   unfold <End>; auto.
 }.
 
-Theorem Coend_wf : [{X:U{i}} {P : X -> X -> U{i}} member(Coend(X;P); U{i})] {
+Theorem Coend_wf : [{X:U{i}} {P : X -> U{i}} member(Coend(X;x.P x); U{i})] {
   unfold <Coend>; auto.
 }.
 
