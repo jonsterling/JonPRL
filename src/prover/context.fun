@@ -49,6 +49,15 @@ struct
          SOME (lbl, (a, vis)) => SOME (lbl, a)
        | NONE => NONE
 
+  fun thin H k =
+    let
+      val H' = Telescope.remove H k
+    in
+      case search H' (fn A => Syntax.hasFree (A, k)) of
+           NONE => H'
+         | SOME (k', _) => thin H' k'
+    end
+
   fun listItems ctx =
     let
       open Telescope.SnocView

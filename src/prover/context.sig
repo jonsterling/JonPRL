@@ -15,6 +15,7 @@ sig
 
   val insert : context -> name -> Visibility.t -> term -> context
   val interposeAfter : context -> name * context -> context
+  val thin : context -> name -> context
 
   val modify : context -> name -> (term -> term) -> context
 
