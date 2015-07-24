@@ -7,6 +7,8 @@ struct
   type level = Level.t
   type meta = TacticMetadata.metadata
 
+  datatype ctx_pattern = CtxPattern of {goal : term, hyps : (name * term) list}
+
   datatype t =
       LEMMA of label * meta
     | UNFOLD of (label * level option) list * meta
@@ -59,10 +61,101 @@ struct
     | FAIL of meta
     | TRACE of string * meta
     | COMPLETE of t * meta
+    | MATCH of (ctx_pattern * branch) list
   and then_tactic =
       APPLY of t
     | LIST of t list
     | FOCUS of int * t
+  and branch = Branch of {pendingSubst : (name * term) list, body : t}
+
+
+  fun branch t = Branch {pendingSubst = [], body = t}
+
+  structure Rebind = Rebind(Syntax)
+  fun substBranch terms (Branch {pendingSubst, body}) =
+    let
+      fun join (sol1, sol2) =
+        let
+          fun eq ((v, _), (v', _)) = Syntax.Variable.eq (v, v')
+        in
+          sol2 @
+          List.filter (fn x => not (List.exists (fn y => eq (x, y)) sol2)) sol1
+        end
+
+      val subst = join (pendingSubst, terms)
+      fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e)
+                               (Rebind.rebind (List.map #1 subst) e)
+                               subst
+      fun applyName v =
+        let
+          val tO =
+            Option.map #2 (List.find ((fn (v', _) => Syntax.Variable.eq (v, v'))) subst)
+        in
+          case tO of
+              NONE => v
+            | SOME e =>
+              case Syntax.out e of
+                  Syntax.` v' => v'
+                | _ => raise Fail "Impossible! Called substBranch on bad subst"
+        end
+
+      fun go t =
+        case t of
+            WITNESS (term, meta) => WITNESS (apply term, meta)
+          | EQ_SUBST ({equality, domain, level}, meta) =>
+            EQ_SUBST ({equality = apply equality,
+                       domain = apply domain,
+                       level = level}, meta)
+          | HYP_SUBST ({dir, index, domain, level}, meta) =>
+            HYP_SUBST ({dir = dir,
+                        index = index,
+                        domain = apply domain,
+                        level = level}, meta)
+          | CEQ_SUBST ({equality, domain}, meta) =>
+            CEQ_SUBST ({equality = apply equality,
+                        domain = apply domain}, meta)
+          | CHYP_SUBST ({dir, index, domain}, meta) =>
+            CHYP_SUBST ({dir = dir,
+                         index = index,
+                         domain = apply domain}, meta)
+          | INTRO ({term, rule, freshVariable, level}, meta) =>
+            INTRO ({term = Option.map apply term,
+                    rule = rule,
+                    freshVariable = freshVariable,
+                    level = level}, meta)
+          | ELIM ({target, term, names}, meta) =>
+            ELIM ({target = target,
+                   term = Option.map apply term,
+                   names = names}, meta)
+          | EQ_CD ({names, terms, level}, meta) =>
+            EQ_CD ({names = names,
+                    terms = List.map apply terms,
+                    level = level}, meta)
+          | ASSERT ({assertion, name}, meta) =>
+            ASSERT ({assertion = apply assertion,
+                     name = name}, meta)
+          | THEN ts =>
+            THEN (List.map (fn (APPLY t) => APPLY (go t)
+                            | (LIST ts) => LIST (List.map go ts)
+                            | (FOCUS (i, t)) => FOCUS (i, go t))
+                           ts)
+          | MATCH branches =>
+            MATCH (List.map (fn (pat, Branch {pendingSubst, body}) =>
+                                (goPat pat,
+                                 Branch {pendingSubst = join (pendingSubst, subst),
+                                         body = body}))
+                            branches)
+          | TRY t => TRY (go t)
+          | LIMIT t => LIMIT (go t)
+          | ORELSE (ts, meta) => ORELSE (List.map go ts, meta)
+          | COMPLETE (t, meta) => COMPLETE (go t, meta)
+          | t => t
+      and goPat (CtxPattern {goal, hyps}) =
+          CtxPattern {goal = apply goal,
+                      hyps = List.map (fn (v, e) => (applyName v, apply e)) hyps}
+    in
+      go body
+    end
 
   val listOfTactics =
     ["intro [TERM]? #NUM? <NAME*>?",

@@ -44,6 +44,11 @@ struct
     {freshVariable : name option,
      level : Level.t option}
 
+  type match_args =
+    {hyps   : (name * term) list,
+     goal   : term,
+     branch : (name * term) list -> tactic} list
+
   val CEqRefl = CEqApprox THEN ApproxRefl
 
   local
@@ -176,6 +181,12 @@ struct
   fun Ext {freshVariable, level} =
     FunExt (freshVariable, level)
     ORELSE ApproxExtEq
+
+  fun Match [] = FAIL
+    | Match [{hyps, goal, branch}] = MatchSingle (hyps, goal, branch)
+    | Match ({hyps, goal, branch} :: branches) =
+      MatchSingle (hyps, goal, branch)
+      ORELSE_LAZY (fn () => Match branches)
 
   local
     val InvAutoEqCD = EqCD {names = [],

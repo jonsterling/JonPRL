@@ -21,6 +21,8 @@ group is
   operator.sml
   syntax.sml
 
+  rebind.fun
+
   tactic.sig
   tactic.sml
   tactic_metadata.sml

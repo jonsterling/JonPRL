@@ -17,3 +17,6 @@
 [submodule "lib/sml-unparse"]
 	path = lib/sml-unparse
 	url = https://github.com/jonsterling/sml-unparse.git
+[submodule "sml-abt-unify"]
+	path = lib/sml-abt-unify
+	url = https://github.com/jozefg/sml-abt-unify.git

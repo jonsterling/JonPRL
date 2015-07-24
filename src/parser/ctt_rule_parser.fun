@@ -287,5 +287,7 @@ structure CttRuleParser = CttRuleParser
    val stringToLabel = StringVariable.named)
 
 structure CttScript = TacticScript
-  (structure Tactic = Tactic
-   structure RuleParser = CttRuleParser)
+  (structure ParserContext = StringVariableContext
+   structure Tactic = Tactic
+   structure RuleParser = CttRuleParser
+   structure ParseSyntax = Syntax)

@@ -1374,6 +1374,20 @@ struct
           (SubsetElim_ (x, NONE) THEN HypEq) (H >> P)
         end
     end
+
+
+    local
+      structure Unify = UnifySequent(Sequent)
+    in
+      fun MatchSingle (hyps, goal, body) (H >> P) =
+        let
+          val {matched, subst} =
+            Unify.unify ({hyps = hyps, goal = goal}, (H >> P))
+              handle Unify.Mismatch => raise Refine
+        in
+          body subst (H >> P)
+        end
+    end
   end
 
   structure Conversions =

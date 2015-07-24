@@ -1,0 +1,18 @@
+Theorem match_example : [{A : U{i}} {B : U{i}} A -> B -> A] {
+  intro; [intro, auto]; [intro, auto]; [intro, auto]; [id, auto];
+  @{[H : A' |- A'] => witness [H]; auto}
+}.
+
+Theorem match_example2 : [(A : U{i})(x : A)  A] {
+  intro; [intro, auto]; [assert [member(x; A)], auto]; [auto, id];
+  @{[M : member(X; A') |- A'] => witness [X]; assumption}
+}.
+
+Theorem modus_ponens : [{A : U{i}}{B : U{i}}((A -> B) * A) -> B] {
+  auto;
+  *{
+    @{ [M' : A', M : A' -> B' |- B'] => elim #4 [M']; auto
+     | [M : X * Y |- Z] => elim #3
+     }
+   }
+}.

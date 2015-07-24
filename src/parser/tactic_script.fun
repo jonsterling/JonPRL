@@ -1,12 +1,19 @@
 functor TacticScript
-  (structure Tactic : TACTIC
+  (structure ParserContext : PARSER_CONTEXT
+   structure Tactic : TACTIC
    structure RuleParser : INTENSIONAL_PARSER
-     where type t = Tactic.t) : TACTIC_SCRIPT =
+     where type t = Tactic.t
+     where type world = ParserContext.world
+   structure ParseSyntax : PARSE_ABT
+     where type t = Tactic.term
+     where type Variable.t = Tactic.name
+     where type ParseOperator.world = ParserContext.label -> Arity.t)
+        : TACTIC_SCRIPT =
 struct
-  type world = RuleParser.world
+  type world = ParserContext.world
   type tactic = Tactic.t
 
-  open Tactic ParserCombinators CharParser
+  open Tactic ParserCombinators CharParser ParserContext
   infix 2 return wth suchthat return guard when
   infixr 1 || <|>
   infixr 3 &&
@@ -18,6 +25,11 @@ struct
   open TP
 
   val pipe = symbol "|"
+
+  val name = identifier wth ParseSyntax.Variable.named
+
+  fun parseTm w =
+    ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState [])
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -49,6 +61,7 @@ struct
       || parseId
       || parseFail
       || parseTrace
+      || $ (parseMatch w)
       || RuleParser.parse w
 
   and parseFocus w () =
@@ -63,6 +76,19 @@ struct
   and parseRepeat w () =
     middle (symbol "*{") ($ (parseScript w)) (symbol "}")
     wth LIMIT
+
+  and parseMatch w () =
+    let
+      val hyp = name && symbol ":" && parseTm w wth (fn (n, (_, h)) => (n, h))
+      val parsePattern =
+        squares (commaSep hyp && symbol "|-" && parseTm w)
+        wth (fn (hyps, (_, goal)) => CtxPattern {goal = goal, hyps = hyps})
+    in
+      middle (symbol "@{")
+             (separate1 (parsePattern && symbol "=>" && ($ (parseScript w))) pipe)
+             (symbol "}")
+      wth (MATCH o List.map (fn (pat, (_, body)) => (pat, branch body)))
+    end
 
   and parseOrelse w () =
     !! (parens (separate1 ($ (parseScript w)) pipe))
