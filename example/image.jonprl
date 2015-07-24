@@ -12,8 +12,7 @@ Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
 Theorem approx_id_refl_wf : [
   =(approx(lam(x.x);lam(x.x));approx(<>;<>);U{i})
 ] {
-  unfold <member>;
-  approx-ext-eq;
+  unfold <member>; ext;
   cut-lemma <implies_squash>;
   elim #1 [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
   focus 0 #{ unfold <iff and implies>; auto };

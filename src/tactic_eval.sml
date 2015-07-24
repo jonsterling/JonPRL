@@ -55,7 +55,6 @@ struct
       | CEQUAL_STRUCT a => an a CEqStruct
       | CEQUAL_APPROX a => an a CEqApprox
       | APPROX_REFL a => an a ApproxRefl
-      | APPROX_EXT_EQ a => an a ApproxExtEq
       | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)

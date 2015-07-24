@@ -199,10 +199,6 @@ struct
     fn w => tactic "areflexivity"
       wth (fn name => fn pos => APPROX_REFL {name = name, pos = pos})
 
-  val parseApproxExtEq : tactic_parser =
-   fn w => tactic "approx-ext-eq"
-      wth (fn name => fn pos => APPROX_EXT_EQ {name = name, pos = pos})
-
   val parseBottomDiverges : tactic_parser =
    fn w => tactic "bot-div"
       && parseIndex
@@ -276,7 +272,6 @@ struct
       || parseCEqualApprox w
       || parseApproxRefl w
       || parseBottomDiverges w
-      || parseApproxExtEq w
       || parseCHypSubst w
       || parseCustomTactic w
 
