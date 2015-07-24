@@ -22,7 +22,6 @@ group is
   syntax.sml
 
   rebind.fun
-  pattern.fun
 
   tactic.sig
   tactic.sml
