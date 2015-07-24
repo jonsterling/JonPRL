@@ -22,14 +22,9 @@ Theorem modus_ponens : [{A : U{i}}{B : U{i}}((B -> A) * B) -> A] {
 }.
 
 Tactic squash-intro {
-  @{
-    [|- squash(A)] =>
-       assert [A];
-       focus 1 #{
-         @{
-           [H : A |- _] =>
-             unfold <squash member>; witness [lam(_.<>) H]; auto
-         }
+  @{ [|- squash(A)] =>
+       assert [A]; focus 1 #{
+         @{[H : A |- _] => unfold <squash member>; witness [lam(_.<>) H]; auto}
        }
   }
 }.
