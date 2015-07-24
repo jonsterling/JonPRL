@@ -16,13 +16,3 @@ Theorem modus_ponens : [{A : U{i}}{B : U{i}}((A -> B) * A) -> B] {
      }
    }
 }.
-
-Theorem modus_ponens2 : [{A : U{i}}{B : U{i}}((A -> B) * A) -> B] {
-  auto;
-  *{
-     @{ [A : A' |- A''] => trace "Impossible - hyp names can't be in context"
-      | [M' : A', M : A' -> B' |- B'] => elim #4 [M']; auto
-      | [M : X * Y |- Z] => elim #3
-      }
-   }
-}.
