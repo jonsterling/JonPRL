@@ -1,6 +1,6 @@
 ||| Tactics
 
-Tactic autoR {
+Tactic autoRed {
   reduce; *{auto; reduce}
 }.
 
@@ -104,7 +104,7 @@ Theorem Ran_wf : [
   {h : X -> V}
   member(Ran(X;cat;hom;g;h); Psh(C))
 ] {
-  unfold <Ran End Psh>; autoR.
+  unfold <Ran End Psh>; autoRed.
 }.
 
 Theorem Lan_wf : [
@@ -115,7 +115,7 @@ Theorem Lan_wf : [
   {h : X -> V}
   member(Lan(X;cat;ten;g;h); Psh(C))
 ] {
-  unfold <Lan Coend Psh>; autoR.
+  unfold <Lan Coend Psh>; autoRed.
 }.
 
 Theorem Hom_wf : [{A:U{i}} {B:U{i}} member(Hom A B; U{i'})] {
@@ -130,32 +130,32 @@ Theorem LowerShriek_wf : [
   {X:U{i}} {Y:U{i}} {f : X -> Y}
   member(LowerShriek(X;Y;f); Psh(X) -> Psh(Y))
 ] {
-  unfold <LowerShriek Lan Paths Ten Coend Psh>; autoR.
+  unfold <LowerShriek Lan Paths Ten Coend Psh>; autoRed.
 }.
 
 Theorem UpperShriek_wf : [
   {X:U{i}} {Y:U{i}} {f : X -> Y}
   member(UpperShriek(X;Y;f); Psh(Y) -> Psh(X))
 ] {
- unfold <UpperShriek Psh>; autoR.
+ unfold <UpperShriek Psh>; autoRed.
 }.
 
 Theorem UpperStar_wf : [
   {X:U{i}} {Y:U{i}} {f : X -> Y}
   member(UpperStar(X;Y;f); Psh(Y) -> Psh(X))
 ] {
- unfold <UpperStar UpperShriek Psh>; autoR.
+ unfold <UpperStar UpperShriek Psh>; autoRed.
 }.
 
 Theorem LowerStar_wf : [
   {X:U{i}} {Y:U{i}} {f : X -> Y}
   member(LowerStar(X;Y;f); Psh(X) -> Psh(Y))
 ] {
-  unfold <LowerStar Ran Paths Hom End Psh>; autoR.
+  unfold <LowerStar Ran Paths Hom End Psh>; autoRed.
 }.
 
 Theorem equals_refl : [{X:U{i}} {x:X} Equals(X;<x,x>)] {
-  unfold <Equals LowerShriek Lan Coend Paths Ten contract bang>; autoR;
+  unfold <Equals LowerShriek Lan Coend Paths Ten contract bang>; autoRed;
   intro [x]; auto.
 }.
 
