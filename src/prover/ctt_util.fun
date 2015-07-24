@@ -175,6 +175,7 @@ struct
 
   fun Ext {freshVariable, level} =
     FunExt (freshVariable, level)
+    ORELSE ApproxExtEq
 
   local
     val InvAutoEqCD = EqCD {names = [],
