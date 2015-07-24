@@ -78,7 +78,7 @@ Theorem Ran_wf : [
   {hom : U{i} -> V -> U{i}}
   {g : X -> C}
   {h : X -> V}
-    member(Ran(X;cat;hom;g;h); Psh(C))
+  member(Ran(X;cat;hom;g;h); Psh(C))
 ] {
   unfold <Ran End Psh>; autoR.
 }.
@@ -89,7 +89,7 @@ Theorem Lan_wf : [
   {ten : V -> U{i} -> U{i}}
   {g : X -> C}
   {h : X -> V}
-    member(Lan(X;cat;ten;g;h); Psh(C))
+  member(Lan(X;cat;ten;g;h); Psh(C))
 ] {
   unfold <Lan Coend Psh>; autoR.
 }.
@@ -129,3 +129,47 @@ Theorem LowerStar_wf : [
 ] {
   unfold <LowerStar Ran Paths Hom End Psh>; autoR.
 }.
+
+||| Adjunctions
+
+||| coproduct ⊣ weakening
+||| L-! ∘ R-!
+||| ≃ f ↓! ∘ f ↑!
+||| ≃ Lan Paths ⊗ f ∘ (- ∘ f)
+||| ≃ λg a. ∫↑x. (g∘f) x ⊗ f x  = a
+||| ≃ λg a. Σ x. (g∘f) x × f x  = a
+||| ≃ λφ a. ∃ x. φ(x[γ]) ∧ x[γ] = a | γ ~ f
+
+||| weakening ⊢ coproduct
+||| R-! ∘ L-!
+||| ≃ f ↑! ∘ f ↓!
+||| ≃ (- ∘ f) ∘ Lan Paths ⊗ f
+||| ≃ λg a. ∫↑x. g x  ⊗ f x  = f a
+||| ≃ λg a. Σ x. g x  × f x  = f a
+||| ≃ λφ a. ∃ x. φ(x) ∧ x[γ] = a[γ] | γ ~ f
+
+||| weakening ⊣ product
+||| L-* ∘ R-*
+||| f ↑* ∘ f ↓*
+||| ≃ (- ∘ f) ∘ Ran Paths ⋔ f
+||| ≃ λg a. ∫↓x. f a  = f x  ⋔ g x
+||| ≃ λg a. Π x. f a  = f x  → g x
+||| ≃ λφ a. ∀ x. a[γ] = x[γ] ⊃ φ(x) | γ ~ f
+
+||| product ⊢ weakening
+||| R-* ∘ L-*
+||| f ↓* ∘ f ↑*
+||| ≃ Ran Paths ⋔ f ∘ (- ∘ f)
+||| ≃ λg a. ∫↓x. a = f x  ⋔ (g∘f) x
+||| ≃ λg a. Π x. a = f x  → (g∘f) x
+||| ≃ λφ a. ∀ x. a = x[γ] ⊃ φ(x[γ]) | γ ~ f
+
+||| contraction ⊣ equality
+||| L-δ ∘ R-θ
+
+||| equality ⊢ contraction
+||| R-θ ∘ L-δ
+
+||| truth ⊣ comprehension
+
+||| comprehension ⊢ truth
