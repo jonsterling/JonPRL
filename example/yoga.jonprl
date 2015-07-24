@@ -6,15 +6,23 @@ Tactic autoR {
 
 ||| Preliminaries
 
+Operator id : ().
+Operator cmp : (0;0).
 Operator fst : (0).
 Operator snd : (0).
 Operator pairF : (0;0).
 Operator pairFp : (0;0).
+Operator diag : ().
+Operator bang : (0).
 
+[id] =def= [lam(x.x)].
+[cmp(g;f)] =def= [lam(x. g (f x))].
 [fst(p)] =def= [spread(p; x.y.x)].
 [snd(p)] =def= [spread(p; x.y.x)].
 [pairF(f;g)] =def= [lam(x. pair(f x; g x))].
 [pairFp(f;g)] =def= [lam(x. pairF(f fst(x); g snd(x)))].
+[bang(v)] =def= [lam(_. v)].
+[diag] =def= [pairF(id; id)].
 
 ||| Ambient categories
 
