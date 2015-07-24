@@ -3,7 +3,7 @@ Theorem natp-example : [nat] {
 }.
 
 Theorem minus-one : [nat -> nat] {
-  intro <n>; [id, auto];
+  intro <n>; focus 1 #{ auto };
   elim #1;
   [ witness [zero]
   , hypothesis #2
@@ -45,7 +45,7 @@ Theorem add-commutes : [
   focus 0 #{
     cut-lemma <add-id-right>;
     elim #3 [m]; auto; unfold <add>;
-    hyp-subst → #4 [h.=(m;h;nat)];
+    hyp-subst → #4 [h.=(_;h;_)];
     auto
   };
 
@@ -53,6 +53,6 @@ Theorem add-commutes : [
   ||| result follows from reflexivity.
   cut-lemma <succ-right>;
   elim #5 [m]; auto; elim #6 [n']; unfold <add>; auto;
-  hyp-subst → #8 [h.=(succ(natrec(n'; m; _.n.succ(n))); h; nat)];
+  hyp-subst → #8 [h.=(_; h; _)];
   auto; eq-cd; auto
 }.

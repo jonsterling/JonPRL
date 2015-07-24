@@ -24,11 +24,11 @@ struct
     infix $$ \\
   in
     val indFunOpr =
-      (spaces >> symbol "->" >> spaces) return Infix (Right, 9, fn (A,B) => FUN $$ #[A, Variable.named "_" \\ B])
+      (spaces >> symbol "->" >> spaces) return Infix (Right, 9, fn (A,B) => FUN $$ #[A, Variable.named "x" \\ B])
     val indIsectOpr =
-      (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "_" \\ B])
+      (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "x" \\ B])
     val indProdOpr =
-      (spaces >> symbol "*" >> spaces) return Infix (Right, 11, fn (A,B) => PROD $$ #[A, Variable.named "_" \\ B])
+      (spaces >> symbol "*" >> spaces) return Infix (Right, 11, fn (A,B) => PROD $$ #[A, Variable.named "x" \\ B])
 
     val plusOpr =
       (spaces >> symbol "+" >> spaces) return Infix (Right, 10, fn (A,B) => PLUS $$ #[A,B])

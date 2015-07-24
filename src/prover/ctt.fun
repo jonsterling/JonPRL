@@ -1134,11 +1134,31 @@ struct
         ] BY mkEvidence EQ_SYM
       end
 
+
+    structure Meta = MetaAbt(Syntax)
+    structure MetaAbt = AbtUtil(Meta.Meta)
+    structure Unify = AbtUnifyOperators
+      (structure A = MetaAbt
+       structure O = Meta.MetaOperator)
+
+    fun applySolution sol e =
+      Meta.unconvert (fn _ => raise Fail "Impossible")
+        (Unify.Solution.foldl
+          (fn (v, e', e) => MetaAbt.substOperator (fn #[] => e') (Meta.MetaOperator.META v) e)
+          e
+          sol)
+
     fun EqSubst (eq, xC, ok) (H >> P) =
       let
         val #[M,N,A] = Context.rebind H eq ^! EQ
+        val xC = Context.rebind H xC
+
+        val fvs = List.map #1 (Context.listItems H)
+        val meta = Meta.convertFree fvs (xC // M)
+        val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+        val xC = applySolution solution (Meta.convertFree fvs xC)
+
         val (H', x, C) = ctxUnbind (H, A, xC)
-        val P' = unify P (xC // M)
         val k = case ok of SOME k => k | NONE => inferLevel (H', C)
       in
         [ H >> eq
@@ -1155,7 +1175,6 @@ struct
     in
       fun HypEqSubst (dir, hyp, xC, ok) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
@@ -1250,9 +1269,14 @@ struct
 
       fun CEqSubst (eq, xC) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val eq = Context.rebind H eq
           val #[M, N] = eq ^! CEQUAL
+
+          val fvs = List.map #1 (Context.listItems H)
+          val meta = Meta.convertFree fvs (xC // M)
+          val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+          val xC = applySolution solution (Meta.convertFree fvs xC)
+
           val _ = unify P (xC // M)
         in
           [ H >> eq
@@ -1263,7 +1287,6 @@ struct
 
       fun HypCEqSubst (dir, hyp, xC) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
