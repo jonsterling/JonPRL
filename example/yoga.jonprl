@@ -154,6 +154,11 @@ Theorem LowerStar_wf : [
   unfold <LowerStar Ran Paths Hom End Psh>; autoR.
 }.
 
+Theorem equals_refl : [{X:U{i}} {x:X} Equals(X;<x,x>)] {
+  unfold <Equals LowerShriek Lan Coend Paths Ten contract bang>; autoR;
+  intro [x]; auto.
+}.
+
 ||| Adjunctions
 
 ||| coproduct ⊣ weakening
