@@ -14,14 +14,12 @@ Theorem match_example2 : [(A : U{i})(x : A)  A] {
 }.
 
 Theorem modus_ponens : [{A : U{i}}{B : U{i}}((B -> A) * B) -> A] {
-  auto;
-  *{
-    @{ [H' : A, H : A -> B |- B] => elim #4 [H']; auto
-     | [H : A * B |- C] => elim #3
+  auto; *{
+    @{ [H' : A, H : A -> B |- B] => elim <H> [H']; auto
+     | [H : X * B |- C] => elim <H>
      }
-   }
+  }
 }.
-
 
 Tactic squash-intro {
   @{

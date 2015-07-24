@@ -23,6 +23,8 @@ group is
 
   rebind.fun
 
+  hyp_syn.sml
+
   tactic.sig
   tactic.sml
   tactic_metadata.sml

@@ -36,5 +36,6 @@ sig
   val subcontext : context * context -> bool
 
   exception Open of term
+  val rebindName : context -> name -> name
   val rebind : context -> term -> term
 end

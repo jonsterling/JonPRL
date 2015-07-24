@@ -35,6 +35,8 @@ struct
   type world = Development.world
   type label = Development.label
 
+  type hyp = name HypSyn.t
+
   structure Operator = Syntax.Operator
   structure Development = Development
   structure Conversionals = Conversionals
@@ -140,9 +142,12 @@ struct
            O $ _ => if operatorIrrelevant O then () else raise Refine
          | _ => raise Refine
 
-    fun eliminationTarget i (H >> P) =
+    fun eliminationTarget hyp (H >> P) =
       let
-        val z = Context.nth H (i - 1)
+        val z =
+          case hyp of
+               HypSyn.INDEX i => Context.nth H (i - 1)
+             | HypSyn.NAME z => Context.rebindName H z
         val (A, visibility) = Context.lookupVisibility H z
       in
         case visibility of
@@ -257,9 +262,9 @@ struct
         [] BY mkEvidence UNIT_INTRO
       end
 
-    fun UnitElim i (H >> P) =
+    fun UnitElim hyp (H >> P) =
       let
-        val x = eliminationTarget i (H >> P)
+        val x = eliminationTarget hyp (H >> P)
         val #[] = Context.lookup H x ^! UNIT
         val ax = AX $$ #[]
         val H' = ctxSubst H ax x
@@ -341,10 +346,10 @@ struct
                | _ => raise Refine)
       end
 
-    fun FunElim (i, s, onames) (H >> P) =
+    fun FunElim (hyp, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = eliminationTarget i (H >> P)
+        val f = eliminationTarget hyp (H >> P)
         val #[S, xT] = Context.lookup H f ^! FUN
         val Ts = xT // s
         val (y, z) =
@@ -436,10 +441,10 @@ struct
                | _ => raise Refine)
       end
 
-    fun IsectElim (i, s, onames) (H >> P) =
+    fun IsectElim (hyp, s, onames) (H >> P) =
       let
         val s = Context.rebind H s
-        val f = eliminationTarget i (H >> P)
+        val f = eliminationTarget hyp (H >> P)
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -542,8 +547,8 @@ struct
                | _ => raise Refine)
       end
 
-    fun SubsetElim (i, onames) (H >> P) =
-      SubsetElim_ (eliminationTarget i (H >> P), onames) (H >> P)
+    fun SubsetElim (hyp, onames) (H >> P) =
+      SubsetElim_ (eliminationTarget hyp (H >> P), onames) (H >> P)
 
     fun SubsetMemberEq (oz, ok) (H >> P) =
       let
@@ -573,9 +578,9 @@ struct
         [] BY mkEvidence NAT_EQ
       end
 
-    fun NatElim (i, onames) (H >> C) =
+    fun NatElim (hyp, onames) (H >> C) =
       let
-        val z = eliminationTarget i (H >> C)
+        val z = eliminationTarget hyp (H >> C)
         val #[] = Context.lookup H z ^! NAT
         val (n,ih) =
           case onames of
@@ -674,9 +679,9 @@ struct
                | _ => raise Refine)
       end
 
-    fun BaseElimEq (i, z) (H >> P) =
+    fun BaseElimEq (hyp, z) (H >> P) =
       let
-        val eq = Context.nth H (i - 1)
+        val eq = eliminationTarget hyp (H >> P)
         val #[M, N, U] = Context.lookup H eq ^! EQ
         val #[] = U ^! BASE
         val z =
@@ -715,9 +720,9 @@ struct
         ] BY mkEvidence IMAGE_MEM_EQ
       end
 
-    fun ImageElim (i, oz) (H >> P) =
+    fun ImageElim (hyp, oz) (H >> P) =
       let
-        val x = eliminationTarget i (H >> P)
+        val x = eliminationTarget hyp (H >> P)
         val #[A,F] = Context.lookup H x ^! IMAGE
         val w =
          case oz of
@@ -732,9 +737,9 @@ struct
         ] BY mkEvidence IMAGE_ELIM
       end
 
-    fun ImageEqInd (i,onames) (H >> P) =
+    fun ImageEqInd (hyp, onames) (H >> P) =
       let
-        val x = eliminationTarget i (H >> P)
+        val x = eliminationTarget hyp (H >> P)
         val #[T2',AP1,U] = Context.lookup H x ^! EQ
         val (a,b,y,z) =
           case onames of
@@ -822,9 +827,9 @@ struct
         ] BY mkEvidence IND_PROD_INTRO
       end
 
-    fun ProdElim (i, onames) (H >> P) =
+    fun ProdElim (hyp, onames) (H >> P) =
       let
-        val z = Context.nth H (i - 1)
+        val z = eliminationTarget hyp (H >> P)
         val #[S, xT] = Context.lookup H z ^! PROD
         val (s, t) =
           case onames of
@@ -950,7 +955,7 @@ struct
 
     fun PlusElim (i, onames) (H >> P) =
       let
-        val z = Context.nth H (i - 1)
+        val z = eliminationTarget i (H >> P)
         val #[A, B] = Context.lookup H z ^! PLUS
         val (s, t) =
             case onames of
@@ -1035,7 +1040,7 @@ struct
         [] BY (fn _ => ``x)
       end
 
-    fun Hypothesis i (H >> P) = Hypothesis_ (Context.nth H (i - 1)) (H >> P)
+    fun Hypothesis hyp goal = Hypothesis_ (eliminationTarget hyp goal) goal
 
     fun Assumption (H >> P) =
       case Context.search H (fn x => Syntax.eq (P, x)) of
@@ -1148,10 +1153,10 @@ struct
       open Tacticals
       infix THEN THENL
     in
-      fun HypEqSubst (dir, i, xC, ok) (H >> P) =
+      fun HypEqSubst (dir, hyp, xC, ok) (H >> P) =
         let
           val xC = Context.rebind H xC
-          val z = Context.nth H (i - 1)
+          val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
           case dir of
@@ -1256,10 +1261,10 @@ struct
                  | _ => raise Refine)
         end
 
-      fun HypCEqSubst (dir, i, xC) (H >> P) =
+      fun HypCEqSubst (dir, hyp, xC) (H >> P) =
         let
           val xC = Context.rebind H xC
-          val z = Context.nth H (i - 1)
+          val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
           case dir of
@@ -1283,9 +1288,9 @@ struct
           ] BY mkEvidence CEQUAL_APPROX
         end
 
-      fun BottomDiverges i (H >> P) =
+      fun BottomDiverges hyp (H >> P) =
         let
-          val x = eliminationTarget i (H >> P)
+          val x = eliminationTarget hyp (H >> P)
           val h = Context.lookup H x
           val #[M,N] = h ^! APPROX
           val #[] = M ^! AX

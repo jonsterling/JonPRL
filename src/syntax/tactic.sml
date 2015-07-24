@@ -1,11 +1,11 @@
 structure Tactic : TACTIC =
 struct
-
   type term = Syntax.t
   type name = Syntax.Variable.t
   type label = string
   type level = Level.t
   type meta = TacticMetadata.metadata
+  type hyp = name HypSyn.t
 
   datatype ctx_pattern = CtxPattern of {goal : term, hyps : (name * term) list}
 
@@ -14,24 +14,24 @@ struct
     | UNFOLD of (label * level option) list * meta
     | CUSTOM_TACTIC of label * meta
     | WITNESS of term * meta
-    | HYPOTHESIS of int * meta
+    | HYPOTHESIS of hyp * meta
     | EQ_SUBST of {equality : term,
                    domain : term,
                    level : level option} * meta
     | HYP_SUBST of {dir : Dir.dir,
-                    index : int,
+                    index : hyp,
                     domain : term,
                     level : level option} * meta
     | CEQ_SUBST of {equality : term,
                     domain : term} * meta
     | CHYP_SUBST of {dir : Dir.dir,
-                     index : int,
+                     index : hyp,
                      domain : term} * meta
     | INTRO of {term : term option,
                 rule : int option,
                 freshVariable : name option,
                 level : level option} * meta
-    | ELIM of {target : int,
+    | ELIM of {target : hyp,
                term : term option,
                names : name list} * meta
     | EQ_CD of {names : name list,
@@ -52,7 +52,7 @@ struct
     | CEQUAL_STRUCT of meta
     | CEQUAL_APPROX of meta
     | APPROX_REFL of meta
-    | BOTTOM_DIVERGES of int * meta
+    | BOTTOM_DIVERGES of hyp * meta
     | TRY of t
     | LIMIT of t
     | ORELSE of t list * meta
@@ -86,7 +86,7 @@ struct
       fun apply e = List.foldl (fn ((v, e'), e) => Syntax.subst e' v e)
                                (Rebind.rebind (List.map #1 subst) e)
                                subst
-      fun applyName v =
+      fun applyName (v : name) : name =
         let
           val tO =
             Option.map #2 (List.find ((fn (v', _) => Syntax.Variable.eq (v, v'))) subst)
@@ -99,6 +99,14 @@ struct
                 | _ => raise Fail "Impossible! Called substBranch on bad subst"
         end
 
+      fun applyHyp (HypSyn.NAME v) =
+            let
+              val Syntax.` v' = Syntax.out (apply (Syntax.`` v))
+            in
+              HypSyn.NAME v'
+            end
+        | applyHyp h = h
+
       fun go t =
         case t of
             WITNESS (term, meta) => WITNESS (apply term, meta)
@@ -108,7 +116,7 @@ struct
                        level = level}, meta)
           | HYP_SUBST ({dir, index, domain, level}, meta) =>
             HYP_SUBST ({dir = dir,
-                        index = index,
+                        index = applyHyp index,
                         domain = apply domain,
                         level = level}, meta)
           | CEQ_SUBST ({equality, domain}, meta) =>
@@ -116,7 +124,7 @@ struct
                         domain = apply domain}, meta)
           | CHYP_SUBST ({dir, index, domain}, meta) =>
             CHYP_SUBST ({dir = dir,
-                         index = index,
+                         index = applyHyp index,
                          domain = apply domain}, meta)
           | INTRO ({term, rule, freshVariable, level}, meta) =>
             INTRO ({term = Option.map apply term,
@@ -124,7 +132,7 @@ struct
                     freshVariable = freshVariable,
                     level = level}, meta)
           | ELIM ({target, term, names}, meta) =>
-            ELIM ({target = target,
+            ELIM ({target = applyHyp target,
                    term = Option.map apply term,
                    names = names}, meta)
           | EQ_CD ({names, terms, level}, meta) =>
@@ -149,6 +157,8 @@ struct
           | LIMIT t => LIMIT (go t)
           | ORELSE (ts, meta) => ORELSE (List.map go ts, meta)
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
+          | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
+          | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | t => t
       and goPat (CtxPattern {goal, hyps}) =
           CtxPattern {goal = apply goal,
@@ -159,7 +169,7 @@ struct
 
   val listOfTactics =
     ["intro [TERM]? #NUM? <NAME*>?",
-     "elim #NUM [TERM]? <NAME*>?",
+     "elim (#NUM | <NAME>) [TERM]? <NAME*>?",
      "eq-cd [TERM*]? <NAME*>? @LEVEL?",
      "ext <NAME>? @LEVEL?",
      "symmetry",
@@ -177,12 +187,12 @@ struct
      "cut-lemma <NAME>",
      "unfold <(NAME @NUM)+>",
      "witness [TERM]",
-     "hypothesis #NUM",
-     "bot-div #NUM",
-     "hyp-subst (←|→) #NUM [TERM] @NUM?",
+     "hypothesis (#NUM | <NAME>)",
+     "bot-div (#NUM | <NAME>)",
+     "hyp-subst (←|→) (#NUM | <NAME>) [TERM] @NUM?",
      "id",
      "fail",
      "trace \"MESSAGE\"",
-     "cum @NUM?",
+     "cum @LEVEL?",
      "focus NUM #{TACTIC}"]
 end
