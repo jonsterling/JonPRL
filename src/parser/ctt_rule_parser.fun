@@ -41,7 +41,7 @@ struct
 
   val parseHyp =
     parseIndex wth HypSyn.INDEX
-      || parseName wth HypSyn.NAME
+      || brackets parseName wth HypSyn.NAME
 
   fun parseOpt p =
     symbol "_" return NONE
