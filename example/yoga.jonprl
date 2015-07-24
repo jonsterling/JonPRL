@@ -76,6 +76,16 @@ Operator LowerStar   : (0;0;0). ||| f ↓* ∈ Psh(X) → Psh(Y)
 
 ||| Hyperdoctrines
 
+Operator contract : ().
+Operator Equals : (0;0).
+Operator element : (0;0).
+Operator implies : (0;0).
+
+[contract] =def= [lam(x. pair(x; x))].
+[Equals(X;p)] =def= [LowerShriek(X;X*X;contract) bang(unit) p].
+[element(x;φ)] =def= [φ x].
+[implies(φ;ψ)] =def= [lam(x. φ x -> ψ x)].
+
 ||| Proofs
 
 Theorem End_wf : [{X:U{i}} {P : X -> X -> U{i}} member(End(X;P); U{i})] {
