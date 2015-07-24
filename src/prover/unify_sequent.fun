@@ -50,22 +50,13 @@ struct
         (y, x :: ys)
       end
 
-  fun disjoint H (hyps : (name * 'a) list) =
-    let
-      val names = List.map #1 hyps
-      val hnames = List.map #1 (Context.listItems H)
-      fun eq (n, n') = MetaAbt.Variable.toString n = MetaAbt.Variable.toString n'
-    in
-      List.app (fn n => if List.exists (fn n' => eq (n, n')) hnames
-                        then raise Mismatch
-                        else ())
-               names
-    end
-
-  fun convertInCtx H M =
+  fun convertInCtx hypVars H M =
     let
       open MetaAbt
-      val ctxVars = List.map #1 (Context.listItems H)
+      val ctxVars =
+        diff Context.Syntax.Variable.eq
+             (List.map #1 (Context.listItems H))
+             hypVars
       val M = Rebind.rebind ctxVars M
       val freeVars =
         diff Context.Syntax.Variable.eq
@@ -163,9 +154,9 @@ struct
   fun unify (pat, H >> P) =
     let
       val {hyps, goal} = rebindPat pat
-      val goal = convertInCtx H goal
-      val hyps = List.map (fn (n, e) => (n, convertInCtx H e)) hyps
-      val () = disjoint H hyps
+      val hypVars = List.map #1 hyps
+      val goal = convertInCtx hypVars H goal
+      val hyps = List.map (fn (n, e) => (n, convertInCtx hypVars H e)) hyps
       val sol = Unify.unify (goal, convert P)
                   handle Unify.Mismatch _ => raise Mismatch
 
