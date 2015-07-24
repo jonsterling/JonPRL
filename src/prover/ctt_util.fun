@@ -117,6 +117,7 @@ struct
         ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
         ORELSE ImageEqInd (target, fourNames)
+        ORELSE ImageElim (target, listAt (names, 0))
         ORELSE NatElim (target, twoNames)
         ORELSE SubsetElim (target, twoNames)
     end

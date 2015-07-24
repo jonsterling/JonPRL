@@ -714,13 +714,13 @@ struct
         ] BY mkEvidence IMAGE_MEM_EQ
       end
 
-    fun ImageElim (i, onames) (H >> P) =
+    fun ImageElim (i, oz) (H >> P) =
       let
         val x = eliminationTarget i (H >> P)
         val #[A,F] = Context.lookup H x ^! IMAGE
         val w =
-         case onames of
-             SOME names => names
+         case oz of
+             SOME z => z
            | NONE => Context.fresh (H, Variable.named "w")
 
         val H' = Context.insert H w Visibility.Hidden A
