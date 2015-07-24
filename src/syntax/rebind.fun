@@ -1,12 +1,13 @@
 (* A utility on ABTs for rebinding variables based on name *)
 functor Rebind(A : ABT_UTIL) :
         sig
+          val rebindPrefix : string -> A.Variable.t list -> A.t -> A.t
           val rebind : A.Variable.t list -> A.t -> A.t
         end =
 struct
   open A
 
-  fun rebind vars tm =
+  fun rebindPrefix pre vars tm =
     let
       fun makeVarTable vs =
         let
@@ -22,7 +23,7 @@ struct
              (tbl, tm)
            else
              let
-               val vstr = Variable.toString v
+               val vstr = pre ^ Variable.toString v
              in
                case StringListDict.find tbl vstr of
                     NONE => go vars' tbl tm
@@ -34,4 +35,6 @@ struct
     in
       tm'
     end
+
+  val rebind = rebindPrefix ""
 end
