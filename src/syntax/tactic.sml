@@ -1,6 +1,5 @@
 structure Tactic : TACTIC =
 struct
-
   type term = Syntax.t
   type name = Syntax.Variable.t
   type label = string

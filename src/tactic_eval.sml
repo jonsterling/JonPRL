@@ -18,15 +18,15 @@ struct
       | CUSTOM_TACTIC (lbl, a) =>
         an a (Development.lookupTactic wld lbl)
       | WITNESS (t, a) => an a (Witness t)
-      | HYPOTHESIS (i, a) => an a (Hypothesis i)
+      | HYPOTHESIS (i, a) => an a (Hypothesis (CttUtil.HYP_INDEX i))
       | EQ_SUBST ({equality, domain, level}, a) =>
         an a (EqSubst (equality, domain, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
-        an a (HypEqSubst (dir, index, domain, level))
+        an a (HypEqSubst (dir, CttUtil.HYP_INDEX index, domain, level))
       | CEQ_SUBST ({equality, domain}, a) =>
         an a (CEqSubst (equality, domain))
       | CHYP_SUBST ({dir, index, domain}, a) =>
-        an a (HypCEqSubst (dir, index, domain))
+        an a (HypCEqSubst (dir, CttUtil.HYP_INDEX index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (CttUtil.Intro {term = term,
                              rule = rule,
@@ -34,7 +34,7 @@ struct
                              freshVariable = freshVariable,
                              level = level})
       | ELIM ({target, term, names}, a) =>
-        an a (CttUtil.Elim {target = target, term = term, names = names})
+        an a (CttUtil.Elim {target = CttUtil.HYP_INDEX target, term = term, names = names})
       | EQ_CD ({names, terms, level}, a) =>
         an a (CttUtil.EqCD {names = names,
                             invertible = false,
@@ -55,7 +55,7 @@ struct
       | CEQUAL_STRUCT a => an a CEqStruct
       | CEQUAL_APPROX a => an a CEqApprox
       | APPROX_REFL a => an a ApproxRefl
-      | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
+      | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges (CttUtil.HYP_INDEX i))
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))

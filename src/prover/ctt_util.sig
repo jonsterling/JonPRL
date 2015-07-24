@@ -11,7 +11,7 @@ sig
      level : Level.t option}
 
   type elim_args =
-    {target : int,
+    {target : hyp,
      names : name list,
      term : term option}
 

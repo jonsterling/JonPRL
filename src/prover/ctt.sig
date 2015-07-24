@@ -19,6 +19,8 @@ sig
 
   type label = Development.label
 
+  datatype hyp = HYP_INDEX of int | HYP_NAME of name
+
   structure Rules : sig
     (* Pretend you have got a proof. *)
     val Admit : tactic
@@ -54,7 +56,7 @@ sig
     (* H, x : Unit, H'[x] >> P by UnitElim x
      * 1. H, x : Unit, H'[Ax] >> P[Ax]
      *)
-    val UnitElim : int -> tactic
+    val UnitElim : hyp -> tactic
 
     (* H >> Ax = Ax ∈ Unit *)
     val AxEq : tactic
@@ -76,7 +78,7 @@ sig
     (* H, z : (Σx:A)B[x], H'[z] >> P[z] by ProdElim z (s, t)
      * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
      *)
-    val ProdElim : int * (name * name) option -> tactic
+    val ProdElim : hyp * (name * name) option -> tactic
 
     val PairEq : name option * Level.t option -> tactic
     val SpreadEq : term option * term option * (name * name * name) option -> tactic
@@ -103,7 +105,7 @@ sig
      *   H, x : A + B, y : A >> C
      *   H, x : A + B, z : B >> C
      *)
-    val PlusElim : (int * (name * name) option) -> tactic
+    val PlusElim : (hyp * (name * name) option) -> tactic
 
     (* H >> inl X = inl Y ∈ A + B
      *    H >> X = Y ∈ A
@@ -122,21 +124,21 @@ sig
 
     val FunEq : name option -> tactic
     val FunIntro : name option * Level.t option -> tactic
-    val FunElim : int * term * (name * name) option -> tactic
+    val FunElim : hyp * term * (name * name) option -> tactic
     val LamEq : name option * Level.t option -> tactic
     val ApEq : term option -> tactic
     val FunExt : name option * Level.t option -> tactic
 
     val IsectEq : name option -> tactic
     val IsectIntro : name option * Level.t option -> tactic
-    val IsectElim : int * term * (name * name) option -> tactic
+    val IsectElim : hyp * term * (name * name) option -> tactic
     val IsectMemberEq : name option * Level.t option -> tactic
     val IsectMemberCaseEq : term option * term -> tactic
 
     val SubsetEq : name option -> tactic
     val SubsetIntro : term * name option * Level.t option -> tactic
     val IndependentSubsetIntro : tactic
-    val SubsetElim : int * (name * name) option -> tactic
+    val SubsetElim : hyp * (name * name) option -> tactic
     val SubsetMemberEq : name option * Level.t option -> tactic
 
     (* H >> nat = nat ∈ U{k} *)
@@ -146,7 +148,7 @@ sig
      *   H, z : nat, H' >> C[0]
      *   H, z : nat, i : nat, p : C[i], H' >> C[s(i)]
      *)
-    val NatElim : int * (name * name) option -> tactic
+    val NatElim : hyp * (name * name) option -> tactic
 
     val ZeroEq : tactic
     val SuccEq : tactic
@@ -155,13 +157,13 @@ sig
     val BaseEq : tactic
     val BaseIntro : tactic
     val BaseMemberEq : tactic
-    val BaseElimEq : int * name option -> tactic
+    val BaseElimEq : hyp * name option -> tactic
 
     val Witness : term -> tactic
 
     val Assumption : tactic
     val Assert : term * name option -> tactic
-    val Hypothesis : int -> tactic
+    val Hypothesis : hyp -> tactic
     val HypEq : tactic
     val EqInSupertype : tactic
 
@@ -177,7 +179,7 @@ sig
     val CEqSym      : tactic
     val CEqStep     : tactic
     val CEqSubst    : term * term -> tactic
-    val HypCEqSubst : Dir.dir * int * term -> tactic
+    val HypCEqSubst : Dir.dir * hyp * term -> tactic
     val CEqStruct   : tactic
     val CEqApprox   : tactic
 
@@ -185,14 +187,14 @@ sig
     val ApproxExtEq : tactic
     val ApproxRefl  : tactic
 
-    val BottomDiverges : int -> tactic
+    val BottomDiverges : hyp -> tactic
 
     val ImageEq    : tactic
     val ImageMemEq : tactic
-    val ImageElim  : int * name option -> tactic
-    val ImageEqInd : int * (name * name * name * name) option -> tactic
+    val ImageElim  : hyp * name option -> tactic
+    val ImageEqInd : hyp * (name * name * name * name) option -> tactic
 
-    val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
+    val HypEqSubst : Dir.dir * hyp * term * Level.t option -> tactic
 
     (* Match a single branch of a [match goal]. This needs to
      * be primitive because it needs access to the structure of
