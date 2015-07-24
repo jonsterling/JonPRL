@@ -1090,82 +1090,82 @@ struct
           handle _ => Development.lookupDefinition world lbl
             handle Subscript => convTheorem lbl world
     in
-    fun Unfolds (world, lbls) (H >> P) =
-      let
-        val conv =
-          foldl (fn ((lbl, ok), acc) =>
-            let
-              val k = case ok of SOME k => k | NONE => Level.base
-              val conv =
-                LevelSolver.subst (LevelSolver.Level.yank k)
-                  o CDEEP (convLabel lbl world)
-            in
-              acc CTHEN conv
-            end) CID lbls
-      in
-        [ Context.map conv H >> conv P
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
+      fun Unfolds (world, lbls) (H >> P) =
+        let
+          val conv =
+            foldl (fn ((lbl, ok), acc) =>
+              let
+                val k = case ok of SOME k => k | NONE => Level.base
+                val conv =
+                  LevelSolver.subst (LevelSolver.Level.yank k)
+                    o CDEEP (convLabel lbl world)
+              in
+                acc CTHEN conv
+              end) CID lbls
+        in
+          [ Context.map conv H >> conv P
+          ] BY (fn [D] => D
+                 | _ => raise Refine)
+        end
     end
 
-    fun Lemma (world, lbl) (H >> P) =
-      let
-        val {statement, evidence} = Development.lookupTheorem world lbl
-        val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
-        val substitution = LevelSolver.Level.resolve constraints
-        val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
-      in
-        [] BY (fn _ => shovedEvidence)
-      end
+      fun Lemma (world, lbl) (H >> P) =
+        let
+          val {statement, evidence} = Development.lookupTheorem world lbl
+          val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
+          val substitution = LevelSolver.Level.resolve constraints
+          val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
+        in
+          [] BY (fn _ => shovedEvidence)
+        end
 
-    fun Admit (H >> P) =
-      [] BY (fn _ => ADMIT $$ #[])
+      fun Admit (H >> P) =
+        [] BY (fn _ => ADMIT $$ #[])
 
-    fun RewriteGoal (c : conv) (H >> P) =
-      [ Context.map c H >> c P
-      ] BY (fn [D] => D | _ => raise Refine)
+      fun RewriteGoal (c : conv) (H >> P) =
+        [ Context.map c H >> c P
+        ] BY (fn [D] => D | _ => raise Refine)
 
-    fun EqSym (H >> P) =
-      let
-        val #[M,N,A] = P ^! EQ
-      in
-        [ H >> EQ $$ #[N,M,A]
-        ] BY mkEvidence EQ_SYM
-      end
+      fun EqSym (H >> P) =
+        let
+          val #[M,N,A] = P ^! EQ
+        in
+          [ H >> EQ $$ #[N,M,A]
+          ] BY mkEvidence EQ_SYM
+        end
 
 
-    structure Meta = MetaAbt(Syntax)
-    structure MetaAbt = AbtUtil(Meta.Meta)
-    structure Unify = AbtUnifyOperators
-      (structure A = MetaAbt
-       structure O = Meta.MetaOperator)
+      structure Meta = MetaAbt(Syntax)
+      structure MetaAbt = AbtUtil(Meta.Meta)
+      structure Unify = AbtUnifyOperators
+        (structure A = MetaAbt
+         structure O = Meta.MetaOperator)
 
-    fun applySolution sol e =
-      Meta.unconvert (fn _ => raise Fail "Impossible")
-        (Unify.Solution.foldl
-          (fn (v, e', e) => MetaAbt.substOperator (fn #[] => e') (Meta.MetaOperator.META v) e)
-          e
-          sol)
+      fun applySolution sol e =
+        Meta.unconvert (fn _ => raise Fail "Impossible")
+          (Unify.Solution.foldl
+            (fn (v, e', e) => MetaAbt.substOperator (fn #[] => e') (Meta.MetaOperator.META v) e)
+            e
+            sol)
 
-    fun EqSubst (eq, xC, ok) (H >> P) =
-      let
-        val #[M,N,A] = Context.rebind H eq ^! EQ
-        val xC = Context.rebind H xC
+      fun EqSubst (eq, xC, ok) (H >> P) =
+        let
+          val #[M,N,A] = Context.rebind H eq ^! EQ
+          val xC = Context.rebind H xC
 
-        val fvs = List.map #1 (Context.listItems H)
-        val meta = Meta.convertFree fvs (xC // M)
-        val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
-        val xC = applySolution solution (Meta.convertFree fvs xC)
+          val fvs = List.map #1 (Context.listItems H)
+          val meta = Meta.convertFree fvs (xC // M)
+          val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+          val xC = applySolution solution (Meta.convertFree fvs xC)
 
-        val (H', x, C) = ctxUnbind (H, A, xC)
-        val k = case ok of SOME k => k | NONE => inferLevel (H', C)
-      in
-        [ H >> eq
-        , H >> xC // N
-        , H' >> MEM $$ #[C, UNIV k $$ #[]]
-        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
-               | _ => raise Refine)
+          val (H', x, C) = ctxUnbind (H, A, xC)
+          val k = case ok of SOME k => k | NONE => inferLevel (H', C)
+        in
+          [ H >> eq
+          , H >> xC // N
+          , H' >> MEM $$ #[C, UNIV k $$ #[]]
+          ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
+                 | _ => raise Refine)
       end
 
     local
