@@ -99,11 +99,15 @@ struct
   fun take3 (x::y::z::_) = SOME (x,y,z)
     | take3 _ = NONE
 
+  fun take4 (u::v::w::x::_) = SOME (u,v,w,x)
+    | take4 _ = NONE
+
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   fun Elim {target, names, term} =
     let
       val twoNames = take2 names
+      val fourNames = take4 names
     in
       (VoidElim THEN Hypothesis target)
         ORELSE UnitElim target
@@ -112,6 +116,8 @@ struct
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
+        ORELSE ImageEqInd (target, fourNames)
+        ORELSE ImageElim (target, listAt (names, 0))
         ORELSE NatElim (target, twoNames)
         ORELSE SubsetElim (target, twoNames)
     end
@@ -151,6 +157,8 @@ struct
         ORELSE SuccEq
         ORELSE Cum level
         ORELSE EqInSupertype
+        ORELSE ImageEq
+        ORELSE ImageMemEq
         ORELSE
         (if not invertible then
              NatRecEq (listAt (terms, 0), take2 names)
@@ -167,6 +175,7 @@ struct
 
   fun Ext {freshVariable, level} =
     FunExt (freshVariable, level)
+    ORELSE ApproxExtEq
 
   local
     val InvAutoEqCD = EqCD {names = [],

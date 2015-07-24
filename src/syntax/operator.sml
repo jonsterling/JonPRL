@@ -19,16 +19,20 @@ struct
     | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
-    | APPROX_EQ | APPROX_REFL
+    | APPROX_EQ | APPROX_EXT_EQ | APPROX_REFL
     | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
+
+    | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
 
       (* Computational Type Theory *)
     | UNIV of Level.t
     | VOID
     | UNIT | AX
-    | PROD | PAIR | SPREAD
-    | FUN | LAM | AP
+    | PROD | PAIR | SPREAD | AND
+    | FUN | LAM | AP | IMPLIES | IFF
+    | ID | BOT | SQUASH
+    | IMAGE
     | FIX
     | CBV
     | ISECT
@@ -51,8 +55,10 @@ struct
     val publicOperators =
       [UNIV i, UNIV i', UNIV i'', UNIV i''', UNIV i'''',
        VOID, UNIT, AX,
-       PROD, PAIR, SPREAD,
-       FUN, LAM, AP,
+       PROD, PAIR, SPREAD, AND,
+       FUN, LAM, AP, IMPLIES, IFF,
+       ID, BOT, SQUASH,
+       IMAGE,
        FIX,
        CBV,
        ISECT, EQ, MEM, SUBSET,
@@ -102,6 +108,7 @@ struct
     | eq (CEQUAL_STRUCT i, CEQUAL_STRUCT j) = i = j
     | eq (CEQUAL_APPROX, CEQUAL_APPROX) = true
     | eq (APPROX_EQ, APPROX_EQ) = true
+    | eq (APPROX_EXT_EQ, APPROX_EXT_EQ) = true
     | eq (APPROX_REFL, APPROX_REFL) = true
     | eq (BOTTOM_DIVERGES, BOTTOM_DIVERGES) = true
     | eq (FUN_INTRO, FUN_INTRO) = true
@@ -123,7 +130,11 @@ struct
     | eq (BASE_EQ, BASE_EQ) = true
     | eq (BASE_INTRO, BASE_INTRO) = true
     | eq (BASE_ELIM_EQ, BASE_ELIM_EQ) = true
-    | eq (BASE_MEMBER_EQ, BASE_MEMBER_EQ) =true
+    | eq (BASE_MEMBER_EQ, BASE_MEMBER_EQ) = true
+    | eq (IMAGE_EQ, IMAGE_EQ) = true
+    | eq (IMAGE_MEM_EQ, IMAGE_MEM_EQ) = true
+    | eq (IMAGE_ELIM, IMAGE_ELIM) = true
+    | eq (IMAGE_EQ_IND, IMAGE_EQ_IND) = true
     | eq (ADMIT, ADMIT) = true
     | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
@@ -134,9 +145,16 @@ struct
     | eq (PROD, PROD) = true
     | eq (PAIR, PAIR) = true
     | eq (SPREAD, SPREAD) = true
+    | eq (AND, AND) = true
     | eq (FUN, FUN) = true
     | eq (LAM, LAM) = true
     | eq (AP, AP) = true
+    | eq (IMPLIES, IMPLIES) = true
+    | eq (IFF, IFF) = true
+    | eq (ID, ID) = true
+    | eq (BOT, BOT) = true
+    | eq (SQUASH, SQUASH) = true
+    | eq (IMAGE, IMAGE) = true
     | eq (FIX, FIX) = true
     | eq (CBV, CBV) = true
     | eq (ISECT, ISECT) = true
@@ -181,6 +199,7 @@ struct
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
        | APPROX_EQ => #[0,0]
+       | APPROX_EXT_EQ => #[0]
        | APPROX_REFL => #[]
        | BOTTOM_DIVERGES => #[]
        | VOID_EQ => #[]
@@ -190,6 +209,11 @@ struct
        | BASE_INTRO => #[]
        | BASE_ELIM_EQ => #[1]
        | BASE_MEMBER_EQ => #[0]
+
+       | IMAGE_EQ => #[0,0]
+       | IMAGE_MEM_EQ => #[0,0]
+       | IMAGE_ELIM => #[0]
+       | IMAGE_EQ_IND => #[0,0,0,4]
 
        | UNIT_EQ => #[]
        | UNIT_INTRO => #[]
@@ -252,9 +276,16 @@ struct
        | PROD => #[0,1]
        | PAIR => #[0,0]
        | SPREAD => #[0,2]
+       | AND => #[0,0]
        | FUN => #[0,1]
        | LAM => #[1]
        | AP => #[0,0]
+       | IMPLIES => #[0,0]
+       | IFF => #[0,0]
+       | ID => #[]
+       | BOT => #[]
+       | SQUASH => #[0]
+       | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
        | PLUS => #[0, 0]
@@ -293,6 +324,7 @@ struct
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
        | APPROX_EQ => "~<=-eq"
+       | APPROX_EXT_EQ => "~<=-ext-eq"
        | APPROX_REFL => "~<=-refl"
        | BOTTOM_DIVERGES => "bottom-div"
        | UNIT_EQ => "unit⁼"
@@ -304,6 +336,11 @@ struct
        | BASE_INTRO => "base-intro"
        | BASE_ELIM_EQ => "base-elim-eq"
        | BASE_MEMBER_EQ => "base-member-eq"
+
+       | IMAGE_EQ => "image-eq"
+       | IMAGE_MEM_EQ => "image-mem-eq"
+       | IMAGE_ELIM => "image-elim"
+       | IMAGE_EQ_IND => "image-eq-ind"
 
        | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"
@@ -360,9 +397,16 @@ struct
        | PROD => "prod"
        | PAIR => "pair"
        | SPREAD => "spread"
+       | AND => "and"
        | FUN => "fun"
        | LAM => "lam"
        | AP => "ap"
+       | IMPLIES => "implies"
+       | IFF => "iff"
+       | ID => "id"
+       | BOT => "bot"
+       | SQUASH => "squash"
+       | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
        | ISECT => "isect"
@@ -417,9 +461,16 @@ struct
          string "decide" return DECIDE,
          string "pair" return PAIR,
          string "spread" return SPREAD,
+         string "and" return AND,
          string "fun" return FUN,
          string "lam" return LAM,
          string "ap" return AP,
+         string "implies" return IMPLIES,
+         string "iff" return IFF,
+         string "id" return ID,
+         string "bot" return BOT,
+         string "squash" return SQUASH,
+         string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,
          string "isect" return ISECT,

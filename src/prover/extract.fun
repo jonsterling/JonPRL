@@ -32,6 +32,7 @@ struct
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
        | APPROX_EQ $ _ => ax
+       | APPROX_EXT_EQ $ _ => ax
        | APPROX_REFL $ _ => ax
        | BOTTOM_DIVERGES $ _ => ax (* could be anything because one hypothesis is false *)
 
@@ -39,6 +40,11 @@ struct
        | BASE_EQ $ _ => ax
        | BASE_MEMBER_EQ $ _ => ax
        | BASE_ELIM_EQ $ #[D] => extract (D // ax)
+
+       | IMAGE_EQ $ _ => ax
+       | IMAGE_MEM_EQ $ _ => ax
+       | IMAGE_ELIM $ #[t] => t
+       | IMAGE_EQ_IND $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => PAIR $$ #[M, extract E]

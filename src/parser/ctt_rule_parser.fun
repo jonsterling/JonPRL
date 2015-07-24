@@ -201,9 +201,9 @@ struct
 
   val parseBottomDiverges : tactic_parser =
    fn w => tactic "bot-div"
-		  && parseIndex
-		  wth (fn (name, i) => fn pos =>
-			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
+      && parseIndex
+      wth (fn (name, i) => fn pos =>
+        BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 
   val parseAssumption : tactic_parser =
     fn w => tactic "assumption"

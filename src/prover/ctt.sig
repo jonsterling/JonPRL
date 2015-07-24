@@ -173,18 +173,24 @@ sig
     val EqSubst : term * term * Level.t option -> tactic
     val EqSym : tactic
 
-    val CEqEq : tactic
-    val CEqSym  : tactic
-    val CEqStep : tactic
-    val CEqSubst : term * term -> tactic
+    val CEqEq       : tactic
+    val CEqSym      : tactic
+    val CEqStep     : tactic
+    val CEqSubst    : term * term -> tactic
     val HypCEqSubst : Dir.dir * int * term -> tactic
-    val CEqStruct : tactic
-    val CEqApprox : tactic
+    val CEqStruct   : tactic
+    val CEqApprox   : tactic
 
-    val ApproxEq : tactic
-    val ApproxRefl : tactic
+    val ApproxEq    : tactic
+    val ApproxExtEq : tactic
+    val ApproxRefl  : tactic
 
     val BottomDiverges : int -> tactic
+
+    val ImageEq    : tactic
+    val ImageMemEq : tactic
+    val ImageElim  : int * name option -> tactic
+    val ImageEqInd : int * (name * name * name * name) option -> tactic
 
     val HypEqSubst : Dir.dir * int * term * Level.t option -> tactic
   end
