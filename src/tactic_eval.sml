@@ -78,4 +78,6 @@ struct
                     goal = goal,
                     branch = fn subst => eval wld (substBranch subst branch)})
                branches)
+      | THIN (hyp, a) =>
+          an a (Thin hyp)
 end

@@ -251,6 +251,12 @@ struct
       wth (fn name => fn (pos : Pos.t) =>
             CUSTOM_TACTIC (stringToLabel name, {name = name, pos = pos}))
 
+  val parseThin : tactic_parser =
+    fn w => tactic "thin"
+      && parseHyp
+      wth (fn (name, hyp) => fn (pos : Pos.t) =>
+            THIN (hyp, {name = name, pos = pos}))
+
   fun tacticParsers w =
     parseLemma w
       || parseCutLemma w
@@ -277,6 +283,7 @@ struct
       || parseApproxRefl w
       || parseBottomDiverges w
       || parseCHypSubst w
+      || parseThin w
       || parseCustomTactic w
 
   val parse : world -> Tactic.t charParser =

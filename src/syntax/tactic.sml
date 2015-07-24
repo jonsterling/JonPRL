@@ -62,6 +62,7 @@ struct
     | TRACE of string * meta
     | COMPLETE of t * meta
     | MATCH of (ctx_pattern * branch) list
+    | THIN of hyp * meta
   and then_tactic =
       APPLY of t
     | LIST of t list
@@ -159,6 +160,7 @@ struct
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
+          | THIN (h, meta) => THIN (applyHyp h, meta)
           | t => t
       and goPat (CtxPattern {goal, hyps}) =
           CtxPattern {goal = apply goal,
@@ -194,5 +196,6 @@ struct
      "fail",
      "trace \"MESSAGE\"",
      "cum @LEVEL?",
-     "focus NUM #{TACTIC}"]
+     "focus NUM #{TACTIC}",
+     "thin (#NUM | <NAME>)"]
 end
