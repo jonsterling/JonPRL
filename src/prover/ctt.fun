@@ -1205,11 +1205,11 @@ struct
         end
 
       local
-          fun bothStuck M N =
-            (Semantics.step M; raise Refine)
-            handle Semantics.Stuck _ =>
-              (Semantics.step N; raise Refine)
-                 handle Semantics.Stuck _ => ()
+        fun bothStuck M N =
+          (Semantics.step M; raise Refine)
+          handle Semantics.Stuck _ =>
+            (Semantics.step N; raise Refine)
+               handle Semantics.Stuck _ => ()
       in
         fun ApproxRefl (H >> P) =
           let
