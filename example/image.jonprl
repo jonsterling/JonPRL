@@ -4,8 +4,7 @@ Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
 
 Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
   auto;
-  witness [lam(_.<>) _];
-  unfold <squash member>;
+  @{ [H:t |- _] => witness [lam(_.<>) H]};
   auto
 }.
 
