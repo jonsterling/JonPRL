@@ -1,6 +1,10 @@
+||| Tactics
+
 Tactic autoR {
   reduce; *{auto; reduce}
 }.
+
+||| Preliminaries
 
 Operator fst : (0).
 Operator snd : (0).
@@ -12,27 +16,27 @@ Operator pairFp : (0;0).
 [pairF(f;g)] =def= [lam(x. pair(f x; g x))].
 [pairFp(f;g)] =def= [lam(x. pairF(f fst(x); g snd(x)))].
 
+||| Ambient categories
+
 Operator CTT : ().
 Operator Paths : (0).
-
-[CTT] =def= [lam(A.lam(B. A -> B))].
-[Paths(A)] =def= [lam(x.lam(y. =(x;y;A)))].
-
 Operator Yo : (0).
 Operator oY : (0).
 
+[CTT] =def= [lam(A.lam(B. A -> B))].
+[Paths(A)] =def= [lam(x.lam(y. =(x;y;A)))].
 [Yo(B)] =def= [lam(A. A -> B)].
 [oY(A)] =def= [lam(B. A -> B)].
 
+||| Ends and extensions
+
 Operator End : (0;0).
 Operator Coend : (0;0).
-
-[End(X;P)] =def= [(x:X) P x x].
-[Coend(X;P)] =def= [(x:X) * P x x].
-
 Operator Ran : (0;0;0;0;0).
 Operator Lan : (0;0;0;0;0).
 
+[End(X;P)] =def= [(x:X) P x x].
+[Coend(X;P)] =def= [(x:X) * P x x].
 [Ran(X;cat;hom;g;h)] =def= [lam(a. End(X; lam(x.lam(y. hom (cat a (g x)) (h y)))))].
 [Lan(X;cat;ten;g;h)] =def= [lam(a. Coend(X; lam(x.lam(y. ten (h x) (cat (g y) a)))))].
 
@@ -61,6 +65,8 @@ Operator LowerStar   : (0;0;0). ||| f ↓* ∈ Psh(X) → Psh(Y)
 [UpperShriek(X;Y;f)] =def= [lam(φ.lam(x. φ (f x)))].
 [UpperStar(X;Y;f)] =def= [UpperShriek(X;Y;f)].
 [LowerStar(X;Y;f)] =def= [lam(φ.lam(x. Ran(X;Paths(Y);Hom;f;φ) x))].
+
+||| Hyperdoctrines
 
 ||| Proofs
 
