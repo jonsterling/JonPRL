@@ -120,6 +120,13 @@ struct
     in
       tm'
     end
+
+    fun rebindName H v =
+      let
+        val Syntax.` v' = Syntax.out (rebind H (Syntax.`` v))
+      in
+        v'
+      end
 end
 
 structure Context = Context(Syntax)

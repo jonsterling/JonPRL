@@ -147,7 +147,7 @@ struct
         val z =
           case hyp of
                HypSyn.INDEX i => Context.nth H (i - 1)
-             | HypSyn.NAME z => z
+             | HypSyn.NAME z => Context.rebindName H z
         val (A, visibility) = Context.lookupVisibility H z
       in
         case visibility of
