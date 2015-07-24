@@ -1380,7 +1380,6 @@ struct
         end
     end
 
-
     local
       structure Unify = UnifySequent(Sequent)
     in
@@ -1393,6 +1392,15 @@ struct
           body subst (H >> P)
         end
     end
+
+    fun Thin hyp (H >> P) =
+      let
+        val z = eliminationTarget hyp (H >> P)
+        val H' = Context.thin H z
+      in
+        [ H' >> P
+        ] BY (fn [D] => D | _ => raise Refine)
+      end
   end
 
   structure Conversions =

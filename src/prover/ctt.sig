@@ -203,6 +203,8 @@ sig
      *)
     val MatchSingle : (name * term) list * term * ((name * term) list -> tactic)
                       -> tactic
+
+    val Thin : hyp -> tactic
   end
 
   structure Conversions :
