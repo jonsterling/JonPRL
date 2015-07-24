@@ -52,8 +52,6 @@ struct
     | APPROX_REFL of meta
     | APPROX_EXT_EQ of meta
     | BOTTOM_DIVERGES of int * meta
-    | IMAGE_EQ of meta
-    | IMAGE_MEM_EQ of meta
     | TRY of t
     | LIMIT of t
     | ORELSE of t list * meta

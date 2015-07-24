@@ -208,19 +208,6 @@ struct
       && parseIndex
       wth (fn (name, i) => fn pos =>
         BOTTOM_DIVERGES (i, {name = name, pos = pos}))
-		  && parseIndex
-		  wth (fn (name, i) => fn pos =>
-			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
-
-  val parseImageEq : tactic_parser =
-   fn w => symbol "image-eq"
-		  wth (fn name => fn pos =>
-			  IMAGE_EQ {name = name, pos = pos})
-
-  val parseImageMemEq : tactic_parser =
-   fn w => symbol "image-mem-eq"
-		  wth (fn name => fn pos =>
-			  IMAGE_MEM_EQ {name = name, pos = pos})
 
   val parseAssumption : tactic_parser =
     fn w => tactic "assumption"
@@ -290,8 +277,6 @@ struct
       || parseApproxRefl w
       || parseBottomDiverges w
       || parseApproxExtEq w
-      || parseImageEq w
-      || parseImageMemEq w
       || parseCHypSubst w
       || parseCustomTactic w
 
