@@ -93,7 +93,7 @@ description. An arity is a list of the valences of an operator's subterms;
 | `pair(0;0)`     | `<M,N>`               | The pair operator                               |
 | `spread(0;2)`   | `spread(M; x.y.E)`    | Pattern matching for pairs                      |
 | `subset(0;1)`   | `{x:A | B}`           | The set comprehension type                      |
-| `+(0;0)`        | `+(A;B)`              | The disjoint union type                         |
+| `plus(0;0)`     | `A + B`               | The disjoint union type                         |
 | `inl(0)`        | `inl(M)`              | The left union introduction form                |
 | `inr(0)`        | `inr(M)`              | The right union introduction form               |
 | `decide(0;1;1)` | `decide(M; l.E; r.F)` | Pattern matching for disjoint unions            |
