@@ -1,0 +1,12 @@
+Tactic squash-intro {
+  @{
+    [|- squash(A)] =>
+       assert [A];
+       focus 1 #{
+         @{
+           [H : A |- _] =>
+             unfold <squash member>; witness [lam(_.<>) H]; auto
+         }
+       }
+  }
+}.
