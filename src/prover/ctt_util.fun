@@ -99,11 +99,15 @@ struct
   fun take3 (x::y::z::_) = SOME (x,y,z)
     | take3 _ = NONE
 
+  fun take4 (u::v::w::x::_) = SOME (u,v,w,x)
+    | take4 _ = NONE
+
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   fun Elim {target, names, term} =
     let
       val twoNames = take2 names
+      val fourNames = take4 names
     in
       (VoidElim THEN Hypothesis target)
         ORELSE UnitElim target
@@ -112,6 +116,7 @@ struct
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
+        ORELSE ImageEqInd (target, fourNames)
         ORELSE NatElim (target, twoNames)
         ORELSE SubsetElim (target, twoNames)
     end
