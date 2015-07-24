@@ -22,9 +22,9 @@ struct
   open JonprlTokenParser
 
   fun tactic s =
-      repeat1 JonprlLanguageDef.identLetter << whiteSpace
-        wth String.implode
-        suchthat (fn s' => s = s')
+    repeat1 JonprlLanguageDef.identLetter << whiteSpace
+      wth String.implode
+      suchthat (fn s' => s = s')
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -35,13 +35,17 @@ struct
   val parseIndex =
     lexeme (symbol "#" >> parseInt)
 
-  fun parseOpt p =
-    symbol "_" return NONE
-      || p wth SOME
-
   val parseName =
     identifier
       wth ParseSyntax.Variable.named
+
+  val parseHyp =
+    parseIndex wth HypSyn.INDEX
+      || parseName wth HypSyn.NAME
+
+  fun parseOpt p =
+    symbol "_" return NONE
+      || p wth SOME
 
   val parseLabel = identifier wth stringToLabel
 
@@ -64,7 +68,7 @@ struct
 
   val parseHypothesis : tactic_parser =
     fn w => tactic "hypothesis"
-      && parseIndex
+      && parseHyp
       wth (fn (name, i) => fn pos =>
         HYPOTHESIS (i, {name = name, pos = pos}))
 
@@ -82,7 +86,7 @@ struct
   val parseHypSubst : tactic_parser =
     fn w => tactic "hyp-subst"
       && parseDir
-      && parseIndex
+      && parseHyp
       && parseTm w && opt parseLevel
       wth (fn (name, (dir, (i, (M, k)))) => fn pos =>
               HYP_SUBST
@@ -102,7 +106,7 @@ struct
   val parseCHypSubst : tactic_parser =
     fn w => tactic "chyp-subst"
       && parseDir
-      && parseIndex
+      && parseHyp
       && parseTm w
       wth (fn (name, (dir, (i, M))) => fn pos =>
               CHYP_SUBST
@@ -128,7 +132,7 @@ struct
           | NONE => [])
 
   val parseElimArgs =
-    fn w => parseIndex
+    fn w => parseHyp
       && opt (parseTm w)
       && parseNames
       wth (fn (i, (M, names)) =>
@@ -201,7 +205,7 @@ struct
 
   val parseBottomDiverges : tactic_parser =
    fn w => tactic "bot-div"
-      && parseIndex
+      && parseHyp
       wth (fn (name, i) => fn pos =>
         BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 

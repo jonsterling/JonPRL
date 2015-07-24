@@ -5,6 +5,7 @@ sig
     type label
     type level
     type meta = TacticMetadata.metadata
+    type hyp = name HypSyn.t
 
     type branch
     datatype ctx_pattern = CtxPattern of {goal : term,
@@ -15,24 +16,24 @@ sig
       | UNFOLD of (label * level option) list * meta
       | CUSTOM_TACTIC of label * meta
       | WITNESS of term * meta
-      | HYPOTHESIS of int * meta
+      | HYPOTHESIS of hyp * meta
       | EQ_SUBST of {equality : term,
                      domain : term,
                      level : level option} * meta
       | HYP_SUBST of {dir : Dir.dir,
-                      index : int,
+                      index : hyp,
                       domain : term,
                       level : level option} * meta
       | CEQ_SUBST of {equality : term,
                       domain : term} * meta
       | CHYP_SUBST of {dir : Dir.dir,
-                       index : int,
+                       index : hyp,
                        domain : term} * meta
       | INTRO of {term : term option,
                   rule : int option,
                   freshVariable : name option,
                   level : level option} * meta
-      | ELIM of {target : int,
+      | ELIM of {target : hyp,
                  term : term option,
                  names : name list} * meta
       | EQ_CD of {names : name list,
@@ -53,7 +54,7 @@ sig
       | CEQUAL_STRUCT of meta
       | CEQUAL_APPROX of meta
       | APPROX_REFL of meta
-      | BOTTOM_DIVERGES of int * meta
+      | BOTTOM_DIVERGES of hyp * meta
       | TRY of t
       | LIMIT of t
       | ORELSE of t list * meta
