@@ -9,6 +9,7 @@ smlnj:
 
 test:
 	bin/jonprl example/test.jonprl example/monoid.jonprl example/squash.jonprl example/unique.jonprl
+	bin/jonprl example/image.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
