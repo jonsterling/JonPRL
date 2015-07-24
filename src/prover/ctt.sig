@@ -19,7 +19,7 @@ sig
 
   type label = Development.label
 
-  datatype hyp = HYP_INDEX of int | HYP_NAME of name
+  type hyp = name HypSyn.t
 
   structure Rules : sig
     (* Pretend you have got a proof. *)

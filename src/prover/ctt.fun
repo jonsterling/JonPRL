@@ -35,7 +35,7 @@ struct
   type world = Development.world
   type label = Development.label
 
-  datatype hyp = HYP_INDEX of int | HYP_NAME of name
+  type hyp = name HypSyn.t
 
   structure Operator = Syntax.Operator
   structure Development = Development
@@ -146,8 +146,8 @@ struct
       let
         val z =
           case hyp of
-               HYP_INDEX i => Context.nth H (i - 1)
-             | HYP_NAME z => z
+               HypSyn.INDEX i => Context.nth H (i - 1)
+             | HypSyn.NAME z => z
         val (A, visibility) = Context.lookupVisibility H z
       in
         case visibility of
