@@ -695,9 +695,9 @@ struct
         val #[A2,f2] = N ^! IMAGE
         val (UNIV _, _) = asApp U
       in
-          [ H >> EQ $$ #[f1, f2, BASE $$ #[]]
-	  , H >> EQ $$ #[A1, A2, U]
-	  ] BY mkEvidence IMAGE_EQ
+        [ H >> EQ $$ #[f1, f2, BASE $$ #[]]
+        , H >> EQ $$ #[A1, A2, U]
+        ] BY mkEvidence IMAGE_EQ
       end
 
     fun ImageMemEq (H >> P) =
@@ -706,69 +706,59 @@ struct
         val #[f1,a1] = M ^! AP
         val #[f2,a2] = N ^! AP
         val #[A,f] = U ^! IMAGE
-	val true = Syntax.eq (f,f1)
-	val true = Syntax.eq (f,f2)
+        val true = Syntax.eq (f,f1)
+        val true = Syntax.eq (f,f2)
       in
-          [ H >> EQ $$ #[a1, a2, A]
-	  , H >> EQ $$ #[f, f, BASE $$ #[]]
-	  ] BY mkEvidence IMAGE_MEM_EQ
+        [ H >> EQ $$ #[a1, a2, A]
+        , H >> EQ $$ #[f, f, BASE $$ #[]]
+        ] BY mkEvidence IMAGE_MEM_EQ
       end
 
     fun ImageElim (i, onames) (H >> P) =
       let
         val x = eliminationTarget i (H >> P)
         val #[A,F] = Context.lookup H x ^! IMAGE
-	val w =
-	    case onames of
-		SOME names => names
-	      | NONE => Context.fresh (H, Variable.named "w")
+        val w =
+         case onames of
+             SOME names => names
+           | NONE => Context.fresh (H, Variable.named "w")
+
         val H' = Context.insert H w Visibility.Hidden A
-	val P' = (x \\ P) // (AP $$ #[F, ``w])
+        val P' = (x \\ P) // (AP $$ #[F, ``w])
         (* substitute x for (f w) in J *)
       in
-          [ H >> P'
-	  ] BY mkEvidence IMAGE_ELIM
+        [ H >> P'
+        ] BY mkEvidence IMAGE_ELIM
       end
 
     fun ImageEqInd (i,onames) (H >> P) =
       let
         val x = eliminationTarget i (H >> P)
         val #[T2',AP1,U] = Context.lookup H x ^! EQ
-	val (a,b,y,z) =
-	    case onames of
-		SOME names => names
-	      | NONE => (Context.fresh (H, Variable.named "a"),
-			 Context.fresh (H, Variable.named "b"),
-			 Context.fresh (H, Variable.named "y"),
-			 Context.fresh (H, Variable.named "z"))
+        val (a,b,y,z) =
+          case onames of
+               SOME names => names
+             | NONE => (Context.fresh (H, Variable.named "a"),
+             Context.fresh (H, Variable.named "b"),
+             Context.fresh (H, Variable.named "y"),
+             Context.fresh (H, Variable.named "z"))
         val #[A,f] = U ^! IMAGE
         val #[T2, AP2, T] = P ^! EQ
         val #[F,T1] = AP1 ^! AP
         val #[F',T1'] = AP2 ^! AP
-	val true = Syntax.eq (T2,T2')
-	val true = Syntax.eq (F,F')
-	val true = Syntax.eq (T1,T1')
-	val base = BASE $$ #[]
-	val fa = AP $$ #[F,``a]
-	val fb = AP $$ #[F,``b]
+        val true = Syntax.eq (T2,T2')
+        val true = Syntax.eq (F,F')
+        val true = Syntax.eq (T1,T1')
+        val base = BASE $$ #[]
+        val fa = AP $$ #[F,``a]
+        val fb = AP $$ #[F,``b]
       in
-          [ H >> EQ $$ #[F, F, base]
-	  , H >> EQ $$ #[T1, T1, A]
-	  , H >> EQ $$ #[AP1, AP1, T]
-	  , H @@ (a,base) @@ (b,base) @@ (y, EQ $$ #[fa,fa,T]) @@ (z,EQ $$ #[``a,``b,A]) >> EQ $$ #[fa,fb,T]
-	  ] BY mkEvidence IMAGE_EQ_IND
+        [ H >> EQ $$ #[F, F, base]
+        , H >> EQ $$ #[T1, T1, A]
+        , H >> EQ $$ #[AP1, AP1, T]
+        , H @@ (a,base) @@ (b,base) @@ (y, EQ $$ #[fa,fa,T]) @@ (z,EQ $$ #[``a,``b,A]) >> EQ $$ #[fa,fb,T]
+        ] BY mkEvidence IMAGE_EQ_IND
       end
-
-	  (*
-    fun MemCD (H >> P) =
-      let
-        val #[M, A] = P ^! MEM
-      in
-        [ H >> EQ $$ #[M, M, A]
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
-*)
 
     fun Witness M (H >> P) =
       let
@@ -1205,8 +1195,8 @@ struct
           val (UNIV _, _) = asApp univ
           val #[_,_] = approx1 ^! APPROX
           val #[_,_] = approx2 ^! APPROX
-	  val iff = IFF $$ #[approx1, approx2]
-	  val squ = SQUASH $$ #[iff]
+          val iff = IFF $$ #[approx1, approx2]
+          val squ = SQUASH $$ #[iff]
         in
           [ H >> squ
           ] BY mkEvidence APPROX_EXT_EQ
@@ -1214,10 +1204,10 @@ struct
 
       local
           fun bothStuck M N =
-              (Semantics.step M; raise Refine)
-              handle Semantics.Stuck _ =>
-                     (Semantics.step N; raise Refine)
-                     handle Semantics.Stuck _ => ()
+            (Semantics.step M; raise Refine)
+            handle Semantics.Stuck _ =>
+              (Semantics.step N; raise Refine)
+                 handle Semantics.Stuck _ => ()
       in
         fun ApproxRefl (H >> P) =
           let

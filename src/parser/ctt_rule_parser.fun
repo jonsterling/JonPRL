@@ -201,10 +201,13 @@ struct
 
   val parseApproxExtEq : tactic_parser =
    fn w => tactic "approx-ext-eq"
-		  wth (fn name => fn pos => APPROX_EXT_EQ {name = name, pos = pos})
+      wth (fn name => fn pos => APPROX_EXT_EQ {name = name, pos = pos})
 
   val parseBottomDiverges : tactic_parser =
    fn w => tactic "bot-div"
+      && parseIndex
+      wth (fn (name, i) => fn pos =>
+        BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 		  && parseIndex
 		  wth (fn (name, i) => fn pos =>
 			  BOTTOM_DIVERGES (i, {name = name, pos = pos}))
