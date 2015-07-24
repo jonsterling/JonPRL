@@ -129,3 +129,37 @@ Theorem LowerStar_wf : [
 ] {
   unfold <LowerStar Ran Paths Hom End Psh>; autoR.
 }.
+
+||| Adjunctions
+
+||| R-! ∘ L-!
+||| ≃ f ↑! ∘ f ↓!
+||| ≃ f ↑! ∘ f ↓!
+||| ≃ (- ∘ f) ∘ Lan Paths ⊗ f
+||| ≃ λg a. ∫↑x. g x  ⊗ f x  = f a
+||| ≃ λg a. Σ x. g x  × f x  = f a
+||| ≃ λφ a. ∃ x. φ(x) ∧ x[θ] = a[θ]
+
+||| L-! ∘ R-!
+||| ≃ f ↓! ∘ f ↑!
+||| ≃ f ↓! ∘ f ↑!
+||| ≃ Lan Paths ⊗ f ∘ (- ∘ f)
+||| ≃ λg a. ∫↑x. (g∘f) x ⊗ f x  = a
+||| ≃ λg a. Σ x. (g∘f) x × f x  = a
+||| ≃ λφ a. ∃ x. φ(x[θ]) ∧ x[θ] = a
+
+||| R-* ∘ L-*
+||| f ↓* ∘ f ↑*
+||| θ ↓* ∘ θ ↑*
+||| ≃ Ran Paths ⋔ θ ∘ (- ∘ θ)
+||| ≃ λg a. ∫↓x. a = f x  ⋔ (g∘f) x
+||| ≃ λg a. Π x. a = f x  → (g∘f) x
+||| ≃ λφ a. ∀ x. a = x[θ] ⊃ φ(x[θ])
+
+||| L-* ∘ R-*
+||| f ↑* ∘ f ↓*
+||| θ ↑* ∘ θ ↓*
+||| ≃ (- ∘ θ) ∘ Ran Paths ⋔ θ
+||| ≃ λg a. ∫↓x. f a  = f x  ⋔ g x
+||| ≃ λg a. Π x. f a  = f x  → g x
+||| ≃ λφ a. ∀ x. a[θ] = x[θ] ⊃ φ(x)
