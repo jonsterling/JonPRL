@@ -132,34 +132,44 @@ Theorem LowerStar_wf : [
 
 ||| Adjunctions
 
-||| R-! ∘ L-!
-||| ≃ f ↑! ∘ f ↓!
-||| ≃ f ↑! ∘ f ↓!
-||| ≃ (- ∘ f) ∘ Lan Paths ⊗ f
-||| ≃ λg a. ∫↑x. g x  ⊗ f x  = f a
-||| ≃ λg a. Σ x. g x  × f x  = f a
-||| ≃ λφ a. ∃ x. φ(x) ∧ x[θ] = a[θ]
-
+||| coproduct ⊣ weakening
 ||| L-! ∘ R-!
-||| ≃ f ↓! ∘ f ↑!
 ||| ≃ f ↓! ∘ f ↑!
 ||| ≃ Lan Paths ⊗ f ∘ (- ∘ f)
 ||| ≃ λg a. ∫↑x. (g∘f) x ⊗ f x  = a
 ||| ≃ λg a. Σ x. (g∘f) x × f x  = a
-||| ≃ λφ a. ∃ x. φ(x[θ]) ∧ x[θ] = a
+||| ≃ λφ a. ∃ x. φ(x[γ]) ∧ x[γ] = a | γ ~ f
 
-||| R-* ∘ L-*
-||| f ↓* ∘ f ↑*
-||| θ ↓* ∘ θ ↑*
-||| ≃ Ran Paths ⋔ θ ∘ (- ∘ θ)
-||| ≃ λg a. ∫↓x. a = f x  ⋔ (g∘f) x
-||| ≃ λg a. Π x. a = f x  → (g∘f) x
-||| ≃ λφ a. ∀ x. a = x[θ] ⊃ φ(x[θ])
+||| weakening ⊢ coproduct
+||| R-! ∘ L-!
+||| ≃ f ↑! ∘ f ↓!
+||| ≃ (- ∘ f) ∘ Lan Paths ⊗ f
+||| ≃ λg a. ∫↑x. g x  ⊗ f x  = f a
+||| ≃ λg a. Σ x. g x  × f x  = f a
+||| ≃ λφ a. ∃ x. φ(x) ∧ x[γ] = a[γ] | γ ~ f
 
+||| weakening ⊣ product
 ||| L-* ∘ R-*
 ||| f ↑* ∘ f ↓*
-||| θ ↑* ∘ θ ↓*
-||| ≃ (- ∘ θ) ∘ Ran Paths ⋔ θ
+||| ≃ (- ∘ f) ∘ Ran Paths ⋔ f
 ||| ≃ λg a. ∫↓x. f a  = f x  ⋔ g x
 ||| ≃ λg a. Π x. f a  = f x  → g x
-||| ≃ λφ a. ∀ x. a[θ] = x[θ] ⊃ φ(x)
+||| ≃ λφ a. ∀ x. a[γ] = x[γ] ⊃ φ(x) | γ ~ f
+
+||| product ⊢ weakening
+||| R-* ∘ L-*
+||| f ↓* ∘ f ↑*
+||| ≃ Ran Paths ⋔ f ∘ (- ∘ f)
+||| ≃ λg a. ∫↓x. a = f x  ⋔ (g∘f) x
+||| ≃ λg a. Π x. a = f x  → (g∘f) x
+||| ≃ λφ a. ∀ x. a = x[γ] ⊃ φ(x[γ]) | γ ~ f
+
+||| contraction ⊣ equality
+||| L-δ ∘ R-θ
+
+||| equality ⊢ contraction
+||| R-θ ∘ L-δ
+
+||| truth ⊣ comprehension
+
+||| comprehension ⊢ truth
