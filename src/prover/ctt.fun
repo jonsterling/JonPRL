@@ -1215,9 +1215,10 @@ struct
                 val instantiation = Meta.unconvert (fn _ => raise Refine) e
                 val eqName = Context.fresh (H', Variable.named "_")
                 val names = (nextTarget, eqName)
+                val hyp = HypSyn.NAME currentTarget
                 val tac =
-                  IsectElim (HypSyn.NAME currentTarget, instantiation, SOME names)
-                    THEN Thin (HypSyn.NAME currentTarget)
+                  IsectElim (hyp, instantiation, SOME names)
+                    THEN Thin hyp
               in
                 (tac THENL [ID, go es]) goal'
               end
