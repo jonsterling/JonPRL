@@ -6,7 +6,34 @@ struct
   open DevelopmentAst
   exception Open of Syntax.t
 
-  fun eval_decl D ast =
+  structure SmallStep = SmallStepUtil (SmallStep (Syntax))
+
+  val operatorToLabel = Syntax.Operator.toString
+
+  fun evalCommand D cmd =
+    case cmd of
+         PRINT theta =>
+         let
+           open Development
+           val lbl = operatorToLabel theta
+           val declString =
+             case SOME (lookupObject D lbl) handle _ => NONE of
+                  SOME obj => Object.toString (lbl, obj)
+                | NONE => "Operator " ^ lbl ^ " : " ^ Arity.toString (Syntax.Operator.arity theta) ^ "."
+         in
+           print ("\n" ^ declString ^ "\n")
+         end
+       | EVAL (M, gas) =>
+         let
+           fun termString M = "⸤" ^ Syntax.toString M ^ "⸥"
+           val result = Sum.INR (SmallStep.steps (M, gas)) handle SmallStep.Stuck R => Sum.INL R
+         in
+           case result of
+                Sum.INR (M',n) => print ("\n" ^ termString M ^ " ⇒ " ^ termString M' ^ " in " ^ Int.toString n ^ " steps.\n")
+              | Sum.INL R => print ("\n" ^ termString M ^ " gets stuck at " ^ termString R ^ ".\n")
+         end
+
+  fun evalDecl D ast =
     case ast of
         THEOREM (lbl, term, tac) =>
         let
@@ -26,6 +53,8 @@ struct
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
+      | COMMAND cmd =>
+        (evalCommand D cmd; D)
 
-  fun eval D = List.foldl (fn (decl, D) => eval_decl D decl) D
+  fun eval D = List.foldl (fn (decl, D) => evalDecl D decl) D
 end

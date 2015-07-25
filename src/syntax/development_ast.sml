@@ -5,9 +5,14 @@ struct
   structure Syntax = Syntax
   structure Tactic  = Tactic
 
-  datatype t
-    = THEOREM of label * Syntax.t * Tactic.t
+  datatype command =
+      PRINT of Syntax.Operator.t
+    | EVAL of Syntax.t * int option
+
+  datatype t =
+      THEOREM of label * Syntax.t * Tactic.t
     | OPERATOR of label * Arity.t
     | TACTIC of label * Tactic.t
     | DEFINITION of Syntax.t * Syntax.t
+    | COMMAND of command
 end

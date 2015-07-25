@@ -5,7 +5,7 @@ group is
   $libs/cmlib/cmlib.cm
   $libs/sml-lcf/lcf.cm
   $libs/sml-conv/conv.cm
-  $libs/sml-abt-unify/abt-unify.cm (bind:(anchor:libs value:$libs))
+  $libs/sml-abt-unify/abt-unify.cm
 
   sequent.fun
   sequent.sig

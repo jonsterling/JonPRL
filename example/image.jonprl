@@ -2,9 +2,9 @@ Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
   unfold <squash>; auto
 }.
 
-Theorem implies_squash : [ isect(U{i};t.t => squash(t)) ] {
+Theorem implies_squash : [ {T:U{i}} T => squash(T) ] {
   *{intro; focus 1 #{auto}};
-  @{ [H:t |- _] => witness [lam(_.<>) H]};
+  @{ [H: 'T |- _] => witness [lam(_.<>) H]};
   unfold <squash>; auto
 }.
 
@@ -21,12 +21,10 @@ Theorem approx_id_refl_wf : [
 }.
 
 Theorem test_image_elim : [
-  fun(nat;n.fun(nat;m.fun(squash(=(n;m;nat));x.=(x;x;squash(=(n;m;nat))) -> =(n;m;nat))))
+  {n:nat} {m:nat} {x:squash(=(n; m; nat))} member(x; squash(=(n; m; nat))) => =(n; m; nat)
 ] {
- intro;[ id, auto ];[id];
- intro;[ id, auto ];[id];
- intro;[ id, *{unfold <squash>;auto} ];[id];
- intro;[ id, *{unfold <squash>;auto} ];[id];
- unfold <squash>;
- elim <x> <e>;auto
+  unfold <squash member>;
+  *{intro; focus 1 #{auto}};
+  @{[H : image(_;_) |- _] => elim <H>};
+  auto
 }.

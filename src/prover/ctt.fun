@@ -1093,8 +1093,7 @@ struct
           | _ => raise Conv.Conv
 
       fun convLabel lbl world =
-        Builtins.unfold lbl
-          handle _ => Development.lookupDefinition world lbl
+        Development.lookupDefinition world lbl
             handle Subscript => convTheorem lbl world
     in
       fun Unfolds (world, lbls) (H >> P) =

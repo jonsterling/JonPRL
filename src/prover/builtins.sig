@@ -3,6 +3,7 @@ sig
   structure Conv : CONV
 
   type label
-  val unfold : label -> Conv.conv
+  type operator
+  val unfold : label -> operator * Conv.conv
 end
 

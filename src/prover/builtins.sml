@@ -7,12 +7,14 @@ struct
   open OperatorType Syntax Conv
   infix $ $$ \\
 
+  type operator = Syntax.Operator.t
+
   local
-    fun makeConv oper f tbl =
-      StringListDict.insert tbl (Operator.toString oper) (fn P =>
+    fun makeConv theta f tbl =
+      StringListDict.insert tbl (Operator.toString theta) (theta, fn P =>
         case out P of
-             oper' $ es =>
-               if Operator.eq (oper, oper') then
+             theta' $ es =>
+               if Operator.eq (theta, theta') then
                  f es
                else
                  raise Conv
