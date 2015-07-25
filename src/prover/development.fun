@@ -39,7 +39,7 @@ struct
     type operator_decl =
       {arity : Arity.t,
        conversion : operator_definition option,
-       notation : DevelopmentAst.notation option}
+       notation : Notation.t option}
 
     fun operatorDeclArity {arity,conversion,notation} = arity
 
