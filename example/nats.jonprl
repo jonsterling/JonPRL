@@ -43,16 +43,14 @@ Theorem add-commutes : [
 
   ||| The base case immeidately follows from add-id-right
   focus 0 #{
-    cut-lemma <add-id-right>;
-    elim #3 [m]; auto; unfold <add>;
-    hyp-subst → #4 [h.=(_;h;_)];
-    auto
+    cut-lemma <add-id-right>; unfold <add>;
+    symmetry;
+    bhyp <add-id-right>; auto
   };
 
   ||| In order to prove this we first rewrite by succ-right from which our
   ||| result follows from reflexivity.
-  cut-lemma <succ-right>;
-  elim #5 [m]; auto; elim #6 [n']; unfold <add>; auto;
-  hyp-subst → #8 [h.=(_; h; _)];
-  auto; eq-cd; auto
+  cut-lemma <succ-right>; elim <succ-right> [m]; auto;
+  unfold <add>; elim #6 [n']; auto;
+  hyp-subst → #8 [h.=(_; h; _)]; auto
 }.
