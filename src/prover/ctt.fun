@@ -135,6 +135,7 @@ struct
          | VOID => true
          | CEQUAL => true
          | APPROX => true
+         | SQUASH => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
