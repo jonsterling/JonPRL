@@ -57,6 +57,6 @@ Theorem axiom-of-choice : [{A:U{i}} {B:U{i}} {Q : A -> B -> U{i}} (φ : (c:A) ->
 {
   auto; intro [lam(w. spread(φ w ; x.y.x))]; auto;
   elim #4 [a]; auto; reduce;
-  hyp-subst ← #7 [h. Q a spread(h; x.y.x)]; auto;
+  hyp-subst ← #7 [h. _ _ spread(h; x.y.x)]; auto;
   elim #6; reduce; auto
 }.

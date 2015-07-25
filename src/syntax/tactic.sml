@@ -11,6 +11,7 @@ struct
 
   datatype t =
       LEMMA of label * meta
+    | BHYP of hyp * meta
     | UNFOLD of (label * level option) list * meta
     | CUSTOM_TACTIC of label * meta
     | WITNESS of term * meta

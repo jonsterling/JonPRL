@@ -4,6 +4,8 @@ sig
 end =
 struct
   open DevelopmentAst
+  exception Open of Syntax.t
+
   fun eval_decl D ast =
     case ast of
         THEOREM (lbl, term, tac) =>
@@ -12,7 +14,7 @@ struct
           val () =
               case vars of
                   [] => ()
-                | _ => raise Context.Open term
+                | _ => raise Open term
         in
           Development.prove D (lbl,
                                Sequent.>> (Sequent.Context.empty, term),

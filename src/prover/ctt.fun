@@ -135,6 +135,7 @@ struct
          | VOID => true
          | CEQUAL => true
          | APPROX => true
+         | SQUASH => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
@@ -445,6 +446,7 @@ struct
       let
         val s = Context.rebind H s
         val f = eliminationTarget hyp (H >> P)
+
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -453,6 +455,7 @@ struct
              | NONE =>
                  (Context.fresh (H, Variable.named "y"),
                   Context.fresh (H, Variable.named "z"))
+
         val fsTs = EQ $$ #[``y, ``f, Ts]
       in
         [ H >> MEM $$ #[s, S]
@@ -1090,62 +1093,91 @@ struct
           handle _ => Development.lookupDefinition world lbl
             handle Subscript => convTheorem lbl world
     in
-    fun Unfolds (world, lbls) (H >> P) =
-      let
-        val conv =
-          foldl (fn ((lbl, ok), acc) =>
-            let
-              val k = case ok of SOME k => k | NONE => Level.base
-              val conv =
-                LevelSolver.subst (LevelSolver.Level.yank k)
-                  o CDEEP (convLabel lbl world)
-            in
-              acc CTHEN conv
-            end) CID lbls
-      in
-        [ Context.map conv H >> conv P
-        ] BY (fn [D] => D
-               | _ => raise Refine)
-      end
+      fun Unfolds (world, lbls) (H >> P) =
+        let
+          val conv =
+            foldl (fn ((lbl, ok), acc) =>
+              let
+                val k = case ok of SOME k => k | NONE => Level.base
+                val conv =
+                  LevelSolver.subst (LevelSolver.Level.yank k)
+                    o CDEEP (convLabel lbl world)
+              in
+                acc CTHEN conv
+              end) CID lbls
+        in
+          [ Context.map conv H >> conv P
+          ] BY (fn [D] => D
+                 | _ => raise Refine)
+        end
     end
 
-    fun Lemma (world, lbl) (H >> P) =
-      let
-        val {statement, evidence} = Development.lookupTheorem world lbl
-        val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
-        val substitution = LevelSolver.Level.resolve constraints
-        val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
-      in
-        [] BY (fn _ => shovedEvidence)
+      fun Lemma (world, lbl) (H >> P) =
+        let
+          val {statement, evidence} = Development.lookupTheorem world lbl
+          val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
+          val substitution = LevelSolver.Level.resolve constraints
+          val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
+        in
+          [] BY (fn _ => shovedEvidence)
+        end
+
+      fun Admit (H >> P) =
+        [] BY (fn _ => ADMIT $$ #[])
+
+      fun RewriteGoal (c : conv) (H >> P) =
+        [ Context.map c H >> c P
+        ] BY (fn [D] => D | _ => raise Refine)
+
+      fun EqSym (H >> P) =
+        let
+          val #[M,N,A] = P ^! EQ
+        in
+          [ H >> EQ $$ #[N,M,A]
+          ] BY mkEvidence EQ_SYM
+        end
+
+
+      structure Meta = MetaAbt(Syntax)
+      structure MetaAbt = AbtUtil(Meta.Meta)
+      structure Unify = AbtUnifyOperators
+        (structure A = MetaAbt
+         structure O = Meta.MetaOperator)
+
+      fun applySolution sol e =
+        Meta.unconvert (fn _ => raise Fail "Impossible")
+          (Unify.Solution.foldl
+            (fn (v, e', e) => MetaAbt.substOperator (fn #[] => e') (Meta.MetaOperator.META v) e)
+            e
+            sol)
+
+      fun EqSubst (eq, xC, ok) (H >> P) =
+        let
+          val #[M,N,A] = Context.rebind H eq ^! EQ
+          val xC = Context.rebind H xC
+
+          val fvs = List.map #1 (Context.listItems H)
+          val meta = Meta.convertFree fvs (xC // M)
+          val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+          val xC = applySolution solution (Meta.convertFree fvs xC)
+
+          val (H', x, C) = ctxUnbind (H, A, xC)
+          val k = case ok of SOME k => k | NONE => inferLevel (H', C)
+        in
+          [ H >> eq
+          , H >> xC // N
+          , H' >> MEM $$ #[C, UNIV k $$ #[]]
+          ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
+                 | _ => raise Refine)
       end
 
-    fun Admit (H >> P) =
-      [] BY (fn _ => ADMIT $$ #[])
-
-    fun RewriteGoal (c : conv) (H >> P) =
-      [ Context.map c H >> c P
-      ] BY (fn [D] => D | _ => raise Refine)
-
-    fun EqSym (H >> P) =
+    fun Thin hyp (H >> P) =
       let
-        val #[M,N,A] = P ^! EQ
+        val z = eliminationTarget hyp (H >> P)
+        val H' = Context.thin H z
       in
-        [ H >> EQ $$ #[N,M,A]
-        ] BY mkEvidence EQ_SYM
-      end
-
-    fun EqSubst (eq, xC, ok) (H >> P) =
-      let
-        val #[M,N,A] = Context.rebind H eq ^! EQ
-        val (H', x, C) = ctxUnbind (H, A, xC)
-        val P' = unify P (xC // M)
-        val k = case ok of SOME k => k | NONE => inferLevel (H', C)
-      in
-        [ H >> eq
-        , H >> xC // N
-        , H' >> MEM $$ #[C, UNIV k $$ #[]]
-        ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
-               | _ => raise Refine)
+        [ H' >> P
+        ] BY (fn [D] => D | _ => raise Refine)
       end
 
     local
@@ -1153,9 +1185,64 @@ struct
       open Tacticals
       infix THEN THENL
     in
+      datatype ForallType = ForallIsect | ForallFun
+
+      fun stripForalls (H, P) =
+        case out P of
+             ISECT $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripForalls (H', B)
+               in
+                 (xs @ [(ForallIsect, x)], Q)
+               end
+           | FUN $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripForalls (H', B)
+               in
+                 (xs @ [(ForallFun, x)], Q)
+               end
+           | _ => ([], P)
+
+      fun BHyp hyp (goal as H >> P) =
+        let
+          val target = eliminationTarget hyp goal
+
+          val (variables, Q) = stripForalls (H, Context.lookup H target)
+          val fvs = List.map #1 (Context.listItems H)
+          val solution = Unify.unify (Meta.convertFree fvs Q, Meta.convertFree fvs P)
+
+          val instantiations = List.map (fn (ty, v) => (ty, Unify.Solution.lookup solution v)) variables
+
+          val targetRef = ref target
+          fun go [] = ID
+            | go ((ty, e) :: es) = fn goal' as H' >> _ =>
+              let
+                val currentTarget = Context.rebindName H' (! targetRef)
+                val nextTarget = Variable.prime currentTarget
+                val _ = targetRef := nextTarget
+                val instantiation = Meta.unconvert (fn _ => raise Refine) e
+                val eqName = Context.fresh (H', Variable.named "_")
+                val names = (nextTarget, eqName)
+                val hyp = HypSyn.NAME currentTarget
+                val elim =
+                  case ty of
+                       ForallIsect => IsectElim
+                     | ForallFun => FunElim
+                val tac =
+                  elim (hyp, instantiation, SOME names)
+                    THEN Thin hyp
+              in
+                (tac THENL [ID, go es]) goal'
+              end
+        in
+          go (rev instantiations) goal
+        end
+
+
       fun HypEqSubst (dir, hyp, xC, ok) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
@@ -1250,9 +1337,14 @@ struct
 
       fun CEqSubst (eq, xC) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val eq = Context.rebind H eq
           val #[M, N] = eq ^! CEQUAL
+
+          val fvs = List.map #1 (Context.listItems H)
+          val meta = Meta.convertFree fvs (xC // M)
+          val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+          val xC = applySolution solution (Meta.convertFree fvs xC)
+
           val _ = unify P (xC // M)
         in
           [ H >> eq
@@ -1263,7 +1355,6 @@ struct
 
       fun HypCEqSubst (dir, hyp, xC) (H >> P) =
         let
-          val xC = Context.rebind H xC
           val z = eliminationTarget hyp (H >> P)
           val X = Context.lookup H z
         in
@@ -1393,14 +1484,6 @@ struct
         end
     end
 
-    fun Thin hyp (H >> P) =
-      let
-        val z = eliminationTarget hyp (H >> P)
-        val H' = Context.thin H z
-      in
-        [ H' >> P
-        ] BY (fn [D] => D | _ => raise Refine)
-      end
   end
 
   structure Conversions =
