@@ -445,6 +445,7 @@ struct
       let
         val s = Context.rebind H s
         val f = eliminationTarget hyp (H >> P)
+
         val #[S, xT] = Context.lookup H f ^! ISECT
         val Ts = xT // s
         val (y, z) =
@@ -453,6 +454,7 @@ struct
              | NONE =>
                  (Context.fresh (H, Variable.named "y"),
                   Context.fresh (H, Variable.named "z"))
+
         val fsTs = EQ $$ #[``y, ``f, Ts]
       in
         [ H >> MEM $$ #[s, S]
@@ -1168,11 +1170,62 @@ struct
                  | _ => raise Refine)
       end
 
+    fun Thin hyp (H >> P) =
+      let
+        val z = eliminationTarget hyp (H >> P)
+        val H' = Context.thin H z
+      in
+        [ H' >> P
+        ] BY (fn [D] => D | _ => raise Refine)
+      end
+
     local
       structure Tacticals = Tacticals (Lcf)
       open Tacticals
       infix THEN THENL
     in
+      fun stripIsects (H, P) =
+        case out P of
+             ISECT $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripIsects (H', B)
+               in
+                 (xs @ [x], Q)
+               end
+           | _ => ([], P)
+
+      fun BHyp hyp (goal as H >> P) =
+        let
+          val target = eliminationTarget hyp goal
+
+          val (variables, Q) = stripIsects (H, Context.lookup H target)
+          val fvs = List.map #1 (Context.listItems H)
+          val solution = Unify.unify (Meta.convertFree fvs Q, Meta.convertFree fvs P)
+
+          val instantiations = List.map (Unify.Solution.lookup solution) variables
+
+          val targetRef = ref target
+          fun go [] = ID
+            | go (e :: es) = fn goal' as H' >> _ =>
+              let
+                val currentTarget = Context.rebindName H' (! targetRef)
+                val nextTarget = Variable.prime currentTarget
+                val _ = targetRef := nextTarget
+                val instantiation = Meta.unconvert (fn _ => raise Refine) e
+                val eqName = Context.fresh (H', Variable.named "_")
+                val names = (nextTarget, eqName)
+                val tac =
+                  IsectElim (HypSyn.NAME currentTarget, instantiation, SOME names)
+                    THEN Thin (HypSyn.NAME currentTarget)
+              in
+                (tac THENL [ID, go es]) goal'
+              end
+        in
+          go (rev instantiations) goal
+        end
+
+
       fun HypEqSubst (dir, hyp, xC, ok) (H >> P) =
         let
           val z = eliminationTarget hyp (H >> P)
@@ -1416,14 +1469,6 @@ struct
         end
     end
 
-    fun Thin hyp (H >> P) =
-      let
-        val z = eliminationTarget hyp (H >> P)
-        val H' = Context.thin H z
-      in
-        [ H' >> P
-        ] BY (fn [D] => D | _ => raise Refine)
-      end
   end
 
   structure Conversions =

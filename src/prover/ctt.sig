@@ -169,6 +169,7 @@ sig
 
     val Unfolds : world * (label * Level.t option) list -> tactic
     val Lemma : world * label -> tactic
+    val BHyp : hyp -> tactic
 
     val RewriteGoal : conv -> tactic
 

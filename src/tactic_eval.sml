@@ -14,6 +14,7 @@ struct
   fun eval wld t =
     case t of
         LEMMA (lbl, a) => an a (Lemma (wld, lbl))
+      | BHYP (hyp, a) => an a (BHyp hyp)
       | UNFOLD (lbls, a) => an a (Unfolds (wld, lbls))
       | CUSTOM_TACTIC (lbl, a) =>
         an a (Development.lookupTactic wld lbl)
