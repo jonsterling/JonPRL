@@ -2,10 +2,10 @@ Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
   unfold <squash>; auto
 }.
 
-Theorem implies_squash : [ isect(U{i};t.t -> squash(t)) ] {
-  auto;
+Theorem implies_squash : [ isect(U{i};t.t => squash(t)) ] {
+  *{intro; focus 1 #{auto}};
   @{ [H:t |- _] => witness [lam(_.<>) H]};
-  auto
+  unfold <squash>; auto
 }.
 
 Theorem approx_id_refl_wf : [
