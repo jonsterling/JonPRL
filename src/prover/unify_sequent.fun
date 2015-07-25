@@ -62,6 +62,9 @@ struct
         diff Context.Syntax.Variable.eq
              (Context.Syntax.freeVariables M)
              ctxVars
+
+      val wildVar = List.find (fn v => "_" = Variable.toString v) freeVars
+      val wild = MetaAbt.into (MetaAbt.$ (MetaOperator.WILD, #[]))
       (* Assert that all free variables are ones we didn't mean to
        * bind to ones in the context already.
        *)
@@ -69,10 +72,15 @@ struct
         if List.exists (String.isPrefix "'") (List.map Variable.toString freeVars)
         then raise Mismatch
         else ()
+      val cM =
+        List.foldl (fn (v, M') => subst ($$ (MetaOperator.META v, #[])) v M')
+                   (convert M)
+                   freeVars
     in
-      List.foldl (fn (v, M') => subst ($$ (MetaOperator.META v, #[])) v M')
-                 (convert M)
-                 freeVars
+      case wildVar of
+          SOME v =>
+          substOperator (fn _ => wild) (MetaOperator.META v) cM
+        | NONE => cM
     end
 
   fun rebindPat {goal, hyps} =
@@ -166,12 +174,13 @@ struct
       val sol = Unify.unify (goal, convert P)
                   handle Unify.Mismatch _ => raise Mismatch
 
+      exception Wildcard
       fun go [] = raise Mismatch
         | go (hs :: subsets) =
           case matchCxt sol hyps hs of
               SOME (names, finalSol) =>
               {matched = names,
-               subst = Sol.toList (Sol.map unconvert finalSol)}
+               subst = Sol.toList (Sol.map (unconvert (fn _ => raise Wildcard)) finalSol)}
             | NONE => go subsets
       val subsets = subset (List.map (fn (n, v, t) => (n, convert t))
                            (Context.listItems H))
