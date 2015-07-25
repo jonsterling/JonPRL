@@ -5,9 +5,10 @@ Tactic tautology-step {
    | [|- P -> Q] => intro
    | [|- P => Q] => intro
    | [H : void |- _] => elim <H>; thin <H>
-   | [H : P * Q |- _] => elim <H>; thin <H>
+   | [H : (x : P) * _ |- _] => elim <H>; thin <H>
    | [H : P + Q |- _] => elim <H>; thin <H>
-   | [H : P -> Q, H' : P |- _] => elim <H> [H']; thin <H>
+   | [H : (x : P) _, H' : P |- _] => elim <H> [H']; thin <H>
+   | [H : {x : P} _, H' : P |- _] => elim <H> [H']; thin <H>
    | [|- member(M;A)] => unfold <member>
    | [|- =(M;N;A)] => eq-cd
    }
