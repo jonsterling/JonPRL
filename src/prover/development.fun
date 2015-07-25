@@ -38,17 +38,15 @@ struct
     type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
       {arity : Arity.t,
-       conversion : operator_definition option}
+       conversion : operator_definition option,
+       notation : DevelopmentAst.notation option}
 
-    fun operatorDeclArity {arity,conversion} = arity
+    fun operatorDeclArity {arity,conversion,notation} = arity
 
     datatype t =
         THEOREM of theorem
       | TACTIC of tactic
       | OPERATOR of operator_decl
-
-    fun arity_toString v =
-      "(" ^ Vector.foldri (fn (i, s1, s2) => if i = (Vector.length v - 1) then s1 else s1 ^ "; " ^ s2) "" (Vector.map Int.toString v) ^ ")"
 
     fun toString (lbl, THEOREM {statement, evidence,...}) =
           let
@@ -61,9 +59,9 @@ struct
           end
       | toString (lbl, TACTIC _) =
           "Tactic " ^ Telescope.Label.toString lbl ^ "."
-      | toString (lbl, OPERATOR {arity, conversion}) =
+      | toString (lbl, OPERATOR {arity, conversion,...}) =
           "Operator " ^ Telescope.Label.toString lbl
-            ^ " : " ^ arity_toString arity
+            ^ " : " ^ Arity.toString arity
             ^ "."
             ^ (case conversion of
                    NONE => ""
@@ -122,7 +120,11 @@ struct
     Telescope.snoc T (lbl, Object.TACTIC tac)
 
   fun declareOperator T (lbl, arity) =
-    Telescope.snoc T (lbl, Object.OPERATOR {arity = arity, conversion = NONE})
+    Telescope.snoc T
+      (lbl, Object.OPERATOR
+        {arity = arity,
+         conversion = NONE,
+         notation = NONE})
 
   fun lookupObject T lbl =
     case SOME (Builtins.unfold lbl) handle _ => NONE of
@@ -136,7 +138,8 @@ struct
            in
              Object.OPERATOR
                {arity = Syntax.Operator.arity theta,
-                conversion = SOME (rule, Susp.delay (fn () => conv))}
+                conversion = SOME (rule, Susp.delay (fn () => conv)),
+                notation = NONE}
            end
   local
     structure Set = SplaySet(structure Elem = Syntax.Variable)
@@ -162,13 +165,20 @@ struct
         val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
         case SOME (lookupObject T lbl) handle _ => NONE of
-             SOME (Object.OPERATOR {arity,conversion = NONE}) =>
+             SOME (Object.OPERATOR {arity,conversion = NONE,notation}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
                   {arity = arity,
-                   conversion = conversion})
+                   conversion = conversion,
+                   notation = notation})
            | SOME _ => raise Subscript
            | NONE => raise Fail "Cannot define undeclared operator"
+      end
+
+    fun declareNotation T (lbl, notation) =
+      let
+      in
+        raise Fail "to be implemented"
       end
   end
 

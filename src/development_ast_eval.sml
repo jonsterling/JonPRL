@@ -53,6 +53,8 @@ struct
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
+      | NOTATION (notation, theta) =>
+        Development.declareNotation D (operatorToLabel theta, notation)
       | COMMAND cmd =>
         (evalCommand D cmd; D)
 

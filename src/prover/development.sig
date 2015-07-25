@@ -52,6 +52,7 @@ sig
   (* extend a development with a new operator *)
   val declareOperator : world -> label * Arity.t -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
+  val declareNotation : world -> label * DevelopmentAst.notation -> world
 
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
