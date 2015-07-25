@@ -1,34 +1,29 @@
-signature SO_TERM =
-sig
-  include ABT
-
-  val asInstantiate : t -> (t * t) option
-end
-
 functor PatternCompiler
   (structure Conv : CONV
-   structure SoTerm : SO_TERM
+   structure PatternTerm : PATTERN_TERM
 
    type label
-   sharing type Conv.term = SoTerm.t) : PATTERN_COMPILER =
+   sharing type Conv.term = PatternTerm.t) : PATTERN_COMPILER =
 struct
-  structure S = AbtUtil(SoTerm)
-  type term = S.t
-  type pattern = S.t
+  structure PatternTerm = PatternTerm
+  open PatternTerm
+
+  type term = PatternTerm.t
+  type pattern = PatternTerm.t
   type rule = {definiendum : pattern, definiens : term}
   type conv = Conv.conv
   type label = label
 
-  structure Set = SplaySet(structure Elem = S.Variable)
+  structure Set = SplaySet(structure Elem = Variable)
   structure Conversionals = Conversionals
-    (structure Syntax = S
+    (structure Syntax = PatternTerm
      structure Conv = Conv)
 
   exception InvalidTemplate
 
   structure Chart =
   struct
-    structure Dict = SplayDict(structure Key = S.Variable)
+    structure Dict = SplayDict(structure Key = Variable)
     open Dict
 
     datatype 'a point =
@@ -50,10 +45,11 @@ struct
          | _ => raise Subscript
   end
 
-  open S
+  structure AbtUtil = AbtUtil(PatternTerm)
+  open AbtUtil
   infix $ $$ \ \\
 
-  fun computeChart (pat, N) : S.t Chart.chart =
+  fun computeChart (pat, N) : term Chart.chart =
     case (out pat, out N) of
          (pato $ es, oper $ es') =>
            let
@@ -73,7 +69,7 @@ struct
                   * right hand side shall be y.E. So we insert its second order
                   * substitution into the chart, i.e. Z !-> [y/x]F. *)
                | go (x \ M) (y \ N) R =
-                 (case SoTerm.asInstantiate M of
+                 (case PatternTerm.asInstantiate M of
                        SOME (F,X) =>
                          (case out F of
                                `f =>
@@ -92,7 +88,7 @@ struct
   local
     open Conv Conversionals
   in
-    fun compile ({definiendum, definiens} : rule) = fn (M : S.t) =>
+    fun compile ({definiendum, definiens} : rule) = fn (M : term) =>
       let
         val Pop $ _ = out definiendum
         val Mop $ _ = out M
@@ -104,7 +100,7 @@ struct
                let
                  val _ = if Operator.eq (Pop, Mop) then () else raise Conv
                  fun go H M =
-                   case SoTerm.asInstantiate M of
+                   case PatternTerm.asInstantiate M of
                         NONE =>
                           (* If we have not reached a second-order application,
                            * then proceed structurally *)
@@ -136,18 +132,53 @@ struct
 
 end
 
-structure SoTerm : SO_TERM =
+structure PatternTerm : PATTERN_TERM =
 struct
-  open Syntax
-  infix $
+  open Syntax OperatorType
+  infix $ $$
+  infixr \ \\
 
   fun asInstantiate M =
     case out M of
-         OperatorType.SO_APPLY $ #[E, M] => SOME (E, M)
+         SO_APPLY $ #[E, M] => SOME (E, M)
        | _ => NONE
+
+  fun patternForOperator theta =
+    let
+      val arity = Operator.arity theta
+      val newVariable =
+        let
+          val store = ref (Variable.named "P")
+        in
+          fn () => let val name = ! store in store := Variable.prime name; `` name end
+        end
+
+      fun makeBoundVariables i =
+        let
+          fun go i xs =
+            if i = 0 then
+              xs
+            else
+              case xs of
+                   [] => go (i - 1) [Variable.named "x"]
+                 | y::ys => go (i - 1) (xs @ [Variable.prime y])
+        in
+          go i []
+        end
+
+      fun patternForValence i =
+        let
+          val xs = makeBoundVariables i
+          val inner = foldl (fn (x,P) => SO_APPLY $$ #[P, ``x]) (newVariable ()) xs
+        in
+          foldr (fn (x, P) => x \\ P) inner xs
+        end
+    in
+      theta $$ Vector.map patternForValence arity
+    end
 end
 
 structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
-   structure SoTerm = SoTerm
+   structure PatternTerm = PatternTerm
    type label = string)

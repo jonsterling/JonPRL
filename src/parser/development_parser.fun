@@ -7,12 +7,13 @@ functor DevelopmentParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
      where type label = ParserContext.label
-   structure Syntax : PARSE_ABT
-     where type ParseOperator.world = Tactic.label -> Arity.t
    structure DevelopmentAst : DEVELOPMENT_AST
-     where type Syntax.t = Syntax.t
      where type Tactic.t = Tactic.t
      where type label = ParserContext.label
+   structure Syntax : PARSE_ABT
+     where type ParseOperator.world = Tactic.label -> Arity.t
+     where type t = DevelopmentAst.Syntax.t
+     where type Operator.t = DevelopmentAst.Syntax.Operator.t
 
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
@@ -37,6 +38,8 @@ struct
 
   fun parseTm fvs w =
     squares (Syntax.parseAbt (lookupOperator w) (Syntax.initialState fvs))
+
+  val parseOperator = Syntax.ParseOperator.parseOperator o lookupOperator
 
   val parsePattern = parseTm []
 
@@ -79,8 +82,9 @@ struct
     ) wth (fn (P : Syntax.t, N : Syntax.t) =>
               (w, DevelopmentAst.DEFINITION (P, N)))
 
-  val parsePrint =
-    reserved "Print" >> parseLabel
+  fun parsePrint (w : world) =
+    reserved "Print" >>
+      parseOperator w
       wth DevelopmentAst.PRINT
 
   fun parseEval w =
@@ -89,7 +93,7 @@ struct
       wth (fn (gas, M) => DevelopmentAst.EVAL (M, gas))
 
   fun parseCommand w =
-    (parsePrint || parseEval w)
+    (parsePrint w || parseEval w)
     wth (fn cmd => (w, DevelopmentAst.COMMAND cmd))
 
   fun parseDecl w =

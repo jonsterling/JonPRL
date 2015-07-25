@@ -8,12 +8,18 @@ struct
 
   structure SmallStep = SmallStepUtil (SmallStep (Syntax))
 
+  val operatorToLabel = Syntax.Operator.toString
+
   fun evalCommand D cmd =
     case cmd of
-         PRINT lbl =>
+         PRINT theta =>
          let
            open Development
-           val declString = Object.toString (lbl, lookupObject D lbl)
+           val lbl = operatorToLabel theta
+           val declString =
+             case SOME (lookupObject D lbl) handle _ => NONE of
+                  SOME obj => Object.toString (lbl, obj)
+                | NONE => "Operator " ^ lbl ^ " : " ^ Arity.toString (Syntax.Operator.arity theta) ^ "."
          in
            print ("\n" ^ declString ^ "\n")
          end

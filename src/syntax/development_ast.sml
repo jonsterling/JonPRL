@@ -6,7 +6,7 @@ struct
   structure Tactic  = Tactic
 
   datatype command =
-      PRINT of label
+      PRINT of Syntax.Operator.t
     | EVAL of Syntax.t * int option
 
   datatype t =

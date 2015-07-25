@@ -4,11 +4,15 @@ functor Development
    structure Lcf : LCF
      where type evidence = Evidence.t
    structure PatternCompiler : PATTERN_COMPILER
-     where type term = Syntax.t
+   sharing PatternCompiler.PatternTerm = Syntax
    structure Extract : EXTRACT
      where type evidence = Lcf.evidence
      where type term = Syntax.t
    structure Telescope : TELESCOPE
+   structure Builtins : BUILTINS
+     where type Conv.term = Syntax.t
+     where type operator = Syntax.Operator.t
+     where type label = Telescope.label
    val operatorToLabel : Syntax.Operator.t -> Telescope.label
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
@@ -120,6 +124,20 @@ struct
   fun declareOperator T (lbl, arity) =
     Telescope.snoc T (lbl, Object.OPERATOR {arity = arity, conversion = NONE})
 
+  fun lookupObject T lbl =
+    case SOME (Builtins.unfold lbl) handle _ => NONE of
+         NONE => Telescope.lookup T lbl
+       | SOME (theta, conv) =>
+           let
+             val pattern = PatternCompiler.PatternTerm.patternForOperator theta
+             val rule : PatternCompiler.rule =
+               {definiendum = pattern,
+                definiens = conv pattern}
+           in
+             Object.OPERATOR
+               {arity = Syntax.Operator.arity theta,
+                conversion = SOME (rule, Susp.delay (fn () => conv))}
+           end
   local
     structure Set = SplaySet(structure Elem = Syntax.Variable)
     val setFromList = foldl (fn (x,S) => Set.insert S x) Set.empty
@@ -143,7 +161,7 @@ struct
             raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
         val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
-        case Telescope.find T lbl of
+        case SOME (lookupObject T lbl) handle _ => NONE of
              SOME (Object.OPERATOR {arity,conversion = NONE}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
@@ -154,13 +172,14 @@ struct
       end
   end
 
+
   fun lookupDefinition T lbl =
-    case Telescope.lookup T lbl of
+    case lookupObject T lbl of
          Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
        | _ => raise Subscript
 
   fun lookupTheorem T lbl =
-    case Telescope.lookup T lbl of
+    case lookupObject T lbl of
          Object.THEOREM {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
@@ -172,14 +191,12 @@ struct
     end
 
   fun lookupTactic T lbl =
-    case Telescope.lookup T lbl of
+    case lookupObject T lbl of
          Object.TACTIC tac => tac
        | _ => raise Subscript
 
-  val lookupObject = Telescope.lookup
-
   fun lookupOperator T lbl =
-    case Telescope.lookup T lbl of
+    case lookupObject T lbl of
          Object.OPERATOR {arity,...} => arity
        | Object.THEOREM {...} => #[]
        | _ => raise Subscript
@@ -193,6 +210,7 @@ structure Development : DEVELOPMENT =
      structure Extract = Extract
      structure Telescope = Telescope(StringVariable)
      structure Lcf = Lcf
+     structure Builtins = Builtins
 
      val operatorToLabel = Syntax.Operator.toString
      val goalToString = Sequent.toString)

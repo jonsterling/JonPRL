@@ -10,7 +10,7 @@ sig
     where type term = Syntax.t
 
   datatype command =
-      PRINT of label
+      PRINT of Syntax.Operator.t
     | EVAL of Syntax.t * int option
 
   datatype t =
