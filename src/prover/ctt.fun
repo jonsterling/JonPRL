@@ -1184,14 +1184,23 @@ struct
       open Tacticals
       infix THEN THENL
     in
-      fun stripIsects (H, P) =
+      datatype ForallType = ForallIsect | ForallFun
+
+      fun stripForalls (H, P) =
         case out P of
              ISECT $ #[A, xB] =>
                let
                  val (H', x, B) = ctxUnbind (H, A, xB)
-                 val (xs, Q) = stripIsects (H', B)
+                 val (xs, Q) = stripForalls (H', B)
                in
-                 (xs @ [x], Q)
+                 (xs @ [(ForallIsect, x)], Q)
+               end
+           | FUN $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripForalls (H', B)
+               in
+                 (xs @ [(ForallFun, x)], Q)
                end
            | _ => ([], P)
 
@@ -1199,15 +1208,15 @@ struct
         let
           val target = eliminationTarget hyp goal
 
-          val (variables, Q) = stripIsects (H, Context.lookup H target)
+          val (variables, Q) = stripForalls (H, Context.lookup H target)
           val fvs = List.map #1 (Context.listItems H)
           val solution = Unify.unify (Meta.convertFree fvs Q, Meta.convertFree fvs P)
 
-          val instantiations = List.map (Unify.Solution.lookup solution) variables
+          val instantiations = List.map (fn (ty, v) => (ty, Unify.Solution.lookup solution v)) variables
 
           val targetRef = ref target
           fun go [] = ID
-            | go (e :: es) = fn goal' as H' >> _ =>
+            | go ((ty, e) :: es) = fn goal' as H' >> _ =>
               let
                 val currentTarget = Context.rebindName H' (! targetRef)
                 val nextTarget = Variable.prime currentTarget
@@ -1216,8 +1225,12 @@ struct
                 val eqName = Context.fresh (H', Variable.named "_")
                 val names = (nextTarget, eqName)
                 val hyp = HypSyn.NAME currentTarget
+                val elim =
+                  case ty of
+                       ForallIsect => IsectElim
+                     | ForallFun => FunElim
                 val tac =
-                  IsectElim (hyp, instantiation, SOME names)
+                  elim (hyp, instantiation, SOME names)
                     THEN Thin hyp
               in
                 (tac THENL [ID, go es]) goal'
