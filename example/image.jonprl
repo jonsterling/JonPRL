@@ -1,4 +1,4 @@
-Theorem squash_wf : [ isect(U{i};t.member(squash(t);U{i})) ] {
+Theorem squash_wf : [ {T:U{i}} member(squash(T); U{i}) ] {
   unfold <squash>; auto
 }.
 
