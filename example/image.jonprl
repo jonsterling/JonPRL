@@ -19,3 +19,14 @@ Theorem approx_id_refl_wf : [
   focus 1 #{elim #2 [H]; auto};
   unfold <iff and implies>; intro; intro; auto
 }.
+
+Theorem test_image_elim : [
+  fun(nat;n.fun(nat;m.fun(squash(=(n;m;nat));x.=(x;x;squash(=(n;m;nat))) -> =(n;m;nat))))
+] {
+ intro;[ id, auto ];[id];
+ intro;[ id, auto ];[id];
+ intro;[ id, *{unfold <squash>;auto} ];[id];
+ intro;[ id, *{unfold <squash>;auto} ];[id];
+ unfold <squash>;
+ elim <x> <e>;auto
+}.

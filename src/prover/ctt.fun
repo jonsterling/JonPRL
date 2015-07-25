@@ -732,11 +732,12 @@ struct
              SOME z => z
            | NONE => Context.fresh (H, Variable.named "w")
 
-        val H' = Context.insert H w Visibility.Hidden A
+	val K  = Context.insert Context.empty w Visibility.Hidden A
+	val H1 = Context.interposeAfter H (x, K)
+	val H2 = Context.mapAfter w (fn t => (x \\ t) // (AP $$ #[F, ``w])) H1
         val P' = (x \\ P) // (AP $$ #[F, ``w])
-        (* substitute x for (f w) in J *)
       in
-        [ H >> P'
+        [ H2 >> P'
         ] BY mkEvidence IMAGE_ELIM
       end
 
