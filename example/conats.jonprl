@@ -32,25 +32,32 @@ Tactic unfolds {
   *{unfold <corec conat czero csucc conatF top omega Y>}
 }.
 
-Tactic rauto {
-  *{reduce; auto} ||| May not terminate but shh
+Tactic instantiate-hyp {
+  @{ [H : P => Q, H' : P |- _] => elim <H> [H']}
+}.
+
+Tactic refl-from-trans {
+  @{ [H : =(y; x; P) |- =(x;x; P)] => hyp-subst <- <H> [h.=(h;h;_)]};
+}.
+
+Tactic conat-wf-overture {
+  unfolds; auto;
+  @{ [n:nat |- _] => elim <n>; thin <n>};
+  reduce 1; auto
 }.
 
 Theorem zero-wf : [member(czero; conat)] {
-  unfolds; rauto; elim #1; rauto
+  conat-wf-overture
 }.
 
 Theorem succ-wf : [{x:conat} member(csucc(x); conat)] {
-  unfolds; auto;
-  elim #2; focus 1 #{elim #1 [n']};
-  rauto;
-  hyp-subst ← #6 [h.=(h; h; _)];
-  rauto
+  conat-wf-overture;
+  instantiate-hyp; auto;
+  refl-from-trans; auto
 }.
 
 Theorem omega-wf : [member(omega; conat)] {
-  unfolds; unfold <omega Y>; auto; elim #1;
-  focus 0 #{reduce 1; auto};
+  conat-wf-overture;
   csubst [ceq(lam(x.inr(x x)) lam(x.inr(x x));
               inr(lam(x.inr(x x))  lam(x.inr(x x))))]
          [h.=(h;h;_)];
