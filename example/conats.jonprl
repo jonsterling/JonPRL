@@ -12,7 +12,7 @@ Operator corec : (1).
 Operator conatF : (0).
 [conatF(X)] =def= [unit + X].
 
-(* conats are the greatest fixed point of the polynomial functor X + 1 *)
+(* conats are the greatest fixed point of the polynomial functor 1 + X *)
 Operator conat : ().
 [conat] =def= [corec(R. conatF(R))].
 
@@ -28,21 +28,17 @@ Operator Y : (1).
 Operator omega : ().
 [omega] =def= [Y(x.csucc(x))].
 
-Tactic unfolds {
-  *{unfold <corec conat czero csucc conatF top omega Y>}
-}.
-
 Tactic instantiate-hyp {
-  @{ [H : P => Q, H' : P |- _] => elim <H> [H']}
+  @{ [H : P => Q, H' : P |- _] => elim <H> [H'] }
 }.
 
 Tactic refl-from-trans {
-  @{ [H : =(y; x; P) |- =(x;x; P)] => hyp-subst <- <H> [h.=(h;h;_)]};
+  @{ [H : =(y; x; P) |- =(x;x; P)] => hyp-subst <- <H> [h.=(h;h;_)] };
 }.
 
 Tactic conat-wf-overture {
-  unfolds; auto;
-  @{ [n:nat |- _] => elim <n>; thin <n>};
+  *{ unfold <corec conat czero csucc conatF top omega Y> }; auto;
+  @{ [n:nat |- _] => elim <n>; thin <n> };
   reduce 1; auto
 }.
 
