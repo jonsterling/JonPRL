@@ -11,6 +11,7 @@ test:
 	bin/jonprl example/test.jonprl example/monoid.jonprl example/squash.jonprl example/unique.jonprl
 	bin/jonprl example/image.jonprl
 	bin/jonprl stdlib/*.jonprl
+	bin/jonprl example/tautology.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
