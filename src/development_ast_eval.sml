@@ -6,7 +6,18 @@ struct
   open DevelopmentAst
   exception Open of Syntax.t
 
-  fun eval_decl D ast =
+  fun evalCommand D cmd =
+    case cmd of
+         PRINT lbl =>
+         let
+           open Development
+           val object = lookupObject D lbl
+           val declString = Object.toString (lbl, object)
+         in
+           print ("\n" ^ declString ^ "\n"); D
+         end
+
+  fun evalDecl D ast =
     case ast of
         THEOREM (lbl, term, tac) =>
         let
@@ -26,6 +37,8 @@ struct
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
+      | COMMAND cmd =>
+        evalCommand D cmd
 
-  fun eval D = List.foldl (fn (decl, D) => eval_decl D decl) D
+  fun eval D = List.foldl (fn (decl, D) => evalDecl D decl) D
 end

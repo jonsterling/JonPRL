@@ -53,9 +53,6 @@ sig
   val declareOperator : world -> label * Arity.t -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
 
-  (* lookup the definiens *)
-  val lookupDefinition : world -> label -> conv
-
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
   val lookupExtract : world -> label -> term
@@ -65,4 +62,9 @@ sig
 
   (* lookup a custom operator *)
   val lookupOperator : world -> label -> Arity.t
+
+  (* lookup the definiens *)
+  val lookupDefinition : world -> label -> conv
+
+  val lookupObject : world -> label -> Object.t
 end

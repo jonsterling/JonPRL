@@ -32,7 +32,7 @@ struct
 
   structure TP = TokenParser
     (open JonprlLanguageDef
-     val reservedNames = ["Theorem", "Tactic", "Operator"])
+     val reservedNames = ["Theorem", "Tactic", "Operator", "Print"])
   open TP
 
   fun parseTm fvs w =
@@ -79,11 +79,16 @@ struct
     ) wth (fn (P : Syntax.t, N : Syntax.t) =>
               (w, DevelopmentAst.DEFINITION (P, N)))
 
+  val parseCommand =
+    reserved "Print" >> parseLabel
+      wth DevelopmentAst.COMMAND o DevelopmentAst.PRINT
+
   fun parseDecl w =
       parseTheorem w
       || parseTactic w
       || parseOperatorDecl w
       || parseOperatorDef w
+      || parseCommand wth (fn r => (w,r))
 
   fun parse' w ast () =
     whiteSpace >>

@@ -176,6 +176,8 @@ struct
          Object.TACTIC tac => tac
        | _ => raise Subscript
 
+  val lookupObject = Telescope.lookup
+
   fun lookupOperator T lbl =
     case Telescope.lookup T lbl of
          Object.OPERATOR {arity,...} => arity
