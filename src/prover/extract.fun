@@ -43,7 +43,21 @@ struct
 
        | IMAGE_EQ $ _ => ax
        | IMAGE_MEM_EQ $ _ => ax
-       | IMAGE_ELIM $ #[t] => t
+       | IMAGE_ELIM $ #[wD] =>
+           let
+             (* NOTE: this is a very strange rule, which is
+              * (proof-theoretically) perhaps a bit suspect. Image elimination
+              * is only constructive in case the conclusion is proof-irrelevant,
+              * and so one way to formulate the rule would be to use [ax] as the
+              * extract. I think the extraction below, however, is a little bit
+              * more sensible: first, we extract the derivation that has a free
+              * variable <w> in it, and then since we required that <w> be a
+              * "hidden" variable, we are free to substitute it with [ax] at the
+              * end. *)
+             val (w,D) = unbind wD
+           in
+             (w \\ extract D) // ax
+           end
        | IMAGE_EQ_IND $ _ => ax
 
        | PROD_EQ $ _ => ax
@@ -102,7 +116,7 @@ struct
        | ` x => `` x
        | x \ E => x \\ extract E
 
-       | _ => (print (Syn.toString E); raise MalformedEvidence E)
+       | _ => (print ("Malformed evidence: " ^ Syn.toString E); raise MalformedEvidence E)
 end
 
 structure Extract = Extract(Syntax)

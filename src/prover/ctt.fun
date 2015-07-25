@@ -723,22 +723,25 @@ struct
         ] BY mkEvidence IMAGE_MEM_EQ
       end
 
-    fun ImageElim (hyp, oz) (H >> P) =
+    fun ImageElim (hyp, ow) (H >> P) =
       let
-        val x = eliminationTarget hyp (H >> P)
-        val #[A,F] = Context.lookup H x ^! IMAGE
+        val z = eliminationTarget hyp (H >> P)
+        val #[A,F] = Context.lookup H z ^! IMAGE
         val w =
-         case oz of
-             SOME z => z
+         case ow of
+             SOME w => w
            | NONE => Context.fresh (H, Variable.named "w")
 
-	val K  = Context.insert Context.empty w Visibility.Hidden A
-	val H1 = Context.interposeAfter H (x, K)
-	val H2 = Context.mapAfter w (fn t => (x \\ t) // (AP $$ #[F, ``w])) H1
-        val P' = (x \\ P) // (AP $$ #[F, ``w])
+        val K  = Context.insert Context.empty w Visibility.Hidden A
+        val H1 = Context.interposeAfter H (z, K)
+
+        val Fw = AP $$ #[F, ``w]
+        val H2 = Context.mapAfter w (fn t => subst Fw z t) H1
+        val P' = subst Fw z P
       in
         [ H2 >> P'
-        ] BY mkEvidence IMAGE_ELIM
+        ] BY (fn [D] => IMAGE_ELIM $$ #[w \\ D]
+               | _ => raise Refine)
       end
 
     fun ImageEqInd (hyp, onames) (H >> P) =
