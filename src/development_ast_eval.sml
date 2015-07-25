@@ -6,15 +6,25 @@ struct
   open DevelopmentAst
   exception Open of Syntax.t
 
+  structure SmallStep = SmallStepUtil (SmallStep (Syntax))
+
   fun evalCommand D cmd =
     case cmd of
          PRINT lbl =>
          let
            open Development
-           val object = lookupObject D lbl
-           val declString = Object.toString (lbl, object)
+           val declString = Object.toString (lbl, lookupObject D lbl)
          in
-           print ("\n" ^ declString ^ "\n"); D
+           print ("\n" ^ declString ^ "\n")
+         end
+       | EVAL (M, gas) =>
+         let
+           fun termString M = "⸤" ^ Syntax.toString M ^ "⸥"
+           val result = Sum.INR (SmallStep.steps (M, gas)) handle SmallStep.Stuck R => Sum.INL R
+         in
+           case result of
+                Sum.INR (M',n) => print ("\n" ^ termString M ^ " ⇒ " ^ termString M' ^ " in " ^ Int.toString n ^ " steps.\n")
+              | Sum.INL R => print ("\n" ^ termString M ^ " gets stuck at " ^ termString R ^ ".\n")
          end
 
   fun evalDecl D ast =
@@ -38,7 +48,7 @@ struct
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
       | COMMAND cmd =>
-        evalCommand D cmd
+        (evalCommand D cmd; D)
 
   fun eval D = List.foldl (fn (decl, D) => evalDecl D decl) D
 end

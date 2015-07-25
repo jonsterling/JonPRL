@@ -9,7 +9,9 @@ sig
     where type label = label
     where type term = Syntax.t
 
-  datatype command = PRINT of label
+  datatype command =
+      PRINT of label
+    | EVAL of Syntax.t * int option
 
   datatype t =
       THEOREM of label * Syntax.t * Tactic.t
