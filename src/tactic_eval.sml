@@ -1,11 +1,11 @@
 structure TacticEval :
 sig
   exception RemainingSubgoals of Development.judgement list
-  val eval : Development.world -> Tactic.t -> Ctt.tactic
+  val eval : Development.world -> Tactic.t -> Refiner.tactic
 end =
 struct
   open Tactic
-  open Ctt.Rules
+  open Refiner.Rules
   structure T = ProgressTacticals(Lcf)
   exception RemainingSubgoals = T.RemainingSubgoals
 
@@ -29,27 +29,27 @@ struct
       | CHYP_SUBST ({dir, index, domain}, a) =>
         an a (HypCEqSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
-        an a (CttUtil.Intro {term = term,
+        an a (RefinerUtil.Intro {term = term,
                              rule = rule,
                              invertible = false,
                              freshVariable = freshVariable,
                              level = level})
       | ELIM ({target, term, names}, a) =>
-        an a (CttUtil.Elim {target = target, term = term, names = names})
+        an a (RefinerUtil.Elim {target = target, term = term, names = names})
       | EQ_CD ({names, terms, level}, a) =>
-        an a (CttUtil.EqCD {names = names,
+        an a (RefinerUtil.EqCD {names = names,
                             invertible = false,
                             terms = terms,
                             level = level})
       | EXT ({freshVariable, level}, a) =>
-        an a (CttUtil.Ext {freshVariable = freshVariable, level = level})
+        an a (RefinerUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
-      | AUTO (oi, a) => an a (CttUtil.Auto (wld, oi))
-      | REDUCE (i, a) => an a (CttUtil.Reduce i)
+      | AUTO (oi, a) => an a (RefinerUtil.Auto (wld, oi))
+      | REDUCE (i, a) => an a (RefinerUtil.Reduce i)
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
-      | CUT_LEMMA (lbl, a) => an a (CttUtil.CutLemma (wld, lbl))
+      | CUT_LEMMA (lbl, a) => an a (RefinerUtil.CutLemma (wld, lbl))
       | SYMMETRY a => an a EqSym
       | CEQUAL_SYM a => an a CEqSym
       | CEQUAL_STEP a => an a CEqStep
@@ -72,7 +72,7 @@ struct
       | TRACE (msg, a) => an a (T.TRACE msg)
       | COMPLETE (t, a) => an a (T.COMPLETE (eval wld t))
       | MATCH branches =>
-        CttUtil.Match
+        RefinerUtil.Match
           (List.map
                (fn (CtxPattern {hyps, goal}, branch) =>
                    {hyps = hyps,

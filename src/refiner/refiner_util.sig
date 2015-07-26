@@ -1,6 +1,6 @@
-signature CTT_UTIL =
+signature REFINER_UTIL =
 sig
-  include CTT
+  include REFINER
   val Auto : world * int option -> tactic
 
   type intro_args =
