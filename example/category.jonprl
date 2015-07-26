@@ -17,7 +17,7 @@ Operator cmp : (0;0;0;0;0;0).
 [idn(C;A)] =def= [spread(spread(spread(C; x.y.y); x.y.y); x.y.x) A].
 [cmp(C;X;Y;Z;f;g)] =def= [spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x) X Y Z f g].
 
-Tactic rawcat_unfold {
+Tactic rawcat-unfold {
   unfold <RawCat obj hom idn cmp>.
 }.
 
@@ -25,28 +25,28 @@ Tactic autoR {
   reduce; *{auto; reduce}.
 }.
 
-Theorem RawCat_wf : [member(RawCat; U{i'})] {
-  rawcat_unfold; auto.
+Theorem RawCat-wf : [member(RawCat; U{i'})] {
+  rawcat-unfold; auto.
 }.
 
 
-Theorem obj_wf : [{RC:RawCat} member(obj(RC); U{i})] {
-  rawcat_unfold; auto.
+Theorem obj-wf : [{RC:RawCat} member(obj(RC); U{i})] {
+  rawcat-unfold; auto.
 }.
 
-Theorem hom_wf : [
+Theorem hom-wf : [
   {RC:RawCat} {A:obj(RC)} {B:obj(RC)} member(hom(RC;A;B); U{i})
 ] {
-  rawcat_unfold; autoR.
+  rawcat-unfold; autoR.
 }.
 
-Theorem idn_wf : [
+Theorem idn-wf : [
   {RC:RawCat} {A:obj(RC)} member(idn(RC; A); hom(RC; A; A))
 ] {
-  rawcat_unfold; autoR.
+  rawcat-unfold; autoR.
 }.
 
-Theorem cmp_wf : [
+Theorem cmp-wf : [
   {RC:RawCat}
   {X:obj(RC)}
   {Y:obj(RC)}
@@ -55,7 +55,7 @@ Theorem cmp_wf : [
   {g:hom(RC; X; Y)}
     member(cmp(RC;X;Y;Z;f;g); hom(RC; X;Z))
 ] {
-  rawcat_unfold; autoR.
+  rawcat-unfold; autoR.
 }.
 
 Operator LeftIdentity : (0).
@@ -76,65 +76,69 @@ Operator CmpAssoc : (0).
 ].
 
 Tactic isect-RawCat {
-  @{ [|- {RC : RawCat} P] => intro @i'; focus 1 #{ lemma <RawCat_wf> }
+  @{ [|- {RC : RawCat} P] => intro @i'; focus 1 #{ lemma <RawCat-wf> }
    }
 }.
 
 Tactic basic-wf {
-  cut-lemma <obj_wf>;
-  cut-lemma <hom_wf>;
-  cut-lemma <cmp_wf>;
-  auto; ?{(bhyp <obj_wf> | bhyp <hom_wf> | bhyp <cmp_wf>); auto};
+  *{ @{ [|- =(obj(C); obj(C); _)] => cut-lemma <obj-wf>; unfold <member>; bhyp <obj-wf>
+      | [|- =(hom(C;X;Y); hom(C;X;Y); _)] => cut-lemma <hom-wf>; unfold <member>; bhyp <hom-wf>
+      | [|- =(cmp(C;X;Y;Z;f;g); cmp(C;X;Y;Z;f;g); _)] => cut-lemma <cmp-wf>; unfold <member>; bhyp <cmp-wf>
+      }; auto
+   }
 }.
 
-Theorem LeftIdentity_wf : [{RC:RawCat} member(LeftIdentity(RC); U{i})] {
-  unfold <LeftIdentity idn>; isect-RawCat; basic-wf;
-  rawcat_unfold; autoR
+Theorem LeftIdentity-wf : [{RC:RawCat} member(LeftIdentity(RC); U{i})] {
+  isect-RawCat;
+  unfold <LeftIdentity>; auto;
+  basic-wf; rawcat-unfold; autoR
 }.
 
-Theorem RightIdentity_wf : [{RC:RawCat} member(RightIdentity(RC); U{i})] {
-  unfold <RightIdentity>; isect-RawCat; basic-wf;
-  rawcat_unfold; autoR
+Theorem RightIdentity-wf : [{RC:RawCat} member(RightIdentity(RC); U{i})] {
+  isect-RawCat;
+  unfold <RightIdentity>; auto;
+  basic-wf; rawcat-unfold; autoR
 }.
 
-Theorem CmpAssoc_wf : [{RC:RawCat} member(CmpAssoc(RC); U{i})] {
-  unfold <CmpAssoc>; isect-RawCat; basic-wf;
-  rawcat_unfold; autoR
+Theorem CmpAssoc-wf : [{RC:RawCat} member(CmpAssoc(RC); U{i})] {
+  unfold <CmpAssoc>; isect-RawCat; auto;
+  basic-wf
 }.
 
 Operator LawCat : (0).
 [LawCat(RC)] =def= [LeftIdentity(RC) * RightIdentity(RC) * CmpAssoc(RC)].
 
-Tactic lawcat_unfold {
+Tactic lawcat-unfold {
   unfold <LeftIdentity RightIdentity CmpAssoc LawCat>;
-  rawcat_unfold.
+  rawcat-unfold.
 }.
 
 Tactic basic-wf' {
   basic-wf;
-  cut-lemma <LeftIdentity_wf>;
-  cut-lemma <RightIdentity_wf>;
-  cut-lemma <CmpAssoc_wf>;
-  unfold <member>;
-  auto; ?{(bhyp <LeftIdentity_wf> | bhyp <RightIdentity_wf> | bhyp <CmpAssoc_wf>); auto};
+  *{ @{ [|- =(LeftIdentity(C); LeftIdentity(C); _)] => cut-lemma <LeftIdentity-wf>; unfold <member>; bhyp <LeftIdentity-wf>
+      | [|- =(RightIdentity(C); RightIdentity(C); _)] => cut-lemma <RightIdentity-wf>; unfold <member>; bhyp <RightIdentity-wf>
+      | [|- =(CmpAssoc(C); CmpAssoc(C); _)] => cut-lemma <CmpAssoc-wf>; unfold <member>; bhyp <CmpAssoc-wf>
+      }; auto
+   }
 }.
 
-Theorem LawCat_wf : [{RC:RawCat} member(LawCat(RC); U{i})] {
-  unfold <LawCat>; isect-RawCat; basic-wf'
+Theorem LawCat-wf : [{RC:RawCat} member(LawCat(RC); U{i})] {
+  unfold <LawCat>; isect-RawCat; auto;
+  basic-wf'
 }.
 
 Operator Cat : ().
 [Cat] =def= [{C : RawCat | LawCat(C)}].
 
-Tactic cat_unfold {
-  unfold <Cat>; lawcat_unfold.
+Tactic cat-unfold {
+  unfold <Cat>; lawcat-unfold.
 }.
 
 Theorem Cat-wf : [member(Cat; U{i'})] {
   unfold <Cat>; auto;
-  cut-lemma <RawCat_wf>; unfold <member>; auto;
-  cum @i; cut-lemma <LawCat_wf>; unfold <member>; bhyp <LawCat_wf>;
-  auto
+  focus 0 #{cut-lemma <RawCat-wf>; unfold <member>; auto};
+  cut-lemma <LawCat-wf>; cum @i; unfold <member>;
+  bhyp <LawCat-wf>; auto
 }.
 
 Theorem InitialRawCat : [RawCat] {
@@ -147,8 +151,10 @@ Theorem InitialCat : [Cat] {
   unfold <Cat>;
   intro [InitialRawCat] @i;
   unfold <InitialRawCat>;
-  [id, id, cut-lemma <LawCat_wf>; elim #2 [C]];
-  *{lawcat_unfold; auto; reduce}
+  [id, id, cut-lemma <LawCat-wf>; elim #2 [C]; auto];
+
+  |||TODO: we need a rule that says "this is the extract of this lemma, and is thence well-formed"
+  *{lawcat-unfold; auto; reduce}
 }.
 
 Theorem TerminalRawCat : [RawCat] {
@@ -165,9 +171,9 @@ Theorem TerminalCat : [Cat] {
   unfold <Cat>;
   intro [TerminalRawCat] <C> @i; unfold <TerminalRawCat>;
   focus 2 #{
-    cut-lemma <LawCat_wf>; bhyp <LawCat_wf>; auto
+    cut-lemma <LawCat-wf>; bhyp <LawCat-wf>; auto
   };
 
-  *{lawcat_unfold; auto; reduce};
+  *{lawcat-unfold; auto; reduce};
   symmetry; unit-eta
 }.
