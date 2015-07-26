@@ -2,7 +2,9 @@ structure Syntax : PARSE_ABT =
 struct
   structure V = ParseLabel (StringVariable)
 
-  structure Operator = Operator (V)
+  structure Operator = Operator
+    (structure Label = V
+     structure ParserContext = StringVariableContext)
   structure Abt = Abt
     (structure Operator = Operator
      structure Variable = Variable ())
@@ -12,6 +14,7 @@ struct
     (structure Syntax = AbtUtil(Abt)
      structure Operator = Operator)
   open ParseAbt OperatorType
+
 
   local
     open JonprlTokenParser
@@ -29,9 +32,25 @@ struct
       (spaces >> symbol "=>" >> spaces) return Infix (Right, 9, fn (A,B) => ISECT $$ #[A, Variable.named "x" \\ B])
     val indProdOpr =
       (spaces >> symbol "*" >> spaces) return Infix (Right, 11, fn (A,B) => PROD $$ #[A, Variable.named "x" \\ B])
-
     val plusOpr =
       (spaces >> symbol "+" >> spaces) return Infix (Right, 10, fn (A,B) => PLUS $$ #[A,B])
+
+    fun customOperator w =
+      (spaces >> identifier << spaces) -- (fn sym =>
+        (let
+          open Notation StringVariableContext
+          val label = lookupNotation w sym
+          val (arity, SOME notation) = StringVariableContext.lookupOperator w label
+          val theta = CUSTOM {label = label, arity = arity}
+        in
+          case notation of
+               INFIX (_, assoc, i) =>
+                 succeed (Infix (assoc, i, fn (M,N) => theta $$ #[M,N]))
+             | PREFIX (_, i) =>
+                 succeed (Prefix (i, fn M => theta $$ #[M]))
+             | POSTFIX (_, i) =>
+                 succeed (Postfix (i, fn M => theta $$ #[M]))
+        end) handle _ => fail "not a custom notation")
 
     fun parseRaw w st () =
       fancySubset w st
@@ -57,7 +76,7 @@ struct
       squares (parseAbt w st) wth (fn N => Postfix (12, fn M => SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
+      alt [customOperator w, plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => AP $$ #[M,N]) << spaces
   end

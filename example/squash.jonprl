@@ -1,10 +1,11 @@
 Operator set-squash : (0).
-[set-squash(A)] =def= [{_:unit | A}].
+Prefix 7 "↓" =def= set-squash.
+[↓ A] =def= [{_:unit | A}].
 
-Theorem set-squash-wf : [{A:U{i}} member(set-squash(A); U{i})] {
+Theorem set-squash-wf : [{A:U{i}} member(↓ A; U{i})] {
   unfold <set-squash>; auto.
 }.
 
-Theorem set-squash-intro : [{A:U{i}} A -> set-squash(A)] {
+Theorem set-squash-intro : [{A:U{i}} A -> ↓ A] {
   unfold <set-squash>; auto.
 }.

@@ -1,7 +1,7 @@
 signature PARSE_CTT =
   PARSE_ABT
     where type Operator.t = string OperatorType.operator
-    where type ParseOperator.world = string -> Arity.t
+    where type ParseOperator.world = StringVariableContext.world
 
 functor DevelopmentParser
   (structure ParserContext : PARSER_CONTEXT
@@ -11,7 +11,7 @@ functor DevelopmentParser
      where type Tactic.t = Tactic.t
      where type label = ParserContext.label
    structure Syntax : PARSE_ABT
-     where type ParseOperator.world = Tactic.label -> Arity.t
+     where type ParseOperator.world = ParserContext.world
      where type t = DevelopmentAst.Syntax.t
      where type Operator.t = DevelopmentAst.Syntax.Operator.t
 
@@ -19,6 +19,7 @@ functor DevelopmentParser
      where type tactic = Tactic.t
      where type world = ParserContext.world
 
+   val operatorToLabel : Syntax.Operator.t -> ParserContext.label
    val stringToLabel : string -> Tactic.label) : DEVELOPMENT_PARSER =
 struct
   open ParserContext
@@ -37,9 +38,9 @@ struct
   open TP
 
   fun parseTm fvs w =
-    squares (Syntax.parseAbt (lookupOperator w) (Syntax.initialState fvs))
+    squares (Syntax.parseAbt w (Syntax.initialState fvs))
 
-  val parseOperator = Syntax.ParseOperator.parseOperator o lookupOperator
+  val parseOperator = Syntax.ParseOperator.parseOperator
 
   val parsePattern = parseTm []
 
@@ -76,6 +77,11 @@ struct
              (declareOperator w (lbl, arity),
               DevelopmentAst.OPERATOR (lbl, arity)))
 
+  fun parseNotationDecl w =
+    Notation.parse && (symbol "=def=" >> parseOperator w)
+    wth (fn (notation, theta) =>
+              (declareNotation w (operatorToLabel theta, notation), DevelopmentAst.NOTATION (notation, theta)))
+
   fun parseOperatorDef w =
     parsePattern w -- (fn pat =>
       succeed pat && (symbol "=def=" >> parseTm (Syntax.freeVariables pat) w)
@@ -101,6 +107,7 @@ struct
       || parseTactic w
       || parseOperatorDecl w
       || parseOperatorDef w
+      || parseNotationDecl w
       || parseCommand w
 
   fun parse' w ast () =
@@ -118,4 +125,5 @@ structure CttDevelopmentParser = DevelopmentParser
    structure DevelopmentAst = DevelopmentAst
    structure TacticScript = CttScript
    val stringToLabel = StringVariable.named
+   val operatorToLabel = Syntax.Operator.toString
    structure ParserContext = StringVariableContext)

@@ -37,7 +37,7 @@ sig
 
   (* enumerate the objects and knowledge available at a world *)
   val enumerate : world -> object Telescope.telescope
-  val enumerateOperators : world -> (label * Arity.t) list
+  val enumerateOperators : world -> (label * Arity.t * Notation.t option) list
   val enumerateTactics : world -> label list
 
   (* the empty world *)
@@ -52,6 +52,7 @@ sig
   (* extend a development with a new operator *)
   val declareOperator : world -> label * Arity.t -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
+  val declareNotation : world -> label * Notation.t -> world
 
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}

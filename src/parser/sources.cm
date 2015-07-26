@@ -13,5 +13,3 @@ group is
   development_parser.fun
   development_parser.sig
   intensional_parser.sig
-  parser_context.fun
-  parser_context.sig

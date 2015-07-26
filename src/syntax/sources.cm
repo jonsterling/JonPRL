@@ -29,5 +29,11 @@ group is
   tactic.sml
   tactic_metadata.sml
 
+  notation.sig
+  notation.sml
+
   development_ast.sig
   development_ast.sml
+
+  ../parser/parser_context.fun
+  ../parser/parser_context.sig

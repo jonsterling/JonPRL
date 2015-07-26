@@ -18,5 +18,6 @@ sig
     | OPERATOR of label * Arity.t
     | TACTIC of label * Tactic.t
     | DEFINITION of Syntax.t * Syntax.t
+    | NOTATION of Notation.t * Syntax.Operator.t
     | COMMAND of command
 end

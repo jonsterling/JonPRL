@@ -7,7 +7,7 @@ functor TacticScript
    structure ParseSyntax : PARSE_ABT
      where type t = Tactic.term
      where type Variable.t = Tactic.name
-     where type ParseOperator.world = ParserContext.label -> Arity.t)
+     where type ParseOperator.world = ParserContext.world)
         : TACTIC_SCRIPT =
 struct
   type world = ParserContext.world
@@ -29,7 +29,7 @@ struct
   val name = identifier wth ParseSyntax.Variable.named
 
   fun parseTm w =
-    ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState [])
+    ParseSyntax.parseAbt w (ParseSyntax.initialState [])
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
