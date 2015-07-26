@@ -15,28 +15,29 @@ Theorem minus-one-test : [=(minus-one succ(succ(zero)); succ(zero); nat)] {
 }.
 
 Operator add : (0;0).
-[add(M; N)] =def= [natrec(M; N; _.n.succ(n))].
+Infix -> 100 "N+" =def= add.
+[M N+ N] =def= [natrec(M; N; _.n.succ(n))].
 
 Tactic t {
   unfold <add>; auto 0; elim #1; reduce; auto 0.
 }.
 
-Theorem add-id-left : [{n:nat} =(add(zero; n); n; nat)] {
+Theorem add-id-left : [{n:nat} =(zero N+ n; n; nat)] {
   t
 }.
 
-Theorem add-id-right : [{n:nat} =(add(n; zero); n; nat)] {
+Theorem add-id-right : [{n:nat} =(n N+ zero; n; nat)] {
   t
 }.
 
 Theorem succ-right : [
-  {n:nat} {m:nat} =(add(n; succ(m)); succ(add(n; m)); nat)
+  {n:nat} {m:nat} =(n N+ succ(m); succ(n N+ m); nat)
 ] {
   t
 }.
 
 Theorem add-commutes : [
-  {n:nat} {m:nat} =(add(n; m); add(m; n); nat)
+  {n:nat} {m:nat} =(n N+ m; m N+ n; nat)
 ] {
   ||| Kick off the induction and do the boring computation thingies.
   t;

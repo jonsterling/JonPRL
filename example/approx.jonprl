@@ -8,12 +8,14 @@ Operator bottom : ().
 [bottom()] =def= [ fix(lam(x.x)) ].
 
 Operator has-value : (0).
-[has-value(t)] =def= [ approx(<>;cbv(t;_.<>)) ].
+Postfix 11 "⇓" =def= has-value.
+[t ⇓] =def= [ approx(<>;cbv(t;_.<>)) ].
 
 Operator not : (0).
-[not(P)] =def= [ P -> void ].
+Prefix 10 "¬" =def= not.
+[¬ P] =def= [ P -> void ].
 
-Theorem bottom-diverges : [ not(has-value(bottom)) ] {
+Theorem bottom-diverges : [ ¬ bottom ⇓ ] {
   unfold <not has-value bottom>;
   auto;
   bot-div #1
