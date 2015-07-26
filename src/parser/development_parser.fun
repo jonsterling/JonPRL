@@ -1,8 +1,3 @@
-signature PARSE_CTT =
-  PARSE_ABT
-    where type Operator.t = string OperatorType.operator
-    where type ParseOperator.world = StringVariableContext.world
-
 functor DevelopmentParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
@@ -123,7 +118,7 @@ structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
    structure Tactic = Tactic
    structure DevelopmentAst = DevelopmentAst
-   structure TacticScript = CttScript
+   structure TacticScript = TacticScript
    val stringToLabel = StringVariable.named
    val operatorToLabel = Syntax.Operator.toString
    structure ParserContext = StringVariableContext)

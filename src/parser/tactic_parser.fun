@@ -1,4 +1,4 @@
-functor CttRuleParser
+functor TacticParser
   (structure ParserContext : PARSER_CONTEXT
    structure Tactic : TACTIC
      where type level = Level.t
@@ -298,14 +298,14 @@ struct
     wth (fn (t, pos) => t pos)
 end
 
-structure CttRuleParser = CttRuleParser
+structure TacticParser = TacticParser
   (structure Tactic = Tactic
    structure ParseSyntax = Syntax
    structure ParserContext = StringVariableContext
    val stringToLabel = StringVariable.named)
 
-structure CttScript = TacticScript
+structure TacticScript = TacticScript
   (structure ParserContext = StringVariableContext
    structure Tactic = Tactic
-   structure RuleParser = CttRuleParser
+   structure RuleParser = TacticParser
    structure ParseSyntax = Syntax)

@@ -6,7 +6,7 @@ group is
   $libs/sml-abt-parser/abt-parser.cm
   ../syntax/sources.cm
 
-  ctt_rule_parser.fun
+  tactic_parser.fun
   tactic_script.fun
   tactic_script.sig
 
