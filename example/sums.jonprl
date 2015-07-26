@@ -1,6 +1,3 @@
-Operator equiv : (0; 0).
-[equiv(A; B)] =def= [(A -> B) * (B -> A)].
-
 ||| Try the first introduction rule and if we can't
 ||| immediately solve the goal backtrack and try the
 ||| next.
@@ -24,18 +21,18 @@ Tactic auto-sums {
   auto; elims; constructor2
 }.
 
-Theorem commutative : [{A:U{i}} {B:U{i}} equiv(A + B; B + A)] {
+Theorem commutative : [{A:U{i}} {B:U{i}} iff(A + B; B + A)] {
   auto-sums
 }.
 
-Theorem plus-assoc : [{A:U{i}} {B:U{i}} {C:U{i}} equiv(A + (B + C); (A + B) + C)] {
+Theorem plus-assoc : [{A:U{i}} {B:U{i}} {C:U{i}} iff(A + (B + C); (A + B) + C)] {
   auto-sums
 }.
 
-Theorem void-idr : [{A:U{i}} equiv(A + void; A)] {
+Theorem void-idr : [{A:U{i}} iff(A + void; A)] {
   auto-sums
 }.
 
-Theorem void-idl : [{A:U{i}} equiv(void + A; A)] {
+Theorem void-idl : [{A:U{i}} iff(void + A; A)] {
   auto-sums
 }.
