@@ -14,5 +14,5 @@ group is
   tactic_eval.sml
   development_ast_eval.sml
 
-  ctt_frontend.sml
+  frontend.sml
   main.sml

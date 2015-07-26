@@ -1,4 +1,4 @@
-structure CttFrontend =
+structure Frontend =
 struct
   val printDevelopment =
     let
