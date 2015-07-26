@@ -113,7 +113,6 @@ struct
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
 
        | LEMMA {label} $ _ => ``(Variable.named label)
-       | ASSERT $ #[D, E] => AP $$ #[LAM $$ #[E], extract D]
 
        | ` x => `` x
        | x \ E => x \\ extract E

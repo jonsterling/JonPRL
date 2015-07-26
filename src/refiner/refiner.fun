@@ -1064,7 +1064,7 @@ struct
       in
         [ H >> term'
         , H @@ (z, term') >> P
-        ] BY (fn [D, E] => ASSERT $$ #[D, z \\ E]
+        ] BY (fn [D, E] => subst D z E
                | _ => raise Refine)
       end
 

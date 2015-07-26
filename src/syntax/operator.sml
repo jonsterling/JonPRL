@@ -15,7 +15,7 @@ struct
 
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
-    | ADMIT | ASSERT
+    | ADMIT
     | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
@@ -143,7 +143,6 @@ struct
     | eq (IMAGE_ELIM, IMAGE_ELIM) = true
     | eq (IMAGE_EQ_IND, IMAGE_EQ_IND) = true
     | eq (ADMIT, ADMIT) = true
-    | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
     | eq (BASE, BASE) = true
     | eq (VOID, VOID) = true
@@ -274,7 +273,6 @@ struct
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
        | ADMIT => #[]
-       | ASSERT => #[0, 1]
 
        | UNIV i => #[]
        | BASE => #[]
@@ -390,7 +388,6 @@ struct
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
-       | ASSERT => "assert"
 
        | SUBSET_EQ => "subset-eq"
        | SUBSET_INTRO => "subset-intro"
