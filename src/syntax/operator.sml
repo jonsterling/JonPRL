@@ -15,7 +15,7 @@ struct
 
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
-    | ADMIT | ASSERT
+    | ADMIT
     | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
@@ -43,6 +43,7 @@ struct
     | CEQUAL | APPROX | BASE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
+    | LEMMA of {label : 'label}
     | SO_APPLY
 
   local
@@ -142,7 +143,6 @@ struct
     | eq (IMAGE_ELIM, IMAGE_ELIM) = true
     | eq (IMAGE_EQ_IND, IMAGE_EQ_IND) = true
     | eq (ADMIT, ADMIT) = true
-    | eq (ASSERT, ASSERT) = true
     | eq (UNIV i, UNIV j) = i = j
     | eq (BASE, BASE) = true
     | eq (VOID, VOID) = true
@@ -170,6 +170,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
+    | eq (LEMMA o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
     | eq (SO_APPLY, SO_APPLY) = true
     | eq (PLUS_EQ, PLUS_EQ) = true
     | eq (PLUS_INTROL, PLUS_INTROL) = true
@@ -272,7 +273,6 @@ struct
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
        | ADMIT => #[]
-       | ASSERT => #[0, 1]
 
        | UNIV i => #[]
        | BASE => #[]
@@ -313,6 +313,7 @@ struct
        | SUBSET => #[0,1]
 
        | CUSTOM {arity,...} => arity
+       | LEMMA _ => #[]
        | SO_APPLY => #[0,0]
 
   fun toString O =
@@ -387,7 +388,6 @@ struct
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | ADMIT => "<<<<<ADMIT>>>>>"
-       | ASSERT => "assert"
 
        | SUBSET_EQ => "subset-eq"
        | SUBSET_INTRO => "subset-intro"
@@ -432,6 +432,7 @@ struct
        | SUBSET => "subset"
 
        | CUSTOM {label,...} => Label.toString label
+       | LEMMA {label} => Label.toString label
        | SO_APPLY => "so_apply"
 
   local

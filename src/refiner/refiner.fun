@@ -1064,7 +1064,7 @@ struct
       in
         [ H >> term'
         , H @@ (z, term') >> P
-        ] BY (fn [D, E] => ASSERT $$ #[D, z \\ E]
+        ] BY (fn [D, E] => subst D z E
                | _ => raise Refine)
       end
 
@@ -1121,8 +1121,9 @@ struct
           val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
           val substitution = LevelSolver.Level.resolve constraints
           val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
+          val theta = LEMMA {label = lbl}
         in
-          [] BY (fn _ => shovedEvidence)
+          [] BY (fn _ => theta $$ #[])
         end
 
       fun Admit (H >> P) =
