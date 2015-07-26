@@ -1,19 +1,19 @@
-functor CttUtil
+functor RefinerUtil
   (structure Lcf : LCF_APART
    structure Syntax : ABT
    structure Conv : CONV
      where type term = Syntax.t
-   structure Ctt : CTT
+   structure Refiner : REFINER
       where type tactic = Lcf.tactic
       where type conv = Conv.conv
       where type term = Syntax.t
       where type name = Syntax.Variable.t
-   val operatorToLabel : Syntax.Operator.t -> Ctt.Development.label
-   sharing type Lcf.goal = Ctt.Sequent.sequent) : CTT_UTIL =
+   val operatorToLabel : Syntax.Operator.t -> Refiner.Development.label
+   sharing type Lcf.goal = Refiner.Sequent.sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
-  open Conv Ctt
+  open Conv Refiner
 
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
@@ -64,10 +64,10 @@ struct
 
     fun CutLemma (world, lbl) =
       let
-        val {statement,...} = Ctt.Development.lookupTheorem world lbl
+        val {statement,...} = Refiner.Development.lookupTheorem world lbl
         val H >> P = statement
         val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
-        val name = Syntax.Variable.named (Ctt.Development.Telescope.Label.toString lbl)
+        val name = Syntax.Variable.named (Refiner.Development.Telescope.Label.toString lbl)
       in
         Assert (P, SOME name)
           THENL [Lemma (world, lbl), ID]
@@ -238,6 +238,6 @@ struct
 
 end
 
-structure CttUtil = CttUtil
-  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Ctt = Ctt
+structure RefinerUtil = RefinerUtil
+  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Refiner = Refiner
    val operatorToLabel = Syntax.Operator.toString)

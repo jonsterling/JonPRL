@@ -1,4 +1,4 @@
-functor Ctt
+functor Refiner
   (structure Lcf : LCF
    structure Development : DEVELOPMENT
      where type judgement = Lcf.goal
@@ -20,7 +20,7 @@ functor Ctt
    sharing type Development.term = Syntax.t
    structure Builtins : BUILTINS
      where type Conv.term = Conv.term
-     where type label = Development.label) : CTT =
+     where type label = Development.label) : REFINER =
 struct
   structure Lcf = Lcf
   structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
@@ -1500,7 +1500,7 @@ struct
   end
 end
 
-structure Ctt = Ctt
+structure Refiner = Refiner
   (structure Lcf = Lcf
    structure Syntax = Syntax
    structure Conv = Conv

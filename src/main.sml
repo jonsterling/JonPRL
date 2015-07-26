@@ -44,7 +44,7 @@ struct
               HELP => (print helpMessage; OS.Process.exit OS.Process.success)
             | _ => ()
 
-      fun loadFile (f, dev) = CttFrontend.loadFile (dev, f)
+      fun loadFile (f, dev) = Frontend.loadFile (dev, f)
       val oworld =
         SOME (foldl loadFile Development.empty files)
           handle E =>
@@ -56,13 +56,13 @@ struct
              (case mode of
                    CHECK_DEVELOPMENT => 0
                  | PRINT_DEVELOPMENT =>
-                   ((CttFrontend.printDevelopment world; 0)
+                   ((Frontend.printDevelopment world; 0)
                      handle E => (print (exnMessage E); 1))
                  | LIST_OPERATORS =>
-                   ((CttFrontend.printOperators world; 0)
+                   ((Frontend.printOperators world; 0)
                      handle E => (print (exnMessage E); 1))
                  | LIST_TACTICS =>
-                   ((CttFrontend.printTactics world; 0)
+                   ((Frontend.printTactics world; 0)
                      handle E => (print (exnMessage E); 1))
                  | HELP => 0)
     end

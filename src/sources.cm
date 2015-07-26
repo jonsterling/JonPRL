@@ -9,10 +9,10 @@ group is
 
   parser/sources.cm (bind:(anchor:libs value:../lib))
   syntax/sources.cm (bind:(anchor:libs value:../lib))
-  prover/sources.cm (bind:(anchor:libs value:../lib))
+  refiner/sources.cm (bind:(anchor:libs value:../lib))
 
   tactic_eval.sml
   development_ast_eval.sml
 
-  ctt_frontend.sml
+  frontend.sml
   main.sml

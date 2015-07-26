@@ -32,10 +32,10 @@ group is
 
   lcf.fun
 
-  ctt.fun
-  ctt.sig
-  ctt_util.fun
-  ctt_util.sig
+  refiner.fun
+  refiner.sig
+  refiner_util.fun
+  refiner_util.sig
 
   pattern_compiler.fun
   pattern_compiler.sig
