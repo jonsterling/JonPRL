@@ -111,6 +111,8 @@ struct
        | EQ_SUBST $ #[_, D, _] => extract D
 
        | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
+
+       | LEMMA {label} $ _ => ``(Variable.named label)
        | ASSERT $ #[D, E] => AP $$ #[LAM $$ #[E], extract D]
 
        | ` x => `` x

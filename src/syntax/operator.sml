@@ -43,6 +43,7 @@ struct
     | CEQUAL | APPROX | BASE
 
     | CUSTOM of {label : 'label, arity : Arity.t}
+    | LEMMA of {label : 'label}
     | SO_APPLY
 
   local
@@ -170,6 +171,7 @@ struct
     | eq (MEM, MEM) = true
     | eq (SUBSET, SUBSET) = true
     | eq (CUSTOM o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
+    | eq (LEMMA o1, CUSTOM o2) = Label.eq (#label o1, #label o2)
     | eq (SO_APPLY, SO_APPLY) = true
     | eq (PLUS_EQ, PLUS_EQ) = true
     | eq (PLUS_INTROL, PLUS_INTROL) = true
@@ -313,6 +315,7 @@ struct
        | SUBSET => #[0,1]
 
        | CUSTOM {arity,...} => arity
+       | LEMMA _ => #[]
        | SO_APPLY => #[0,0]
 
   fun toString O =
@@ -432,6 +435,7 @@ struct
        | SUBSET => "subset"
 
        | CUSTOM {label,...} => Label.toString label
+       | LEMMA {label} => Label.toString label
        | SO_APPLY => "so_apply"
 
   local
