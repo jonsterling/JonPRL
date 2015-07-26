@@ -5,6 +5,8 @@ sig
     | PREFIX of string * int
     | POSTFIX of string * int
 
+  val symbol : t -> string
+
   val toString : t -> string
   val parse : t CharParser.charParser
 end

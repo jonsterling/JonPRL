@@ -59,7 +59,7 @@ struct
           end
       | toString (lbl, TACTIC _) =
           "Tactic " ^ Telescope.Label.toString lbl ^ "."
-      | toString (lbl, OPERATOR {arity, conversion,...}) =
+      | toString (lbl, OPERATOR {arity, conversion, notation}) =
           "Operator " ^ Telescope.Label.toString lbl
             ^ " : " ^ Arity.toString arity
             ^ "."
@@ -68,6 +68,11 @@ struct
                   | SOME ({definiendum, definiens}, _) =>
                        "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
+            ^ (case notation of
+                   NONE => ""
+                  | SOME notation =>
+                       "\n" ^ Notation.toString notation ^ " ≝ "
+                       ^ Telescope.Label.toString lbl ^ ".")
   end
 
   type object = Object.t
@@ -78,10 +83,10 @@ struct
     let
       open Telescope.SnocView
       fun go Empty bind = bind
-        | go (Snoc (rest, lbl, Object.OPERATOR {arity, ...})) bind =
-          go (out rest) ((lbl, arity) :: bind)
+        | go (Snoc (rest, lbl, Object.OPERATOR {arity, notation, ...})) bind =
+          go (out rest) ((lbl, arity, notation) :: bind)
         | go (Snoc (rest, lbl, Object.THEOREM {...})) bind =
-          go (out rest) ((lbl, #[]) :: bind)
+          go (out rest) ((lbl, #[], NONE) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
@@ -176,10 +181,14 @@ struct
       end
 
     fun declareNotation T (lbl, notation) =
-      let
-      in
-        raise Fail "to be implemented"
-      end
+      case lookupObject T lbl of
+           Object.OPERATOR {arity,conversion,notation = NONE} =>
+             Telescope.modify T (lbl, fn _ =>
+               Object.OPERATOR
+                {arity = arity,
+                 conversion = conversion,
+                 notation = SOME notation})
+         | _ => raise Subscript
   end
 
 

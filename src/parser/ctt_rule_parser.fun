@@ -6,7 +6,7 @@ functor CttRuleParser
    structure ParseSyntax : PARSE_ABT
      where type t = Tactic.term
      where type Variable.t = Tactic.name
-     where type ParseOperator.world = ParserContext.label -> Arity.t
+     where type ParseOperator.world = ParserContext.world
    val stringToLabel : string -> ParserContext.label
    ) :> INTENSIONAL_PARSER
          where type world = ParserContext.world
@@ -53,7 +53,7 @@ struct
   type tactic_parser = (Pos.t -> Tactic.t) intensional_parser
 
   fun parseTm w =
-    squares (ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState []))
+    squares (ParseSyntax.parseAbt w (ParseSyntax.initialState []))
 
   val parseCum : tactic_parser =
     fn w => tactic "cum"
@@ -141,7 +141,7 @@ struct
              names = names})
 
   val parseTerms : term list intensional_parser =
-    fn w => opt (squares (commaSep1 (ParseSyntax.parseAbt (lookupOperator w) (ParseSyntax.initialState []))))
+    fn w => opt (squares (commaSep1 (ParseSyntax.parseAbt w (ParseSyntax.initialState []))))
     wth (fn oxs => getOpt (oxs, []))
 
   val parseEqCdArgs =

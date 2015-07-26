@@ -37,7 +37,7 @@ sig
 
   (* enumerate the objects and knowledge available at a world *)
   val enumerate : world -> object Telescope.telescope
-  val enumerateOperators : world -> (label * Arity.t) list
+  val enumerateOperators : world -> (label * Arity.t * Notation.t option) list
   val enumerateTactics : world -> label list
 
   (* the empty world *)

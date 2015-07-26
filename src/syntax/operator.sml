@@ -70,21 +70,27 @@ end
 
 signature CTT_OPERATOR =
 sig
-  structure Label : LABEL
+  structure Label : PARSE_LABEL
+  structure ParserContext : PARSER_CONTEXT
+    where type label = Label.t
 
   include PARSE_OPERATOR
-    where type t = Label.t OperatorType.operator
-    where type world = Label.t -> Arity.t
+    where type t = ParserContext.label OperatorType.operator
+    where type world = ParserContext.world
 
 end
 
-functor Operator (Label : PARSE_LABEL) : CTT_OPERATOR =
+functor Operator
+  (structure Label : PARSE_LABEL
+   structure ParserContext : PARSER_CONTEXT
+     where type label = Label.t) : CTT_OPERATOR =
 struct
   open OperatorType
   structure Label = Label
+  structure ParserContext = ParserContext
   type t = Label.t operator
 
-  type world = Label.t -> Arity.t
+  type world = ParserContext.world
   fun eq (UNIV_EQ i, UNIV_EQ j) = i = j
     | eq (CUM, CUM) = true
     | eq (EQ_EQ, EQ_EQ) = true
@@ -485,10 +491,10 @@ struct
          string "succ" return SUCC,
          string "natrec" return NATREC]
 
-    fun intensionalParseOperator lookup =
+    fun intensionalParseOperator world =
       Label.parseLabel -- (fn lbl =>
-        case (SOME (lookup lbl) handle _ => NONE) of
-             SOME arity => succeed (CUSTOM {label = lbl, arity = arity})
+        case (SOME (ParserContext.lookupOperator world lbl) handle _ => NONE) of
+             SOME (arity, _) => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")
 
     fun parseOperator lookup =

@@ -68,4 +68,8 @@ struct
 
     val parse = parseInfix || parsePrefix || parsePostfix
   end
+
+  fun symbol (INFIX (s, _, _)) = s
+    | symbol (PREFIX (s, _)) = s
+    | symbol (POSTFIX (s, _)) = s
 end

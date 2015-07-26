@@ -34,3 +34,6 @@ group is
 
   development_ast.sig
   development_ast.sml
+
+  ../parser/parser_context.fun
+  ../parser/parser_context.sig

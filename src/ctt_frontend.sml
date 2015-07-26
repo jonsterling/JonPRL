@@ -14,7 +14,7 @@ struct
   local
     open Development.Telescope.ConsView Development.Object
 
-    fun printStep (name, arity) =
+    fun printStep (name, arity, _) =
       print (name ^ " " ^ Arity.toString arity ^ "\n")
 
     val labelToString = Development.Telescope.Label.toString
@@ -22,7 +22,7 @@ struct
     fun printOperators world =
       (List.app
          (fn x =>
-           printStep (Syntax.Operator.toString x, Syntax.Operator.arity x))
+           printStep (Syntax.Operator.toString x, Syntax.Operator.arity x, NONE))
          OperatorType.publicOperators;
        List.app printStep (Development.enumerateOperators world))
   end
