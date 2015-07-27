@@ -6,7 +6,7 @@ functor Refiner
      where type tactic = Lcf.tactic
 
    structure Syntax : ABT_UTIL
-     where type Operator.t = OperatorType.operator
+     where type Operator.t = UniversalOperator.t
 
    structure Sequent : SEQUENT
      where type term = Syntax.t
@@ -27,24 +27,31 @@ struct
   structure Syntax = Syntax
 
   structure Sequent = Sequent
+  structure Development = Development
+
   type tactic = Lcf.tactic
   type conv = Conv.conv
   type name = Sequent.name
   type term = Syntax.t
   type goal = Sequent.sequent
-  type world = Development.world
   type label = Development.label
 
   type hyp = name HypSyn.t
 
   structure Operator = Syntax.Operator
-  structure Development = Development
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure Conv = Conv)
 
-  open Syntax
-  open Operator OperatorType
+  open Syntax CttCalculus Derivation
+  structure C = CttCalculusInj and D = DerivationInj
+
+  type world = Development.world
+
+  structure CttCalculusView = RestrictAbtView
+    (structure Abt = Syntax
+     structure Injection = CttCalculusInj)
+
   infix $ \
   infix 8 $$ //
   infixr 8 \\
@@ -69,7 +76,7 @@ struct
         (H', x', E')
       end
 
-    fun mkEvidence operator = fn Ds => operator $$ Vector.fromList Ds
+    fun mkEvidence operator = fn Ds => D.`> operator $$ Vector.fromList Ds
 
     fun BY (Ds, V) = (Ds, V)
     infix BY
@@ -79,12 +86,12 @@ struct
 
     fun asApp M =
       case out M of
-           O $ ES => (O, ES)
+           theta $ ES => (C.`< theta, ES)
          | _ => raise Refine
 
-    fun ^! (M, O) =
+    fun ^! (M, theta) =
       case out M of
-           O' $ ES => if Operator.eq (O, O') then ES else raise Refine
+           theta' $ ES => if Operator.eq (C.`> theta, theta') then ES else raise Refine
          | _ => raise Refine
     infix ^!
 
@@ -99,36 +106,40 @@ struct
       else
         raise Refine
 
-    fun assertSubtype_ f H A B =
-      if Syntax.eq (A, B) then
-        A
-      else
-        case (out A, out B) of
-             (SUBSET $ #[S,xT], SUBSET $ #[S',xT']) =>
-               let
-                 val S'' = f H S S'
-                 val (H', x, T) = ctxUnbind (H,S'',xT)
-                 val T' = xT' // ``x
-               in
-                 SUBSET $$ #[S'', f H' T T']
-               end
-           | (SUBSET $ #[S,xT], _) => f H S B
-           | (FUN $ #[S, xT], FUN $ #[S', xT']) =>
-               let
-                 val S'' = f H S' S
-                 val (H', x, T) = ctxUnbind (H, S'', xT)
-                 val T' = xT' // ``x
-               in
-                 FUN $$ #[S'', f H' T T']
-               end
-           | _ => raise Refine
+    local
+      open CttCalculusView
+    in
+      fun assertSubtype_ f H A B =
+        if Syntax.eq (A, B) then
+          A
+        else
+          case (project A, project B) of
+               (SUBSET $ #[S,xT], SUBSET $ #[S',xT']) =>
+                 let
+                   val S'' = f H S S'
+                   val (H', x, T) = ctxUnbind (H,S'',xT)
+                   val T' = xT' // ``x
+                 in
+                   C.`> SUBSET $$ #[S'', f H' T T']
+                 end
+             | (SUBSET $ #[S,xT], _) => f H S B
+             | (FUN $ #[S, xT], FUN $ #[S', xT']) =>
+                 let
+                   val S'' = f H S' S
+                   val (H', x, T) = ctxUnbind (H, S'', xT)
+                   val T' = xT' // ``x
+                 in
+                   C.`> FUN $$ #[S'', f H' T T']
+                 end
+             | _ => raise Refine
+    end
 
     fun typeLub H A B =
       assertSubtype_ typeLub H A B
       handle _ => assertSubtype_ typeLub H B A
 
-    fun operatorIrrelevant O =
-      case O of
+    fun operatorIrrelevant theta =
+      case theta of
            EQ => true
          | MEM => true
          | UNIT => true
@@ -140,7 +151,7 @@ struct
 
     fun assertIrrelevant (H, P) =
       case out P of
-           O $ _ => if operatorIrrelevant O then () else raise Refine
+           theta $ _ => if operatorIrrelevant (C.`< theta) then () else raise Refine
          | _ => raise Refine
 
     fun eliminationTarget hyp (H >> P) =
@@ -157,68 +168,72 @@ struct
            | Visibility.Visible => z
       end
 
-    fun inferLevel (H, P) =
-      case out P of
-           UNIV l $ _ => Level.succ l
-         | FUN $ #[A, xB] =>
-           let
-             val (H', x, B) = ctxUnbind (H, A, xB)
-           in
-             Level.max (inferLevel (H, A), inferLevel (H', B))
-           end
-         | PROD $ #[A, xB] =>
-           let
-             val (H', x, B) = ctxUnbind (H, A, xB)
-           in
-             Level.max (inferLevel (H, A), inferLevel (H', B))
-           end
-         | ISECT $ #[A, xB] =>
-           let
-             val (H', x, B) = ctxUnbind (H, A, xB)
-           in
-             Level.max (inferLevel (H, A), inferLevel (H', B))
-           end
-         | SUBSET $ #[A, xB] =>
-           let
-             val (H', x, B) = ctxUnbind (H, A, xB)
-           in
-             Level.max (inferLevel (H, A), inferLevel (H', B))
-           end
-         | EQ $ #[M,N,A] => inferLevel (H, A)
-         | MEM $ #[M,A] => inferLevel (H, A)
-         | ` x =>
-            let
-              val X = Context.lookup H x
-              val k = inferLevel (H, X)
-            in
-              Level.pred k
-            end
-         | CUSTOM _ $ _ =>
-             raise Refine
-         | _ => Level.base
-
-    fun inferType (H, M) =
-      case out M of
-           UNIV l $ _ => UNIV (Level.succ l) $$ #[]
-         | AP $ #[F, N] =>
+    local
+      open CttCalculusView
+    in
+      fun inferLevel (H, P) =
+        case project P of
+             UNIV l $ _ => Level.succ l
+           | FUN $ #[A, xB] =>
              let
-               val #[A, xB] = inferType (H, F) ^! FUN
+               val (H', x, B) = ctxUnbind (H, A, xB)
              in
-               xB // N
+               Level.max (inferLevel (H, A), inferLevel (H', B))
              end
-         | SPREAD $ #[X, uvE] =>
+           | PROD $ #[A, xB] =>
              let
-               val #[A, xB] = inferType (H, X) ^! PROD
-               val (H', u, vE) = ctxUnbind (H, A, uvE)
-               val (H'', v, E) = ctxUnbind (H', xB // ``u, vE)
-
-               val uval = SPREAD $$ #[X, u \\ (v \\ (``u))]
-               val vval = SPREAD $$ #[X, u \\ (v \\ (``v))]
+               val (H', x, B) = ctxUnbind (H, A, xB)
              in
-               subst uval u (subst vval v (inferType (H'', E)))
+               Level.max (inferLevel (H, A), inferLevel (H', B))
              end
-         | ` x => Context.lookup H x
-         | _ => raise Refine
+           | ISECT $ #[A, xB] =>
+             let
+               val (H', x, B) = ctxUnbind (H, A, xB)
+             in
+               Level.max (inferLevel (H, A), inferLevel (H', B))
+             end
+           | SUBSET $ #[A, xB] =>
+             let
+               val (H', x, B) = ctxUnbind (H, A, xB)
+             in
+               Level.max (inferLevel (H, A), inferLevel (H', B))
+             end
+           | EQ $ #[M,N,A] => inferLevel (H, A)
+           | MEM $ #[M,A] => inferLevel (H, A)
+           | ` x =>
+              let
+                val X = Context.lookup H x
+                val k = inferLevel (H, X)
+              in
+                Level.pred k
+              end
+           | CUSTOM _ $ _ =>
+               raise Refine
+           | _ => Level.base
+
+      fun inferType (H, M) =
+        case project M of
+             UNIV l $ _ => C.`> (UNIV (Level.succ l)) $$ #[]
+           | AP $ #[F, N] =>
+               let
+                 val #[A, xB] = inferType (H, F) ^! FUN
+               in
+                 xB // N
+               end
+           | SPREAD $ #[X, uvE] =>
+               let
+                 val #[A, xB] = inferType (H, X) ^! PROD
+                 val (H', u, vE) = ctxUnbind (H, A, uvE)
+                 val (H'', v, E) = ctxUnbind (H', xB // ``u, vE)
+
+                 val uval = C.`> SPREAD $$ #[X, u \\ (v \\ (``u))]
+                 val vval = C.`> SPREAD $$ #[X, u \\ (v \\ (``v))]
+               in
+                 subst uval u (subst vval v (inferType (H'', E)))
+               end
+           | ` x => Context.lookup H x
+           | _ => raise Refine
+    end
 
     fun Cum ok : tactic =
       fn (H >> P) =>
@@ -228,7 +243,7 @@ struct
           val k = case ok of NONE => Level.max (inferLevel (H, A), inferLevel (H, B)) | SOME k => k
           val _ = Level.assertLt (k, l)
         in
-          [H >> EQ $$ #[A,B, UNIV k $$ #[]]] BY mkEvidence CUM
+          [H >> C.`> EQ $$ #[A,B, C.`> (UNIV k) $$ #[]]] BY mkEvidence CUM
         end
 
     fun UnivEq (H >> P) =
@@ -250,9 +265,9 @@ struct
         val #[M,N,A] = E1 ^! EQ
         val #[M',N',A'] = E2 ^! EQ
       in
-        [ H >> EQ $$ #[A,A',univ]
-        , H >> EQ $$ #[M,M',A]
-        , H >> EQ $$ #[N,N',A]
+        [ H >> C.`> EQ $$ #[A,A',univ]
+        , H >> C.`> EQ $$ #[M,M',A]
+        , H >> C.`> EQ $$ #[N,N',A]
         ] BY mkEvidence EQ_EQ
       end
 
@@ -267,12 +282,12 @@ struct
       let
         val x = eliminationTarget hyp (H >> P)
         val #[] = Context.lookup H x ^! UNIT
-        val ax = AX $$ #[]
+        val ax = C.`> AX $$ #[]
         val H' = ctxSubst H ax x
         val P' = subst ax x P
       in
         [ H' >> P'
-        ] BY (fn [D] => UNIT_ELIM $$ #[`` x, D]
+        ] BY (fn [D] => D.`> UNIT_ELIM $$ #[`` x, D]
                | _ => raise Refine)
       end
 
@@ -297,7 +312,7 @@ struct
       end
 
     fun VoidElim (H >> P) =
-      [ H >> VOID $$ #[]
+      [ H >> C.`> VOID $$ #[]
       ] BY mkEvidence VOID_ELIM
 
     fun AxEq (H >> P) =
@@ -323,9 +338,9 @@ struct
                  NONE => #1 (unbind xB)
                | SOME z => z)
       in
-        [ H >> EQ $$ #[A,A',univ]
-        , H @@ (z,A) >> EQ $$ #[xB // ``z, yB' // `` z, univ]
-        ] BY (fn [D, E] => Q_EQ $$ #[D, z \\ E]
+        [ H >> C.`> EQ $$ #[A,A',univ]
+        , H @@ (z,A) >> C.`> EQ $$ #[xB // ``z, yB' // `` z, univ]
+        ] BY (fn [D, E] => D.`> Q_EQ $$ #[D, z \\ E]
                | _ => raise Refine)
       end
 
@@ -342,8 +357,8 @@ struct
         val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
       in
         [ H @@ (z,P1) >> xP2 // `` z
-        , H >> MEM $$ #[P1, UNIV k $$ #[]]
-        ] BY (fn [D,E] => FUN_INTRO $$ #[z \\ D, E]
+        , H >> C.`> MEM $$ #[P1, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D,E] => D.`> FUN_INTRO $$ #[z \\ D, E]
                | _ => raise Refine)
       end
 
@@ -360,11 +375,11 @@ struct
                  (Context.fresh (H, Variable.named "y"),
                   Context.fresh (H, Variable.named "z"))
 
-        val fsTs = EQ $$ #[``y, AP $$ #[``f, s], Ts]
+        val fsTs = C.`> EQ $$ #[``y, C.`> AP $$ #[``f, s], Ts]
       in
-        [ H >> MEM $$ #[s, S]
+        [ H >> C.`> MEM $$ #[s, S]
         , H @@ (y, Ts) @@ (z, fsTs) >> P
-        ] BY (fn [D, E] => FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
+        ] BY (fn [D, E] => D.`> FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
                 | _ => raise Refine)
       end
 
@@ -381,9 +396,9 @@ struct
                | SOME z => z)
         val k = case ok of NONE => inferLevel (H, A) | SOME k => k
       in
-        [ H @@ (z,A) >> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
-        , H >> MEM $$ #[A, UNIV k $$ #[]]
-        ] BY (fn [D, E] => LAM_EQ $$ #[z \\ D, E]
+        [ H @@ (z,A) >> C.`> EQ $$ #[aE // ``z, bE' // ``z, cB // ``z]
+        , H >> C.`> MEM $$ #[A, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D, E] => D.`> LAM_EQ $$ #[z \\ D, E]
                 | _ => raise Refine)
       end
 
@@ -398,11 +413,11 @@ struct
                | SOME z => z)
         val k = case ok of NONE => inferLevel (H, S) | SOME k => k
       in
-        [ H @@ (z, S) >> EQ $$ #[AP $$ #[f1,``z], AP $$ #[f2, ``z], xT // ``z]
-        , H >> MEM $$ #[S, UNIV k $$ #[]]
-        , H >> MEM $$ #[f1, funty]
-        , H >> MEM $$ #[f2, funty]
-        ] BY (fn [D,E,F,G] => FUN_EXT $$ #[z \\ D, E, F, G]
+        [ H @@ (z, S) >> C.`> EQ $$ #[C.`> AP $$ #[f1,``z], C.`> AP $$ #[f2, ``z], xT // ``z]
+        , H >> C.`> MEM $$ #[S, C.`> (UNIV k) $$ #[]]
+        , H >> C.`> MEM $$ #[f1, funty]
+        , H >> C.`> MEM $$ #[f2, funty]
+        ] BY (fn [D,E,F,G] => D.`> FUN_EXT $$ #[z \\ D, E, F, G]
                | _ => raise Refine)
       end
 
@@ -418,8 +433,8 @@ struct
         val #[S, xT] = funty ^! FUN
         val Tt1' = unify (xT // t1) Tt1
       in
-        [ H >> EQ $$ #[f1, f2, funty]
-        , H >> EQ $$ #[t1, t2, S]
+        [ H >> C.`> EQ $$ #[f1, f2, funty]
+        , H >> C.`> EQ $$ #[t1, t2, S]
         ] BY mkEvidence AP_EQ
       end
 
@@ -437,8 +452,8 @@ struct
         val H' = Context.insert H z Visibility.Hidden P1
       in
         [ H' >> xP2 // `` z
-        , H >> MEM $$ #[P1, UNIV k $$ #[]]
-        ] BY (fn [D,E] => ISECT_INTRO $$ #[z \\ D, E]
+        , H >> C.`> MEM $$ #[P1, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D,E] => D.`> ISECT_INTRO $$ #[z \\ D, E]
                | _ => raise Refine)
       end
 
@@ -456,11 +471,11 @@ struct
                  (Context.fresh (H, Variable.named "y"),
                   Context.fresh (H, Variable.named "z"))
 
-        val fsTs = EQ $$ #[``y, ``f, Ts]
+        val fsTs = C.`> EQ $$ #[``y, ``f, Ts]
       in
-        [ H >> MEM $$ #[s, S]
+        [ H >> C.`> MEM $$ #[s, S]
         , H @@ (y, Ts) @@ (z, fsTs) >> P
-        ] BY (fn [D, E] => FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
+        ] BY (fn [D, E] => D.`> FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
                 | _ => raise Refine)
       end
 
@@ -476,9 +491,9 @@ struct
         val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
         val H' = Context.insert H z Visibility.Hidden P1
       in
-        [ H' >> EQ $$ #[M,N, xP2 // ``z]
-        , H >> MEM $$ #[P1, UNIV k $$ #[]]
-        ] BY (fn [D, E] => ISECT_MEMBER_EQ $$ #[z \\ D, E]
+        [ H' >> C.`> EQ $$ #[M,N, xP2 // ``z]
+        , H >> C.`> MEM $$ #[P1, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D, E] => D.`> ISECT_MEMBER_EQ $$ #[z \\ D, E]
                | _ => raise Refine)
       end
 
@@ -494,8 +509,8 @@ struct
         val #[S, xT] = isect ^! ISECT
         val _ = unify Tt (xT // t)
       in
-        [ H >> EQ $$ #[F1, F2, isect]
-        , H >> MEM $$ #[t, S]
+        [ H >> C.`> EQ $$ #[F1, F2, isect]
+        , H >> C.`> MEM $$ #[t, S]
         ] BY mkEvidence ISECT_MEMBER_CASE_EQ
       end
 
@@ -512,10 +527,10 @@ struct
                  SOME z => z
                | NONE => #1 (unbind xP2))
       in
-        [ H >> MEM $$ #[ w, P1]
+        [ H >> C.`> MEM $$ #[ w, P1]
         , H >> xP2 // w
-        , H @@ (z, P1) >> MEM $$ #[xP2 // ``z, UNIV k $$ #[]]
-        ] BY (fn [D, E, F] => SUBSET_INTRO $$ #[w, D, E, z \\ F]
+        , H @@ (z, P1) >> C.`> MEM $$ #[xP2 // ``z, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D, E, F] => D.`> SUBSET_INTRO $$ #[w, D, E, z \\ F]
                | _ => raise Refine)
       end
 
@@ -546,7 +561,7 @@ struct
         val P' = subst (``s) z P
       in
         [ H' >> P'
-        ] BY (fn [D] => SUBSET_ELIM $$ #[``z, s \\ (t \\ D)]
+        ] BY (fn [D] => D.`> SUBSET_ELIM $$ #[``z, s \\ (t \\ D)]
                | _ => raise Refine)
       end
 
@@ -564,10 +579,10 @@ struct
                | SOME z => z)
         val k = case ok of SOME k => k | NONE => inferLevel (H, subset)
       in
-        [ H >> EQ $$ #[s,t,S]
+        [ H >> C.`> EQ $$ #[s,t,S]
         , H >> xT // s
-        , H @@ (z,S) >> MEM $$ #[xT // ``z, UNIV k $$ #[]]
-        ] BY (fn [D, E, F] => SUBSET_MEMBER_EQ $$ #[D, E, z \\ F]
+        , H @@ (z,S) >> C.`> MEM $$ #[xT // ``z, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D, E, F] => D.`> SUBSET_MEMBER_EQ $$ #[D, E, z \\ F]
                | _ => raise Refine)
       end
 
@@ -592,15 +607,15 @@ struct
                  (Context.fresh (H, Variable.named "n"),
                   Context.fresh (H, Variable.named "ih"))
 
-        val zero = ZERO $$ #[]
-        val succn = SUCC $$ #[``n]
+        val zero = C.`> ZERO $$ #[]
+        val succn = C.`> SUCC $$ #[``n]
 
-        val J = Context.empty @@ (n, NAT $$ #[]) @@ (ih, subst (``n) z C)
+        val J = Context.empty @@ (n, C.`> NAT $$ #[]) @@ (ih, subst (``n) z C)
         val H' = ctxSubst (Context.interposeAfter H (z, J)) succn z
       in
         [ ctxSubst H zero z >> subst zero z C
         , H' >> subst succn z C
-        ] BY (fn [D,E] => NAT_ELIM $$ #[``z, D, n \\ (ih \\ E)]
+        ] BY (fn [D,E] => D.`> NAT_ELIM $$ #[``z, D, n \\ (ih \\ E)]
                | _ => raise Refine)
       end
 
@@ -621,7 +636,7 @@ struct
         val #[M] = succ1 ^! SUCC
         val #[N] = succ2 ^! SUCC
       in
-        [ H >> EQ $$ #[M, N, NAT $$ #[]]
+        [ H >> C.`> EQ $$ #[M, N, C.`> NAT $$ #[]]
         ] BY mkEvidence SUCC_EQ
       end
 
@@ -642,14 +657,14 @@ struct
                 (Context.fresh (H, Variable.named "n'"),
                  Context.fresh (H, Variable.named "ih"))
               | SOME names => names
-        val H' = H @@ (npred, NAT $$ #[]) @@ (ih, zC // (`` npred))
+        val H' = H @@ (npred, C.`> NAT $$ #[]) @@ (ih, zC // (`` npred))
         val succSubst = (succ // ``npred) // ``ih
         val succSubst' = (succ' // ``npred) // ``ih
       in
-        [ H >> EQ $$ #[n, n', NAT $$ #[]]
-        , H >> EQ $$ #[zero, zero', zC // (ZERO $$ #[])]
-        , H' >> EQ $$ #[succSubst, succSubst', zC // (SUCC $$ #[`` npred])]
-        ] BY (fn [N, D, E] => NATREC_EQ $$ #[N, D, npred \\ (ih \\ E)]
+        [ H >> C.`>EQ $$ #[n, n', C.`> NAT $$ #[]]
+        , H >> C.`>EQ $$ #[zero, zero', zC // (C.`> ZERO $$ #[])]
+        , H' >> C.`>EQ $$ #[succSubst, succSubst', zC // (C.`> SUCC $$ #[`` npred])]
+        ] BY (fn [N, D, E] => D.`> NATREC_EQ $$ #[N, D, npred \\ (ih \\ E)]
                | _ => raise Refine)
       end
 
@@ -660,7 +675,7 @@ struct
         val #[] = N ^! BASE
         val (UNIV _, _) = asApp U
       in
-        [] BY (fn [] => BASE_EQ $$ #[]
+        [] BY (fn [] => D.`> BASE_EQ $$ #[]
                 | _ => raise Refine)
       end
 
@@ -668,7 +683,7 @@ struct
       let
         val #[] = P ^! BASE
       in
-        [] BY (fn [] => BASE_INTRO $$ #[]
+        [] BY (fn [] => D.`> BASE_INTRO $$ #[]
                 | _ => raise Refine)
       end
 
@@ -677,8 +692,8 @@ struct
         val #[M, N, U] = P ^! EQ
         val #[] = U ^! BASE
       in
-        [ H >> CEQUAL $$ #[M, N]
-        ] BY (fn [D] => BASE_MEMBER_EQ $$ #[D]
+        [ H >> C.`> CEQUAL $$ #[M, N]
+        ] BY (fn [D] => D.`> BASE_MEMBER_EQ $$ #[D]
                | _ => raise Refine)
       end
 
@@ -692,8 +707,8 @@ struct
                 SOME z => z
               | NONE => Context.fresh (H, Variable.named "H")
       in
-        [H @@ (z, CEQUAL $$ #[M, N]) >> P
-        ] BY (fn [D] => BASE_ELIM_EQ $$ #[z \\ D]
+        [H @@ (z, C.`> CEQUAL $$ #[M, N]) >> P
+        ] BY (fn [D] => D.`> BASE_ELIM_EQ $$ #[z \\ D]
                | _ => raise Refine)
       end
 
@@ -704,8 +719,8 @@ struct
         val #[A2,f2] = N ^! IMAGE
         val (UNIV _, _) = asApp U
       in
-        [ H >> EQ $$ #[f1, f2, BASE $$ #[]]
-        , H >> EQ $$ #[A1, A2, U]
+        [ H >> C.`> EQ $$ #[f1, f2, C.`> BASE $$ #[]]
+        , H >> C.`> EQ $$ #[A1, A2, U]
         ] BY mkEvidence IMAGE_EQ
       end
 
@@ -718,8 +733,8 @@ struct
         val true = Syntax.eq (f,f1)
         val true = Syntax.eq (f,f2)
       in
-        [ H >> EQ $$ #[a1, a2, A]
-        , H >> EQ $$ #[f, f, BASE $$ #[]]
+        [ H >> C.`> EQ $$ #[a1, a2, A]
+        , H >> C.`> EQ $$ #[f, f, C.`> BASE $$ #[]]
         ] BY mkEvidence IMAGE_MEM_EQ
       end
 
@@ -735,12 +750,12 @@ struct
         val K  = Context.insert Context.empty w Visibility.Hidden A
         val H1 = Context.interposeAfter H (z, K)
 
-        val Fw = AP $$ #[F, ``w]
+        val Fw = C.`> AP $$ #[F, ``w]
         val H2 = Context.mapAfter w (fn t => subst Fw z t) H1
         val P' = subst Fw z P
       in
         [ H2 >> P'
-        ] BY (fn [D] => IMAGE_ELIM $$ #[w \\ D]
+        ] BY (fn [D] => D.`> IMAGE_ELIM $$ #[w \\ D]
                | _ => raise Refine)
       end
 
@@ -762,15 +777,15 @@ struct
         val true = Syntax.eq (T2,T2')
         val true = Syntax.eq (F,F')
         val true = Syntax.eq (T1,T1')
-        val base = BASE $$ #[]
-        val fa = AP $$ #[F,``a]
-        val fb = AP $$ #[F,``b]
+        val base = C.`> BASE $$ #[]
+        val fa = C.`> AP $$ #[F,``a]
+        val fb = C.`> AP $$ #[F,``b]
       in
-        [ H >> EQ $$ #[F, F, base]
-        , H >> EQ $$ #[T1, T1, A]
-        , H >> EQ $$ #[AP1, AP1, T]
-        , H @@ (a,base) @@ (b,base) @@ (y, EQ $$ #[fa,fa,T]) @@ (z,EQ $$ #[``a,``b,A]) >> EQ $$ #[fa,fb,T]
-        ] BY (fn [D1,D2,D3,D4] => IMAGE_EQ_IND $$ #[D1,D2,D3, a \\ b \\ y \\ z \\ D4]
+        [ H >> C.`> EQ $$ #[F, F, base]
+        , H >> C.`> EQ $$ #[T1, T1, A]
+        , H >> C.`> EQ $$ #[AP1, AP1, T]
+        , H @@ (a,base) @@ (b,base) @@ (y, C.`> EQ $$ #[fa,fa,T]) @@ (z, C.`> EQ $$ #[``a,``b,A]) >> C.`> EQ $$ #[fa,fb,T]
+        ] BY (fn [D1,D2,D3,D4] => D.`> IMAGE_EQ_IND $$ #[D1,D2,D3, a \\ b \\ y \\ z \\ D4]
                | _ => raise Refine)
       end
 
@@ -788,8 +803,8 @@ struct
           else
             ()
       in
-        [ H >> MEM $$ #[M, P]
-        ] BY (fn [D] => WITNESS $$ #[M, D]
+        [ H >> C.`> MEM $$ #[M, P]
+        ] BY (fn [D] => D.`> WITNESS $$ #[M, D]
                | _ => raise Refine)
       end
 
@@ -800,7 +815,7 @@ struct
         val x = asVariable (unify M M')
         val _ = unify A (Context.lookup H x)
       in
-        [] BY (fn _ => HYP_EQ $$ #[`` x])
+        [] BY (fn _ => D.`> HYP_EQ $$ #[`` x])
       end
 
     val ProdEq = QuantifierEq (PROD, PROD_EQ)
@@ -816,10 +831,10 @@ struct
                  SOME z => z
                | NONE => #1 (unbind xP2))
       in
-        [ H >> MEM $$ #[w, P1]
+        [ H >> C.`> MEM $$ #[w, P1]
         , H >> xP2 // w
-        , H @@ (z, P1) >> MEM $$ #[xP2 // ``z, UNIV k $$ #[]]
-        ] BY (fn [D, E, F] => PROD_INTRO $$ #[w, D, E, z \\ F]
+        , H @@ (z, P1) >> C.`> MEM $$ #[xP2 // ``z, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D, E, F] => D.`> PROD_INTRO $$ #[w, D, E, z \\ F]
                | _ => raise Refine)
       end
 
@@ -845,12 +860,12 @@ struct
                  (Context.fresh (H, Variable.named "s"),
                   Context.fresh (H, Variable.named "t"))
 
-        val st = PAIR $$ #[``s, ``t]
+        val st = C.`> PAIR $$ #[``s, ``t]
         val J = Context.empty @@ (s, S) @@ (t, (xT // ``s))
         val H' = ctxSubst (Context.interposeAfter H (z, J)) st z
       in
         [ H' >> subst st z P
-        ] BY (fn [D] => PROD_ELIM $$ #[``z, s \\ (t \\ D)]
+        ] BY (fn [D] => D.`> PROD_ELIM $$ #[``z, s \\ (t \\ D)]
                | _ => raise Refine)
       end
 
@@ -867,10 +882,10 @@ struct
                | SOME z => z)
         val k = case ok of NONE => inferLevel (H, A) | SOME k => k
       in
-        [ H >> EQ $$ #[M, M', A]
-        , H >> EQ $$ #[N, N', xB // M]
-        , H @@ (z,A) >> MEM $$ #[xB // `` z, UNIV k $$ #[]]
-        ] BY (fn [D,E,F] => PAIR_EQ $$ #[D, E, z \\ F]
+        [ H >> C.`> EQ $$ #[M, M', A]
+        , H >> C.`> EQ $$ #[N, N', xB // M]
+        , H @@ (z,A) >> C.`> MEM $$ #[xB // `` z, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [D,E,F] => D.`> PAIR_EQ $$ #[D, E, z \\ F]
                | _ => raise Refine)
       end
 
@@ -903,8 +918,8 @@ struct
                  val H' = H @@ (z, prod)
                  val Cz =
                    typeLub H'
-                     (inferType (H', SPREAD $$ #[``z, xyT1]))
-                     (inferType (H', SPREAD $$ #[``z, uvT2]))
+                     (inferType (H', C.`> SPREAD $$ #[``z, xyT1]))
+                     (inferType (H', C.`> SPREAD $$ #[``z, uvT2]))
                in
                  z \\ Cz
                end
@@ -912,15 +927,15 @@ struct
 
         val CE1' = unify CE1 (zC // E1)
         val Ts = xT // ``s
-        val st = PAIR $$ #[``s, ``t]
-        val E1pair = EQ $$ #[E1, st, prod]
+        val st = C.`> PAIR $$ #[``s, ``t]
+        val E1pair = C.`> EQ $$ #[E1, st, prod]
         val Cst = zC // st
         val T1st = (xyT1 // ``s) // ``t
         val T2st = (uvT2 // ``s) // ``t
       in
-        [ H >> EQ $$ #[E1, E2, prod]
-        , H @@ (s, S) @@ (t, Ts) @@ (y, E1pair) >> EQ $$ #[T1st, T2st, Cst]
-        ] BY (fn [D, E] => SPREAD_EQ $$ #[D, s \\ (t \\ (y \\ E))]
+        [ H >> C.`> EQ $$ #[E1, E2, prod]
+        , H @@ (s, S) @@ (t, Ts) @@ (y, E1pair) >> C.`> EQ $$ #[T1st, T2st, Cst]
+        ] BY (fn [D, E] => D.`> SPREAD_EQ $$ #[D, s \\ (t \\ (y \\ E))]
                 | _ => raise Refine)
       end
 
@@ -932,9 +947,9 @@ struct
         val #[A, B] = L ^! PLUS
         val #[A', B'] = R ^! PLUS
       in
-         [ H >> EQ $$ #[A, A', U]
-         , H >> EQ $$ #[B, B', U]
-         ] BY (fn [L, R] => PLUS_EQ $$ #[L, R]
+         [ H >> C.`> EQ $$ #[A, A', U]
+         , H >> C.`> EQ $$ #[B, B', U]
+         ] BY (fn [L, R] => D.`> PLUS_EQ $$ #[L, R]
                 | _ => raise Refine)
       end
 
@@ -944,8 +959,8 @@ struct
         val k = case x of SOME k => k | NONE => inferLevel (H, B)
       in
         [ H >> A
-        , H >> MEM $$ #[B, UNIV k $$ #[]]
-        ] BY (fn [InA, WfB] => PLUS_INTROL $$ #[InA, WfB]
+        , H >> C.`> MEM $$ #[B, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [InA, WfB] => D.`> PLUS_INTROL $$ #[InA, WfB]
                | _ => raise Refine)
       end
 
@@ -955,8 +970,8 @@ struct
         val k = case x of SOME k => k | NONE => inferLevel (H, A)
       in
         [ H >> B
-        , H >> MEM $$ #[A, UNIV k $$ #[]]
-        ] BY (fn [InB, WfA] => PLUS_INTROR $$ #[InB, WfA]
+        , H >> C.`> MEM $$ #[A, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [InB, WfA] => D.`> PLUS_INTROR $$ #[InB, WfA]
                | _ => raise Refine)
       end
 
@@ -969,8 +984,8 @@ struct
                 SOME names => names
               | NONE => (Context.fresh (H, Variable.named "s"),
                          Context.fresh (H, Variable.named "t"))
-        val withs = INL $$ #[``s]
-        val witht = INR $$ #[``t]
+        val withs = C.`> INL $$ #[``s]
+        val witht = C.`> INR $$ #[``t]
         val H's = ctxSubst (Context.interposeAfter H (z, Context.empty @@ (s, A)))
                            withs z
         val H't = ctxSubst (Context.interposeAfter H (z, Context.empty @@ (t, B)))
@@ -978,7 +993,7 @@ struct
       in
         [ H's >> subst withs z P
         , H't >> subst witht z P
-        ] BY (fn [L, R] => PLUS_ELIM $$ #[``z, s \\ L, t \\ R]
+        ] BY (fn [L, R] => D.`> PLUS_ELIM $$ #[``z, s \\ L, t \\ R]
                | _ => raise Refine)
       end
 
@@ -990,9 +1005,9 @@ struct
         val #[N'] = N ^! INL
         val k = case x of SOME k => k | NONE => inferLevel (H, B)
       in
-        [ H >> EQ $$ #[M', N', A]
-        , H >> MEM $$ #[B, UNIV k $$ #[]]
-        ] BY (fn [In, Wf] => INL_EQ $$ #[In, Wf]
+        [ H >> C.`> EQ $$ #[M', N', A]
+        , H >> C.`> MEM $$ #[B, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [In, Wf] => D.`> INL_EQ $$ #[In, Wf]
                | _ => raise Refine)
       end
 
@@ -1004,9 +1019,9 @@ struct
         val #[N'] = N ^! INR
         val k = case x of SOME k => k | NONE => inferLevel (H, A)
       in
-        [ H >> EQ $$ #[M', N', B]
-        , H >> MEM $$ #[A, UNIV k $$ #[]]
-        ] BY (fn [In, Wf] => INR_EQ $$ #[In, Wf]
+        [ H >> C.`> EQ $$ #[M', N', B]
+        , H >> C.`> MEM $$ #[A, C.`> (UNIV k) $$ #[]]
+        ] BY (fn [In, Wf] => D.`> INR_EQ $$ #[In, Wf]
                | _ => raise Refine)
       end
 
@@ -1022,17 +1037,17 @@ struct
                          Context.fresh (H, Variable.named "t"),
                          Context.fresh (H, Variable.named "eq"))
         val H's = H @@ (s, A)
-                    @@ (eq, EQ $$ #[M', INL $$ #[``s], PLUS $$ #[A, B]])
+                    @@ (eq, C.`> EQ $$ #[M', C.`> INL $$ #[``s], C.`> PLUS $$ #[A, B]])
         val H't = H @@ (t, B)
-                    @@ (eq, EQ $$ #[M', INR $$ #[``t], PLUS $$ #[A, B]])
-        val C's = subst1 C (INL $$ #[``s])
-        val C't = subst1 C (INR $$ #[``t])
+                    @@ (eq, C.`> EQ $$ #[M', C.`> INR $$ #[``t], C.`> PLUS $$ #[A, B]])
+        val C's = subst1 C (C.`> INL $$ #[``s])
+        val C't = subst1 C (C.`> INR $$ #[``t])
       in
-        [ H >> EQ $$ #[M', N', PLUS $$ #[A, B]]
-        , H's >> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
-        , H't >> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
+        [ H >> C.`> EQ $$ #[M', N', C.`> PLUS $$ #[A, B]]
+        , H's >> C.`> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
+        , H't >> C.`> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
         ] BY (fn [EqM, EqL, EqR] =>
-                 DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
+                 D.`> DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
                | _ => raise Refine)
       end
 
@@ -1068,11 +1083,7 @@ struct
                | _ => raise Refine)
       end
 
-    structure LevelSolver =
-      LevelSolver
-        (SyntaxWithUniverses
-          (type label = Development.label
-           structure Syntax = Syntax))
+    structure LevelSolver = LevelSolver (SyntaxWithUniverses (Syntax))
 
     structure SequentLevelSolver = SequentLevelSolver
       (structure Solver = LevelSolver
@@ -1083,14 +1094,18 @@ struct
       open Conversionals
       infix CTHEN
 
-      fun convTheorem lbl world M =
-        case out M of
-            CUSTOM {label,...} $ _ =>
-              if Label.eq (label, lbl) then
-                Development.lookupExtract world lbl
-              else
-                raise Conv.Conv
-          | _ => raise Conv.Conv
+      local
+        open CttCalculusView
+      in
+        fun convTheorem lbl world M =
+          case project M of
+              CUSTOM {label,...} $ _ =>
+                if Label.eq (label, lbl) then
+                  Development.lookupExtract world lbl
+                else
+                  raise Conv.Conv
+            | _ => raise Conv.Conv
+      end
 
       fun convLabel lbl world =
         Development.lookupDefinition world lbl
@@ -1123,11 +1138,11 @@ struct
           val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
           val theta = LEMMA {label = lbl}
         in
-          [] BY (fn _ => theta $$ #[])
+          [] BY (fn _ => D.`> theta $$ #[])
         end
 
       fun Admit (H >> P) =
-        [] BY (fn _ => ADMIT $$ #[])
+        [] BY (fn _ => D.`> ADMIT $$ #[])
 
       fun RewriteGoal (c : conv) (H >> P) =
         [ Context.map c H >> c P
@@ -1137,7 +1152,7 @@ struct
         let
           val #[M,N,A] = P ^! EQ
         in
-          [ H >> EQ $$ #[N,M,A]
+          [ H >> C.`> EQ $$ #[N,M,A]
           ] BY mkEvidence EQ_SYM
         end
 
@@ -1170,8 +1185,8 @@ struct
         in
           [ H >> eq
           , H >> xC // N
-          , H' >> MEM $$ #[C, UNIV k $$ #[]]
-          ] BY (fn [D,E,F] => EQ_SUBST $$ #[D, E, x \\ F]
+          , H' >> C.`> MEM $$ #[C, C.`> (UNIV k) $$ #[]]
+          ] BY (fn [D,E,F] => D.`> EQ_SUBST $$ #[D, E, x \\ F]
                  | _ => raise Refine)
       end
 
@@ -1191,23 +1206,27 @@ struct
     in
       datatype ForallType = ForallIsect | ForallFun
 
-      fun stripForalls (H, P) =
-        case out P of
-             ISECT $ #[A, xB] =>
-               let
-                 val (H', x, B) = ctxUnbind (H, A, xB)
-                 val (xs, Q) = stripForalls (H', B)
-               in
-                 (xs @ [(ForallIsect, x)], Q)
-               end
-           | FUN $ #[A, xB] =>
-               let
-                 val (H', x, B) = ctxUnbind (H, A, xB)
-                 val (xs, Q) = stripForalls (H', B)
-               in
-                 (xs @ [(ForallFun, x)], Q)
-               end
-           | _ => ([], P)
+      local
+        open CttCalculusView
+      in
+        fun stripForalls (H, P) =
+          case project P of
+               ISECT $ #[A, xB] =>
+                 let
+                   val (H', x, B) = ctxUnbind (H, A, xB)
+                   val (xs, Q) = stripForalls (H', B)
+                 in
+                   (xs @ [(ForallIsect, x)], Q)
+                 end
+             | FUN $ #[A, xB] =>
+                 let
+                   val (H', x, B) = ctxUnbind (H, A, xB)
+                   val (xs, Q) = stripForalls (H', B)
+                 in
+                   (xs @ [(ForallFun, x)], Q)
+                 end
+             | _ => ([], P)
+      end
 
       fun BHyp hyp (goal as H >> P) =
         let
@@ -1256,7 +1275,7 @@ struct
                  let
                    val #[M,N,A] = X ^! EQ
                  in
-                   (EqSubst (EQ $$ #[N,M,A], xC, ok)
+                   (EqSubst (C.`> EQ $$ #[N,M,A], xC, ok)
                      THENL [EqSym THEN Hypothesis_ z, ID, ID]) (H >> P)
                  end
         end
@@ -1268,9 +1287,9 @@ struct
           val #[L, R] = M ^! CEQUAL
           val #[L', R'] = N ^! CEQUAL
         in
-          [ H >> CEQUAL $$ #[L, L']
-          , H >> CEQUAL $$ #[R, R']
-          ] BY (fn [D, E] => CEQUAL_EQ $$ #[D, E]
+          [ H >> C.`> CEQUAL $$ #[L, L']
+          , H >> C.`> CEQUAL $$ #[R, R']
+          ] BY (fn [D, E] => D.`> CEQUAL_EQ $$ #[D, E]
                  | _ => raise Refine)
         end
 
@@ -1280,10 +1299,10 @@ struct
           val (UNIV _, _) = asApp univ
           val #[M,N] = approx1 ^! APPROX
           val #[M',N'] = approx2 ^! APPROX
-          val base = BASE $$ #[]
+          val base = C.`> BASE $$ #[]
         in
-          [ H >> EQ $$ #[M,M',base]
-          , H >> EQ $$ #[N,N',base]
+          [ H >> C.`> EQ $$ #[M,M',base]
+          , H >> C.`> EQ $$ #[N,N',base]
           ] BY mkEvidence APPROX_EQ
         end
 
@@ -1293,8 +1312,8 @@ struct
           val (UNIV _, _) = asApp univ
           val #[_,_] = approx1 ^! APPROX
           val #[_,_] = approx2 ^! APPROX
-          val iff = IFF $$ #[approx1, approx2]
-          val squ = SQUASH $$ #[iff]
+          val iff = C.`> IFF $$ #[approx1, approx2]
+          val squ = C.`> SQUASH $$ #[iff]
         in
           [ H >> squ
           ] BY mkEvidence APPROX_EXT_EQ
@@ -1320,8 +1339,8 @@ struct
         let
           val #[M, N] = P ^! CEQUAL
         in
-          [H >> CEQUAL $$ #[N, M]
-          ] BY (fn [D] => CEQUAL_SYM $$ #[D]
+          [H >> C.`> CEQUAL $$ #[N, M]
+          ] BY (fn [D] => D.`> CEQUAL_SYM $$ #[D]
                  | _ => raise Refine)
         end
 
@@ -1334,8 +1353,8 @@ struct
                 | Semantics.CANON => raise Refine
                 | Semantics.NEUTRAL => raise Refine
         in
-          [ H >> CEQUAL $$ #[M', N]
-          ] BY (fn [D] => CEQUAL_STEP $$ #[D]
+          [ H >> C.`> CEQUAL $$ #[M', N]
+          ] BY (fn [D] => D.`> CEQUAL_STEP $$ #[D]
                  | _ => raise Refine)
         end
 
@@ -1353,7 +1372,7 @@ struct
         in
           [ H >> eq
           , H >> xC // N
-          ] BY (fn [D, E] => CEQUAL_SUBST $$ #[D, E]
+          ] BY (fn [D, E] => D.`> CEQUAL_SUBST $$ #[D, E]
                  | _ => raise Refine)
         end
 
@@ -1369,7 +1388,7 @@ struct
               let
                 val #[M,N] = X ^! CEQUAL
               in
-                (CEqSubst (CEQUAL $$ #[N,M], xC)
+                (CEqSubst (C.`> CEQUAL $$ #[N,M], xC)
                           THENL [CEqSym THEN Hypothesis_ z, ID]) (H >> P)
               end
         end
@@ -1378,8 +1397,8 @@ struct
         let
           val #[M, N] = P ^! CEQUAL
         in
-          [ H >> APPROX $$ #[M, N]
-          , H >> APPROX $$ #[N, M]
+          [ H >> C.`> APPROX $$ #[M, N]
+          , H >> C.`> APPROX $$ #[N, M]
           ] BY mkEvidence CEQUAL_APPROX
         end
 
@@ -1412,11 +1431,11 @@ struct
         fun newSubGoal H vs (t1, t2) =
           case (out t1, out t2) of
               (x \ t1', y \ t2') =>
-              newSubGoal (H @@ (x, BASE $$ #[]))
+              newSubGoal (H @@ (x, C.`> BASE $$ #[]))
                          (x :: vs)
                          (t1', subst (``x) y t2')
             | (_, _) =>
-              (List.rev vs, H >> CEQUAL $$ #[t1, t2])
+              (List.rev vs, H >> C.`> CEQUAL $$ #[t1, t2])
 
         fun toList v = Vector.foldr op:: nil v
 
@@ -1450,7 +1469,7 @@ struct
             val boundVars = Vector.fromList boundVars
           in
             subgoals BY (fn Ds =>
-                            CEQUAL_STRUCT (Vector.map List.length boundVars)
+                            D.`> (CEQUAL_STRUCT (Vector.map List.length boundVars))
                               $$ bindVars boundVars (Vector.fromList Ds)
                             handle _ => raise Refine)
           end
@@ -1459,14 +1478,14 @@ struct
 
     local
       structure Tacticals = Tacticals(Lcf)
-      open Tacticals infix THEN
+      open Tacticals CttCalculusView infix THEN
     in
       fun EqInSupertype (H >> P) =
         let
           val #[M,N,A] = P ^! EQ
           val result =
             Context.search H (fn A' =>
-              case out A' of
+              case project A' of
                    SUBSET $ #[A'', _] => Syntax.eq (A, A'')
                  | _ => false)
           val x = case result of SOME (x,_) => x | NONE => raise Refine

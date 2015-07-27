@@ -19,9 +19,8 @@ struct
   in
     fun printOperators world =
       (List.app
-         (fn x =>
-           printStep (Syntax.Operator.toString x, Syntax.Operator.arity x, NONE))
-         OperatorType.publicOperators;
+         (fn theta => printStep (CttCalculus.toString theta, CttCalculus.arity theta, NONE))
+         CttCalculus.publicOperators;
        List.app printStep (Development.enumerateOperators world))
   end
 

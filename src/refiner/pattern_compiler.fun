@@ -134,14 +134,20 @@ end
 
 structure PatternTerm : PATTERN_TERM =
 struct
-  open Syntax OperatorType
+  open CttCalculus CttCalculusInj Syntax
+  structure CttView = RestrictAbtView (structure Abt = Syntax and Injection = CttCalculusInj)
+
   infix $ $$
   infixr \ \\
 
-  fun asInstantiate M =
-    case out M of
-         SO_APPLY $ #[E, M] => SOME (E, M)
-       | _ => NONE
+  local
+    open CttView
+  in
+    fun asInstantiate M =
+      case project M of
+           SO_APPLY $ #[E, M] => SOME (E, M)
+         | _ => NONE
+  end
 
   fun patternForOperator theta =
     let
@@ -169,7 +175,7 @@ struct
       fun patternForValence i =
         let
           val xs = makeBoundVariables i
-          val inner = foldl (fn (x,P) => SO_APPLY $$ #[P, ``x]) (newVariable ()) xs
+          val inner = foldl (fn (x,P) => `> SO_APPLY $$ #[P, ``x]) (newVariable ()) xs
         in
           foldr (fn (x, P) => x \\ P) inner xs
         end

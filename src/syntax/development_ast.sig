@@ -3,7 +3,7 @@ sig
   type label = Label.t
 
   structure Syntax : ABT_UTIL
-    where type Operator.t = OperatorType.operator
+    where type Operator.t = UniversalOperator.t
 
   structure Tactic : TACTIC
     where type label = label

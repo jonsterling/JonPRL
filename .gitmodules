@@ -20,3 +20,9 @@
 [submodule "sml-abt-unify"]
 	path = lib/sml-abt-unify
 	url = https://github.com/jozefg/sml-abt-unify.git
+[submodule "lib/sml-open-abt"]
+	path = lib/sml-open-abt
+	url = https://github.com/jonsterling/sml-open-abt.git
+[submodule "lib/sml-open-ended"]
+	path = lib/sml-open-ended
+	url = https://github.com/jonsterling/sml-open-ended.git

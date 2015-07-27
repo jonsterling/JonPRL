@@ -21,38 +21,42 @@ struct
   end
 end
 
-functor SmallStep (Syn : ABT_UTIL where type Operator.t = OperatorType.operator)
+functor SmallStep (Syn : ABT_UTIL where type Operator.t = UniversalOperator.t)
         : SMALL_STEP where type syn = Syn.t =
 struct
   type syn = Syn.t
 
   open Syn
-  open Operator
-  open OperatorType
+  open Operator CttCalculus CttCalculusInj
+  structure View = RestrictAbtView (structure Abt = Syn and Injection = CttCalculusInj)
+  open View
+
   infix $ \ $$ \\ //
 
+  fun theta $$ es =
+    Syn.$$ (`> theta, es)
 
   exception Stuck of Syn.t
   datatype t = STEP of Syn.t | CANON | NEUTRAL
 
   fun stepSpreadBeta (P, E) =
-    case out P of
+    case project P of
         PAIR $ #[L, R] => (E // L) // R
       | _ => raise Stuck (SPREAD $$ #[P, E])
 
   fun stepApBeta (F, A) =
-    case out F of
+    case project F of
         LAM $ #[B] => B // A
       | _ => raise Stuck (AP $$ #[F, A])
 
   fun stepDecideBeta (S, L, R) =
-    case out S of
+    case project S of
         INL $ #[A] => L // A
       | INR $ #[B] => R // B
       | _ => raise Stuck (DECIDE $$ #[S, L, R])
 
   fun stepNatrecBeta (M, Z, xyS) =
-    case out M of
+    case project M of
          ZERO $ #[] => Z
        | SUCC $ #[N] => (xyS // N) // (NATREC $$ #[N, Z, xyS])
        | _ => raise Stuck (NATREC $$ #[M, Z, xyS])
@@ -62,7 +66,7 @@ struct
   fun stepCbv (A, F) = F // A
 
   fun step e =
-    case out e of
+    case project e of
         UNIV _ $ _ => CANON
       | VOID $ _ => CANON
       | UNIT $ _ => CANON
@@ -122,7 +126,7 @@ struct
            * for the core type theory: not just what users
            * can say with the syntax we give.
            *)
-          (case out L of
+          (case project L of
                x \ L => STEP (subst R x L)
              | _ =>
              (case step L of

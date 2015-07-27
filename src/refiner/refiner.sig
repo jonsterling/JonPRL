@@ -4,7 +4,6 @@ sig
   type term
 
   type conv
-  type world
   type tactic
 
   exception Refine
@@ -14,11 +13,10 @@ sig
 
   structure Development : DEVELOPMENT
     where type tactic = tactic
-    where type world = world
     where type judgement = Sequent.sequent
 
+  type world = Development.world
   type label = Development.label
-
   type hyp = name HypSyn.t
 
   structure Rules : sig
