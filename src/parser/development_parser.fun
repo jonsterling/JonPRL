@@ -1,10 +1,7 @@
 functor DevelopmentParser
-  (structure ParserContext : PARSER_CONTEXT
-   structure Tactic : TACTIC
-     where type label = ParserContext.label
+  (structure Tactic : TACTIC
    structure DevelopmentAst : DEVELOPMENT_AST
      where type Tactic.t = Tactic.t
-     where type label = ParserContext.label
    structure Syntax : PARSE_ABT
      where type ParseOperator.world = ParserContext.world
      where type t = DevelopmentAst.Syntax.t
@@ -14,8 +11,7 @@ functor DevelopmentParser
      where type tactic = Tactic.t
      where type world = ParserContext.world
 
-   val operatorToLabel : Syntax.Operator.t -> ParserContext.label
-   val stringToLabel : string -> Tactic.label) : DEVELOPMENT_PARSER =
+   val operatorToLabel : Syntax.Operator.t -> Label.t) : DEVELOPMENT_PARSER =
 struct
   open ParserContext
 
@@ -43,7 +39,7 @@ struct
     identifier
       wth Syntax.Variable.named
 
-  val parseLabel = identifier wth stringToLabel
+  val parseLabel = identifier
 
   fun parseTheorem w =
     reserved "Theorem" >> parseLabel << colon
@@ -120,5 +116,4 @@ structure CttDevelopmentParser = DevelopmentParser
    structure DevelopmentAst = DevelopmentAst
    structure TacticScript = TacticScript
    val stringToLabel = StringVariable.named
-   val operatorToLabel = Syntax.Operator.toString
-   structure ParserContext = StringVariableContext)
+   val operatorToLabel = Syntax.Operator.toString)

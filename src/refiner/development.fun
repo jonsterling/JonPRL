@@ -8,7 +8,6 @@ functor Development
    structure Extract : EXTRACT
      where type evidence = Lcf.evidence
      where type term = Syntax.t
-   structure Label : LABEL
    structure Builtins : BUILTINS
      where type Conv.term = Syntax.t
      where type operator = Syntax.Operator.t
@@ -227,7 +226,6 @@ structure Development : DEVELOPMENT =
      structure Evidence = Syntax
      structure PatternCompiler = PatternCompiler
      structure Extract = Extract
-     structure Label = StringVariable
      structure Lcf = Lcf
      structure Builtins = Builtins
 

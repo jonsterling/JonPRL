@@ -2,7 +2,7 @@ structure Builtins : BUILTINS =
 struct
   structure Syntax = Syntax
   structure Conv = Conv
-  type label = string
+  type label = Label.t
 
   open OperatorType Syntax Conv
   infix $ $$ \\

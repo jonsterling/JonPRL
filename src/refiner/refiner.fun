@@ -6,7 +6,7 @@ functor Refiner
      where type tactic = Lcf.tactic
 
    structure Syntax : ABT_UTIL
-     where type Operator.t = Development.label OperatorType.operator
+     where type Operator.t = OperatorType.operator
 
    structure Sequent : SEQUENT
      where type term = Syntax.t
@@ -1086,7 +1086,7 @@ struct
       fun convTheorem lbl world M =
         case out M of
             CUSTOM {label,...} $ _ =>
-              if Development.Telescope.Label.eq (label, lbl) then
+              if Label.eq (label, lbl) then
                 Development.lookupExtract world lbl
               else
                 raise Conv.Conv

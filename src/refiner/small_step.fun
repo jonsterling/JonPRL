@@ -21,7 +21,7 @@ struct
   end
 end
 
-functor SmallStep (Syn : ABT_UTIL where type Operator.t = StringVariable.t OperatorType.operator)
+functor SmallStep (Syn : ABT_UTIL where type Operator.t = OperatorType.operator)
         : SMALL_STEP where type syn = Syn.t =
 struct
   type syn = Syn.t

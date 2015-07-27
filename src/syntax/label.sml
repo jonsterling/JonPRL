@@ -1,0 +1,1 @@
+structure Label : LABEL = StringVariable

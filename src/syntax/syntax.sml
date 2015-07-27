@@ -2,9 +2,6 @@ structure Syntax : PARSE_ABT =
 struct
   structure V = ParseLabel (StringVariable)
 
-  structure Operator = Operator
-    (structure Label = V
-     structure ParserContext = StringVariableContext)
   structure Abt = Abt
     (structure Operator = Operator
      structure Variable = Variable ())
@@ -38,9 +35,9 @@ struct
     fun customOperator w =
       (spaces >> identifier << spaces) -- (fn sym =>
         (let
-          open Notation StringVariableContext
+          open Notation ParserContext
           val label = lookupNotation w sym
-          val (arity, SOME notation) = StringVariableContext.lookupOperator w label
+          val (arity, SOME notation) = ParserContext.lookupOperator w label
           val theta = CUSTOM {label = label, arity = arity}
         in
           case notation of

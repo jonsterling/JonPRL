@@ -16,8 +16,6 @@ struct
 
     fun printStep (name, arity, _) =
       print (name ^ " " ^ Arity.toString arity ^ "\n")
-
-    val labelToString = Development.Telescope.Label.toString
   in
     fun printOperators world =
       (List.app
@@ -55,7 +53,7 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
       val initialContext =
-        StringVariableContext.new
+        ParserContext.new
           (Development.enumerateOperators initialDevelopment)
 
       open CttDevelopmentParser

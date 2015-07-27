@@ -72,8 +72,7 @@ end
 
 functor SyntaxWithUniverses
   (type label
-   structure Syntax : ABT
-     where type Operator.t = label OperatorType.operator
+   structure Syntax : ABT where type Operator.t = OperatorType.operator
   ) : SYNTAX_WITH_UNIVERSES =
 struct
   open Syntax

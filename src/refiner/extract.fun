@@ -1,4 +1,4 @@
-functor Extract (Syn : ABT_UTIL where type Operator.t = StringVariable.t OperatorType.operator) : EXTRACT =
+functor Extract (Syn : ABT_UTIL where type Operator.t = OperatorType.operator) : EXTRACT =
 struct
   type evidence = Syn.t
   type term = Syn.t

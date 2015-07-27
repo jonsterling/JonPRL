@@ -1,6 +1,6 @@
 structure OperatorType =
 struct
-  datatype 'label operator =
+  datatype operator =
       (* Derivations *)
       UNIV_EQ of Level.t | CUM
     | EQ_EQ
@@ -42,8 +42,8 @@ struct
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
 
-    | CUSTOM of {label : 'label, arity : Arity.t}
-    | LEMMA of {label : 'label}
+    | CUSTOM of {label : Label.t, arity : Arity.t}
+    | LEMMA of {label : Label.t}
     | SO_APPLY
 
   local
@@ -71,25 +71,16 @@ end
 
 signature CTT_OPERATOR =
 sig
-  structure Label : PARSE_LABEL
-  structure ParserContext : PARSER_CONTEXT
-    where type label = Label.t
-
   include PARSE_OPERATOR
-    where type t = ParserContext.label OperatorType.operator
+    where type t = OperatorType.operator
     where type world = ParserContext.world
 
 end
 
-functor Operator
-  (structure Label : PARSE_LABEL
-   structure ParserContext : PARSER_CONTEXT
-     where type label = Label.t) : CTT_OPERATOR =
+structure Operator : CTT_OPERATOR =
 struct
   open OperatorType
-  structure Label = Label
-  structure ParserContext = ParserContext
-  type t = Label.t operator
+  type t = operator
 
   type world = ParserContext.world
   fun eq (UNIV_EQ i, UNIV_EQ j) = i = j
@@ -493,7 +484,7 @@ struct
          string "natrec" return NATREC]
 
     fun intensionalParseOperator world =
-      Label.parseLabel -- (fn lbl =>
+      JonprlTokenParser.identifier -- (fn lbl =>
         case (SOME (ParserContext.lookupOperator world lbl) handle _ => NONE) of
              SOME (arity, _) => succeed (CUSTOM {label = lbl, arity = arity})
            | NONE => fail "no such operator")

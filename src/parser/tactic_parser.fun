@@ -1,8 +1,7 @@
 functor TacticParser
-  (structure ParserContext : PARSER_CONTEXT
-   structure Tactic : TACTIC
+  ( structure Tactic : TACTIC
      where type level = Level.t
-     where type label = ParserContext.label
+     where type label = Label.t
    structure ParseSyntax : PARSE_ABT
      where type t = Tactic.term
      where type Variable.t = Tactic.name
@@ -301,11 +300,9 @@ end
 structure TacticParser = TacticParser
   (structure Tactic = Tactic
    structure ParseSyntax = Syntax
-   structure ParserContext = StringVariableContext
    val stringToLabel = StringVariable.named)
 
 structure TacticScript = TacticScript
-  (structure ParserContext = StringVariableContext
-   structure Tactic = Tactic
+  (structure Tactic = Tactic
    structure RuleParser = TacticParser
    structure ParseSyntax = Syntax)
