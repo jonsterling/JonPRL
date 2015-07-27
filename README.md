@@ -114,7 +114,7 @@ As an example, unique existence might be defined as follows:
 ```
 Operator ex_uni : (0;1).
 
-[ex_uni(T;P)] =def= [(x:T) * P[x] * {y:T} P[y] => =(x;y;T)].
+[ex_uni(T;x.P[x])] =def= [(x:T) * P[x] * {y:T} P[y] => =(x;y;T)].
 ```
 
 Note that `P` is applied to `x` and `y` using `so_apply` rather than
