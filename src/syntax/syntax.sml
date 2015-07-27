@@ -87,13 +87,16 @@ struct
     structure UnparseAbt = UnparseAbt (structure Abt = Abt and Unparse = Unparse)
     open UnparseAbt
 
+    structure CttCalculusView = RestrictAbtView
+      (structure Abt = Abt and Injection = CttCalculusInj)
+
     fun unparseCttTerm M =
       let
-        val theta $ subterms = out M
+        open CttCalculusView
       in
-        case (`< theta, subterms) of
-             (AP, #[M, N]) => Unparse.adj (unparseAbt M, unparseAbt N)
-           | (FUN, #[A, xB]) =>
+        case project M of
+             AP $ #[M, N] => Unparse.adj (unparseAbt M, unparseAbt N)
+           | FUN $ #[A, xB] =>
                let
                  val (x,B) = unbind xB
                in
@@ -103,7 +106,7 @@ struct
                  else
                    Unparse.infix' (Unparse.Right, 9, "->") (unparseAbt A, unparseAbt B)
                end
-           | (ISECT, #[A, xB]) =>
+           | ISECT $ #[A, xB] =>
                let
                  val (x,B) = unbind xB
                in
@@ -113,7 +116,7 @@ struct
                  else
                    Unparse.infix' (Unparse.Right, 9, "=>") (unparseAbt A, unparseAbt B)
                end
-           | (PROD, #[A, xB]) =>
+           | PROD $ #[A, xB] =>
                let
                  val (x,B) = unbind xB
                in
@@ -123,18 +126,18 @@ struct
                  else
                    Unparse.infix' (Unparse.Right, 10, "*") (unparseAbt A, unparseAbt B)
                end
-           | (SUBSET, #[A, xB]) =>
+           | SUBSET $ #[A, xB] =>
                let
                  val (x, B) = unbind xB
                in
                  Unparse.atom
                    ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
                end
-           | (PLUS, #[A,B]) =>
+           | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
-           | (PAIR, #[M,N]) =>
+           | PAIR $ #[M,N] =>
                Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
-           | (SO_APPLY, #[M,N]) =>
+           | SO_APPLY $ #[M,N] =>
                Unparse.postfix (12, "[" ^ toString N ^ "]") (unparseAbt M)
            | _ => inner M
       end
