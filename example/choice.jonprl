@@ -1,0 +1,17 @@
+Tactic instantiate-hyps {
+  @{ [H : A -> B, H' : A |- _] => elim <H> [H']
+   | [H : A => B, H' : A |- _] => elim <H> [H']
+   }
+}.
+
+Tactic destruct-hyps {
+  *{ @{ [H : A * B |- _] => elim <H>; thin <H>} }
+}.
+
+Theorem axiom-of-choice : [{A:U{i}} {B:U{i}} {Q : A -> B -> U{i}} (φ : (c:A) -> (b:B) * Q c b) (f : A -> B) * (a : A) Q a (f a)]
+{
+  auto; intro [lam(w. spread(φ w; x.y.x))]; auto;
+  instantiate-hyps; auto; reduce;
+  @{ [H : =(y; φ a; _) |- _] => hyp-subst <- <H> [h. _ _ spread(h; x.y.x)] };
+  auto; destruct-hyps; reduce; auto
+}.
