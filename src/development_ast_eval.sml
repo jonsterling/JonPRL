@@ -38,9 +38,9 @@ struct
            val lbl = operatorToLabel oper
            val results = searchObject D lbl
          in
-           print ("Results for " ^ lbl ^ "\n");
+           print ("\nResults for " ^ lbl ^ ":\n");
            List.app
-             (fn (lbl, obj) => print (Object.toString (lbl, obj) ^ "\n"))
+             (fn (lbl, obj) => print ("\n" ^ Object.toString (lbl, obj) ^ "\n"))
              results
          end
 
