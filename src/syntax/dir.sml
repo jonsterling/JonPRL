@@ -1,4 +1,4 @@
-structure Dir :> DIR =
+structure Dir =
 struct
   datatype dir = LEFT | RIGHT
 end
