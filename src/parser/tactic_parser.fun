@@ -6,7 +6,7 @@ functor TacticParser
      where type t = Tactic.term
      where type Variable.t = Tactic.name
      where type ParseOperator.world = ParserContext.world
-   val stringToLabel : string -> ParserContext.label
+     where type ParseOperator.t = Tactic.operator
    ) :> INTENSIONAL_PARSER
          where type world = ParserContext.world
            and type t = Tactic.t =
@@ -46,7 +46,7 @@ struct
     symbol "_" return NONE
       || p wth SOME
 
-  val parseLabel = identifier wth stringToLabel
+  val parseLabel = identifier
 
   type 'a intensional_parser = world -> 'a charParser
   type tactic_parser = (Pos.t -> Tactic.t) intensional_parser
@@ -229,9 +229,9 @@ struct
 
   val parseLemma : tactic_parser =
     fn w => tactic "lemma"
-      && brackets parseLabel
-      wth (fn (name, lbl) => fn pos =>
-             LEMMA (lbl, {name = name, pos = pos}))
+      && brackets (ParseSyntax.ParseOperator.parseOperator w)
+      wth (fn (name, theta) => fn pos =>
+             LEMMA (theta, {name = name, pos = pos}))
 
   val parseBHyp : tactic_parser =
     fn w => tactic "bhyp"
@@ -241,20 +241,20 @@ struct
 
   val parseCutLemma : tactic_parser =
     fn w => tactic "cut-lemma"
-      && brackets parseLabel
-      wth (fn (name, lbl) => fn pos =>
-             CUT_LEMMA (lbl, {name = name, pos = pos}))
+      && brackets (ParseSyntax.ParseOperator.parseOperator w)
+      wth (fn (name, theta) => fn pos =>
+             CUT_LEMMA (theta, {name = name, pos = pos}))
 
   val parseUnfold : tactic_parser =
     fn w => tactic "unfold"
-      && brackets (separate (parseLabel && opt parseLevel) whiteSpace)
-      wth (fn (name, lbls) => fn pos =>
-             UNFOLD (lbls, ({name = name, pos = pos})))
+      && brackets (separate (ParseSyntax.ParseOperator.parseOperator w && opt parseLevel) whiteSpace)
+      wth (fn (name, thetas) => fn pos =>
+             UNFOLD (thetas, ({name = name, pos = pos})))
 
   val parseCustomTactic : tactic_parser =
     fn w => identifier
       wth (fn name => fn (pos : Pos.t) =>
-            CUSTOM_TACTIC (stringToLabel name, {name = name, pos = pos}))
+            CUSTOM_TACTIC (name, {name = name, pos = pos}))
 
   val parseThin : tactic_parser =
     fn w => tactic "thin"
@@ -299,8 +299,7 @@ end
 
 structure TacticParser = TacticParser
   (structure Tactic = Tactic
-   structure ParseSyntax = Syntax
-   val stringToLabel = StringVariable.named)
+   structure ParseSyntax = Syntax)
 
 structure TacticScript = TacticScript
   (structure Tactic = Tactic

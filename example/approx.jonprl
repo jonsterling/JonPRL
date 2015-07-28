@@ -7,9 +7,11 @@ Theorem ceq-refl-thru-approx : [ {x:base} ceq(x; x) ]
 Operator bottom : ().
 [bottom()] =def= [ fix(lam(x.x)) ].
 
+Infix 7 "≼" =def= approx.
+
 Operator has-value : (0).
 Postfix 11 "⇓" =def= has-value.
-[t ⇓] =def= [ approx(<>;cbv(t;_.<>)) ].
+[t ⇓] =def= [ <> ≼ cbv(t;_.<>) ].
 
 Operator not : (0).
 Prefix 10 "¬" =def= not.
@@ -17,6 +19,5 @@ Prefix 10 "¬" =def= not.
 
 Theorem bottom-diverges : [ ¬ bottom ⇓ ] {
   unfold <not has-value bottom>;
-  auto;
-  bot-div #1
+  auto; bot-div #1
 }.

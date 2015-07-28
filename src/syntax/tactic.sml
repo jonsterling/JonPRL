@@ -3,6 +3,7 @@ struct
   type term = Syntax.t
   type name = Syntax.Variable.t
   type label = string
+  type operator = Syntax.Operator.t
   type level = Level.t
   type meta = TacticMetadata.metadata
   type hyp = name HypSyn.t
@@ -10,9 +11,9 @@ struct
   datatype ctx_pattern = CtxPattern of {goal : term, hyps : (name * term) list}
 
   datatype t =
-      LEMMA of label * meta
+      LEMMA of operator * meta
     | BHYP of hyp * meta
-    | UNFOLD of (label * level option) list * meta
+    | UNFOLD of (operator * level option) list * meta
     | CUSTOM_TACTIC of label * meta
     | WITNESS of term * meta
     | HYPOTHESIS of hyp * meta
@@ -46,7 +47,7 @@ struct
     | ASSUMPTION of meta
     | ASSERT of {assertion : term,
                  name : name option} * meta
-    | CUT_LEMMA of label * meta
+    | CUT_LEMMA of operator * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta

@@ -17,7 +17,7 @@ struct
            open Development
            val lbl = operatorToLabel theta
            val declString =
-             case SOME (lookupObject D lbl) handle _ => NONE of
+             case SOME (lookupObject D theta) handle _ => NONE of
                   SOME obj => Object.toString (lbl, obj)
                 | NONE => "Operator " ^ lbl ^ " : " ^ Arity.toString (Syntax.Operator.arity theta) ^ "."
          in
@@ -66,7 +66,7 @@ struct
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
       | NOTATION (notation, theta) =>
-        Development.declareNotation D (operatorToLabel theta, notation)
+        Development.declareNotation D (theta, notation)
       | COMMAND cmd =>
         (evalCommand D cmd; D)
 

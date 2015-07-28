@@ -14,7 +14,6 @@ functor Development
    structure Builtins : BUILTINS
      where type Conv.term = Syntax.t
      where type operator = Syntax.Operator.t
-     where type label = Label.t
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -42,7 +41,8 @@ struct
     type operator_decl =
       {operator : Syntax.Operator.t,
        conversion : operator_definition option,
-       notation : Notation.t option}
+       notation : Notation.t option,
+       userDefined : bool}
 
     datatype t =
         THEOREM of theorem
@@ -60,17 +60,19 @@ struct
           end
       | toString (lbl, TACTIC _) =
           "Tactic " ^ Label.toString lbl ^ "."
-      | toString (lbl, OPERATOR {operator, conversion, notation}) =
-          "Operator " ^ Label.toString lbl
-            ^ " : " ^ Arity.toString (Syntax.Operator.arity operator)
-            ^ "."
+      | toString (lbl, OPERATOR {operator, conversion, notation, userDefined}) =
+          (case userDefined of
+                true => "Operator " ^ Label.toString lbl
+                        ^ " : " ^ Arity.toString (Syntax.Operator.arity operator)
+                        ^ "."
+              | false => "")
             ^ (case conversion of
-                   NONE => ""
+                    NONE => ""
                   | SOME ({definiendum, definiens}, _) =>
                        "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
                        ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
             ^ (case notation of
-                   NONE => ""
+                    NONE => ""
                   | SOME notation =>
                        "\n" ^ Notation.toString notation ^ " ≝ "
                        ^ Label.toString lbl ^ ".")
@@ -131,23 +133,8 @@ struct
       (lbl, Object.OPERATOR
         {operator = operator,
          conversion = NONE,
-         notation = NONE})
-
-  fun lookupObject T lbl =
-    case SOME (Builtins.unfold lbl) handle _ => NONE of
-         NONE => Telescope.lookup T lbl
-       | SOME (theta : Syntax.Operator.t, conv) =>
-           let
-             val pattern = PatternCompiler.PatternTerm.patternForOperator theta
-             val rule : PatternCompiler.rule =
-               {definiendum = pattern,
-                definiens = conv pattern}
-           in
-             Object.OPERATOR
-               {operator = theta,
-                conversion = SOME (rule, Susp.delay (fn () => conv)),
-                notation = NONE}
-           end
+         notation = NONE,
+         userDefined = true})
 
   fun searchObject T lbl =
     let
@@ -206,56 +193,83 @@ struct
             raise Fail "FV(Definiens) must be a subset of FV(Definiendum)"
         val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
-        case SOME (lookupObject T lbl) handle _ => NONE of
-             SOME (Object.OPERATOR {operator, conversion = NONE,notation}) =>
+        case Telescope.find T lbl of
+             SOME (Object.OPERATOR {operator, conversion = NONE,notation, userDefined = true}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
                   {operator = operator,
                    conversion = conversion,
-                   notation = notation})
+                   notation = notation,
+                   userDefined = true})
            | SOME _ => raise Subscript
            | NONE => raise Fail "Cannot define undeclared operator"
       end
 
-    fun declareNotation T (lbl, notation) =
-      case lookupObject T lbl of
-           Object.OPERATOR {operator,conversion,notation = NONE} =>
-             Telescope.modify T (lbl, fn _ =>
-               Object.OPERATOR
-                {operator = operator,
-                 conversion = conversion,
-                 notation = SOME notation})
-         | _ => raise Subscript
+    fun declareNotation T (theta, notation) =
+      let
+        val lbl = Syntax.Operator.toString theta
+      in
+        case Telescope.find T lbl of
+             SOME (Object.OPERATOR {operator, conversion, notation = NONE, userDefined}) =>
+               Telescope.modify T (lbl, fn _ =>
+                 Object.OPERATOR
+                  {operator = operator,
+                   conversion = conversion,
+                   notation = SOME notation,
+                   userDefined = userDefined})
+           | SOME _ => raise Fail "Cannot redefined notation"
+           | NONE =>
+               Telescope.snoc T (lbl,
+                 Object.OPERATOR
+                  {operator = theta,
+                   conversion = NONE,
+                   notation = SOME notation,
+                   userDefined = false})
+      end
   end
 
 
-  fun lookupDefinition T lbl =
-    case lookupObject T lbl of
-         Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
-       | _ => raise Subscript
+  fun lookupDefinition T theta =
+    case SOME (Builtins.unfold theta) handle _ => NONE of
+         NONE =>
+           (case Telescope.lookup T (Syntax.Operator.toString theta) of
+                 Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
+               | _ => raise Subscript)
+       | SOME conv => conv
 
-  fun lookupTheorem T lbl =
-    case lookupObject T lbl of
+  fun lookupTheorem T theta =
+    case Telescope.lookup T (Syntax.Operator.toString theta) of
          Object.THEOREM {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
 
-  fun lookupExtract T lbl =
+  fun lookupExtract T theta =
     let
-      val {evidence,...} = lookupTheorem T lbl
+      val {evidence,...} = lookupTheorem T theta
     in
       Extract.extract (Susp.force evidence)
     end
 
   fun lookupTactic T lbl =
-    case lookupObject T lbl of
+    case Telescope.lookup T lbl of
          Object.TACTIC tac => tac
        | _ => raise Subscript
 
-  fun lookupOperator T lbl =
-    case lookupObject T lbl of
-         Object.OPERATOR {operator,...} => operator
-       | Object.THEOREM {operator,...} => operator
-       | _ => raise Subscript
+  fun lookupObject T theta =
+    case SOME (Builtins.unfold theta) handle _ => NONE of
+         NONE => Telescope.lookup T (Syntax.Operator.toString theta)
+       | SOME conv =>
+           let
+             val pattern = PatternCompiler.PatternTerm.patternForOperator theta
+             val rule : PatternCompiler.rule =
+               {definiendum = pattern,
+                definiens = conv pattern}
+           in
+             Object.OPERATOR
+               {operator = theta,
+                conversion = SOME (rule, Susp.delay (fn () => conv)),
+                notation = NONE,
+                userDefined = false}
+           end
 end
 
 structure Development : DEVELOPMENT =

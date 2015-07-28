@@ -48,14 +48,14 @@ struct
        notations = notations}
     end
 
-  fun declareNotation {initial, added, notations} (lbl, notation) =
-    {initial = initial,
-     added =
-       case Dict.lookup added lbl of
-            (theta, NONE) => Dict.insert added lbl (theta, SOME notation)
-          | _ => raise Subscript,
-     notations = NotationDict.insert notations (Notation.symbol notation) lbl
-    }
+  fun declareNotation {initial, added, notations} (theta, notation) =
+    let
+      val lbl = UniversalOperator.toString theta
+    in
+      {initial = initial,
+       added = Dict.insert added lbl (theta, SOME notation),
+       notations = NotationDict.insert notations (Notation.symbol notation) lbl }
+    end
 
   fun lookupNotation {initial, added, notations} =
     NotationDict.lookup notations

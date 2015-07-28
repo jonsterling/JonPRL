@@ -83,7 +83,7 @@ struct
   fun parseNotationDecl w =
     Notation.parse && (symbol "=def=" >> parseOperator w)
     wth (fn (notation, theta) =>
-              (declareNotation w (Syntax.Operator.toString theta, notation), DevelopmentAst.NOTATION (notation, theta)))
+              (declareNotation w (theta, notation), DevelopmentAst.NOTATION (notation, theta)))
 
   fun parseOperatorDef w =
     parsePattern w -- (fn pat =>

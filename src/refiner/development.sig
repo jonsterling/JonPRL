@@ -53,21 +53,18 @@ sig
   (* extend a development with a new operator *)
   val declareOperator : world -> label * operator -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
-  val declareNotation : world -> label * Notation.t -> world
+  val declareNotation : world -> operator * Notation.t -> world
 
   (* lookup the statement & evidence of a theorem *)
-  val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
-  val lookupExtract : world -> label -> term
+  val lookupTheorem : world -> operator -> {statement : judgement, evidence : evidence Susp.susp}
+  val lookupExtract : world -> operator -> term
 
   (* lookup a custom tactic *)
   val lookupTactic : world -> label -> tactic
 
-  (* lookup a custom operator *)
-  val lookupOperator : world -> label -> operator
-
   (* lookup the definiens *)
-  val lookupDefinition : world -> label -> conv
+  val lookupDefinition : world -> operator -> conv
 
-  val lookupObject : world -> label -> Object.t
+  val lookupObject : world -> operator -> Object.t
   val searchObject : world -> label -> (label * Object.t) list
 end

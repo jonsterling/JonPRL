@@ -9,7 +9,7 @@ sig
 
   val lookupOperator : world -> label -> operator * Notation.t option
   val declareOperator : world -> label * Arity.t -> world
-  val declareNotation : world -> label * Notation.t -> world
+  val declareNotation : world -> operator * Notation.t -> world
   val lookupNotation : world -> string -> label
 
   (* This should only return operators added with

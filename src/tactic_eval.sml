@@ -13,9 +13,9 @@ struct
 
   fun eval wld t =
     case t of
-        LEMMA (lbl, a) => an a (Lemma (wld, lbl))
+        LEMMA (theta, a) => an a (Lemma (wld, theta))
       | BHYP (hyp, a) => an a (BHyp hyp)
-      | UNFOLD (lbls, a) => an a (Unfolds (wld, lbls))
+      | UNFOLD (thetas, a) => an a (Unfolds (wld, thetas))
       | CUSTOM_TACTIC (lbl, a) =>
         an a (Development.lookupTactic wld lbl)
       | WITNESS (t, a) => an a (Witness t)
@@ -49,7 +49,7 @@ struct
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
-      | CUT_LEMMA (lbl, a) => an a (RefinerUtil.CutLemma (wld, lbl))
+      | CUT_LEMMA (theta, a) => an a (RefinerUtil.CutLemma (wld, theta))
       | SYMMETRY a => an a EqSym
       | CEQUAL_SYM a => an a CEqSym
       | CEQUAL_STEP a => an a CEqStep
