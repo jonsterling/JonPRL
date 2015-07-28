@@ -1,8 +1,11 @@
 functor Development
   (structure Syntax : ABT_UTIL
    structure Evidence : ABT_UTIL
+   structure Sequent : SEQUENT
+     where type term = Syntax.t
    structure Lcf : LCF
      where type evidence = Evidence.t
+     where type goal = Sequent.sequent
    structure PatternCompiler : PATTERN_COMPILER
    sharing PatternCompiler.PatternTerm = Syntax
    structure Extract : EXTRACT
@@ -13,6 +16,7 @@ functor Development
      where type operator = Syntax.Operator.t
      where type label = Label.t
    val operatorToLabel : Syntax.Operator.t -> Label.t
+   val evidenceOperatorToLabel : Evidence.Operator.t -> Label.t
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -145,6 +149,41 @@ struct
                 conversion = SOME (rule, Susp.delay (fn () => conv)),
                 notation = NONE}
            end
+
+  fun searchObject T lbl =
+    let
+      open Telescope.SnocView
+      open Sequent
+      infix >>
+
+      fun termHasLbl lbl term =
+        List.exists (fn oper => operatorToLabel oper = lbl)
+                    (Syntax.operators term)
+      fun evidenceHasLbl lbl term =
+        List.exists (fn oper => evidenceOperatorToLabel oper = lbl)
+                    (Evidence.operators (Susp.force term))
+
+      fun contains lbl (Object.THEOREM {statement = H >> P, evidence, ...}) =
+          termHasLbl lbl P
+          orelse evidenceHasLbl lbl evidence
+          orelse Option.isSome (Context.search H (termHasLbl lbl))
+        | contains lbl (Object.OPERATOR {conversion, ...}) =
+          Option.getOpt (Option.map (fn ({definiendum, definiens}, _) =>
+                                        termHasLbl lbl definiens)
+                                    conversion,
+                         false)
+        | contains lbl (Object.TACTIC _) = false
+
+
+      fun go Empty found = found
+        | go (Snoc (rest, lbl', obj)) found =
+          if contains lbl obj
+          then go (out rest) ((lbl', obj) :: found)
+          else go (out rest) found
+    in
+      go (out T) []
+    end
+
   local
     structure Set = SplaySet(structure Elem = Syntax.Variable)
     val setFromList = foldl (fn (x,S) => Set.insert S x) Set.empty
@@ -224,10 +263,12 @@ structure Development : DEVELOPMENT =
   Development
     (structure Syntax = Syntax
      structure Evidence = Syntax
+     structure Sequent = Sequent
      structure PatternCompiler = PatternCompiler
      structure Extract = Extract
      structure Lcf = Lcf
      structure Builtins = Builtins
 
      val operatorToLabel = Syntax.Operator.toString
+     val evidenceOperatorToLabel = Syntax.Operator.toString
      val goalToString = Sequent.toString)
