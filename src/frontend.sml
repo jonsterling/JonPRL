@@ -16,14 +16,11 @@ struct
 
     fun printStep (name, arity, _) =
       print (name ^ " " ^ Arity.toString arity ^ "\n")
-
-    val labelToString = Development.Telescope.Label.toString
   in
     fun printOperators world =
       (List.app
-         (fn x =>
-           printStep (Syntax.Operator.toString x, Syntax.Operator.arity x, NONE))
-         OperatorType.publicOperators;
+         (fn theta => printStep (CttCalculus.toString theta, CttCalculus.arity theta, NONE))
+         CttCalculus.publicOperators;
        List.app printStep (Development.enumerateOperators world))
   end
 
@@ -55,7 +52,7 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
       val initialContext =
-        StringVariableContext.new
+        ParserContext.new
           (Development.enumerateOperators initialDevelopment)
 
       open CttDevelopmentParser

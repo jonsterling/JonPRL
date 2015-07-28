@@ -17,6 +17,7 @@ sig
   type conv = term -> term
 
   structure Telescope : TELESCOPE
+    where type Label.t = Label.t
   type label = Telescope.label
 
   structure Object :

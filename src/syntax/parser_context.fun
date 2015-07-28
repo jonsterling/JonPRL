@@ -1,4 +1,4 @@
-functor ParserContext(structure Label : LABEL) :> PARSER_CONTEXT where type label = Label.t =
+structure ParserContext :> PARSER_CONTEXT =
 struct
   type label = Label.t
 
@@ -51,5 +51,3 @@ struct
   fun enumerateOperators {initial, added, notations} =
     Dict.toList added
 end
-
-structure StringVariableContext = ParserContext(structure Label = StringVariable)

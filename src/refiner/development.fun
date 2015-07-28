@@ -8,16 +8,15 @@ functor Development
    structure Extract : EXTRACT
      where type evidence = Lcf.evidence
      where type term = Syntax.t
-   structure Telescope : TELESCOPE
    structure Builtins : BUILTINS
      where type Conv.term = Syntax.t
      where type operator = Syntax.Operator.t
-     where type label = Telescope.label
-   val operatorToLabel : Syntax.Operator.t -> Telescope.label
+     where type label = Label.t
+   val operatorToLabel : Syntax.Operator.t -> Label.t
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
-  structure Telescope = Telescope
+  structure Telescope = Telescope(Label)
   structure PatternCompiler = PatternCompiler
 
   type label = Telescope.label
@@ -52,15 +51,15 @@ struct
           let
             val evidence' = Susp.force evidence
           in
-            "Theorem " ^ Telescope.Label.toString lbl
+            "Theorem " ^ Label.toString lbl
               ^ " : ⸤" ^ goalToString statement ^ "⸥ {\n  "
               ^ Evidence.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
       | toString (lbl, TACTIC _) =
-          "Tactic " ^ Telescope.Label.toString lbl ^ "."
+          "Tactic " ^ Label.toString lbl ^ "."
       | toString (lbl, OPERATOR {arity, conversion, notation}) =
-          "Operator " ^ Telescope.Label.toString lbl
+          "Operator " ^ Label.toString lbl
             ^ " : " ^ Arity.toString arity
             ^ "."
             ^ (case conversion of
@@ -72,7 +71,7 @@ struct
                    NONE => ""
                   | SOME notation =>
                        "\n" ^ Notation.toString notation ^ " ≝ "
-                       ^ Telescope.Label.toString lbl ^ ".")
+                       ^ Label.toString lbl ^ ".")
   end
 
   type object = Object.t
@@ -227,7 +226,6 @@ structure Development : DEVELOPMENT =
      structure Evidence = Syntax
      structure PatternCompiler = PatternCompiler
      structure Extract = Extract
-     structure Telescope = Telescope(StringVariable)
      structure Lcf = Lcf
      structure Builtins = Builtins
 

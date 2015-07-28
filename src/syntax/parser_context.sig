@@ -1,7 +1,7 @@
 signature PARSER_CONTEXT =
 sig
     type world
-    type label
+    type label = Label.t
     exception NoSuchOperator of label
 
     val new : (label * Arity.t * Notation.t option) list -> world

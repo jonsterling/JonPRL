@@ -1,9 +1,9 @@
 signature DEVELOPMENT_AST =
 sig
-  type label
+  type label = Label.t
 
   structure Syntax : ABT_UTIL
-    where type Operator.t = label OperatorType.operator
+    where type Operator.t = UniversalOperator.t
 
   structure Tactic : TACTIC
     where type label = label

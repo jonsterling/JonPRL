@@ -70,28 +70,40 @@ struct
        | x \ E => into (x \ subst f E)
 end
 
-functor SyntaxWithUniverses
-  (type label
-   structure Syntax : ABT
-     where type Operator.t = label OperatorType.operator
-  ) : SYNTAX_WITH_UNIVERSES =
+functor SyntaxWithUniverses (Syntax : ABT where type Operator.t = UniversalOperator.t) : SYNTAX_WITH_UNIVERSES =
 struct
+  open CttCalculus
+  open Derivation
+
   open Syntax
   structure Level = Level
 
-  fun mapLevel f O =
-    case O of
-         OperatorType.UNIV k => OperatorType.UNIV (Level.subst f k)
-       | OperatorType.UNIV_EQ k => OperatorType.UNIV_EQ (Level.subst f k)
-       | _ => O
+  structure C = CttCalculusInj
+  structure D = DerivationInj
 
-  fun getLevelParameter (OperatorType.UNIV k) = SOME k
-    | getLevelParameter (OperatorType.UNIV_EQ k) = SOME k
-    | getLevelParameter _ = NONE
+  fun mapLevel f theta =
+    case C.`<? theta of
+         SOME (UNIV k) => C.`> (UNIV (Level.subst f k))
+       | _ =>
+           (case D.`<? theta of
+                 SOME (UNIV_EQ k) => D.`> (UNIV_EQ (Level.subst f k))
+               | _ => theta)
 
-  fun eqModLevel (OperatorType.UNIV _, OperatorType.UNIV _) = true
-    | eqModLevel (OperatorType.UNIV_EQ _, OperatorType.UNIV_EQ _) = true
-    | eqModLevel (o1, o2) = Operator.eq (o1, o2)
+  fun getLevelParameter theta =
+    case C.`<? theta of
+         SOME (UNIV k) => SOME k
+       | _ =>
+           (case D.`<? theta of
+                 SOME (UNIV_EQ k) => SOME k
+               | _ => NONE)
+
+  fun eqModLevel (theta, theta') =
+    case (C.`<? theta, C.`<? theta') of
+         (SOME (UNIV _), SOME (UNIV _)) => true
+       | _ =>
+           (case (D.`<? theta, D.`<? theta') of
+                 (SOME (UNIV_EQ _), SOME (UNIV_EQ _)) => true
+               | _ => Operator.eq (theta, theta'))
 end
 
 functor SequentLevelSolver

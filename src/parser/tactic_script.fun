@@ -1,6 +1,5 @@
 functor TacticScript
-  (structure ParserContext : PARSER_CONTEXT
-   structure Tactic : TACTIC
+  (structure Tactic : TACTIC
    structure RuleParser : INTENSIONAL_PARSER
      where type t = Tactic.t
      where type world = ParserContext.world
