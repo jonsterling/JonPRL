@@ -69,4 +69,5 @@ sig
   val lookupDefinition : world -> label -> conv
 
   val lookupObject : world -> label -> Object.t
+  val searchObject : world -> label -> (label * Object.t) list
 end

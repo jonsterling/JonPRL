@@ -32,6 +32,17 @@ struct
                 Sum.INR (M',n) => print ("\n" ^ termString M ^ " ⇒ " ^ termString M' ^ " in " ^ Int.toString n ^ " steps.\n")
               | Sum.INL R => print ("\n" ^ termString M ^ " gets stuck at " ^ termString R ^ ".\n")
          end
+       | SEARCH oper =>
+         let
+           open Development
+           val lbl = operatorToLabel oper
+           val results = searchObject D lbl
+         in
+           print ("Results for " ^ lbl ^ "\n");
+           List.app
+             (fn (lbl, obj) => print (Object.toString (lbl, obj) ^ "\n"))
+             results
+         end
 
   fun evalDecl D ast =
     case ast of

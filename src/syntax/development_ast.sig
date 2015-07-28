@@ -12,6 +12,7 @@ sig
   datatype command =
       PRINT of Syntax.Operator.t
     | EVAL of Syntax.t * int option
+    | SEARCH of Syntax.Operator.t
 
   datatype t =
       THEOREM of label * Syntax.t * Tactic.t

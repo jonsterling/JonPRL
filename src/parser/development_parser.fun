@@ -25,7 +25,12 @@ struct
 
   structure TP = TokenParser
     (open JonprlLanguageDef
-     val reservedNames = ["Theorem", "Tactic", "Operator", "Print", "Eval"])
+     val reservedNames = ["Theorem",
+                          "Tactic",
+                          "Operator",
+                          "Print",
+                          "Eval",
+                          "Search"])
   open TP
 
   fun parseTm fvs w =
@@ -89,8 +94,13 @@ struct
       opt parseInt << spaces && parseTm [] w
       wth (fn (gas, M) => DevelopmentAst.EVAL (M, gas))
 
+  fun parseSearch w =
+    reserved "Search" >>
+      parseOperator w
+      wth DevelopmentAst.SEARCH
+
   fun parseCommand w =
-    (parsePrint w || parseEval w)
+    (parsePrint w || parseEval w || parseSearch w)
     wth (fn cmd => (w, DevelopmentAst.COMMAND cmd))
 
   fun parseDecl w =
