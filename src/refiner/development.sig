@@ -13,6 +13,7 @@ sig
   type tactic
 
   type term
+  type operator
 
   type conv = term -> term
 
@@ -24,7 +25,6 @@ sig
   sig
     type theorem
     type operator_decl
-    val operatorDeclArity : operator_decl -> Arity.t
 
     datatype t =
         THEOREM of theorem
@@ -38,7 +38,7 @@ sig
 
   (* enumerate the objects and knowledge available at a world *)
   val enumerate : world -> object Telescope.telescope
-  val enumerateOperators : world -> (label * Arity.t * Notation.t option) list
+  val enumerateOperators : world -> (label * operator * Notation.t option) list
   val enumerateTactics : world -> label list
 
   (* the empty world *)
@@ -51,7 +51,7 @@ sig
   val defineTactic : world -> label * tactic -> world
 
   (* extend a development with a new operator *)
-  val declareOperator : world -> label * Arity.t -> world
+  val declareOperator : world -> label * operator -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
   val declareNotation : world -> label * Notation.t -> world
 
@@ -63,7 +63,7 @@ sig
   val lookupTactic : world -> label -> tactic
 
   (* lookup a custom operator *)
-  val lookupOperator : world -> label -> Arity.t
+  val lookupOperator : world -> label -> operator
 
   (* lookup the definiens *)
   val lookupDefinition : world -> label -> conv

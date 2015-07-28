@@ -36,8 +36,7 @@ struct
         (let
           open Notation ParserContext
           val label = lookupNotation w sym
-          val (arity, SOME notation) = ParserContext.lookupOperator w label
-          val theta = `> (CUSTOM {label = label, arity = arity})
+          val (theta, SOME notation) = ParserContext.lookupOperator w label
         in
           case notation of
                INFIX (_, assoc, i) =>

@@ -3,6 +3,7 @@ group is
   ../lib/sml-abt/abt.cm
   ../lib/sml-lcf/lcf.cm
   ../lib/sml-conv/conv.cm
+  ../lib/sml-open-abt/open-abt.cm (bind:(anchor:libs value:../lib))
   ../lib/sml-parcom-wrapper/parcom.cm (bind:(anchor:libs value:../lib))
   ../lib/sml-abt-parser/abt-parser.cm (bind:(anchor:libs value:../lib))
   ../lib/cmlib/cmlib.cm

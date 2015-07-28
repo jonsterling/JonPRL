@@ -70,8 +70,12 @@ struct
   fun parseOperatorDecl w =
     (reserved "Operator" >> parseLabel << colon && parseArity)
      wth (fn (lbl, arity) =>
-             (declareOperator w (lbl, arity),
-              DevelopmentAst.OPERATOR (lbl, arity)))
+           let
+             val w' = declareOperator w (lbl, arity)
+             val (theta, _) = lookupOperator w' lbl
+           in
+             (w', DevelopmentAst.OPERATOR (lbl, theta))
+           end)
 
   fun parseNotationDecl w =
     Notation.parse && (symbol "=def=" >> parseOperator w)

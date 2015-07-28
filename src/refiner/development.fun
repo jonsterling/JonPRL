@@ -1,13 +1,14 @@
 functor Development
   (structure Syntax : ABT_UTIL
-   structure Evidence : ABT_UTIL
+     where type Operator.t = UniversalOperator.t
    structure Sequent : SEQUENT
      where type term = Syntax.t
    structure Lcf : LCF
-     where type evidence = Evidence.t
+     where type evidence = Syntax.t
      where type goal = Sequent.sequent
    structure PatternCompiler : PATTERN_COMPILER
-   sharing PatternCompiler.PatternTerm = Syntax
+     where type PatternTerm.t = Syntax.t
+     where type PatternTerm.Operator.t = UniversalOperator.t
    structure Extract : EXTRACT
      where type evidence = Lcf.evidence
      where type term = Syntax.t
@@ -15,8 +16,6 @@ functor Development
      where type Conv.term = Syntax.t
      where type operator = Syntax.Operator.t
      where type label = Label.t
-   val operatorToLabel : Syntax.Operator.t -> Label.t
-   val evidenceOperatorToLabel : Evidence.Operator.t -> Label.t
    val goalToString : Lcf.goal -> string) : DEVELOPMENT =
 struct
   structure Lcf = Lcf
@@ -28,6 +27,7 @@ struct
   type judgement = Lcf.goal
   type evidence = Lcf.evidence
   type tactic = Lcf.tactic
+  type operator = UniversalOperator.t
 
   type conv = term -> term
 
@@ -40,11 +40,9 @@ struct
 
     type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
-      {arity : Arity.t,
+      {operator : Syntax.Operator.t,
        conversion : operator_definition option,
        notation : Notation.t option}
-
-    fun operatorDeclArity {arity,conversion,notation} = arity
 
     datatype t =
         THEOREM of theorem
@@ -57,14 +55,14 @@ struct
           in
             "Theorem " ^ Label.toString lbl
               ^ " : ⸤" ^ goalToString statement ^ "⸥ {\n  "
-              ^ Evidence.toString evidence' ^ "\n} ext {\n  "
+              ^ Syntax.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
       | toString (lbl, TACTIC _) =
           "Tactic " ^ Label.toString lbl ^ "."
-      | toString (lbl, OPERATOR {arity, conversion, notation}) =
+      | toString (lbl, OPERATOR {operator, conversion, notation}) =
           "Operator " ^ Label.toString lbl
-            ^ " : " ^ Arity.toString arity
+            ^ " : " ^ Arity.toString (Syntax.Operator.arity operator)
             ^ "."
             ^ (case conversion of
                    NONE => ""
@@ -86,10 +84,10 @@ struct
     let
       open Telescope.SnocView
       fun go Empty bind = bind
-        | go (Snoc (rest, lbl, Object.OPERATOR {arity, notation, ...})) bind =
-          go (out rest) ((lbl, arity, notation) :: bind)
+        | go (Snoc (rest, lbl, Object.OPERATOR {operator, notation, ...})) bind =
+          go (out rest) ((lbl, operator, notation) :: bind)
         | go (Snoc (rest, lbl, Object.THEOREM {...})) bind =
-          go (out rest) ((lbl, #[], NONE) :: bind)
+          go (out rest) ((lbl, CttCalculusInj.`> (CttCalculus.CUSTOM {label = lbl, arity = #[]}), NONE) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
@@ -127,17 +125,17 @@ struct
   fun defineTactic T (lbl, tac) =
     Telescope.snoc T (lbl, Object.TACTIC tac)
 
-  fun declareOperator T (lbl, arity) =
+  fun declareOperator T (lbl, operator) =
     Telescope.snoc T
       (lbl, Object.OPERATOR
-        {arity = arity,
+        {operator = operator,
          conversion = NONE,
          notation = NONE})
 
   fun lookupObject T lbl =
     case SOME (Builtins.unfold lbl) handle _ => NONE of
          NONE => Telescope.lookup T lbl
-       | SOME (theta, conv) =>
+       | SOME (theta : Syntax.Operator.t, conv) =>
            let
              val pattern = PatternCompiler.PatternTerm.patternForOperator theta
              val rule : PatternCompiler.rule =
@@ -145,7 +143,7 @@ struct
                 definiens = conv pattern}
            in
              Object.OPERATOR
-               {arity = Syntax.Operator.arity theta,
+               {operator = theta,
                 conversion = SOME (rule, Susp.delay (fn () => conv)),
                 notation = NONE}
            end
@@ -157,11 +155,11 @@ struct
       infix >>
 
       fun termHasLbl lbl term =
-        List.exists (fn oper => operatorToLabel oper = lbl)
+        List.exists (fn oper => Syntax.Operator.toString oper = lbl)
                     (Syntax.operators term)
       fun evidenceHasLbl lbl term =
-        List.exists (fn oper => evidenceOperatorToLabel oper = lbl)
-                    (Evidence.operators (Susp.force term))
+        List.exists (fn oper => Syntax.Operator.toString oper = lbl)
+                    (Syntax.operators (Susp.force term))
 
       fun contains lbl (Object.THEOREM {statement = H >> P, evidence, ...}) =
           termHasLbl lbl P
@@ -197,7 +195,7 @@ struct
     fun defineOperator T (rule as {definiendum, definiens}) =
       let
         val Syntax.$ (oper, _) = Syntax.out definiendum
-        val lbl = operatorToLabel oper
+        val lbl = Syntax.Operator.toString oper
         val LFVs = Syntax.freeVariables definiendum
         val RFVs = Syntax.freeVariables definiens
         val _ =
@@ -208,10 +206,10 @@ struct
         val conversion = SOME (rule, Susp.delay (fn _ => PatternCompiler.compile rule))
       in
         case SOME (lookupObject T lbl) handle _ => NONE of
-             SOME (Object.OPERATOR {arity,conversion = NONE,notation}) =>
+             SOME (Object.OPERATOR {operator, conversion = NONE,notation}) =>
                Telescope.modify T (lbl, fn _ =>
                  Object.OPERATOR
-                  {arity = arity,
+                  {operator = operator,
                    conversion = conversion,
                    notation = notation})
            | SOME _ => raise Subscript
@@ -220,10 +218,10 @@ struct
 
     fun declareNotation T (lbl, notation) =
       case lookupObject T lbl of
-           Object.OPERATOR {arity,conversion,notation = NONE} =>
+           Object.OPERATOR {operator,conversion,notation = NONE} =>
              Telescope.modify T (lbl, fn _ =>
                Object.OPERATOR
-                {arity = arity,
+                {operator = operator,
                  conversion = conversion,
                  notation = SOME notation})
          | _ => raise Subscript
@@ -254,21 +252,18 @@ struct
 
   fun lookupOperator T lbl =
     case lookupObject T lbl of
-         Object.OPERATOR {arity,...} => arity
-       | Object.THEOREM {...} => #[]
+         Object.OPERATOR {operator,...} => operator
+       | Object.THEOREM {...} => CttCalculusInj.`> (CttCalculus.CUSTOM {label = lbl, arity = #[]})
        | _ => raise Subscript
 end
 
 structure Development : DEVELOPMENT =
   Development
     (structure Syntax = Syntax
-     structure Evidence = Syntax
      structure Sequent = Sequent
      structure PatternCompiler = PatternCompiler
      structure Extract = Extract
      structure Lcf = Lcf
      structure Builtins = Builtins
 
-     val operatorToLabel = Syntax.Operator.toString
-     val evidenceOperatorToLabel = Syntax.Operator.toString
      val goalToString = Sequent.toString)

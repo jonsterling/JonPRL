@@ -7,7 +7,7 @@ struct
   open CttCalculus CttCalculusInj Syntax Conv
   infix $ $$ \\
 
-  type operator = Syntax.Operator.t
+  type operator = UniversalOperator.t
 
   local
     fun makeConv (theta : CttCalculus.t) f tbl =

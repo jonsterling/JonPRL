@@ -1,6 +1,7 @@
 structure CttCalculus =
 struct
   type world = ParserContext.world
+  type operator = UniversalOperator.t
 
   datatype t =
       UNIV of Level.t
@@ -129,7 +130,13 @@ struct
 
        | CUSTOM {label,...} => Label.toString label
        | SO_APPLY => "so_apply"
+end
 
+structure CttCalculusInj = OperatorInjection (CttCalculus)
+
+structure ParseCttOperator =
+struct
+  open CttCalculus
   local
     open ParserCombinators CharParser
     infix 2 return wth suchthat return guard when
@@ -149,7 +156,7 @@ struct
     fun choices xs =
       foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
 
-    val extensionalParseOperator : t charParser =
+    val parseOperator : t charParser =
       choices
         [parseUniv,
          string "base" return BASE,
@@ -186,20 +193,8 @@ struct
          string "zero" return ZERO,
          string "succ" return SUCC,
          string "natrec" return NATREC]
-
-    fun intensionalParseOperator world =
-      JonprlTokenParser.identifier -- (fn lbl =>
-        case (SOME (ParserContext.lookupOperator world lbl) handle _ => NONE) of
-             SOME (arity, _) => succeed (CUSTOM {label = lbl, arity = arity})
-           | NONE => fail "no such operator")
-
-    fun parseOperator lookup =
-      intensionalParseOperator lookup
-      || extensionalParseOperator
   end
 end
-
-structure CttCalculusInj = OperatorInjection (CttCalculus)
 
 structure ParseOperator : PARSE_OPERATOR =
 struct
@@ -207,10 +202,17 @@ struct
   open UniversalOperator
 
   open ParserCombinators
-  infix wth
+  infixr 1 || <|>
+  infixr 4 << >> --
+  infix 2 wth
 
-  fun parseOperator lookup =
-    CttCalculus.parseOperator lookup
-      wth CttCalculusInj.`>
+  fun intensionalParseOperator world =
+    JonprlTokenParser.identifier -- (fn lbl =>
+      succeed (#1 (ParserContext.lookupOperator world lbl))
+        handle _ => fail "no such operator")
+
+  fun parseOperator world =
+    intensionalParseOperator world
+    || ParseCttOperator.parseOperator wth CttCalculusInj.`>
 end
 

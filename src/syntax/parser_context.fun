@@ -1,13 +1,16 @@
 structure ParserContext :> PARSER_CONTEXT =
 struct
   type label = Label.t
+  type operator = UniversalOperator.t
 
   structure Dict = SplayDict(structure Key = Label)
+
+  (* to look up the fixity of a notational symbol *)
   structure NotationDict = SplayDict(structure Key = StringVariable)
 
   type world =
-    {initial : (Arity.t * Notation.t option) Dict.dict,
-     added : (Arity.t * Notation.t option) Dict.dict,
+    {initial : (operator * Notation.t option) Dict.dict,
+     added : (operator * Notation.t option) Dict.dict,
      notations : label NotationDict.dict}
 
   exception NoSuchOperator of label
@@ -32,15 +35,24 @@ struct
       | SOME a => a
 
   fun declareOperator {initial, added, notations} (lbl, arity) =
-    {initial = initial,
-     added = Dict.insert added lbl (arity, NONE),
-     notations = notations}
+    let
+      datatype theta = THETA
+      val {inject, project} =
+        OperatorUniverse.embed
+          ((), {arity = fn THETA => arity,
+                toString = fn THETA => lbl,
+                eq = fn (THETA, THETA) => true})
+    in
+      {initial = initial,
+       added = Dict.insert added lbl (inject THETA, NONE),
+       notations = notations}
+    end
 
   fun declareNotation {initial, added, notations} (lbl, notation) =
     {initial = initial,
      added =
        case Dict.lookup added lbl of
-            (arity, NONE) => Dict.insert added lbl (arity, SOME notation)
+            (theta, NONE) => Dict.insert added lbl (theta, SOME notation)
           | _ => raise Subscript,
      notations = NotationDict.insert notations (Notation.symbol notation) lbl
     }

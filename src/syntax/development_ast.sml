@@ -12,7 +12,7 @@ struct
 
   datatype t =
       THEOREM of label * Syntax.t * Tactic.t
-    | OPERATOR of label * Arity.t
+    | OPERATOR of label * Syntax.Operator.t
     | TACTIC of label * Tactic.t
     | DEFINITION of Syntax.t * Syntax.t
     | NOTATION of Notation.t * Syntax.Operator.t
