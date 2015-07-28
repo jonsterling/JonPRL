@@ -8,9 +8,8 @@ struct
 
   structure ParseAbt = ParseAbt
     (structure Syntax = AbtUtil(Abt)
-     structure Operator = UniversalOperator)
+     structure Operator = ParseOperator)
   open CttCalculus ParseAbt
-
 
   local
     open JonprlTokenParser

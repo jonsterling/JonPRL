@@ -1,7 +1,5 @@
 structure Derivation =
 struct
-  type world = ParserContext.world
-
   datatype t =
       UNIV_EQ of Level.t | CUM
     | EQ_EQ
@@ -189,11 +187,6 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
        | LEMMA {label} => Label.toString label
-
-  fun parseOperator _ =
-    ParserCombinators.fail "derivations not parsed"
 end
 
-structure DerivationInj = OperatorInjection
-  (structure Operator = Derivation
-   structure Universe = UniversalOperator.Universe)
+structure DerivationInj = OperatorInjection (Derivation)
