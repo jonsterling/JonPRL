@@ -14,9 +14,6 @@ group is
   dir.sig
   dir.sml
 
-  parse_label.sig
-  parse_label.fun
-
   jonprl_language_def.sml
 
   operator.sml

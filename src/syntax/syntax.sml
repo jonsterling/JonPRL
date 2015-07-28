@@ -1,6 +1,6 @@
 structure Syntax : PARSE_ABT =
 struct
-  structure V = ParseLabel (StringVariable)
+  structure V = StringVariable
 
   structure Abt = Abt
     (structure Operator = UniversalOperator
