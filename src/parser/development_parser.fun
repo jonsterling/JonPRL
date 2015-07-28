@@ -10,8 +10,7 @@ functor DevelopmentParser
    structure TacticScript : TACTIC_SCRIPT
      where type tactic = Tactic.t
      where type world = ParserContext.world
-
-   val operatorToLabel : Syntax.Operator.t -> Label.t) : DEVELOPMENT_PARSER =
+   ) : DEVELOPMENT_PARSER =
 struct
   open ParserContext
 
@@ -50,9 +49,13 @@ struct
     reserved "Theorem" >> parseLabel << colon
       && parseTm [] w
       && braces (!! (TacticScript.parse w))
-      wth (fn (thm, (M, (tac, pos))) =>
-             (declareOperator w (thm, #[]), DevelopmentAst.THEOREM
-               (thm, M, Tactic.COMPLETE (tac, {name = "COMPLETE", pos = pos}))))
+      wth (fn (lbl, (M, (tac, pos))) =>
+             let
+               val w' = declareOperator w (lbl, #[])
+               val (theta, _) = lookupOperator w' lbl
+             in
+               (w', DevelopmentAst.THEOREM (lbl, theta, M, Tactic.COMPLETE (tac, {name = "COMPLETE", pos = pos})))
+             end)
 
   val parseInt =
     repeat1 digit wth valOf o Int.fromString o String.implode
@@ -80,7 +83,7 @@ struct
   fun parseNotationDecl w =
     Notation.parse && (symbol "=def=" >> parseOperator w)
     wth (fn (notation, theta) =>
-              (declareNotation w (operatorToLabel theta, notation), DevelopmentAst.NOTATION (notation, theta)))
+              (declareNotation w (Syntax.Operator.toString theta, notation), DevelopmentAst.NOTATION (notation, theta)))
 
   fun parseOperatorDef w =
     parsePattern w -- (fn pat =>
@@ -128,6 +131,4 @@ structure CttDevelopmentParser = DevelopmentParser
   (structure Syntax = Syntax
    structure Tactic = Tactic
    structure DevelopmentAst = DevelopmentAst
-   structure TacticScript = TacticScript
-   val stringToLabel = StringVariable.named
-   val operatorToLabel = Syntax.Operator.toString)
+   structure TacticScript = TacticScript)

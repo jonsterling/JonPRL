@@ -207,8 +207,6 @@ struct
               in
                 Level.pred k
               end
-           | CUSTOM _ $ _ =>
-               raise Refine
            | _ => Level.base
 
       fun inferType (H, M) =
@@ -1094,22 +1092,18 @@ struct
       open Conversionals
       infix CTHEN
 
-      local
-        open CttCalculusView
-      in
-        fun convTheorem lbl world M =
-          case project M of
-              CUSTOM {label,...} $ _ =>
-                if Label.eq (label, lbl) then
-                  Development.lookupExtract world lbl
-                else
-                  raise Conv.Conv
-            | _ => raise Conv.Conv
-      end
+      fun convTheorem lbl world M =
+        case out M of
+             theta $ #[] =>
+               if Label.eq (Operator.toString theta, lbl) then
+                 Development.lookupExtract world lbl
+               else
+                 raise Conv.Conv
+           | _ => raise Conv.Conv
 
       fun convLabel lbl world =
         Development.lookupDefinition world lbl
-            handle Subscript => convTheorem lbl world
+          handle Subscript => convTheorem lbl world
     in
       fun Unfolds (world, lbls) (H >> P) =
         let
@@ -1123,6 +1117,7 @@ struct
               in
                 acc CTHEN conv
               end) CID lbls
+
         in
           [ Context.map conv H >> conv P
           ] BY (fn [D] => D

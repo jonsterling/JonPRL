@@ -36,7 +36,8 @@ struct
     type theorem =
       {statement : judgement,
        script : tactic,
-       evidence : evidence Susp.susp}
+       evidence : evidence Susp.susp,
+       operator : Syntax.Operator.t}
 
     type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
@@ -86,8 +87,8 @@ struct
       fun go Empty bind = bind
         | go (Snoc (rest, lbl, Object.OPERATOR {operator, notation, ...})) bind =
           go (out rest) ((lbl, operator, notation) :: bind)
-        | go (Snoc (rest, lbl, Object.THEOREM {...})) bind =
-          go (out rest) ((lbl, CttCalculusInj.`> (CttCalculus.CUSTOM {label = lbl, arity = #[]}), NONE) :: bind)
+        | go (Snoc (rest, lbl, Object.THEOREM {operator,...})) bind =
+          go (out rest) ((lbl, operator, NONE) :: bind)
         | go (Snoc (rest, lbl, _)) bind =
           go (out rest) bind
     in
@@ -110,13 +111,14 @@ struct
 
   val empty = Telescope.empty
 
-  fun prove T (lbl, goal, tac) =
+  fun prove T (lbl, theta, goal, tac) =
     let
       val (subgoals, validation) = tac goal
     in
       case subgoals of
            [] => Telescope.snoc T (lbl, Object.THEOREM
-                  {statement = goal,
+                  {operator = theta,
+                   statement = goal,
                    script = tac,
                    evidence = Susp.delay (fn _ => validation [])})
          | _ => raise Fail "Subgoals not discharged"
@@ -253,7 +255,7 @@ struct
   fun lookupOperator T lbl =
     case lookupObject T lbl of
          Object.OPERATOR {operator,...} => operator
-       | Object.THEOREM {...} => CttCalculusInj.`> (CttCalculus.CUSTOM {label = lbl, arity = #[]})
+       | Object.THEOREM {operator,...} => operator
        | _ => raise Subscript
 end
 

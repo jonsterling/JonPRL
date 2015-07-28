@@ -46,7 +46,7 @@ struct
 
   fun evalDecl D ast =
     case ast of
-        THEOREM (lbl, term, tac) =>
+        THEOREM (lbl, theta, term, tac) =>
         let
           val vars = Syntax.freeVariables term
           val () =
@@ -54,12 +54,13 @@ struct
                   [] => ()
                 | _ => raise Open term
         in
-          Development.prove D (lbl,
-                               Sequent.>> (Sequent.Context.empty, term),
-                               TacticEval.eval D tac)
+          Development.prove D
+            (lbl, theta,
+             Sequent.>> (Sequent.Context.empty, term),
+             TacticEval.eval D tac)
         end
-      | OPERATOR (lbl, arity) =>
-        Development.declareOperator D (lbl, arity)
+      | OPERATOR (lbl, theta) =>
+        Development.declareOperator D (lbl, theta)
       | TACTIC (lbl, tac) =>
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>

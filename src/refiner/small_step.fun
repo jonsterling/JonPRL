@@ -133,7 +133,6 @@ struct
                  CANON => raise Stuck (SO_APPLY $$ #[L, R])
                | STEP L' => STEP (SO_APPLY $$ #[L', R])
                | NEUTRAL => NEUTRAL))
-      | CUSTOM _ $ _ => NEUTRAL (* Require unfolding elsewhere *)
       | ` _ => NEUTRAL (* Cannot step an open term *)
       | x \ e => (
         case step e of

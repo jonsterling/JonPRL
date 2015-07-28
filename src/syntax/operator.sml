@@ -19,7 +19,6 @@ struct
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
-    | CUSTOM of {label : Label.t, arity : Arity.t}
     | SO_APPLY
 
 
@@ -87,7 +86,6 @@ struct
 
        | SUBSET => #[0,1]
 
-       | CUSTOM {arity,...} => arity
        | SO_APPLY => #[0,0]
 
   fun toString theta =
@@ -128,7 +126,6 @@ struct
 
        | SUBSET => "subset"
 
-       | CUSTOM {label,...} => Label.toString label
        | SO_APPLY => "so_apply"
 end
 

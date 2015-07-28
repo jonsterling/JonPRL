@@ -11,7 +11,7 @@ struct
     | SEARCH of Syntax.Operator.t
 
   datatype t =
-      THEOREM of label * Syntax.t * Tactic.t
+      THEOREM of label * Syntax.Operator.t * Syntax.t * Tactic.t
     | OPERATOR of label * Syntax.Operator.t
     | TACTIC of label * Tactic.t
     | DEFINITION of Syntax.t * Syntax.t
