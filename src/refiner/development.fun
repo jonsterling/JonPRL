@@ -61,21 +61,33 @@ struct
       | toString (lbl, TACTIC _) =
           "Tactic " ^ Label.toString lbl ^ "."
       | toString (lbl, OPERATOR {operator, conversion, notation, userDefined}) =
-          (case userDefined of
-                true => "Operator " ^ Label.toString lbl
-                        ^ " : " ^ Arity.toString (Syntax.Operator.arity operator)
-                        ^ "."
-              | false => "")
-            ^ (case conversion of
-                    NONE => ""
+          let
+            val arityDecl =
+              case userDefined of
+                    true => ["Operator " ^ Label.toString lbl
+                            ^ " : " ^ Arity.toString (Syntax.Operator.arity operator)
+                            ^ "."]
+                  | false => []
+            val definitionDecl =
+              case conversion of
+                    NONE => []
                   | SOME ({definiendum, definiens}, _) =>
-                       "\n⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
-                       ^ "⸤" ^ Syntax.toString definiens ^ "⸥.")
-            ^ (case notation of
-                    NONE => ""
+                       ["⸤" ^ Syntax.toString definiendum ^ "⸥ ≝ "
+                       ^ "⸤" ^ Syntax.toString definiens ^ "⸥."]
+
+            val notationDecl =
+              case notation of
+                    NONE => []
                   | SOME notation =>
-                       "\n" ^ Notation.toString notation ^ " ≝ "
-                       ^ Label.toString lbl ^ ".")
+                       [Notation.toString notation ^ " ≝ "
+                       ^ Label.toString lbl ^ "."]
+
+            val lines = arityDecl @ definitionDecl @ notationDecl
+            fun intercalate (sep, xs) =
+              getOpt (foldl (fn (x, NONE) => SOME x | (x, SOME r) => SOME (r ^ sep ^ x)) NONE xs, "")
+          in
+            intercalate ("\n", arityDecl @ definitionDecl @ notationDecl)
+          end
   end
 
   type object = Object.t
