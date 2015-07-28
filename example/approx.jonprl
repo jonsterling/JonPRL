@@ -1,4 +1,6 @@
-Theorem ceq-refl-thru-approx : [ {x:base} ceq(x; x) ]
+Infix 7 "~" =def= ceq.
+
+Theorem ceq-refl-thru-approx : [ {x:base} x ~ x ]
 {
   intro; focus 1 #{auto};
   capprox; areflexivity
