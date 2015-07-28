@@ -1,6 +1,5 @@
 functor Development
   (structure Syntax : ABT_UTIL
-     where type Operator.t = UniversalOperator.t
    structure Sequent : SEQUENT
      where type term = Syntax.t
    structure Lcf : LCF
@@ -8,7 +7,7 @@ functor Development
      where type goal = Sequent.sequent
    structure PatternCompiler : PATTERN_COMPILER
      where type PatternTerm.t = Syntax.t
-     where type PatternTerm.Operator.t = UniversalOperator.t
+     where type PatternTerm.Operator.t = Syntax.Operator.t
    structure Extract : EXTRACT
      where type evidence = Lcf.evidence
      where type term = Syntax.t
@@ -27,7 +26,7 @@ struct
   type judgement = Lcf.goal
   type evidence = Lcf.evidence
   type tactic = Lcf.tactic
-  type operator = UniversalOperator.t
+  type operator = Syntax.Operator.t
 
   type conv = term -> term
 
