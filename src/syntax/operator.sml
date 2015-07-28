@@ -1,5 +1,3 @@
-structure UniversalOperator = UniversalOperator (type world = ParserContext.world)
-
 structure CttCalculus =
 struct
   type world = ParserContext.world
@@ -201,7 +199,18 @@ struct
   end
 end
 
-structure CttCalculusInj = OperatorInjection
-  (structure Operator = CttCalculus
-   structure Universe = UniversalOperator.Universe)
+structure CttCalculusInj = OperatorInjection (CttCalculus)
+
+structure ParseOperator : PARSE_OPERATOR =
+struct
+  type world = ParserContext.world
+  open UniversalOperator
+
+  open ParserCombinators
+  infix wth
+
+  fun parseOperator lookup =
+    CttCalculus.parseOperator lookup
+      wth CttCalculusInj.`>
+end
 
