@@ -15,7 +15,7 @@ Theorem minus-one-test : [=(minus-one succ(succ(zero)); succ(zero); nat)] {
 }.
 
 Operator add : (0;0).
-Infix -> 100 "N+" =def= add.
+Infix -> 100 "N+" := add.
 [M N+ N] =def= [natrec(M; N; _.n.succ(n))].
 
 Tactic t {

@@ -1,7 +1,7 @@
-Prefix 7 "↓" =def= squash.
-Infix 3 "∈" =def= member.
-Infix 7 "≼" =def= approx.
-Infix 4 "⇔" =def= iff.
+Prefix 7 "↓" := squash.
+Infix 3 "∈" := member.
+Infix 7 "≼" := approx.
+Infix 4 "⇔" := iff.
 
 Theorem squash_wf : [ {T:U{i}} ↓ T ∈ U{i} ] {
   unfold <squash>; auto

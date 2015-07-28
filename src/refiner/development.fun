@@ -79,7 +79,7 @@ struct
               case notation of
                     NONE => []
                   | SOME notation =>
-                       [Notation.toString notation ^ " ≝ "
+                       [Notation.toString notation ^ " := "
                        ^ Label.toString lbl ^ "."]
 
             val lines = arityDecl @ definitionDecl @ notationDecl

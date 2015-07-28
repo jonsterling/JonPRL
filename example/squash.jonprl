@@ -1,5 +1,5 @@
 Operator set-squash : (0).
-Prefix 7 "↓" =def= set-squash.
+Prefix 7 "↓" := set-squash.
 [↓ A] =def= [{_:unit | A}].
 
 Theorem set-squash-wf : [{A:U{i}} member(↓ A; U{i})] {

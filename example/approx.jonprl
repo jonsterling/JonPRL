@@ -1,4 +1,5 @@
-Infix 7 "~" =def= ceq.
+Infix 7 "~" := ceq.
+Infix 7 "≼" := approx.
 
 Theorem ceq-refl-thru-approx : [ {x:base} x ~ x ]
 {
@@ -9,14 +10,12 @@ Theorem ceq-refl-thru-approx : [ {x:base} x ~ x ]
 Operator bottom : ().
 [bottom()] =def= [ fix(lam(x.x)) ].
 
-Infix 7 "≼" =def= approx.
-
 Operator has-value : (0).
-Postfix 11 "⇓" =def= has-value.
+Postfix 11 "⇓" := has-value.
 [t ⇓] =def= [ <> ≼ cbv(t;_.<>) ].
 
 Operator not : (0).
-Prefix 10 "¬" =def= not.
+Prefix 10 "¬" := not.
 [¬ P] =def= [ P -> void ].
 
 Theorem bottom-diverges : [ ¬ bottom ⇓ ] {
