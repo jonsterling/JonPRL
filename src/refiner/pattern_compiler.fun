@@ -141,9 +141,10 @@ struct
     open CttView
   in
     fun asInstantiate M =
-      case project M of
+      (case project M of
            SO_APPLY $ #[E, M] => SOME (E, M)
-         | _ => NONE
+         | _ => NONE)
+      handle CttCalculusInj.Mismatch => NONE
   end
 
   fun patternForOperator theta =
