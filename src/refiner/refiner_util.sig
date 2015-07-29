@@ -38,6 +38,6 @@ sig
   val Match : match_args -> tactic
 
   val Reduce : int option -> tactic
-  val CutLemma : world * Development.label -> tactic
+  val CutLemma : world * operator -> tactic
 
 end

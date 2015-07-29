@@ -17,7 +17,7 @@ struct
            open Development
            val lbl = operatorToLabel theta
            val declString =
-             case SOME (lookupObject D lbl) handle _ => NONE of
+             case SOME (lookupObject D theta) handle _ => NONE of
                   SOME obj => Object.toString (lbl, obj)
                 | NONE => "Operator " ^ lbl ^ " : " ^ Arity.toString (Syntax.Operator.arity theta) ^ "."
          in
@@ -46,7 +46,7 @@ struct
 
   fun evalDecl D ast =
     case ast of
-        THEOREM (lbl, term, tac) =>
+        THEOREM (lbl, theta, term, tac) =>
         let
           val vars = Syntax.freeVariables term
           val () =
@@ -54,18 +54,19 @@ struct
                   [] => ()
                 | _ => raise Open term
         in
-          Development.prove D (lbl,
-                               Sequent.>> (Sequent.Context.empty, term),
-                               TacticEval.eval D tac)
+          Development.prove D
+            (lbl, theta,
+             Sequent.>> (Sequent.Context.empty, term),
+             TacticEval.eval D tac)
         end
-      | OPERATOR (lbl, arity) =>
-        Development.declareOperator D (lbl, arity)
+      | OPERATOR (lbl, theta) =>
+        Development.declareOperator D (lbl, theta)
       | TACTIC (lbl, tac) =>
         Development.defineTactic D (lbl, TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
       | NOTATION (notation, theta) =>
-        Development.declareNotation D (operatorToLabel theta, notation)
+        Development.declareNotation D (theta, notation)
       | COMMAND cmd =>
         (evalCommand D cmd; D)
 

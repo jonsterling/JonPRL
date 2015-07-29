@@ -10,7 +10,6 @@ signature PATTERN_COMPILER =
 sig
   structure PatternTerm : PATTERN_TERM
 
-  type label
   type term = PatternTerm.t
   type conv = term -> term
 

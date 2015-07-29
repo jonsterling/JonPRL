@@ -8,7 +8,7 @@ functor RefinerUtil
       where type conv = Conv.conv
       where type term = Syntax.t
       where type name = Syntax.Variable.t
-   val operatorToLabel : Syntax.Operator.t -> Refiner.Development.label
+      where type operator = Syntax.Operator.t
    sharing type Lcf.goal = Refiner.Sequent.sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
@@ -59,18 +59,18 @@ struct
   in
     fun UnfoldHead world (goal as H >> P) =
       case out P of
-           oper $ _ => Unfolds (world, [(operatorToLabel oper, NONE)]) goal
+           theta $ _ => Unfolds (world, [(theta, NONE)]) goal
          | _ => raise Refine
 
-    fun CutLemma (world, lbl) =
+    fun CutLemma (world, theta : operator) =
       let
-        val {statement,...} = Refiner.Development.lookupTheorem world lbl
+        val {statement,...} = Development.lookupTheorem world theta
         val H >> P = statement
         val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
-        val name = Syntax.Variable.named (Refiner.Development.Telescope.Label.toString lbl)
+        val name = Syntax.Variable.named (Syntax.Operator.toString theta)
       in
         Assert (P, SOME name)
-          THENL [Lemma (world, lbl), ID]
+          THENL [Lemma (world, theta), ID]
       end
   end
 
@@ -239,5 +239,4 @@ struct
 end
 
 structure RefinerUtil = RefinerUtil
-  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Refiner = Refiner
-   val operatorToLabel = Syntax.Operator.toString)
+  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Refiner = Refiner)

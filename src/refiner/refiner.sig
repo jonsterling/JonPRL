@@ -5,6 +5,7 @@ sig
 
   type conv
   type tactic
+  type operator
 
   exception Refine
 
@@ -14,9 +15,9 @@ sig
   structure Development : DEVELOPMENT
     where type tactic = tactic
     where type judgement = Sequent.sequent
+    where type operator = operator
 
   type world = Development.world
-  type label = Development.label
   type hyp = name HypSyn.t
 
   structure Rules : sig
@@ -165,8 +166,8 @@ sig
     val HypEq : tactic
     val EqInSupertype : tactic
 
-    val Unfolds : world * (label * Level.t option) list -> tactic
-    val Lemma : world * label -> tactic
+    val Unfolds : world * (operator * Level.t option) list -> tactic
+    val Lemma : world * operator -> tactic
     val BHyp : hyp -> tactic
 
     val RewriteGoal : conv -> tactic

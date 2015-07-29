@@ -4,6 +4,7 @@ functor Refiner
      where type judgement = Lcf.goal
      where type evidence = Lcf.evidence
      where type tactic = Lcf.tactic
+     where type operator = UniversalOperator.t
 
    structure Syntax : ABT_UTIL
      where type Operator.t = UniversalOperator.t
@@ -19,8 +20,7 @@ functor Refiner
    structure Semantics : SMALL_STEP where type syn = Syntax.t
    sharing type Development.term = Syntax.t
    structure Builtins : BUILTINS
-     where type Conv.term = Conv.term
-     where type label = Development.label) : REFINER =
+     where type Conv.term = Conv.term) : REFINER =
 struct
   structure Lcf = Lcf
   structure Conv = ConvUtil(structure Conv = Conv and Syntax = Syntax)
@@ -34,8 +34,8 @@ struct
   type name = Sequent.name
   type term = Syntax.t
   type goal = Sequent.sequent
-  type label = Development.label
 
+  type operator = Syntax.Operator.t
   type hyp = name HypSyn.t
 
   structure Operator = Syntax.Operator
@@ -51,6 +51,7 @@ struct
   structure CttCalculusView = RestrictAbtView
     (structure Abt = Syntax
      structure Injection = CttCalculusInj)
+
 
   infix $ \
   infix 8 $$ //
@@ -207,8 +208,6 @@ struct
               in
                 Level.pred k
               end
-           | CUSTOM _ $ _ =>
-               raise Refine
            | _ => Level.base
 
       fun inferType (H, M) =
@@ -1094,35 +1093,37 @@ struct
       open Conversionals
       infix CTHEN
 
-      local
-        open CttCalculusView
-      in
-        fun convTheorem lbl world M =
-          case project M of
-              CUSTOM {label,...} $ _ =>
-                if Label.eq (label, lbl) then
-                  Development.lookupExtract world lbl
-                else
-                  raise Conv.Conv
-            | _ => raise Conv.Conv
-      end
+      fun convTheorem theta world =
+        let
+          val extract = Development.lookupExtract world theta
+        in
+          fn M =>
+            case out M of
+               theta' $ #[] =>
+                 if Syntax.Operator.eq (theta, theta') then
+                   extract
+                 else
+                   raise Conv.Conv
+             | _ => raise Conv.Conv
+        end
 
-      fun convLabel lbl world =
-        Development.lookupDefinition world lbl
-            handle Subscript => convTheorem lbl world
+      fun convOperator theta world =
+        Development.lookupDefinition world theta
+          handle Subscript => convTheorem theta world
     in
-      fun Unfolds (world, lbls) (H >> P) =
+      fun Unfolds (world, thetas) (H >> P) =
         let
           val conv =
-            foldl (fn ((lbl, ok), acc) =>
+            foldl (fn ((theta, ok), acc) =>
               let
                 val k = case ok of SOME k => k | NONE => Level.base
                 val conv =
                   LevelSolver.subst (LevelSolver.Level.yank k)
-                    o CDEEP (convLabel lbl world)
+                    o CDEEP (convOperator theta world)
               in
                 acc CTHEN conv
-              end) CID lbls
+              end) CID thetas
+
         in
           [ Context.map conv H >> conv P
           ] BY (fn [D] => D
@@ -1130,15 +1131,15 @@ struct
         end
     end
 
-      fun Lemma (world, lbl) (H >> P) =
+      fun Lemma (world, theta) (H >> P) =
         let
-          val {statement, evidence} = Development.lookupTheorem world lbl
+          val {statement, evidence} = Development.lookupTheorem world theta
           val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
           val substitution = LevelSolver.Level.resolve constraints
           val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
-          val theta = LEMMA {label = lbl}
+          val lemmaOperator = LEMMA {label = Operator.toString theta}
         in
-          [] BY (fn _ => D.`> theta $$ #[])
+          [] BY (fn _ => D.`> lemmaOperator $$ #[])
         end
 
       fun Admit (H >> P) =
@@ -1166,7 +1167,7 @@ struct
       fun applySolution sol e =
         Meta.unconvert (fn _ => raise Fail "Impossible")
           (Unify.Solution.foldl
-            (fn (v, e', e) => MetaAbt.substOperator (fn #[] => e') (Meta.MetaOperator.META v) e)
+            (fn (v, e', e) => MetaAbt.substOperator (fn _ => e') (Meta.MetaOperator.META v) e)
             e
             sol)
 

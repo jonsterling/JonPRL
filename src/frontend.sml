@@ -14,14 +14,21 @@ struct
   local
     open Development.Telescope.ConsView Development.Object
 
-    fun printStep (name, arity, _) =
-      print (name ^ " " ^ Arity.toString arity ^ "\n")
+    fun printStep theta =
+      let
+        val name = UniversalOperator.toString theta
+        val arity = UniversalOperator.arity theta
+      in
+        print (name ^ " " ^ Arity.toString arity ^ "\n")
+      end
   in
     fun printOperators world =
       (List.app
-         (fn theta => printStep (CttCalculus.toString theta, CttCalculus.arity theta, NONE))
+         (fn theta => printStep (CttCalculusInj.`> theta))
          CttCalculus.publicOperators;
-       List.app printStep (Development.enumerateOperators world))
+       List.app
+         (fn (_, theta, _) => printStep theta)
+         (Development.enumerateOperators world))
   end
 
   fun printTactics world =

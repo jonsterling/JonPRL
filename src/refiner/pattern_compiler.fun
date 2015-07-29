@@ -1,8 +1,6 @@
 functor PatternCompiler
   (structure Conv : CONV
    structure PatternTerm : PATTERN_TERM
-
-   type label
    sharing type Conv.term = PatternTerm.t) : PATTERN_COMPILER =
 struct
   structure PatternTerm = PatternTerm
@@ -12,7 +10,6 @@ struct
   type pattern = PatternTerm.t
   type rule = {definiendum : pattern, definiens : term}
   type conv = Conv.conv
-  type label = label
 
   structure Set = SplaySet(structure Elem = Variable)
   structure Conversionals = Conversionals
@@ -144,9 +141,10 @@ struct
     open CttView
   in
     fun asInstantiate M =
-      case project M of
+      (case project M of
            SO_APPLY $ #[E, M] => SOME (E, M)
-         | _ => NONE
+         | _ => NONE)
+      handle CttCalculusInj.Mismatch => NONE
   end
 
   fun patternForOperator theta =
@@ -186,5 +184,4 @@ end
 
 structure PatternCompiler = PatternCompiler
   (structure Conv = Conv
-   structure PatternTerm = PatternTerm
-   type label = string)
+   structure PatternTerm = PatternTerm)

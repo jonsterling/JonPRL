@@ -13,6 +13,7 @@ sig
   type tactic
 
   type term
+  type operator
 
   type conv = term -> term
 
@@ -24,7 +25,6 @@ sig
   sig
     type theorem
     type operator_decl
-    val operatorDeclArity : operator_decl -> Arity.t
 
     datatype t =
         THEOREM of theorem
@@ -38,36 +38,33 @@ sig
 
   (* enumerate the objects and knowledge available at a world *)
   val enumerate : world -> object Telescope.telescope
-  val enumerateOperators : world -> (label * Arity.t * Notation.t option) list
+  val enumerateOperators : world -> (label * operator * Notation.t option) list
   val enumerateTactics : world -> label list
 
   (* the empty world *)
   val empty : world
 
   (* extend a development with a theorem *)
-  val prove : world -> label * judgement * tactic -> world
+  val prove : world -> label * operator * judgement * tactic -> world
 
   (* extend a development with a custom tactic *)
   val defineTactic : world -> label * tactic -> world
 
   (* extend a development with a new operator *)
-  val declareOperator : world -> label * Arity.t -> world
+  val declareOperator : world -> label * operator -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
-  val declareNotation : world -> label * Notation.t -> world
+  val declareNotation : world -> operator * Notation.t -> world
 
   (* lookup the statement & evidence of a theorem *)
-  val lookupTheorem : world -> label -> {statement : judgement, evidence : evidence Susp.susp}
-  val lookupExtract : world -> label -> term
+  val lookupTheorem : world -> operator -> {statement : judgement, evidence : evidence Susp.susp}
+  val lookupExtract : world -> operator -> term
 
   (* lookup a custom tactic *)
   val lookupTactic : world -> label -> tactic
 
-  (* lookup a custom operator *)
-  val lookupOperator : world -> label -> Arity.t
-
   (* lookup the definiens *)
-  val lookupDefinition : world -> label -> conv
+  val lookupDefinition : world -> operator -> conv
 
-  val lookupObject : world -> label -> Object.t
+  val lookupObject : world -> operator -> Object.t
   val searchObject : world -> label -> (label * Object.t) list
 end

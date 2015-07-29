@@ -1,27 +1,32 @@
-Theorem squash_wf : [ {T:U{i}} member(squash(T); U{i}) ] {
+Prefix 7 "↓" := squash.
+Infix 3 "∈" := member.
+Infix 7 "≼" := approx.
+Infix 4 "⇔" := iff.
+
+Theorem squash_wf : [ {T:U{i}} ↓ T ∈ U{i} ] {
   unfold <squash>; auto
 }.
 
-Theorem implies_squash : [ {T:U{i}} T => squash(T) ] {
+Theorem implies_squash : [ {T:U{i}} T => ↓ T ] {
   *{intro; focus 1 #{auto}};
   @{ [H: 'T |- _] => witness [lam(_.<>) H]};
   unfold <squash>; auto
 }.
 
 Theorem approx_id_refl_wf : [
-  =(approx(lam(x.x);lam(x.x));approx(<>;<>);U{i})
+  =(lam(x.x) ≼ lam(x.x) ; <> ≼ <> ; U{i})
 ] {
   unfold <member>; ext;
   cut-lemma <implies_squash>;
-  elim #1 [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
+  elim #1 [lam(x.x) ≼ lam(x.x) ⇔ <> ≼ <>];
   focus 0 #{ unfold <iff and implies>; auto };
-  assert [iff(approx(lam(x.x); lam(x.x)); approx(<>; <>))];
+  assert [lam(x.x) ≼ lam(x.x) ⇔ <> ≼ <>];
   focus 1 #{elim #2 [H]; auto};
   unfold <iff and implies>; intro; intro; auto
 }.
 
 Theorem test_image_elim : [
-  {n:nat} {m:nat} {x:squash(=(n; m; nat))} member(x; squash(=(n; m; nat))) => =(n; m; nat)
+  {n:nat} {m:nat} {x : ↓ =(n; m; nat)} x ∈ ↓ =(n; m; nat) => =(n; m; nat)
 ] {
   unfold <squash member>;
   *{intro; focus 1 #{auto}};

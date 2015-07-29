@@ -2,16 +2,26 @@ structure Builtins : BUILTINS =
 struct
   structure Syntax = Syntax
   structure Conv = Conv
-  type label = Label.t
 
   open CttCalculus CttCalculusInj Syntax Conv
   infix $ $$ \\
 
-  type operator = Syntax.Operator.t
+  type operator = UniversalOperator.t
+
+  structure Dict = SplayDict
+    (structure Key =
+     struct
+       type t = Syntax.Operator.t
+       val eq = Syntax.Operator.eq
+       fun compare (theta, theta') =
+         String.compare
+           (Syntax.Operator.toString theta,
+            Syntax.Operator.toString theta')
+     end)
 
   local
     fun makeConv (theta : CttCalculus.t) f tbl =
-      StringListDict.insert tbl (Operator.toString (`> theta)) (`> theta, fn P =>
+      Dict.insert tbl (`> theta) (fn P =>
         case out P of
              theta' $ es =>
                if Operator.eq (`> theta, theta') then
@@ -62,5 +72,5 @@ struct
       o unfoldSquash
   end
 
-  val unfold = StringListDict.lookup (definitions StringListDict.empty)
+  val unfold = Dict.lookup (definitions Dict.empty)
 end
