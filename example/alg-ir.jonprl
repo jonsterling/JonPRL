@@ -130,7 +130,7 @@ Operator nil : ().
 Operator cons : (0;0).
 
 [ListCon] =def= [con(Nat;Fin)].
-[List(A)] =def= [decode(ListCon) < A, bang unit >].
+[List(A)] =def= [fst decode(ListCon) < A, bang unit >].
 [nil] =def= [<nz, < lam(x.x), <> >>].
 [cons(x;xs)] =def= [spread(xs; len.rest. spread(rest; env._.
   < ns(len), < lam(e. decide(e; _. x; n. env n)), <> >>
