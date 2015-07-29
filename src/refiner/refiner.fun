@@ -270,6 +270,17 @@ struct
         ] BY mkEvidence EQ_EQ
       end
 
+    fun EqMemEq (H >> P) =
+      let
+        val #[M, N, E] = P ^! EQ
+        val #[] = M ^! AX
+        val #[] = N ^! AX
+        val #[M', N', T] = E ^! EQ
+      in
+        [ H >> E
+        ] BY mkEvidence EQ_MEMBER_EQ
+      end
+
     fun UnitIntro (H >> P) =
       let
         val #[] = P ^! UNIT
@@ -1294,6 +1305,17 @@ struct
                  | _ => raise Refine)
         end
 
+      fun CEqMemEq (H >> P) =
+        let
+          val #[M, N, E] = P ^! EQ
+          val #[] = M ^! AX
+          val #[] = N ^! AX
+          val #[_, _] = E ^! CEQUAL
+        in
+          [ H >> E
+          ] BY mkEvidence CEQUAL_MEMBER_EQ
+        end
+
       fun ApproxEq (H >> P) =
         let
           val #[approx1, approx2, univ] = P ^! EQ
@@ -1305,6 +1327,17 @@ struct
           [ H >> C.`> EQ $$ #[M,M',base]
           , H >> C.`> EQ $$ #[N,N',base]
           ] BY mkEvidence APPROX_EQ
+        end
+
+      fun ApproxMemEq (H >> P) =
+        let
+          val #[M, N, E] = P ^! EQ
+          val #[] = M ^! AX
+          val #[] = N ^! AX
+          val #[_, _] = E ^! APPROX
+        in
+          [ H >> E
+          ] BY mkEvidence APPROX_MEMBER_EQ
         end
 
       fun ApproxExtEq (H >> P) =

@@ -2,7 +2,7 @@ structure Derivation =
 struct
   datatype t =
       UNIV_EQ of Level.t | CUM
-    | EQ_EQ
+    | EQ_EQ | EQ_MEMBER_EQ
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
@@ -15,10 +15,10 @@ struct
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
     | ADMIT
-    | CEQUAL_EQ | CEQUAL_SYM | CEQUAL_STEP
+    | CEQUAL_EQ | CEQUAL_MEMBER_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
-    | APPROX_EQ | APPROX_EXT_EQ | APPROX_REFL
+    | APPROX_EQ | APPROX_MEMBER_EQ | APPROX_EXT_EQ | APPROX_REFL
     | BOTTOM_DIVERGES
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
@@ -32,13 +32,16 @@ struct
          UNIV_EQ _ => #[]
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
+       | EQ_MEMBER_EQ => #[0]
        | CEQUAL_EQ => #[0, 0]
+       | CEQUAL_MEMBER_EQ => #[0]
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
        | APPROX_EQ => #[0,0]
+       | APPROX_MEMBER_EQ => #[0]
        | APPROX_EXT_EQ => #[0]
        | APPROX_REFL => #[]
        | BOTTOM_DIVERGES => #[]
@@ -116,13 +119,16 @@ struct
        | VOID_ELIM => "void-elim"
 
        | EQ_EQ => "eq⁼"
+       | EQ_MEMBER_EQ => "eq-mem⁼"
        | CEQUAL_EQ => "~⁼"
+       | CEQUAL_MEMBER_EQ => "~-mem⁼"
        | CEQUAL_SYM => "~-sym"
        | CEQUAL_STEP => "~-step"
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
        | APPROX_EQ => "~<=-eq"
+       | APPROX_MEMBER_EQ => "~<=-mem-eq"
        | APPROX_EXT_EQ => "~<=-ext-eq"
        | APPROX_REFL => "~<=-refl"
        | BOTTOM_DIVERGES => "bottom-div"

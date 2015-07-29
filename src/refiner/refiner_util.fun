@@ -133,8 +133,11 @@ struct
     in
       AxEq
         ORELSE EqEq
+        ORELSE EqMemEq
         ORELSE CEqEq
+        ORELSE CEqMemEq
         ORELSE ApproxEq
+        ORELSE ApproxMemEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq
