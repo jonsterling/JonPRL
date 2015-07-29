@@ -22,17 +22,20 @@ struct
        | CUM $ _ => ax
 
        | EQ_EQ $ _ => ax
+       | EQ_MEMBER_EQ $ _ => ax
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
        | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => ax
        | EQ_SYM $ _ => ax
        | CEQUAL_EQ $ _ => ax
+       | CEQUAL_MEMBER_EQ $ _ => ax
        | CEQUAL_SYM $ _ => ax
        | CEQUAL_STEP $ _ => ax
        | CEQUAL_SUBST $ #[D, E] => extract E
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
+       | APPROX_MEMBER_EQ $ _ => ax
        | APPROX_EQ $ _ => ax
        | APPROX_EXT_EQ $ _ => ax
        | APPROX_REFL $ _ => ax

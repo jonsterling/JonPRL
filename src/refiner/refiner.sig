@@ -41,6 +41,8 @@ sig
      * 3. H >> N = N' ∈ A *)
     val EqEq : tactic
 
+    val EqMemEq : tactic
+
     (* H >> A by VoidElim
      * 1. H >> Void
      *)
@@ -176,6 +178,7 @@ sig
     val EqSym : tactic
 
     val CEqEq       : tactic
+    val CEqMemEq       : tactic
     val CEqSym      : tactic
     val CEqStep     : tactic
     val CEqSubst    : term * term -> tactic
@@ -184,6 +187,7 @@ sig
     val CEqApprox   : tactic
 
     val ApproxEq    : tactic
+    val ApproxMemEq : tactic
     val ApproxExtEq : tactic
     val ApproxRefl  : tactic
 
