@@ -13,12 +13,16 @@ Theorem union-wf : [
   unfold <union snd>; auto
 }.
 
-Operator top : ().
-[top] =def= [void => void].
 
+||| The least fixed point of a functor can be taken using the union type. This
+||| is dual to the construction of the least fixed point using intersection and
+||| top. Intuitively, the index [n] says how big the structure is, whereas in
+||| the coinductive case it specified how much of the structure is requested for
+||| consumption.
 Operator rec : (1).
 [rec(x.F[x])] =def= [union(nat; n. natrec(n; void; _.x. F[x]))].
 
+||| We construct the natural numbers as the least fixed point of the functor 1 + X.
 Operator NAT : ().
 [NAT] =def= [rec(X. unit + X)].
 
@@ -29,22 +33,23 @@ Operator SU : (0).
 [SU(N)] =def= [inr(N)].
 
 Theorem NAT-wf : [NAT ∈ U{i}] {
-  unfold <NAT rec union top>; auto
+  unfold <NAT rec union>; auto
 }.
 
 Theorem ZE-wf : [ZE ∈ NAT] {
+  ||| In order to apply the image membership rule, we must wrangle the goal such
+  ||| that ZE is in the right form (i.e. a function application); the part that is
+  ||| lost in the redex is, then, the depth of the structure of ZE.
   assert [ZE ~ (snd <succ(zero), ZE>)] <H>;
   focus 0 #{
     unfold <ZE snd>; reduce; auto
   };
 
   chyp-subst -> <H> [h. h ∈ NAT]; thin <H>;
-  unfold <NAT ZE rec union top>; auto;
+  unfold <NAT ZE rec union>; auto;
   reduce; auto
 }.
 
-Operator nat-of : (0).
-[nat-of(N)] =def= [fix(lam(F.decide(N; l.zero; r.succ(F r))))].
 
 Tactic isect-NAT {
   @{ [|- {n:NAT} _] => intro @i; focus 1 #{ lemma <NAT-wf> }}
@@ -52,13 +57,18 @@ Tactic isect-NAT {
 
 Tactic NAT-induction {
   @{ [n:NAT |- _] =>
-     unfold <NAT rec union>; elim <n> <w>; elim <w> <s, t>; elim <s>
+     unfold <NAT rec union>; elim <n> <w>; elim <w> <s,t>; elim <s>
   }
 }.
 
 Tactic steps {
   *{ (!{ step; auto} | step; auto) }
 }.
+
+||| For any term ZE or SUⁿ(ZE), we may convert it back to a canonical (built-in)
+||| natural number.
+Operator nat-of : (0).
+[nat-of(N)] =def= [fix(lam(F.decide(N; l.zero; r.succ(F r))))].
 
 Theorem nat-of-wf : [{n:NAT} nat-of(n) ∈ nat] {
   isect-NAT; NAT-induction;
@@ -68,6 +78,7 @@ Theorem nat-of-wf : [{n:NAT} nat-of(n) ∈ nat] {
 Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   isect-NAT;
 
+  ||| We use the same technique here as we did to prove the wellformedness of ZE.
   assert [SU(n) ~ (snd <succ(nat-of(n)), SU(n)>)] <H>;
   focus 0 #{
     unfold <SU nat-of snd>; csymmetry; steps
