@@ -610,7 +610,7 @@ struct
         val succn = C.`> SUCC $$ #[``n]
 
         val J = Context.empty @@ (n, C.`> NAT $$ #[]) @@ (ih, subst (``n) z C)
-        val H' = ctxSubst (Context.interposeAfter H (z, J)) succn z
+        val H' = Context.mapAfter n (Syntax.subst succn z) (Context.interposeAfter H (z, J))
       in
         [ ctxSubst H zero z >> subst zero z C
         , H' >> subst succn z C
