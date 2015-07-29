@@ -46,8 +46,8 @@ Operator cata : (0;0;0).
   decide(c
   ; o. i o
   ; r. decide(r
-    ; f. map(rec;f)
-    ; f. map(rec;f)
+    ; f. s map(rec;f)
+    ; f. d map(rec;f)
     )
   )
 )))].
