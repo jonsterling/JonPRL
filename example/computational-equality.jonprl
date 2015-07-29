@@ -1,7 +1,7 @@
 Operator Y : (0).
 [Y(f)] =def= [lam(x.f (x x)) lam(x.f (x x))].
 
-Infix 7 "~" =def= ceq.
+Infix 7 "~" := ceq.
 
 Theorem test : [lam(x.x) ~ lam(x.x)] {
   auto
