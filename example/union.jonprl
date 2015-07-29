@@ -61,10 +61,6 @@ Tactic NAT-induction {
   }
 }.
 
-Tactic steps {
-  *{ (!{ step; auto} | step; auto) }
-}.
-
 ||| For any term ZE or SUⁿ(ZE), we may convert it back to a canonical (built-in)
 ||| natural number.
 Operator nat-of : (0).
@@ -81,7 +77,7 @@ Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   ||| We use the same technique here as we did to prove the wellformedness of ZE.
   assert [SU(n) ~ (snd <succ(nat-of(n)), SU(n)>)] <H>;
   focus 0 #{
-    unfold <SU nat-of snd>; csymmetry; steps
+    unfold <SU nat-of snd>; csymmetry; *{ step }; auto
   };
 
   chyp-subst -> <H> [h.h ∈ NAT];
