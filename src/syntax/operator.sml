@@ -14,7 +14,7 @@ struct
     | FIX
     | CBV
     | ISECT
-    | EQ | MEM
+    | EQ | MEM | SUBTYPE
     | SUBSET
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
@@ -38,7 +38,7 @@ struct
        IMAGE,
        FIX,
        CBV,
-       ISECT, EQ, MEM, SUBSET,
+       ISECT, EQ, MEM, SUBTYPE, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
        CEQUAL, APPROX, BASE, SO_APPLY]
@@ -83,6 +83,7 @@ struct
        | CEQUAL => #[0, 0]
        | APPROX => #[0, 0]
        | MEM => #[0,0]
+       | SUBTYPE => #[0, 0]
 
        | SUBSET => #[0,1]
 
@@ -112,6 +113,7 @@ struct
        | CBV => "cbv"
        | ISECT => "isect"
        | EQ => "="
+       | SUBTYPE => "subtype"
        | CEQUAL => "ceq"
        | APPROX => "approx"
        | MEM => "member"
@@ -181,6 +183,7 @@ struct
          string "cbv" return CBV,
          string "isect" return ISECT,
          string "=" return EQ,
+         string "subtype" return SUBTYPE,
          string "ceq" return CEQUAL,
          string "approx" return APPROX,
          string "member" return MEM,
@@ -212,4 +215,3 @@ struct
     intensionalParseOperator world
     || ParseCttOperator.parseOperator wth CttCalculusInj.`>
 end
-
