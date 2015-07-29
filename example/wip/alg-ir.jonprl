@@ -1,4 +1,4 @@
-Operator bang : ().
+Operator bang : (0).
 Operator apply : (0;0).
 Operator compose : (0;0).
 Operator fst : ().
@@ -6,10 +6,11 @@ Operator snd : ().
 
 Infix -> 100 "∘" := compose.
 Infix <- 100 "·" := apply.
+Prefix 100 "!" := bang.
 
-[bang] =def= [lam(v.lam(_. v))].
-[apply(f;x)] =def= [f x].
-[compose(g;f)] =def= [lam(x. g (f x))].
+[! v] =def= [lam(_. v)].
+[f · x] =def= [f x].
+[g ∘ f] =def= [lam(x. g (f x))].
 [fst] =def= [lam(p.spread(p; x.y.x))].
 [snd] =def= [lam(p.spread(p; x.y.y))].
 
@@ -26,7 +27,7 @@ Operator map : (0;0).
 Operator η : ().
 Operator μ : ().
 
-[η] =def= [lam(u. <unit, bang u>)].
+[η] =def= [lam(u. <unit, ! u>)].
 [μ] =def= [lam(F. spread(F; U.T.
   < Σ(U; fst ∘ T)
   , lam(s.spread(s; x.f. fst · (U x) f)) >
@@ -95,7 +96,7 @@ Operator IR_F : (0).
 Operator IR_Sum : (0;0).
 
 [IR_U(c)] =def= [Rec <TagU, c>].
-[IR_T(c;a)] =def= [Rec <TagT, <c, a>>].
+[IR_T(c;a)] =def= [Rec <TagT, c, a>].
 [IR_F(c)] =def= [Rec <TagF, c>].
 [IR_Sum(A;B)] =def= [σ(< unit + unit, lam(x.decide(x; _.A; _.B)) >)].
 
@@ -108,7 +109,7 @@ Operator ns : (0).
 
 [Nat] =def= [IR_U(NumCode)].
 [nz] =def= [inl(<>)].
-[ns(n)] =def= [inr(< bang n, <> >)].
+[ns(n)] =def= [inr(< ! n, <> >)].
 
 Operator Fin : ().
 Operator fz : ().
@@ -122,7 +123,7 @@ Operator Con : ().
 Operator con : (0;0).
 
 [Con] =def= [Fam0(U{i})].
-[con(S;P)] =def= [σ(<S, lam(s. δ(<P s, bang ι(unit)>))>)].
+[con(S;P)] =def= [σ(<S, lam(s. δ(<P s, ! ι(unit)>))>)].
 
 Operator ListCon : ().
 Operator List : (0).
@@ -130,8 +131,8 @@ Operator nil : ().
 Operator cons : (0;0).
 
 [ListCon] =def= [con(Nat;Fin)].
-[List(A)] =def= [fst decode(ListCon) < A, bang unit >].
-[nil] =def= [<nz, < lam(x.x), <> >>].
+[List(A)] =def= [fst decode(ListCon) < A, ! unit >].
+[nil] =def= [<nz, lam(x.x), <> >].
 [cons(x;xs)] =def= [spread(xs; len.rest. spread(rest; env._.
-  < ns(len), < lam(e. decide(e; _. x; n. env n)), <> >>
+  < ns(len), lam(e. decide(e; _. x; n. env n)), <> >
 ))].
