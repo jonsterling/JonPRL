@@ -13,7 +13,6 @@ Theorem union-wf : [
   unfold <union snd>; auto
 }.
 
-
 ||| The least fixed point of a functor can be taken using the union type. This
 ||| is dual to the construction of the least fixed point using intersection and
 ||| top. Intuitively, the index [n] says how big the structure is, whereas in
@@ -83,4 +82,32 @@ Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   chyp-subst -> <H> [h.h ∈ NAT];
   NAT-induction;
   unfold <snd>; reduce; auto
+}.
+
+Theorem NAT-ind-wf : [
+  lam(pz. lam(psu. lam(n. fix(lam(F. decide(n; l.pz; r.psu r (F r))))))) ∈ {P : NAT -> U{i}} P ZE -> ((n : NAT) P n -> P (SU(n))) -> (z : NAT) P z
+] {
+  auto; eq-cd @i';
+  focus 1 #{
+    auto; cut-lemma <NAT-wf>; cum @i; unfold <member>; auto
+  }; auto;
+
+  focus 1 #{
+    cut-lemma <ZE-wf>; unfold <member>; auto
+  }; eq-cd @i;
+
+  focus 1 #{
+    auto; [cut-lemma <NAT-wf>; unfold <member>; auto, cut-lemma <SU-wf>];
+    unfold <member>; bhyp <SU-wf>; auto
+  }; eq-cd @i;
+
+  focus 1 #{
+    lemma <NAT-wf>
+  };
+
+  elim #3 [z]; auto;
+  NAT-induction; unfold <snd>;
+  focus 0 #{reduce 1; auto};
+  unfold <SU>;
+  ||| TODO: can someone figure out how to finish this proof?
 }.
