@@ -4,8 +4,8 @@ Operator compose : (0;0).
 Operator fst : ().
 Operator snd : ().
 
-Infix -> 100 "∘" =def= compose.
-Infix <- 100 "·" =def= apply.
+Infix -> 100 "∘" := compose.
+Infix <- 100 "·" := apply.
 
 [bang] =def= [lam(v.lam(_. v))].
 [apply(f;x)] =def= [f x].
