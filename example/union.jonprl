@@ -17,7 +17,7 @@ Operator top : ().
 [top] =def= [void => void].
 
 Operator rec : (1).
-[rec(x.F[x])] =def= [union(nat; n. natrec(n; top; _.x. F[x]))].
+[rec(x.F[x])] =def= [union(nat; n. natrec(n; void; _.x. F[x]))].
 
 Operator NAT : ().
 [NAT] =def= [rec(X. unit + X)].
@@ -33,7 +33,7 @@ Theorem NAT-wf : [NAT ∈ U{i}] {
 }.
 
 Theorem ZE-wf : [ZE ∈ NAT] {
-  assert [ZE ~ (snd <zero, ZE>)] <H>;
+  assert [ZE ~ (snd <succ(zero), ZE>)] <H>;
   focus 0 #{
     unfold <ZE snd>; reduce; auto
   };
