@@ -43,6 +43,29 @@ Theorem ZE-wf : [ZE ∈ NAT] {
   reduce; auto
 }.
 
+Operator nat-of : (0).
+[nat-of(N)] =def= [fix(lam(F.decide(N; l.zero; r.succ(F r))))].
+
+Theorem nat-of-wf : [{n:NAT} nat-of(n) ∈ nat] {
+  intro @i; focus 1 #{ lemma <NAT-wf> };
+  unfold <NAT rec union snd>;
+  elim #1; elim #2; elim #3; reduce; auto
+}.
+
 Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   intro @i; focus 1 #{ lemma <NAT-wf> };
+
+  assert [SU(n) ~ (snd <succ(nat-of(n)), SU(n)>)] <H>;
+  focus 0 #{
+    unfold <SU nat-of snd>; csymmetry; step; step; auto
+  };
+
+  chyp-subst -> <H> [h.h ∈ NAT];
+  unfold <NAT rec union top>; auto;
+  focus 0 #{
+    cut-lemma <nat-of-wf>; unfold <member>; bhyp <nat-of-wf>;
+    unfold <NAT rec union>; auto
+  };
+
+  elim #1; elim #2; elim #3; unfold <SU snd>; reduce; auto
 }.
