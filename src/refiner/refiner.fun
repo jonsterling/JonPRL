@@ -148,6 +148,7 @@ struct
          | CEQUAL => true
          | APPROX => true
          | SQUASH => true
+         | SUBTYPE => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
@@ -279,6 +280,62 @@ struct
       in
         [ H >> E
         ] BY mkEvidence EQ_MEMBER_EQ
+      end
+
+    fun SubtypeEq (H >> P) =
+      let
+        val #[M, N, univ] = P ^! EQ
+        val (UNIV k, #[]) = asApp univ
+        val #[L, R] = M ^! SUBTYPE
+        val #[L', R'] = M ^! SUBTYPE
+      in
+        [ H >> C.`> EQ $$ #[L, L', univ]
+        , H >> C.`> EQ $$ #[R, R', univ]
+        ] BY mkEvidence SUBTYPE_EQ
+      end
+
+     fun SubtypeMemEq (H >> P) =
+      let
+        val #[M, N, E] = P ^! EQ
+        val #[] = M ^! AX
+        val #[] = N ^! AX
+        val #[_, _] = E ^! SUBTYPE
+      in
+        [ H >> E
+        ] BY mkEvidence SUBTYPE_MEMBER_EQ
+      end
+
+    fun SubtypeIntro oname (H >> P) =
+      let
+        val #[M, N] = P ^! SUBTYPE
+        val name =
+          case oname of
+              SOME name => name
+            | NONE => (Context.fresh (H, Variable.named "x"))
+        val H' = H @@ (name, M)
+      in
+        [ H' >> C.`> MEM $$ #[`` name, N]
+        ] BY (fn [D] => D.`> SUBTYPE_INTRO $$ #[name \\ D]
+               | _ => raise Refine)
+      end
+
+    fun SubtypeElim (hyp, term, oname) (H >> P) =
+      let
+        val term = Context.rebind H term
+        val target = eliminationTarget hyp (H >> P)
+        val #[L, R, M'] = term ^! EQ
+        val #[M, N] = Context.lookup H target ^! SUBTYPE
+        val true = Syntax.eq (M, M')
+        val x =
+          case oname of
+              SOME name => name
+            | NONE => Context.fresh (H, Variable.named "x")
+        val H' = H @@ (x, C.`> EQ $$ #[L, R, N])
+      in
+        [ H >> term
+        , H' >> P
+        ] BY (fn [D, D'] => D.`> SUBTYPE_ELIM $$ #[``target, term, D, x \\  D']
+               | _ => raise Refine)
       end
 
     fun UnitIntro (H >> P) =

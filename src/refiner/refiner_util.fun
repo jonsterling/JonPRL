@@ -92,6 +92,7 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRefl
        ORELSE BaseIntro
+       ORELSE SubtypeIntro freshVariable
        ORELSE
        (if not invertible then
             CEqStruct
@@ -121,6 +122,7 @@ struct
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => SubtypeElim (target, valOf term, listAt (names, 0)))
         ORELSE ImageEqInd (target, fourNames)
         ORELSE ImageElim (target, listAt (names, 0))
         ORELSE NatElim (target, twoNames)
@@ -138,6 +140,8 @@ struct
         ORELSE CEqMemEq
         ORELSE ApproxEq
         ORELSE ApproxMemEq
+        ORELSE SubtypeEq
+        ORELSE SubtypeMemEq
         ORELSE UnitEq
         ORELSE VoidEq
         ORELSE HypEq

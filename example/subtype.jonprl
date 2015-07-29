@@ -1,0 +1,20 @@
+Theorem reflexive : [{A : U{i}} subtype(A; A)] {
+  auto
+}.
+
+Theorem trans : [{A : U{i}}{B : U{i}}{C : U{i}}
+                 subtype(A; B) => subtype(B; C) => subtype(A; C)] {
+  auto; elim #4 [=(x''; x''; A)];
+  auto; elim #5 [=(x''; x''; B)];
+  auto
+}.
+
+Theorem very-strong-function : [{A : U{i}}{B : U{i}}{C : U{i}}
+                                subtype(A; B) -> (A -> B)] {
+  auto; elim #4 [=(x'; x'; A)]; auto; witness [x']; unfold <member>; auto
+}.
+
+Theorem fun-is-id : [{A : U{i}}{B : U{i}}{x : subtype(A; B)}{a : A}
+                     ceq(very-strong-function x a; a)] {
+  auto; unfold <very-strong-function>; *{step}; auto
+}.
