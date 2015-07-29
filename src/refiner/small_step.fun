@@ -65,7 +65,7 @@ struct
 
   fun stepCbv (A, F) = F // A
 
-  fun step e =
+  fun step' e =
     case project e of
         UNIV _ $ _ => CANON
       | VOID $ _ => CANON
@@ -141,6 +141,10 @@ struct
           | CANON => NEUTRAL
       )
       | _ => raise Stuck e
+
+    and step e =
+      step' e
+      handle CttCalculusInj.Mismatch => NEUTRAL
 end
 
 structure Semantics = SmallStep(Syntax)
