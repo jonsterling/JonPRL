@@ -1,0 +1,48 @@
+Infix 20 "∈" := member.
+Infix 100 "~" := ceq.
+
+Operator snd : ().
+[snd] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; snd)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
+] {
+  unfold <union snd>; auto
+}.
+
+Operator top : ().
+[top] =def= [void => void].
+
+Operator rec : (1).
+[rec(x.F[x])] =def= [union(nat; n. natrec(n; top; _.x. F[x]))].
+
+Operator NAT : ().
+[NAT] =def= [rec(X. unit + X)].
+
+Operator ZE : ().
+[ZE] =def= [inl(<>)].
+
+Operator SU : (0).
+[SU(N)] =def= [inr(N)].
+
+Theorem NAT-wf : [NAT ∈ U{i}] {
+  unfold <NAT rec union top>; auto
+}.
+
+Theorem ZE-wf : [ZE ∈ NAT] {
+  assert [ZE ~ (snd <zero, ZE>)] <H>;
+  focus 0 #{
+    unfold <ZE snd>; reduce; auto
+  };
+
+  chyp-subst -> <H> [h. h ∈ NAT]; thin <H>;
+  unfold <NAT ZE rec union top>; auto;
+  reduce; auto
+}.
+
+Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
+  intro @i; focus 1 #{ lemma <NAT-wf> };
+}.
