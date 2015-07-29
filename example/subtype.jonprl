@@ -4,14 +4,14 @@ Theorem reflexive : [{A : U{i}} subtype(A; A)] {
 
 Theorem trans : [{A : U{i}}{B : U{i}}{C : U{i}}
                  subtype(A; B) => subtype(B; C) => subtype(A; C)] {
-  auto; elim #4 [x'']; auto; elim #5 [x''];
-  focus 0 #{hyp-subst → #8 [h. member(h; B)]; *{unfold <member>}; auto};
-  hyp-subst → #10 [h. =(h; h; C)]; auto
+  auto; elim #4 [=(x''; x''; A)];
+  auto; elim #5 [=(x''; x''; B)];
+  auto
 }.
 
 Theorem very-strong-function : [{A : U{i}}{B : U{i}}{C : U{i}}
                                 subtype(A; B) -> (A -> B)] {
-  auto; elim #4 [x']; auto
+  auto; elim #4 [=(x'; x'; A)]; auto; witness [x']; unfold <member>; auto
 }.
 
 Theorem fun-is-id : [{A : U{i}}{B : U{i}}{x : subtype(A; B)}{a : A}

@@ -319,21 +319,22 @@ struct
                | _ => raise Refine)
       end
 
-    fun SubtypeElim (hyp, term, onames) (H >> P) =
+    fun SubtypeElim (hyp, term, oname) (H >> P) =
       let
         val term = Context.rebind H term
         val target = eliminationTarget hyp (H >> P)
+        val #[L, R, M'] = term ^! EQ
         val #[M, N] = Context.lookup H target ^! SUBTYPE
-        val (x, y) =
-          case onames of
+        val true = Syntax.eq (M, M')
+        val x =
+          case oname of
               SOME name => name
-            | NONE => (Context.fresh (H, Variable.named "x"),
-                       Context.fresh (H, Variable.named "y"))
-        val H' = H @@ (x, N) @@ (y, C.`> EQ $$ #[term, `` x, N])
+            | NONE => Context.fresh (H, Variable.named "x")
+        val H' = H @@ (x, C.`> EQ $$ #[L, R, N])
       in
-        [ H >> C.`> MEM $$ #[term, M]
+        [ H >> term
         , H' >> P
-        ] BY (fn [D, D'] => D.`> SUBTYPE_ELIM $$ #[``target, term, D, x \\ (y \\ D')]
+        ] BY (fn [D, D'] => D.`> SUBTYPE_ELIM $$ #[``target, term, D, x \\  D']
                | _ => raise Refine)
       end
 

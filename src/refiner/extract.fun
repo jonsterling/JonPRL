@@ -26,7 +26,7 @@ struct
        | SUBTYPE_EQ $ _ => ax
        | SUBTYPE_MEMBER_EQ $ _ => ax
        | SUBTYPE_INTRO $ _ => ax
-       | SUBTYPE_ELIM $ #[_, term, _, rest] => (extract rest // term) // ax
+       | SUBTYPE_ELIM $ #[_, _, _, rest] => extract rest // ax
        | UNIT_EQ $ _ => ax
        | UNIT_INTRO $ _ => ax
        | UNIT_ELIM $ #[R, E] => extract E
