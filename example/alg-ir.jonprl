@@ -1,0 +1,137 @@
+Operator bang : ().
+Operator apply : (0;0).
+Operator compose : (0;0).
+Operator fst : ().
+Operator snd : ().
+
+Infix -> 100 "∘" =def= compose.
+Infix <- 100 "·" =def= apply.
+
+[bang] =def= [lam(v.lam(_. v))].
+[apply(f;x)] =def= [f x].
+[compose(g;f)] =def= [lam(x. g (f x))].
+[fst] =def= [lam(p.spread(p; x.y.x))].
+[snd] =def= [lam(p.spread(p; x.y.y))].
+
+Operator Σ : (0;0).
+Operator Fam0 : (0).
+Operator Fam1 : (0;0).
+Operator map : (0;0).
+
+[Σ(A;B)] =def= [(x : A) * B x].
+[Fam0(I)] =def= [(X : U{i}) * X -> I].
+[Fam1(I;O)] =def= [(X : U{i}) * (X -> I) -> O].
+[map(f; F)] =def= [spread(F; U.T. < U, f ∘ T >)].
+
+Operator η : ().
+Operator μ : ().
+
+[η] =def= [lam(u. <unit, bang u>)].
+[μ] =def= [lam(F. spread(F; U.T.
+  < Σ(U; fst ∘ T)
+  , lam(s.spread(s; x.f. fst · (U x) f)) >
+))].
+
+Operator Code : (0;0).
+Operator ι : (0).
+Operator σ : (0).
+Operator δ : (0).
+Operator cata : (0;0;0).
+
+[Code(I;O)] =def= [fix(lam(X. O + Fam0(X) + Fam1(I;X)))].
+[ι(x)] =def= [inl(x)].
+[σ(x)] =def= [inr(inl(x))].
+[δ(x)] =def= [inr(inr(x))].
+[cata(i;s;d)] =def= [fix(lam(rec.lam(c.
+  decide(c
+  ; o. i o
+  ; r. decide(r
+    ; f. map(rec;f)
+    ; f. map(rec;f)
+    )
+  )
+)))].
+
+Operator ρ : (0).
+Operator decode : (0).
+
+[ρ(Fi)] =def= [lam(Fo.
+  spread(Fi; U.T.
+  spread(Fo; A.F.
+  <(A -> U), lam(g. F (T ∘ g))>)))
+].
+[decode(c)] =def= [lam(m. cata(η;μ;(η ∘ ρ(m))) c)].
+
+Operator TagU : ().
+Operator TagT : ().
+Operator TagF : ().
+
+[TagU] =def= [inl(<>)].
+[TagT] =def= [inr(inl(<>))].
+[TagF] =def= [inr(inr(<>))].
+
+Operator call : (0;0;0).
+Operator DefU : (0;0).
+Operator DefT : (0;0).
+Operator DefF : (0;0).
+
+[call(self;tag;arg)] =def= [self <tag, arg>].
+[DefU(self;arg)] =def= [(fst ∘ decode(arg)) (call(self;TagF;arg))].
+[DefT(self;arg)] =def= [spread(arg; c.a. (snd ∘ decode(c)) (call(self;TagF;c)) a)].
+[DefF(self;arg)] =def= [<call(self;TagU;arg), call(self;TagF;arg)>].
+
+Operator Rec : ().
+[Rec] =def= [fix(lam(self.lam(input. spread(input; tag.arg.
+  decide(tag
+  ; _. DefU(self;arg)
+  ; rest. decide(rest
+  ; _. DefT(self;arg)
+  ; _. DefF(self;arg)
+))))))].
+
+Operator IR_U : (0).
+Operator IR_T : (0;0).
+Operator IR_F : (0).
+Operator IR_Sum : (0;0).
+
+[IR_U(c)] =def= [Rec <TagU, c>].
+[IR_T(c;a)] =def= [Rec <TagT, <c, a>>].
+[IR_F(c)] =def= [Rec <TagF, c>].
+[IR_Sum(A;B)] =def= [σ(< unit + unit, lam(x.decide(x; _.A; _.B)) >)].
+
+Operator NumCode : ().
+[NumCode] =def= [IR_Sum(ι(void); δ(< unit , lam(X. ι(unit + X <>)) >))].
+
+Operator Nat : ().
+Operator nz : ().
+Operator ns : (0).
+
+[Nat] =def= [IR_U(NumCode)].
+[nz] =def= [inl(<>)].
+[ns(n)] =def= [inr(< bang n, <> >)].
+
+Operator Fin : ().
+Operator fz : ().
+Operator fs : (0).
+
+[Fin] =def= [lam(n. IR_T(NumCode;n))].
+[fz] =def= [inl(<>)].
+[fs(n)] =def= [inr(n)].
+
+Operator Con : ().
+Operator con : (0;0).
+
+[Con] =def= [Fam0(U{i})].
+[con(S;P)] =def= [σ(<S, lam(s. δ(<P s, bang ι(unit)>))>)].
+
+Operator ListCon : ().
+Operator List : (0).
+Operator nil : ().
+Operator cons : (0;0).
+
+[ListCon] =def= [con(Nat;Fin)].
+[List(A)] =def= [decode(ListCon) < A, bang unit >].
+[nil] =def= [<nz, < lam(x.x), <> >>].
+[cons(x;xs)] =def= [spread(xs; len.rest. spread(rest; env._.
+  < ns(len), < lam(e. decide(e; _. x; n. env n)), <> >>
+))].
