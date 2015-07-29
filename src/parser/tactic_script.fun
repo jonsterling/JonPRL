@@ -48,8 +48,8 @@ struct
 
   fun parseScript w () : tactic charParser =
     separate ((squares (commaSep ($ (parseScript w))) wth LIST)
-                   <|> ($ (parseFocus w) wth FOCUS)
-                   <|> ($ (plain w) wth APPLY)) semi
+                   || ($ (parseFocus w) wth FOCUS)
+                   || ($ (plain w) wth APPLY)) semi
     wth THEN
 
   and plain w () =
