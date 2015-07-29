@@ -14,7 +14,7 @@ Theorem union-wf : [
 }.
 
 ||| The least fixed point of a functor can be taken using the union type. This
-||| is dual to the construction of the least fixed point using intersection and
+||| is dual to the construction of the greatest fixed point using intersection and
 ||| top. Intuitively, the index [n] says how big the structure is, whereas in
 ||| the coinductive case it specified how much of the structure is requested for
 ||| consumption.
