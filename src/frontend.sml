@@ -70,4 +70,7 @@ struct
            DevelopmentAstEval.eval initialDevelopment ast)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
+
+  fun loadFiles (initialDevelopment, names) : Development.world =
+    List.foldl (fn (f, dev) => loadFile (dev, f)) Development.empty names
 end

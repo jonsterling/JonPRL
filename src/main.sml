@@ -46,7 +46,7 @@ struct
 
       fun loadFile (f, dev) = Frontend.loadFile (dev, f)
       val oworld =
-        SOME (foldl loadFile Development.empty files)
+        SOME (Frontend.loadFiles (Development.empty, files))
           handle E =>
             (print (exnMessage E); NONE)
     in
