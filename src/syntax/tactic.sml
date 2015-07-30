@@ -193,11 +193,15 @@ struct
      "witness [TERM]",
      "hypothesis (#NUM | <NAME>)",
      "bot-div (#NUM | <NAME>)",
+     "subst [TERM] [TERM] @NUM?",
      "hyp-subst (←|→) (#NUM | <NAME>) [TERM] @NUM?",
+     "csubst [TERM] [TERM] @NUM?",
+     "chyp-subst (←|→) (#NUM | <NAME>) [TERM] @NUM?",
      "id",
      "fail",
      "trace \"MESSAGE\"",
      "cum @LEVEL?",
      "focus NUM #{TACTIC}",
-     "thin (#NUM | <NAME>)"]
+     "thin (#NUM | <NAME>)",
+     "bhyp (#NUM | <NAME>)"]
 end
