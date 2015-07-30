@@ -84,12 +84,18 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
 
-      fun relativize file =
-        OS.Path.joinDirFile {dir = OS.Path.dir name, file = file}
+      open OS.Path
+      fun relativize file = joinDirFile {dir = dir name, file = file}
     in
       case CharParser.parseChars ConfigParser.parse coordStream of
           Sum.INL e => raise Fail e
-        | Sum.INR names => loadFiles (Development.empty, List.map relativize names)
+        | Sum.INR names =>
+          List.foldl (fn (f, dev) => if ext f = SOME "cfg"
+                                     then loadConfig (dev, f)
+                                     else loadFile (dev, f))
+                     initialDevelopment
+                     (List.map relativize names)
+
     end
 
   fun loadConfigs names : Development.world =
