@@ -36,7 +36,7 @@ struct
        | EQ_MEMBER_EQ => #[0]
        | SUBTYPE_EQ => #[0, 0]
        | SUBTYPE_MEMBER_EQ => #[0]
-       | SUBTYPE_INTRO => #[1]
+       | SUBTYPE_INTRO => #[0, 1]
        | SUBTYPE_ELIM => #[0, 0, 0, 1]
        | CEQUAL_EQ => #[0, 0]
        | CEQUAL_MEMBER_EQ => #[0]

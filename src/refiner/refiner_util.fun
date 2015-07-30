@@ -92,7 +92,7 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRefl
        ORELSE BaseIntro
-       ORELSE SubtypeIntro freshVariable
+       ORELSE SubtypeIntro (freshVariable, level)
        ORELSE
        (if not invertible then
             CEqStruct

@@ -179,7 +179,7 @@ sig
 
     val SubtypeEq : tactic
     val SubtypeMemEq : tactic
-    val SubtypeIntro : name option -> tactic
+    val SubtypeIntro : name option * Level.t option -> tactic
     val SubtypeElim : hyp * term * name option -> tactic
 
     val CEqEq       : tactic

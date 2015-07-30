@@ -305,17 +305,19 @@ struct
         ] BY mkEvidence SUBTYPE_MEMBER_EQ
       end
 
-    fun SubtypeIntro oname (H >> P) =
+    fun SubtypeIntro (oname, ok) (H >> P) =
       let
         val #[M, N] = P ^! SUBTYPE
         val name =
           case oname of
               SOME name => name
             | NONE => (Context.fresh (H, Variable.named "x"))
+        val k = case ok of NONE => inferLevel (H, M) | SOME k => k
         val H' = H @@ (name, M)
       in
-        [ H' >> C.`> MEM $$ #[`` name, N]
-        ] BY (fn [D] => D.`> SUBTYPE_INTRO $$ #[name \\ D]
+        [ H  >> C.`> MEM $$ #[M, C.`> (UNIV k) $$ #[]]
+        , H' >> C.`> MEM $$ #[`` name, N]
+        ] BY (fn [D, D'] => D.`> SUBTYPE_INTRO $$ #[D, name \\ D']
                | _ => raise Refine)
       end
 
