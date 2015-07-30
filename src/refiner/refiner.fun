@@ -271,6 +271,19 @@ struct
         ] BY mkEvidence EQ_EQ
       end
 
+    fun EqEqBase (H >> P) =
+      let
+        val #[E1, E2, univ] = P ^! EQ
+        val (UNIV k, #[]) = asApp univ
+        val #[M,N,A] = E1 ^! EQ
+        val #[M',N',A'] = E2 ^! EQ
+      in
+        [ H >> C.`> EQ $$ #[A,A',univ]
+        , H >> C.`> SQUASH $$ #[C.`> PLUS $$ #[C.`> EQ $$ #[M,M',A], C.`> CEQUAL $$ #[M,M']]]
+        , H >> C.`> SQUASH $$ #[C.`> PLUS $$ #[C.`> EQ $$ #[N,N',A], C.`> CEQUAL $$ #[N,N']]]
+        ] BY mkEvidence EQ_EQ_BASE
+      end
+
     fun EqMemEq (H >> P) =
       let
         val #[M, N, E] = P ^! EQ

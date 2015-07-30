@@ -41,6 +41,12 @@ sig
      * 3. H >> N = N' ∈ A *)
     val EqEq : tactic
 
+    (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
+     * 1. H >> A = A' ∈ U{k}
+     * 2. H >> squash(M = M' ∈ A \/ M ~ M')
+     * 3. H >> squash(N = N' ∈ A \/ N ~ N') *)
+    val EqEqBase : tactic
+
     val EqMemEq : tactic
 
     (* H >> A by VoidElim

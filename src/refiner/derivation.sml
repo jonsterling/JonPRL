@@ -2,7 +2,7 @@ structure Derivation =
 struct
   datatype t =
       UNIV_EQ of Level.t | CUM
-    | EQ_EQ | EQ_MEMBER_EQ
+    | EQ_EQ | EQ_EQ_BASE | EQ_MEMBER_EQ
     | SUBTYPE_EQ | SUBTYPE_MEMBER_EQ | SUBTYPE_INTRO | SUBTYPE_ELIM
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
@@ -33,6 +33,7 @@ struct
          UNIV_EQ _ => #[]
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
+       | EQ_EQ_BASE => #[0,0,0]
        | EQ_MEMBER_EQ => #[0]
        | SUBTYPE_EQ => #[0, 0]
        | SUBTYPE_MEMBER_EQ => #[0]
@@ -124,6 +125,7 @@ struct
        | VOID_ELIM => "void-elim"
 
        | EQ_EQ => "eq⁼"
+       | EQ_EQ_BASE => "eq-eq-base⁼"
        | EQ_MEMBER_EQ => "eq-mem⁼"
        | SUBTYPE_EQ => "subtype⁼"
        | SUBTYPE_MEMBER_EQ => "subtype-mem⁼"

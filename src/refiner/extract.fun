@@ -22,6 +22,7 @@ struct
        | CUM $ _ => ax
 
        | EQ_EQ $ _ => ax
+       | EQ_EQ_BASE $ _ => ax
        | EQ_MEMBER_EQ $ _ => ax
        | SUBTYPE_EQ $ _ => ax
        | SUBTYPE_MEMBER_EQ $ _ => ax
