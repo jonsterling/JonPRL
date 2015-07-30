@@ -38,32 +38,15 @@ struct
       val (opts, files) = List.partition (String.isPrefix "--") args
       val mode = getMode opts
 
-      (* Print help message and exit early *)
-      val () =
-          case mode of
-              HELP => (print helpMessage; OS.Process.exit OS.Process.success)
-            | _ => ()
-
-      fun loadFile (f, dev) = Frontend.loadFile (dev, f)
-      val oworld =
-        SOME (foldl loadFile Development.empty files)
-          handle E =>
-            (print (exnMessage E); NONE)
+      (* This will check the file extension to load configs as needed *)
+      fun loadFiles () = Frontend.loadFiles (Development.empty, files)
     in
-      case oworld of
-           NONE => 1
-         | SOME world =>
-             (case mode of
-                   CHECK_DEVELOPMENT => 0
-                 | PRINT_DEVELOPMENT =>
-                   ((Frontend.printDevelopment world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | LIST_OPERATORS =>
-                   ((Frontend.printOperators world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | LIST_TACTICS =>
-                   ((Frontend.printTactics world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | HELP => 0)
+      (case mode of
+           CHECK_DEVELOPMENT => (loadFiles (); 0)
+         | PRINT_DEVELOPMENT => (Frontend.printDevelopment (loadFiles ()); 0)
+         | LIST_OPERATORS => (Frontend.printOperators (loadFiles ()); 0)
+         | LIST_TACTICS => (Frontend.printTactics (loadFiles ()); 0)
+         | HELP => (print helpMessage; 0))
+      handle E => (print (exnMessage E); 1)
     end
 end

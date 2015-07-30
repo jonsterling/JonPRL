@@ -70,4 +70,28 @@ struct
            DevelopmentAstEval.eval initialDevelopment ast)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
+
+  fun loadFiles (initialDevelopment, names) : Development.world =
+    List.foldl ((fn (f, dev) => if OS.Path.ext f = SOME "cfg"
+                                then loadConfig (dev, f)
+                                else loadFile (dev, f)))
+               initialDevelopment
+               names
+  and loadConfig (initialDevelopment, name) : Development.world =
+    let
+      val instream = TextIO.openIn name
+      val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
+      fun is_eol s =
+        case Stream.front s of
+             Stream.Nil => true
+           | Stream.Cons (x, s') => x = #"\n"
+      val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
+
+      open OS.Path
+      fun relativize file = joinDirFile {dir = dir name, file = file}
+    in
+      case CharParser.parseChars ConfigParser.parse coordStream of
+          Sum.INL e => raise Fail e
+        | Sum.INR names => loadFiles (initialDevelopment, List.map relativize names)
+    end
 end
