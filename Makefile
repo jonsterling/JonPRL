@@ -8,7 +8,7 @@ smlnj:
 	build/mkexec.sh `which sml` `pwd` jonprl
 
 test:
-	bin/jonprl --config example/test.cfg
+	bin/jonprl example/test.cfg
 	bin/jonprl example/image.jonprl
 	bin/jonprl stdlib/*.jonprl
 	bin/jonprl example/tautology.jonprl

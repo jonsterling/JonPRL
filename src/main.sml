@@ -6,7 +6,6 @@ struct
     | LIST_OPERATORS
     | LIST_TACTICS
     | HELP
-    | LOAD_CONFIG of mode
 
   local
     fun go [] = PRINT_DEVELOPMENT
@@ -14,7 +13,6 @@ struct
       | go ("--list-operators" :: _) = LIST_OPERATORS
       | go ("--list-tactics" :: _) = LIST_TACTICS
       | go ("--help" :: _) = HELP
-      | go ("--config" :: xs) = LOAD_CONFIG (go xs)
       | go (_ :: xs) = go xs
   in
     fun getMode args = go args
@@ -40,23 +38,15 @@ struct
       val (opts, files) = List.partition (String.isPrefix "--") args
       val mode = getMode opts
 
+      (* This will check the file extension to load configs as needed *)
       fun loadFiles () = Frontend.loadFiles (Development.empty, files)
-      fun loadConfigs () = Frontend.loadConfigs files
     in
       (case mode of
            CHECK_DEVELOPMENT => (loadFiles (); 0)
          | PRINT_DEVELOPMENT => (Frontend.printDevelopment (loadFiles ()); 0)
          | LIST_OPERATORS => (Frontend.printOperators (loadFiles ()); 0)
          | LIST_TACTICS => (Frontend.printTactics (loadFiles ()); 0)
-         | HELP => (print helpMessage; 0)
-         | LOAD_CONFIG CHECK_DEVELOPMENT => (loadConfigs (); 0)
-         | LOAD_CONFIG PRINT_DEVELOPMENT =>
-           (Frontend.printDevelopment (loadConfigs ()); 0)
-         | LOAD_CONFIG LIST_OPERATORS =>
-           (Frontend.printOperators (loadConfigs ()); 0)
-         | LOAD_CONFIG LIST_TACTICS =>
-           (Frontend.printTactics (loadConfigs ()); 0)
-         | _ => 1)
+         | HELP => (print helpMessage; 0))
       handle E => (print (exnMessage E); 1)
     end
 end

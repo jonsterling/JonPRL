@@ -72,9 +72,12 @@ struct
     end
 
   fun loadFiles (initialDevelopment, names) : Development.world =
-    List.foldl (fn (f, dev) => loadFile (dev, f)) Development.empty names
-
-  fun loadConfig (initialDevelopment, name) : Development.world =
+    List.foldl ((fn (f, dev) => if OS.Path.ext f = SOME "cfg"
+                                then loadConfig (dev, f)
+                                else loadFile (dev, f)))
+               initialDevelopment
+               names
+  and loadConfig (initialDevelopment, name) : Development.world =
     let
       val instream = TextIO.openIn name
       val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
@@ -89,16 +92,6 @@ struct
     in
       case CharParser.parseChars ConfigParser.parse coordStream of
           Sum.INL e => raise Fail e
-        | Sum.INR names =>
-          List.foldl (fn (f, dev) => if ext f = SOME "cfg"
-                                     then loadConfig (dev, f)
-                                     else loadFile (dev, f))
-                     initialDevelopment
-                     (List.map relativize names)
-
+        | Sum.INR names => loadFiles (initialDevelopment, List.map relativize names)
     end
-
-  fun loadConfigs names : Development.world =
-    List.foldl (fn (f, dev) => loadConfig (dev, f)) Development.empty names
-
 end
