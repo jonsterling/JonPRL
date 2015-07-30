@@ -8,7 +8,7 @@ smlnj:
 	build/mkexec.sh `which sml` `pwd` jonprl
 
 test:
-	bin/jonprl example/choice.jonprl example/monoid.jonprl example/squash.jonprl example/unique.jonprl
+	bin/jonprl example/test.cfg
 	bin/jonprl example/image.jonprl
 	bin/jonprl stdlib/*.jonprl
 	bin/jonprl example/tautology.jonprl
@@ -23,4 +23,3 @@ install:
 	rm -f $(DESTDIR)/bin/jonprl.new
 	cp bin/jonprl $(DESTDIR)/bin/jonprl.new
 	mv $(DESTDIR)/bin/jonprl.new $(DESTDIR)/bin/jonprl
-

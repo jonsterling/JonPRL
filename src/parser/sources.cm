@@ -13,3 +13,5 @@ group is
   development_parser.fun
   development_parser.sig
   intensional_parser.sig
+
+  config_parser.sml
