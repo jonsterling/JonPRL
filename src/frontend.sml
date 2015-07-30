@@ -73,4 +73,26 @@ struct
 
   fun loadFiles (initialDevelopment, names) : Development.world =
     List.foldl (fn (f, dev) => loadFile (dev, f)) Development.empty names
+
+  fun loadConfig (initialDevelopment, name) : Development.world =
+    let
+      val instream = TextIO.openIn name
+      val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
+      fun is_eol s =
+        case Stream.front s of
+             Stream.Nil => true
+           | Stream.Cons (x, s') => x = #"\n"
+      val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
+
+      fun relativize file =
+        OS.Path.joinDirFile {dir = OS.Path.dir name, file = file}
+    in
+      case CharParser.parseChars ConfigParser.parse coordStream of
+          Sum.INL e => raise Fail e
+        | Sum.INR names => loadFiles (Development.empty, List.map relativize names)
+    end
+
+  fun loadConfigs names : Development.world =
+    List.foldl (fn (f, dev) => loadConfig (dev, f)) Development.empty names
+
 end

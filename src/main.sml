@@ -6,6 +6,7 @@ struct
     | LIST_OPERATORS
     | LIST_TACTICS
     | HELP
+    | LOAD_CONFIG of mode
 
   local
     fun go [] = PRINT_DEVELOPMENT
@@ -13,6 +14,7 @@ struct
       | go ("--list-operators" :: _) = LIST_OPERATORS
       | go ("--list-tactics" :: _) = LIST_TACTICS
       | go ("--help" :: _) = HELP
+      | go ("--config" :: xs) = LOAD_CONFIG (go xs)
       | go (_ :: xs) = go xs
   in
     fun getMode args = go args
@@ -38,32 +40,23 @@ struct
       val (opts, files) = List.partition (String.isPrefix "--") args
       val mode = getMode opts
 
-      (* Print help message and exit early *)
-      val () =
-          case mode of
-              HELP => (print helpMessage; OS.Process.exit OS.Process.success)
-            | _ => ()
-
-      fun loadFile (f, dev) = Frontend.loadFile (dev, f)
-      val oworld =
-        SOME (Frontend.loadFiles (Development.empty, files))
-          handle E =>
-            (print (exnMessage E); NONE)
+      fun loadFiles () = Frontend.loadFiles (Development.empty, files)
+      fun loadConfigs () = Frontend.loadConfigs files
     in
-      case oworld of
-           NONE => 1
-         | SOME world =>
-             (case mode of
-                   CHECK_DEVELOPMENT => 0
-                 | PRINT_DEVELOPMENT =>
-                   ((Frontend.printDevelopment world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | LIST_OPERATORS =>
-                   ((Frontend.printOperators world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | LIST_TACTICS =>
-                   ((Frontend.printTactics world; 0)
-                     handle E => (print (exnMessage E); 1))
-                 | HELP => 0)
+      (case mode of
+           CHECK_DEVELOPMENT => (loadFiles (); 0)
+         | PRINT_DEVELOPMENT => (Frontend.printDevelopment (loadFiles ()); 0)
+         | LIST_OPERATORS => (Frontend.printOperators (loadFiles ()); 0)
+         | LIST_TACTICS => (Frontend.printTactics (loadFiles ()); 0)
+         | HELP => (print helpMessage; 0)
+         | LOAD_CONFIG CHECK_DEVELOPMENT => (loadConfigs (); 0)
+         | LOAD_CONFIG PRINT_DEVELOPMENT =>
+           (Frontend.printDevelopment (loadConfigs ()); 0)
+         | LOAD_CONFIG LIST_OPERATORS =>
+           (Frontend.printOperators (loadConfigs ()); 0)
+         | LOAD_CONFIG LIST_TACTICS =>
+           (Frontend.printTactics (loadConfigs ()); 0)
+         | _ => 1)
+      handle E => (print (exnMessage E); 1)
     end
 end
