@@ -97,5 +97,5 @@ struct
     !! (middle (symbol "!{") ($ (parseScript w)) (symbol "}"))
     wth (fn (t, pos) => COMPLETE (t, {name = "COMPLETE", pos = pos}))
 
-  fun parse w = $ (parseScript w) << opt (dot || semi)
+  fun parse w = $ (parseScript w) << opt dot
 end
