@@ -31,12 +31,9 @@ sig
   (* [This conversion only makes sense when the underlying term
    *  is a tree]
    *
-   * CDEEP t will run t and if it succeeds just behaves as t.
-   * If t fails CDEEP will walk to the nodes of the t and recurse with
-   * CDEEP t there. If there are no subterms then CDEEP t just behaves
-   * as CID. Note that CDEEP t will apply to *every* subterm so the conv
-   * may rewrite multiple subterms of the original supplied term. However
-   * it will never rewrite X and Y where Y occurs somewhere in X.
+   * CDEEP t will run t from the bottom up. If [t] can be applied to
+   * any subterm it will be. This means that whenever [t] is run on a term
+   * [t] has already been run on the subterms of that term.
    *)
   val CDEEP : conv -> conv
 
