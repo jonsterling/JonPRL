@@ -47,9 +47,9 @@ struct
               TRACE (msg, {name = name, pos = pos}))
 
   fun parseScript w () : tactic charParser =
-    separate ((squares (commaSep ($ (parseScript w))) wth LIST)
-                   || ($ (parseFocus w) wth FOCUS)
-                   || ($ (plain w) wth APPLY)) semi
+    sepEnd' ((squares (commaSep ($ (parseScript w))) wth LIST)
+                 || ($ (parseFocus w) wth FOCUS)
+                 || ($ (plain w) wth APPLY)) semi
     wth THEN
 
   and plain w () =
@@ -97,5 +97,5 @@ struct
     !! (middle (symbol "!{") ($ (parseScript w)) (symbol "}"))
     wth (fn (t, pos) => COMPLETE (t, {name = "COMPLETE", pos = pos}))
 
-  fun parse w = $ (parseScript w) << opt (dot || semi)
+  fun parse w = $ (parseScript w) << opt dot
 end

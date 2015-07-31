@@ -1,0 +1,117 @@
+||| This gives a general framework for inductive and coinductive types
+||| in JonPRL. To use it, one introduces and operator and shows that it's
+||| (co)continious and in return gets back the least/greatest fixed point
+||| of that type and a corresponding induction principle.
+
+||| First, coinduction
+Operator top : ().
+[top] =def= [void => void].
+
+Theorem top-is-top :
+  [{x:base} {y:base} =(x; y; top)] {
+  unfold <top>; auto
+}.
+
+Operator corec : (1).
+[corec(x.F[x])] =def= [{n:nat} natrec(n; top; _.x. F[x])].
+
+||| Now induction
+Operator snd : ().
+[snd] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; snd)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} member(union(A; x.B x); U{i})
+] {
+  unfold <union snd>; auto
+}.
+
+Operator rec : (1).
+[rec(x.F[x])] =def= [union(nat; n. lam(n. natrec(n; void; _.x. F[x])) n)].
+
+||| So now that we have these two constructors we want to prove
+||| a few things. First that they actually give us fixed points,
+||| second that we can derive a (co)induction principle from
+||| their results. However, this isn't as simple as it seems.
+|||
+||| corec/rec only do the right things when they're applied to
+||| functionals with an appropriate continuity principle. They
+||| need to be
+|||
+|||  1. Monotone
+|||  2. Preserve either glb and lubs
+|||
+||| We start by proving that union and intersection are actually
+||| the least and greatest upperbounds for
+
+Infix 50 "⊂" := subtype.
+
+Theorem isect-lb : [
+  {A : U{i}} {B : A -> U{i}} {a : A} ({a : A} B a) ⊂ B a
+] {
+  auto; elim #4 [a]; auto; hyp-subst ← #6 [h.=(h;h;_)]; auto
+}.
+
+
+Theorem isect-glb : [
+  {A : U{i}} {B : A -> U{i}} {C : U{i}}
+  ({a : A} C ⊂ B a) =>
+  C ⊂ ({a : A} B a)
+] {
+  auto; elim #4 [a]; auto; elim #7 [=(x'; x'; C)]; auto
+}.
+
+Theorem union-ub : [
+  {A : U{i}} {B : A -> U{i}} {a : A} B a ⊂ union(A; a. B a)
+] {
+  unfold <union>; auto;
+  csubst [ceq(x; snd <a, x>)] [h. =(h; h; _)];
+  focus 0 #{unfold <snd>; reduce; auto};
+  auto
+}.
+
+
+Theorem union-lub : [
+  {A : U{i}} {B : A -> U{i}} {C : U{i}}
+  ({a : A} B a ⊂ C) =>
+  union(A; a. B a) ⊂ C
+] {
+  unfold <union>; auto;
+  elim #5; unfold <snd>; elim #6; reduce;
+  elim #4 [s]; auto; elim #9 [=(t; t; B s)]; auto
+}.
+
+||| So we now know that union and isect actually give us the
+||| least and greatest upper bounds in the poset of types where
+||| the ordering relation is ⊂. Now we want to formalize the math
+||| that gives us fixed-points. First let's define the appropriate
+||| continuity predicates.
+
+||| We need an extensional equality on types
+Operator teq : (0; 0).
+Infix 50 "~" := teq.
+[A ~ B] =def= [(A ⊂ B) * (B ⊂ A)].
+
+Operator cocont : (0).
+[cocont(F)] =def= [{A : U{i}}{B : A -> U{i}} ({a : A} F (B a)) ~ F ({a : A} B a)].
+
+Operator cont : (0).
+[cont(F)] =def= [{A : U{i}}{B : A -> U{i}}
+                 union(A; a. F (B a)) ~ F (union(A; a. B a))].
+
+Theorem rec-is-fixed : [
+  {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
+] {
+  unfold <cont teq rec union>; auto;
+  elim #2 [nat]; auto; reduce;
+  elim #4 [lam(n.natrec(n; void; _.x.F x))]; auto;
+  elim #6; thin #6; thin #8; thin #5;
+  focus 0 #{
+    thin #6;
+    elim #5 [=(x';x';image((x:nat) * F (lam(n.natrec(n; void; _.x.F x)) x); snd))];
+    reduce; auto;
+    elim #3; elim #4; auto
+  }
+}.
