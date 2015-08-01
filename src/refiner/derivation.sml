@@ -15,7 +15,7 @@ struct
 
     | NAT_EQ | NAT_ELIM | ZERO_EQ | SUCC_EQ | NATREC_EQ
 
-    | ADMIT
+    | FIAT
     | CEQUAL_EQ | CEQUAL_MEMBER_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
@@ -113,7 +113,7 @@ struct
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
-       | ADMIT => #[]
+       | FIAT => #[]
        | LEMMA _ => #[]
 
   fun toString theta =
@@ -194,7 +194,7 @@ struct
        | HYP_EQ => "hyp-eq"
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
-       | ADMIT => "<<<<<ADMIT>>>>>"
+       | FIAT => "<<<<<FIAT>>>>>"
 
        | SUBSET_EQ => "subset-eq"
        | SUBSET_INTRO => "subset-intro"

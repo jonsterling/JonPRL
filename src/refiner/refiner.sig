@@ -22,7 +22,7 @@ sig
 
   structure Rules : sig
     (* Pretend you have got a proof. *)
-    val Admit : tactic
+    val Fiat : tactic
 
     (* H >> A = B ∈ U{l} by Cum k (k < l)
      * 1.  H >> A = B ∈ U{k}

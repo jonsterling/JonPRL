@@ -119,7 +119,7 @@ struct
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
 
-       | ADMIT $ #[] => ``(Variable.named "<<<<<ADMIT>>>>>")
+       | FIAT $ #[] => raise Fail "FIAT may not appear in extract"
 
        | LEMMA {label} $ _ => ``(Variable.named label)
 
