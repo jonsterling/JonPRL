@@ -1226,8 +1226,8 @@ struct
           [] BY (fn _ => D.`> lemmaOperator $$ #[])
         end
 
-      fun Admit (H >> P) =
-        [] BY (fn _ => D.`> ADMIT $$ #[])
+      fun Fiat (H >> P) =
+        [] BY (fn _ => D.`> FIAT $$ #[])
 
       fun RewriteGoal (c : conv) (H >> P) =
         [ Context.map c H >> c P

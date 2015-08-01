@@ -67,6 +67,7 @@ sig
       | COMPLETE of t * meta
       | MATCH of (ctx_pattern * branch) list
       | THIN of hyp * meta
+      | FIAT of meta
     and then_tactic =
         APPLY of t
       | LIST of t list
