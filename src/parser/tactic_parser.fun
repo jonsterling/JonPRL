@@ -267,6 +267,12 @@ struct
       wth (fn (name, hyp) => fn (pos : Pos.t) =>
             THIN (hyp, {name = name, pos = pos}))
 
+
+  val parseFiat : tactic_parser =
+    fn w => tactic "fiat"
+      wth (fn name => fn (pos : Pos.t) =>
+            FIAT {name = name, pos = pos})
+
   fun tacticParsers w =
     parseLemma w
       || parseBHyp w
@@ -296,6 +302,7 @@ struct
       || parseEqEqBase w
       || parseCHypSubst w
       || parseThin w
+      || parseFiat w
       || parseCustomTactic w
 
   val parse : world -> Tactic.t charParser =

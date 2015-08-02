@@ -82,4 +82,5 @@ struct
                branches)
       | THIN (hyp, a) =>
           an a (Thin hyp)
+      | FIAT a => an a Fiat
 end

@@ -33,6 +33,9 @@ struct
     (Telescope.lookup ctx k)
 
   fun lookup ctx k = #1 (lookupVisibility ctx k)
+  fun find ctx k =
+    SOME (lookup ctx k )
+    handle _ => NONE
 
   fun nth ctx i =
     let

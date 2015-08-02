@@ -77,6 +77,19 @@ struct
         (H', x', E')
       end
 
+    (* assert that an expression's free variables are all bound in context *)
+    fun assertClosed (H : context) (m : Syntax.t) =
+      let
+        val FVs = Syntax.freeVariables m
+        val isClosed = List.all (fn x => case Context.find H x of NONE => false | SOME _ => true) FVs
+      in
+        if isClosed then
+          ()
+        else
+          raise Fail "Expression contains variables not bound in context"
+      end
+
+
     fun mkEvidence operator = fn Ds => D.`> operator $$ Vector.fromList Ds
 
     fun BY (Ds, V) = (Ds, V)
@@ -883,6 +896,7 @@ struct
     fun Witness M (H >> P) =
       let
         val M = Context.rebind H M
+        val _ = assertClosed H M
         val hasHiddenVariables =
           foldl
             (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden handle _ => false)
@@ -1234,8 +1248,8 @@ struct
           [] BY (fn _ => D.`> lemmaOperator $$ #[])
         end
 
-      fun Admit (H >> P) =
-        [] BY (fn _ => D.`> ADMIT $$ #[])
+      fun Fiat (H >> P) =
+        [] BY (fn _ => D.`> FIAT $$ #[])
 
       fun RewriteGoal (c : conv) (H >> P) =
         [ Context.map c H >> c P
