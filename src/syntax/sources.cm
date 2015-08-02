@@ -4,7 +4,7 @@ group is
   $libs/sml-abt-parser/abt-parser.cm
   $libs/sml-open-abt/open-abt.cm
   $libs/sml-unparse/unparse.cm
-  $libs/telescopes/telescopes.cm
+  $libs/sml-telescopes/telescopes.cm
   $libs/cmlib/cmlib.cm
   $libs/sml-conv/conv.cm
 
