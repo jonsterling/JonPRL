@@ -60,6 +60,22 @@ struct
         end
       | _ => raise Conv)
 
+    val unfoldFst =
+      makeConv FST (fn #[T] =>
+        let val x = Variable.named "x"
+            val y = Variable.named "y"
+        in `> SPREAD $$ #[T, x \\ (y \\ ``x)]
+        end
+      | _ => raise Conv)
+
+    val unfoldSnd =
+      makeConv SND (fn #[T] =>
+        let val x = Variable.named "x"
+	    val y = Variable.named "y"
+        in `> SPREAD $$ #[T, x \\ (y \\ ``y)]
+	end
+      | _ => raise Conv)
+
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
   val definitions =
@@ -70,6 +86,8 @@ struct
       o unfoldId
       o unfoldBot
       o unfoldSquash
+      o unfoldFst
+      o unfoldSnd
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)

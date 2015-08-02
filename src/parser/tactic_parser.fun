@@ -208,6 +208,11 @@ struct
       wth (fn (name, i) => fn pos =>
         BOTTOM_DIVERGES (i, {name = name, pos = pos}))
 
+  val parseEqEqBase : tactic_parser =
+   fn w => tactic "eq-eq-base"
+      wth (fn name => fn pos =>
+        EQ_EQ_BASE {name = name, pos = pos})
+
   val parseAssumption : tactic_parser =
     fn w => tactic "assumption"
       wth (fn name => fn pos => ASSUMPTION {name = name, pos = pos})
@@ -288,6 +293,7 @@ struct
       || parseCEqualApprox w
       || parseApproxRefl w
       || parseBottomDiverges w
+      || parseEqEqBase w
       || parseCHypSubst w
       || parseThin w
       || parseCustomTactic w

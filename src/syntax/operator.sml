@@ -9,7 +9,7 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD | AND
     | FUN | LAM | AP | IMPLIES | IFF
-    | ID | BOT | SQUASH
+    | ID | BOT | SQUASH | FST | SND
     | IMAGE
     | FIX
     | CBV
@@ -34,7 +34,7 @@ struct
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD, AND,
        FUN, LAM, AP, IMPLIES, IFF,
-       ID, BOT, SQUASH,
+       ID, BOT, SQUASH, FST, SND,
        IMAGE,
        FIX,
        CBV,
@@ -65,6 +65,8 @@ struct
        | ID => #[]
        | BOT => #[]
        | SQUASH => #[0]
+       | FST => #[0]
+       | SND => #[0]
        | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
@@ -108,6 +110,8 @@ struct
        | ID => "id"
        | BOT => "bot"
        | SQUASH => "squash"
+       | FST => "fst"
+       | SND => "snd"
        | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
@@ -178,6 +182,8 @@ struct
          string "id" return ID,
          string "bot" return BOT,
          string "squash" return SQUASH,
+         string "fst" return FST,
+         string "snd" return SND,
          string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,

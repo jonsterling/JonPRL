@@ -18,3 +18,42 @@ Theorem fun-is-id : [{A : U{i}}{B : U{i}}{x : subtype(A; B)}{a : A}
                      ceq(very-strong-function x a; a)] {
   auto; unfold <very-strong-function>; *{step}; auto
 }.
+
+
+(* Let's now define subtype *)
+Operator subtype_rel : (0;0).
+[subtype_rel(A;B)] =def= [ member(lam(x.x); A -> B) ].
+
+Tactic unsquash {
+  @{ [ |- squash(T) ] =>
+       assert [T] <h>;
+       [ id
+       , witness [lam(_.<>) h];
+         unfold <squash>;
+         auto;
+         fail
+       ]
+   }
+}.
+
+Theorem subtype_rel_wf :
+[ {A : U{i}}{B : U{i}} member(subtype_rel(A;B);U{i}) ] {
+  auto;unfold <subtype_rel member>;eq-eq-base;
+  [ auto
+  , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
+    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;[reduce 1;auto, id];
+    elim <x>;[reduce 1;auto, reduce 1; auto]
+  , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
+    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;[reduce 1;auto, id];
+    elim <x>;[reduce 1;auto, reduce 1; auto]
+  ] 
+}.
+
+Theorem subtype-rel-eq :
+[ {A : U{i}}{B : U{i}}{x : A}{y : A} subtype_rel(A;B) -> =(x;y;A) -> =(x;y;B) ] {
+ auto;intro @i;
+ [ intro @i;
+   [ unfold <subtype_rel>
+   , auto]
+ , id (*lemma <subtype_rel_wf>*) ]
+}.
