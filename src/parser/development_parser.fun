@@ -32,6 +32,9 @@ struct
                           "Search"])
   open TP
 
+  (* Make sure that our version of braces smartly handles whitespace *)
+  val braces = fn p => braces (spaces >> p << spaces)
+
   fun parseTm fvs w =
     squares (Syntax.parseAbt w (Syntax.initialState fvs))
 
