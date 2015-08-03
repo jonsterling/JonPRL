@@ -290,7 +290,7 @@ struct
         val (UNIV k, #[]) = asApp univ
         val #[M,N,A] = E1 ^! EQ
         val #[M',N',A'] = E2 ^! EQ
-	val bas = C.`> BASE $$ #[]
+        val bas = C.`> BASE $$ #[]
         val img = C.`> BUNION $$ #[A, bas]
       in
         [ H >> C.`> EQ $$ #[A,A',univ]
