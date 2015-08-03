@@ -183,11 +183,6 @@ sig
     val EqSubst : term * term * Level.t option -> tactic
     val EqSym : tactic
 
-    val SubtypeEq : tactic
-    val SubtypeMemEq : tactic
-    val SubtypeIntro : name option * Level.t option -> tactic
-    val SubtypeElim : hyp * term * name option -> tactic
-
     val CEqEq       : tactic
     val CEqMemEq    : tactic
     val CEqSym      : tactic
