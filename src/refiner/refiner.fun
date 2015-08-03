@@ -290,15 +290,8 @@ struct
         val (UNIV k, #[]) = asApp univ
         val #[M,N,A] = E1 ^! EQ
         val #[M',N',A'] = E2 ^! EQ
-	val v = Variable.named "x"
-	val w = Variable.named ""
-	val snd = C.`> LAM $$ #[v \\ (C.`> SND $$ #[``v])]
-	val unt = C.`> UNIT $$ #[]
-	val two = C.`> PLUS $$ #[unt, unt]
 	val bas = C.`> BASE $$ #[]
-	val dec = C.`> DECIDE $$ #[``v, w \\ A, w \\ bas]
-	val prd = C.`> PROD $$ #[two, v \\ dec]
-        val img = C.`> IMAGE $$ #[prd, snd]
+        val img = C.`> BUNION $$ #[A, bas]
       in
         [ H >> C.`> EQ $$ #[A,A',univ]
         , H >> C.`> EQ $$ #[M,M',img]

@@ -10,6 +10,7 @@ struct
     | PROD | PAIR | SPREAD | AND
     | FUN | LAM | AP | IMPLIES | IFF
     | ID | BOT | SQUASH | FST | SND
+    | SUBTYPE_REL | BUNION
     | IMAGE
     | FIX
     | CBV
@@ -35,6 +36,7 @@ struct
        PROD, PAIR, SPREAD, AND,
        FUN, LAM, AP, IMPLIES, IFF,
        ID, BOT, SQUASH, FST, SND,
+       SUBTYPE_REL, BUNION,
        IMAGE,
        FIX,
        CBV,
@@ -67,6 +69,8 @@ struct
        | SQUASH => #[0]
        | FST => #[0]
        | SND => #[0]
+       | SUBTYPE_REL => #[0,0]
+       | BUNION => #[0,0]
        | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
@@ -112,6 +116,8 @@ struct
        | SQUASH => "squash"
        | FST => "fst"
        | SND => "snd"
+       | SUBTYPE_REL => "sub_type"
+       | BUNION => "bunion"
        | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
@@ -184,6 +190,8 @@ struct
          string "squash" return SQUASH,
          string "fst" return FST,
          string "snd" return SND,
+         string "sub_type" return SUBTYPE_REL,
+         string "bunion" return BUNION,
          string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,

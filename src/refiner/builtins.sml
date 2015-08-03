@@ -76,6 +76,26 @@ struct
 	end
       | _ => raise Conv)
 
+    val unfoldSubtypeRel =
+      makeConv SUBTYPE_REL (fn #[A,B] =>
+        let val x = Variable.named "_"
+        in `> MEM $$ #[`> ID $$ #[], `> FUN $$ #[A, x \\ B]]
+	end
+      | _ => raise Conv)
+
+    val unfoldBunion =
+      makeConv BUNION (fn #[A,B] =>
+        let val v = Variable.named "x"
+	    val w = Variable.named ""
+	    val snd = `> LAM $$ #[v \\ (`> SND $$ #[``v])]
+	    val unt = `> UNIT $$ #[]
+	    val two = `> PLUS $$ #[unt, unt]
+	    val dec = `> DECIDE $$ #[``v, w \\ A, w \\ B]
+	    val prd = `> PROD $$ #[two, v \\ dec]
+        in `> IMAGE $$ #[prd, snd]
+	end
+      | _ => raise Conv)
+
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
   val definitions =
@@ -88,6 +108,8 @@ struct
       o unfoldSquash
       o unfoldFst
       o unfoldSnd
+      o unfoldSubtypeRel
+      o unfoldBunion
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)
