@@ -9,12 +9,13 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD | AND
     | FUN | LAM | AP | IMPLIES | IFF
-    | ID | BOT | SQUASH
+    | ID | BOT | SQUASH | FST | SND
+    | SUBTYPE_REL | BUNION
     | IMAGE
     | FIX
     | CBV
     | ISECT
-    | EQ | MEM | SUBTYPE
+    | EQ | MEM
     | SUBSET
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
@@ -34,11 +35,12 @@ struct
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD, AND,
        FUN, LAM, AP, IMPLIES, IFF,
-       ID, BOT, SQUASH,
+       ID, BOT, SQUASH, FST, SND,
+       SUBTYPE_REL, BUNION,
        IMAGE,
        FIX,
        CBV,
-       ISECT, EQ, MEM, SUBTYPE, SUBSET,
+       ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
        CEQUAL, APPROX, BASE, SO_APPLY]
@@ -65,6 +67,10 @@ struct
        | ID => #[]
        | BOT => #[]
        | SQUASH => #[0]
+       | FST => #[0]
+       | SND => #[0]
+       | SUBTYPE_REL => #[0,0]
+       | BUNION => #[0,0]
        | IMAGE => #[0,0]
        | FIX => #[0]
        | CBV => #[0, 1]
@@ -83,7 +89,6 @@ struct
        | CEQUAL => #[0, 0]
        | APPROX => #[0, 0]
        | MEM => #[0,0]
-       | SUBTYPE => #[0, 0]
 
        | SUBSET => #[0,1]
 
@@ -108,12 +113,15 @@ struct
        | ID => "id"
        | BOT => "bot"
        | SQUASH => "squash"
+       | FST => "fst"
+       | SND => "snd"
+       | SUBTYPE_REL => "subtype_rel"
+       | BUNION => "bunion"
        | IMAGE => "image"
        | FIX => "fix"
        | CBV => "cbv"
        | ISECT => "isect"
        | EQ => "="
-       | SUBTYPE => "subtype"
        | CEQUAL => "ceq"
        | APPROX => "approx"
        | MEM => "member"
@@ -178,12 +186,15 @@ struct
          string "id" return ID,
          string "bot" return BOT,
          string "squash" return SQUASH,
+         string "fst" return FST,
+         string "snd" return SND,
+         string "subtype_rel" return SUBTYPE_REL,
+         string "bunion" return BUNION,
          string "image" return IMAGE,
          string "fix" return FIX,
          string "cbv" return CBV,
          string "isect" return ISECT,
          string "=" return EQ,
-         string "subtype" return SUBTYPE,
          string "ceq" return CEQUAL,
          string "approx" return APPROX,
          string "member" return MEM,

@@ -2,8 +2,7 @@ structure Derivation =
 struct
   datatype t =
       UNIV_EQ of Level.t | CUM
-    | EQ_EQ | EQ_MEMBER_EQ
-    | SUBTYPE_EQ | SUBTYPE_MEMBER_EQ | SUBTYPE_INTRO | SUBTYPE_ELIM
+    | EQ_EQ | EQ_EQ_BASE | EQ_MEMBER_EQ
     | VOID_EQ | VOID_ELIM
     | UNIT_EQ | UNIT_INTRO | UNIT_ELIM | AX_EQ
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
@@ -33,11 +32,8 @@ struct
          UNIV_EQ _ => #[]
        | CUM => #[0]
        | EQ_EQ => #[0,0,0]
+       | EQ_EQ_BASE => #[0,0,0]
        | EQ_MEMBER_EQ => #[0]
-       | SUBTYPE_EQ => #[0, 0]
-       | SUBTYPE_MEMBER_EQ => #[0]
-       | SUBTYPE_INTRO => #[0, 1]
-       | SUBTYPE_ELIM => #[0, 0, 0, 1]
        | CEQUAL_EQ => #[0, 0]
        | CEQUAL_MEMBER_EQ => #[0]
        | CEQUAL_SYM => #[0]
@@ -124,11 +120,8 @@ struct
        | VOID_ELIM => "void-elim"
 
        | EQ_EQ => "eq⁼"
+       | EQ_EQ_BASE => "eq-eq-base⁼"
        | EQ_MEMBER_EQ => "eq-mem⁼"
-       | SUBTYPE_EQ => "subtype⁼"
-       | SUBTYPE_MEMBER_EQ => "subtype-mem⁼"
-       | SUBTYPE_INTRO => "subtype-intro"
-       | SUBTYPE_ELIM => "subtype-elim"
        | CEQUAL_EQ => "~⁼"
        | CEQUAL_MEMBER_EQ => "~-mem⁼"
        | CEQUAL_SYM => "~-sym"

@@ -57,6 +57,7 @@ struct
       | CEQUAL_APPROX a => an a CEqApprox
       | APPROX_REFL a => an a ApproxRefl
       | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
+      | EQ_EQ_BASE a => an a EqEqBase
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
