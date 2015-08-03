@@ -1,7 +1,7 @@
 ||| Each sequent has its own universe hierarchy. It is valid to make any uniform
 ||| substitution on level variables.
 Theorem lower : [U{i} -> U{i'}] {
-  auto; witness [unit]; auto
+  auto; witness [void]; auto
 }.
 
 ||| We can use the <lower> theorem by substituting its level variable i ↦ i'.
