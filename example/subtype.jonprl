@@ -1,3 +1,4 @@
+(*
 Theorem reflexive : [{A : U{i}} subtype(A; A)] {
   auto
 }.
@@ -18,6 +19,7 @@ Theorem fun-is-id : [{A : U{i}}{B : U{i}}{x : subtype(A; B)}{a : A}
                      ceq(very-strong-function x a; a)] {
   auto; unfold <very-strong-function>; *{step}; auto
 }.
+*)
 
 
 Tactic unsquash {
