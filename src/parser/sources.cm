@@ -1,6 +1,6 @@
 group is
   $libs/sml-abt/abt.cm
-  $libs/telescopes/telescopes.cm
+  $libs/sml-telescopes/telescopes.cm
   $libs/cmlib/cmlib.cm
   $libs/sml-parcom-wrapper/parcom.cm
   $libs/sml-abt-parser/abt-parser.cm

@@ -26,3 +26,6 @@
 [submodule "lib/sml-open-ended"]
 	path = lib/sml-open-ended
 	url = https://github.com/jonsterling/sml-open-ended.git
+[submodule "lib/sml-telescopes"]
+	path = lib/sml-telescopes
+	url = https://github.com/jonsterling/sml-telescopes.git
