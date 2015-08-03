@@ -10,6 +10,7 @@ smlnj:
 test:
 	bin/jonprl example/test.cfg
 	bin/jonprl example/image.jonprl
+	bin/jonprl example/subtype.jonprl
 	bin/jonprl stdlib/*.jonprl
 	bin/jonprl example/tautology.jonprl
 	bin/jonprl example/computational-equality.jonprl

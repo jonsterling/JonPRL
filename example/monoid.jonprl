@@ -67,23 +67,22 @@ Theorem Monoid-wf : [member(Monoid; U{i'})] {
 
 Theorem UnitMonoidStruct : [MonoidSig] {
   unfold <MonoidSig>;
-  intro [unit]; auto;
-  intro [<>] ; auto.
+  intro [unit]; unfold <unit>; auto
 }.
 
 Theorem UnitMonoid : [Monoid] {
   unfold <Monoid>;
   intro [UnitMonoidStruct] @i; unfold <UnitMonoidStruct>;
-  monoid-simplify;
-  elim #1; auto.
+  monoid-simplify;unfold <unit>;auto
 }.
 
 Theorem UnitMonoid-LeftUnit : [LeftUnit(UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>;
-  monoid-simplify; elim #1; auto.
+  monoid-simplify;unfold <unit>;auto
 }.
 
 Theorem UnitMonoid-RightUnit : [RightUnit(UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>;
-  monoid-simplify; elim #1; auto.
+  monoid-simplify;unfold <unit>;auto
 }.
+

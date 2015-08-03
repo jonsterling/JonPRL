@@ -1,6 +1,6 @@
 Tactic tautology-step {
   @{ [H : P |- P] => hypothesis <H>
-   | [|- unit] => intro
+   | [|- unit] => unfold <unit>;auto
    | [|- P * Q] => intro
    | [|- P -> Q] => intro
    | [|- P => Q] => intro

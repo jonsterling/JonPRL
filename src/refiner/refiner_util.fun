@@ -77,8 +77,8 @@ struct
 
   (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} =
-     UnitIntro
-       ORELSE Assumption
+     (*UnitIntro
+       ORELSE*) Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
                                 0 => PlusIntroL level
                               | 1 => PlusIntroR level
@@ -115,7 +115,7 @@ struct
       val fourNames = take4 names
     in
       (VoidElim THEN Hypothesis target)
-        ORELSE UnitElim target
+        (*ORELSE UnitElim target*)
         ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
@@ -131,14 +131,14 @@ struct
     let
       val freshVariable = listAt (names, 0)
     in
-      AxEq
-        ORELSE EqEq
+      (*AxEq
+        ORELSE*) EqEq
         ORELSE EqMemEq
         ORELSE CEqEq
         ORELSE CEqMemEq
         ORELSE ApproxEq
         ORELSE ApproxMemEq
-        ORELSE UnitEq
+        (*ORELSE UnitEq*)
         ORELSE VoidEq
         ORELSE HypEq
         ORELSE UnivEq

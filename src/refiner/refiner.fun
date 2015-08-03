@@ -338,6 +338,7 @@ struct
       in
         [] BY mkEvidence UNIT_EQ
       end
+	  *)
 
     fun VoidEq (H >> P) =
       let
@@ -353,6 +354,7 @@ struct
       [ H >> C.`> VOID $$ #[]
       ] BY mkEvidence VOID_ELIM
 
+	(*
     fun AxEq (H >> P) =
       let
         val #[ax, ax', unit] = P ^! EQ
@@ -362,6 +364,7 @@ struct
       in
         [] BY mkEvidence AX_EQ
       end
+*)
 
     fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
       let
