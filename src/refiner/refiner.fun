@@ -309,37 +309,6 @@ struct
         ] BY mkEvidence EQ_MEMBER_EQ
       end
 
-    fun UnitIntro (H >> P) =
-      let
-        val #[] = P ^! UNIT
-      in
-        [] BY mkEvidence UNIT_INTRO
-      end
-
-    fun UnitElim hyp (H >> P) =
-      let
-        val x = eliminationTarget hyp (H >> P)
-        val #[] = Context.lookup H x ^! UNIT
-        val ax = C.`> AX $$ #[]
-        val H' = ctxSubst H ax x
-        val P' = subst ax x P
-      in
-        [ H' >> P'
-        ] BY (fn [D] => D.`> UNIT_ELIM $$ #[`` x, D]
-               | _ => raise Refine)
-      end
-
-    fun UnitEq (H >> P) =
-      let
-        val #[unit, unit', univ] = P ^! EQ
-        val #[] = unit ^! UNIT
-        val #[] = unit' ^! UNIT
-        val (UNIV _, #[]) = asApp univ
-      in
-        [] BY mkEvidence UNIT_EQ
-      end
-	  *)
-
     fun VoidEq (H >> P) =
       let
         val #[void, void', univ] = P ^! EQ
@@ -353,18 +322,6 @@ struct
     fun VoidElim (H >> P) =
       [ H >> C.`> VOID $$ #[]
       ] BY mkEvidence VOID_ELIM
-
-	(*
-    fun AxEq (H >> P) =
-      let
-        val #[ax, ax', unit] = P ^! EQ
-        val #[] = ax ^! AX
-        val #[] = ax' ^! AX
-        val #[] = unit ^! UNIT
-      in
-        [] BY mkEvidence AX_EQ
-      end
-*)
 
     fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
       let

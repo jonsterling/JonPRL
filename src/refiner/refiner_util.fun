@@ -131,14 +131,12 @@ struct
     let
       val freshVariable = listAt (names, 0)
     in
-      (*AxEq
-        ORELSE*) EqEq
+        EqEq
         ORELSE EqMemEq
         ORELSE CEqEq
         ORELSE CEqMemEq
         ORELSE ApproxEq
         ORELSE ApproxMemEq
-        (*ORELSE UnitEq*)
         ORELSE VoidEq
         ORELSE HypEq
         ORELSE UnivEq

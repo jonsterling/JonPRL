@@ -54,22 +54,6 @@ sig
      *)
     val VoidElim : tactic
 
-		       (*
-    (* H >> Unit = Unit ∈ U{k} by UnitEq *)
-    val UnitEq : tactic
-
-    (* H >> Unit by UnitIntro *)
-    val UnitIntro : tactic
-
-    (* H, x : Unit, H'[x] >> P by UnitElim x
-     * 1. H, x : Unit, H'[Ax] >> P[Ax]
-     *)
-    val UnitElim : hyp -> tactic
-
-    (* H >> Ax = Ax ∈ Unit *)
-    val AxEq : tactic
-*)
-
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}
      * 2. H, z : A >> B[z] = B'[z] ∈ U{k}
