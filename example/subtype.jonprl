@@ -39,11 +39,13 @@ Theorem subtype_rel_wf :
   auto;unfold <subtype_rel member>;eq-eq-base;unfold <bunion id>;
   [ auto
   , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
-    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;[reduce 1;auto, id];
-    elim <x>;[reduce 1;auto, reduce 1; auto]
+    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;unfold <unit>;auto;
+    [reduce 1;auto, id];
+    elim <x>;reduce 1;auto
   , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
-    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;[reduce 1;auto, id];
-    elim <x>;[reduce 1;auto, reduce 1; auto]
+    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;unfold <unit>;auto;
+    [reduce 1;auto, id];
+    elim <x>;reduce 1;auto
   ]
 }.
 

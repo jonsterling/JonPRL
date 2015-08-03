@@ -96,6 +96,13 @@ struct
 	end
       | _ => raise Conv)
 
+    val unfoldUnit =
+      makeConv UNIT (fn #[] =>
+        let val ax = `> AX $$ #[]
+        in `> APPROX $$ #[ax, ax]
+	end
+      | _ => raise Conv)
+
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
   val definitions =
@@ -110,6 +117,7 @@ struct
       o unfoldSnd
       o unfoldSubtypeRel
       o unfoldBunion
+      o unfoldUnit
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)

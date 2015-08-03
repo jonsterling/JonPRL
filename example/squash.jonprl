@@ -3,7 +3,7 @@ Prefix 7 "↓" := set-squash.
 [↓ A] =def= [{_:unit | A}].
 
 Theorem set-squash-wf : [{A:U{i}} member(↓ A; U{i})] {
-  unfold <set-squash>; auto.
+  unfold <set-squash>; auto;unfold <unit>;auto
 }.
 
 Theorem set-squash-intro : [{A:U{i}} A -> ↓ A] {
