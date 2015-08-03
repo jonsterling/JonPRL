@@ -1,7 +1,7 @@
-(*
-Theorem reflexive : [{A : U{i}} subtype(A; A)] {
-  auto
+Theorem reflexive : [{A : U{i}} subtype_rel(A; A)] {
+  auto; unfold <id>; auto
 }.
+(*
 
 Theorem trans : [{A : U{i}}{B : U{i}}{C : U{i}}
                  subtype(A; B) => subtype(B; C) => subtype(A; C)] {
@@ -34,11 +34,9 @@ Tactic unsquash {
    }
 }.
 
-(* I tried to call sub_type, "subtype_rel" as in Nuprl but got syntax errors *)
-
 Theorem subtype_rel_wf :
-[ {A : U{i}}{B : U{i}} member(sub_type(A;B);U{i}) ] {
-  auto;unfold <sub_type member>;eq-eq-base;unfold <bunion id>;
+[ {A : U{i}}{B : U{i}} member(subtype_rel(A;B);U{i}) ] {
+  auto;unfold <subtype_rel member>;eq-eq-base;unfold <bunion id>;
   [ auto
   , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
     [unfold <snd>; reduce 2; auto, id];eq-cd;auto;[reduce 1;auto, id];
@@ -50,9 +48,9 @@ Theorem subtype_rel_wf :
 }.
 
 Theorem subtype_rel_eq :
-[ {A : U{i}}{B : U{i}}{x : A}{y : A} sub_type(A;B) -> =(x;y;A) -> =(x;y;B) ] {
+[ {A : U{i}}{B : U{i}}{x : A}{y : A} subtype_rel(A;B) -> =(x;y;A) -> =(x;y;B) ] {
  auto;
- [ unfold <sub_type id>;
+ [ unfold <subtype_rel id>;
    assert [=(lam(x.x)x;lam(x.x)y;B)] <h>;
    [ eq-cd [A -> B];[unfold <member>;auto, auto]
    , reduce;auto
@@ -64,12 +62,12 @@ Theorem subtype_rel_eq :
  ]
 }.
 
-Theorem subtype_rel_reflexive : [{A : U{i}} sub_type(A; A)] {
+Theorem subtype_rel_reflexive : [{A : U{i}} subtype_rel(A; A)] {
   auto;unfold <id>;eq-cd;auto
 }.
 
 Theorem subtype_rel_trans : [{A : U{i}}{B : U{i}}{C : U{i}}
-                 sub_type(A; B) => sub_type(B; C) => sub_type(A; C)] {
+                 subtype_rel(A; B) => subtype_rel(B; C) => subtype_rel(A; C)] {
   auto;
   [ unfold <id>;eq-cd;[id,auto];
     cut-lemma <subtype_rel_eq>;
@@ -77,13 +75,13 @@ Theorem subtype_rel_trans : [{A : U{i}}{B : U{i}}{C : U{i}}
     elim #8 [B];[auto,id];
     elim #10 [_];[auto,id];
     elim #12 [_];[auto,id];
-    elim #14 [x];[auto;unfold <sub_type member id>;auto,id];
+    elim #14 [x];[auto;unfold <subtype_rel member id>;auto,id];
     elim #16 [<>];[auto,id];
     elim #7 [B];[auto,id]; (* here it looks like B is captured in 20*)
     elim #20 [C];[auto,id];
     elim #22 [_];[auto,id];
     elim #24 [_];[auto,id];
-    elim #26 [x'];[auto;unfold <sub_type member id>;auto,id];
+    elim #26 [x'];[auto;unfold <subtype_rel member id>;auto,id];
     elim #28 [y'''''];auto
   , cut-lemma <subtype_rel_wf>;
     elim #5 [B];[auto,id];

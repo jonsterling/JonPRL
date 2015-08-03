@@ -115,7 +115,7 @@ struct
        | SQUASH => "squash"
        | FST => "fst"
        | SND => "snd"
-       | SUBTYPE_REL => "sub_type"
+       | SUBTYPE_REL => "subtype_rel"
        | BUNION => "bunion"
        | IMAGE => "image"
        | FIX => "fix"
@@ -188,7 +188,7 @@ struct
          string "squash" return SQUASH,
          string "fst" return FST,
          string "snd" return SND,
-         string "sub_type" return SUBTYPE_REL,
+         string "subtype_rel" return SUBTYPE_REL,
          string "bunion" return BUNION,
          string "image" return IMAGE,
          string "fix" return FIX,
