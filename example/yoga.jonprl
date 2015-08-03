@@ -155,7 +155,7 @@ Theorem LowerStar_wf : [
 }.
 
 Theorem equals_refl : [{X:U{i}} {x:X} Equals(X;<x,x>)] {
-  unfold <Equals LowerShriek Lan Coend Paths Ten contract bang>; autoRed;
+  unfold <Equals LowerShriek Lan Coend Paths Ten contract bang unit>; autoRed;
   intro [x]; auto.
 }.
 

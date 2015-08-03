@@ -37,7 +37,7 @@ Tactic refl-from-trans {
 }.
 
 Tactic conat-wf-overture {
-  *{ unfold <corec conat czero csucc conatF top omega Y> }; auto;
+  *{ unfold <corec conat czero csucc conatF top omega unit Y> }; auto;
   @{ [n:nat |- _] => elim <n>; thin <n> };
   reduce 1; auto
 }.
