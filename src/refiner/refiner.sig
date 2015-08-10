@@ -181,6 +181,7 @@ sig
     val ApproxEq    : tactic
     val ApproxMemEq : tactic
     val ApproxExtEq : tactic
+    val ApproxElim : hyp -> tactic
     val ApproxRefl  : tactic
 
     val BottomDiverges : hyp -> tactic

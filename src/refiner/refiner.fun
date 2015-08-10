@@ -1358,6 +1358,19 @@ struct
           end
       end
 
+      fun ApproxElim hyp (goal as H >> P) =
+        let
+          val z = eliminationTarget hyp goal
+          val _ = Context.lookup H z ^! APPROX
+          val ax = C.`> AX $$ #[]
+          val H' = ctxSubst H ax z
+          val P' = subst ax z P
+        in
+          [ H' >> P'
+          ] BY (fn [D] => D.`> APPROX_ELIM $$ #[`` z, D]
+                 | _ => raise Refine)
+        end
+
       fun CEqSym (H >> P) =
         let
           val #[M, N] = P ^! CEQUAL

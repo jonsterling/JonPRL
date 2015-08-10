@@ -115,7 +115,7 @@ struct
       val fourNames = take4 names
     in
       (VoidElim THEN Hypothesis target)
-        (*ORELSE UnitElim target*)
+        ORELSE ApproxElim target
         ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
