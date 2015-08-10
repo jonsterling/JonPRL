@@ -83,7 +83,7 @@ struct
     val unfoldSubtypeRel =
       makeConv SUBTYPE_REL (fn #[A,B] =>
         let
-          val x = Variable.named "_"
+          val x = Variable.named "p"
         in
           `> MEM $$ #[`> ID $$ #[], `> FUN $$ #[A, x \\ B]]
         end
