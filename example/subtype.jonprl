@@ -75,14 +75,14 @@ Theorem subtype_rel_trans : [{A : U{i}}{B : U{i}}{C : U{i}}
     cut-lemma <subtype_rel_eq>;
     elim #7 [A];[auto,id];
     elim #8 [B];[auto,id];
-    elim #10 [_];[auto,id];
-    elim #12 [_];[auto,id];
+    elim #10 [p];[auto,id];
+    elim #12 [p];[auto,id];
     elim #14 [x];[auto;unfold <subtype_rel member id>;auto,id];
     elim #16 [<>];[auto,id];
     elim #7 [B];[auto,id]; (* here it looks like B is captured in 20*)
     elim #20 [C];[auto,id];
-    elim #22 [_];[auto,id];
-    elim #24 [_];[auto,id];
+    elim #22 [p];[auto,id];
+    elim #24 [p];[auto,id];
     elim #26 [x'];[auto;unfold <subtype_rel member id>;auto,id];
     elim #28 [y'''''];auto
   , cut-lemma <subtype_rel_wf>;
