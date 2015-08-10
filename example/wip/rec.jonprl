@@ -46,12 +46,14 @@ Operator rec : (1).
 ||| We start by proving that union and intersection are actually
 ||| the least and greatest upperbounds for
 
-Infix 50 "⊂" := subtype.
+Infix 50 "⊂" := subtype_rel.
 
 Theorem isect-lb : [
   {A : U{i}} {B : A -> U{i}} {a : A} ({a : A} B a) ⊂ B a
 ] {
-  auto; elim #4 [a]; auto; hyp-subst ← #6 [h.=(h;h;_)]; auto
+  auto; unfold <id>; auto;
+  elim #4 [a]; auto;
+  hyp-subst <- #6 [h.=(h;h;_)]; auto;
 }.
 
 
@@ -60,7 +62,8 @@ Theorem isect-glb : [
   ({a : A} C ⊂ B a) =>
   C ⊂ ({a : A} B a)
 ] {
-  auto; elim #4 [a]; auto; elim #7 [=(x'; x'; C)]; auto
+  auto; unfold <subtype_rel member id>; auto;
+  trace "help!!!"
 }.
 
 Theorem union-ub : [
