@@ -14,8 +14,26 @@ Operator isContr : (0).
 ||| There is just one function void ⇒ A for any A.
 Theorem abort-unique : [{A:U{i}} unique(void -> A; _. unit)] {
   unfold <unique>; auto;
-  intro [lam(x. x)]; auto;unfold <unit>;auto;
-  ext; auto
+  intro [lam(x. x)]; auto;unfold <unit>; auto;
+  [ assert [void] <h>;
+    [ id
+    , unfold <void>;
+    assert [has-value(bot)] <q>;
+     [ csubst [ceq(bot;<>)] [h.has-value(h)];
+       [ capprox;
+         [ assume-has-value <hv>;
+           [ bot-div <hv>
+           , unfold <has-value bot id member>; eq-cd;
+             eq-cd;capprox;areflexivity  ]
+         , assumption ]
+       , unfold <has-value>; reduce; areflexivity ]
+     , bot-div <q> ] ]
+  , id
+  , id
+  , id
+  , id
+  , id]
+  (*ext; auto*)
 }.
 
 ||| using isContr: the realizer is just the unique function (the uniqueness

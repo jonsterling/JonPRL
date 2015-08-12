@@ -32,8 +32,8 @@ sig
     (* H >> U{l} = U{l} ∈ U{k} by UnivEq (l < k) *)
     val UnivEq : tactic
 
-    (* H >> Void = Void ∈ U{k} by VoidEq *)
-    val VoidEq : tactic
+(*    (* H >> Void = Void ∈ U{k} by VoidEq *)
+    val VoidEq : tactic*)
 
     (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
      * 1. H >> A = A' ∈ U{k}
@@ -49,10 +49,10 @@ sig
 
     val EqMemEq : tactic
 
-    (* H >> A by VoidElim
+(*    (* H >> A by VoidElim
      * 1. H >> Void
      *)
-    val VoidElim : tactic
+    val VoidElim : tactic*)
 
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}
@@ -184,6 +184,7 @@ sig
     val ApproxRefl  : tactic
 
     val BottomDiverges : hyp -> tactic
+    val AssumeHasValue : (name option * Level.t option) -> tactic
 
     val ImageEq    : tactic
     val ImageMemEq : tactic

@@ -41,6 +41,7 @@ struct
        | APPROX_EXT_EQ $ _ => ax
        | APPROX_REFL $ _ => ax
        | BOTTOM_DIVERGES $ _ => ax (* could be anything because one hypothesis is false *)
+       | ASSUME_HAS_VALUE $ _ => ax
 
        | BASE_INTRO $ _ => ax
        | BASE_EQ $ _ => ax

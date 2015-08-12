@@ -57,6 +57,7 @@ sig
       | CEQUAL_APPROX of meta
       | APPROX_REFL of meta
       | BOTTOM_DIVERGES of hyp * meta
+      | ASSUME_HAS_VALUE of {name : name option, level : level option} * meta
       | EQ_EQ_BASE of meta
       | TRY of t
       | LIMIT of t

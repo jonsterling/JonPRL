@@ -1,6 +1,6 @@
 functor RefinerUtil
   (structure Lcf : LCF_APART
-   structure Syntax : ABT
+   structure Syntax : ABT where type Operator.t = UniversalOperator.t
    structure Conv : CONV
      where type term = Syntax.t
    structure Refiner : REFINER
@@ -109,12 +109,43 @@ struct
 
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
-  fun Elim {target, names, term} =
+  local
+      (*structure Tacticals = Tacticals (Lcf)*)
+      structure AbtUtil = AbtUtil (Syntax)
+      structure CI = CttCalculusInj
+      structure C = CttCalculus
+      open (*Tacticals*) Sequent AbtUtil (*Syntax*)
+      infix THENL >>
+      infix 8 $$
+  in
+  fun VoidElim world (goal as H >> P) =
+    let val oprv = CI.`> C.VOID
+	val void = oprv $$ #[]
+        val name = Variable.named "v"
+    in (Assert (void, SOME name)
+               THENL [ ID
+		     , Unfolds (world, [(oprv, NONE)])
+       ]) goal
+    end
+(*
+  fun VoidEq (H >> P) =
+    let (* val #[void, void', univ] = P ^! EQ
+        val #[] = void ^! VOID
+        val #[] = void' ^! VOID
+        val (UNIV _, #[]) = asApp univ*)
+    in ID
+    end*)
+  end
+
+  (*val VoidElim : tactic = FAIL*)
+  val VoidEq : tactic = FAIL
+
+  fun Elim {target, names, term} world =
     let
       val twoNames = take2 names
       val fourNames = take4 names
     in
-      (VoidElim THEN Hypothesis target)
+      (VoidElim world THEN Hypothesis target)
         (*ORELSE UnitElim target*)
         ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
@@ -199,7 +230,7 @@ struct
                          invertible = false,
                          terms = []}
 
-    val AutoVoidElim = VoidElim THEN Assumption
+    fun AutoVoidElim world = VoidElim world THEN Assumption
 
     val InvAutoIntro = Intro {term = NONE,
                               rule = NONE,
@@ -217,10 +248,10 @@ struct
 
     val DeepReduce = RewriteGoal (CDEEP Step)
   in
-    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim ORELSE InvAutoEqCD)
+    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim wld ORELSE InvAutoEqCD)
       | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD) THEN FinAuto (wld, n - 1)
 
-    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim ORELSE AutoEqCD)
+    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim wld ORELSE AutoEqCD)
 
     fun Auto (wld, opt) =
       case opt of

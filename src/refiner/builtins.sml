@@ -103,6 +103,23 @@ struct
 	end
       | _ => raise Conv)
 
+    val unfoldVoid =
+      makeConv VOID (fn #[] =>
+        let val ax = `> AX $$ #[]
+            val bot = `> BOT $$ #[]
+        in `> APPROX $$ #[ax,bot]
+	end
+      | _ => raise Conv)
+
+    val unfoldHasValue =
+      makeConv HASVALUE (fn #[T] =>
+        let val ax = `> AX $$ #[]
+	    val v = Variable.named ""
+	    val cbv = `> CBV $$ #[ax,v \\ T]
+        in `> APPROX $$ #[ax,cbv]
+	end
+      | _ => raise Conv)
+
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
   val definitions =
@@ -118,6 +135,8 @@ struct
       o unfoldSubtypeRel
       o unfoldBunion
       o unfoldUnit
+      o unfoldVoid
+      o unfoldHasValue
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)
