@@ -114,31 +114,68 @@ struct
       structure AbtUtil = AbtUtil (Syntax)
       structure CI = CttCalculusInj
       structure C = CttCalculus
+
       open (*Tacticals*) Sequent AbtUtil (*Syntax*)
+      open Conversions Conversionals
+
+      val DeepReduce = RewriteGoal (CDEEP Step)
+
       infix THENL >>
       infix 8 $$
+      infixr 8 \\
   in
-  fun VoidElim world (goal as H >> P) =
-    let val oprv = CI.`> C.VOID
-	val void = oprv $$ #[]
-        val name = Variable.named "v"
-    in (Assert (void, SOME name)
-               THENL [ ID
-		     , Unfolds (world, [(oprv, NONE)])
-       ]) goal
-    end
-(*
-  fun VoidEq (H >> P) =
-    let (* val #[void, void', univ] = P ^! EQ
-        val #[] = void ^! VOID
-        val #[] = void' ^! VOID
-        val (UNIV _, #[]) = asApp univ*)
-    in ID
-    end*)
-  end
 
-  (*val VoidElim : tactic = FAIL*)
-  val VoidEq : tactic = FAIL
+  fun VoidElim world (goal as H >> P) =
+    let val oprv  = CI.`> C.VOID
+        val oprb  = CI.`> C.BOT
+        val oprh  = CI.`> C.HASVALUE
+        val opri  = CI.`> C.ID
+        val oprm  = CI.`> C.MEM
+        val namex = Variable.named "x"
+        val nameh = Variable.named "h"
+        val nameq = Variable.named "q"
+        val namev = Variable.named "v"
+	val void  = oprv $$ #[]
+	val bot   = oprb $$ #[]
+	val ax    = CI.`> C.AX $$ #[]
+	val hv    = oprh $$ #[bot]
+	val ceq   = CI.`> C.CEQUAL $$ #[bot, ax]
+	val hvx   = oprh $$ #[``namex]
+	val xC    = namex \\ hvx
+    in (Assert (void, SOME nameh)
+        THENL [ ID
+              , Unfolds (world, [(oprv, NONE)])
+                THEN Assert (hv, SOME nameq)
+                THENL [ CEqSubst (ceq, xC)
+			THENL [ CEqApprox
+				THENL [ AssumeHasValue (SOME namev, NONE)
+					THENL [ BottomDiverges (HypSyn.NAME namev)
+					      , Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
+						THEN ApproxEq
+						THEN BaseMemberEq
+						THEN CEqApprox
+						THEN ApproxRefl
+					      ]
+                                      , Assumption
+				      ]
+                              , Unfolds (world, [(oprh, NONE)])
+				THEN DeepReduce
+				THEN ApproxRefl
+			      ]
+		      , BottomDiverges (HypSyn.NAME nameq)
+		      ]
+              ]) goal
+    end
+
+  fun VoidEq world =
+    let val oprv  = CI.`> C.VOID
+    in Unfolds (world, [(oprv, NONE)])
+       THEN ApproxEq
+       THEN BaseMemberEq
+       THEN CEqApprox
+       THEN ApproxRefl
+    end
+  end
 
   fun Elim {target, names, term} world =
     let
@@ -158,7 +195,7 @@ struct
         ORELSE SubsetElim (target, twoNames)
     end
 
-  fun EqCD {names, level, invertible, terms} =
+  fun EqCD {names, level, invertible, terms} world =
     let
       val freshVariable = listAt (names, 0)
     in
@@ -168,7 +205,7 @@ struct
         ORELSE CEqMemEq
         ORELSE ApproxEq
         ORELSE ApproxMemEq
-        ORELSE VoidEq
+        ORELSE VoidEq world
         ORELSE HypEq
         ORELSE UnivEq
         ORELSE PlusEq
@@ -221,14 +258,14 @@ struct
       ORELSE_LAZY (fn () => Match branches)
 
   local
-    val InvAutoEqCD = EqCD {names = [],
-                            level = NONE,
-                            invertible = true,
-                            terms = []}
-    val AutoEqCD = EqCD {names = [],
-                         level = NONE,
-                         invertible = false,
-                         terms = []}
+    fun InvAutoEqCD world = EqCD {names = [],
+				 level = NONE,
+				 invertible = true,
+				 terms = []} world
+    fun AutoEqCD world = EqCD {names = [],
+                              level = NONE,
+                              invertible = false,
+                              terms = []} world
 
     fun AutoVoidElim world = VoidElim world THEN Assumption
 
@@ -248,10 +285,10 @@ struct
 
     val DeepReduce = RewriteGoal (CDEEP Step)
   in
-    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim wld ORELSE InvAutoEqCD)
-      | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD) THEN FinAuto (wld, n - 1)
+    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim wld ORELSE InvAutoEqCD wld)
+      | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD wld) THEN FinAuto (wld, n - 1)
 
-    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim wld ORELSE AutoEqCD)
+    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim wld ORELSE AutoEqCD wld)
 
     fun Auto (wld, opt) =
       case opt of

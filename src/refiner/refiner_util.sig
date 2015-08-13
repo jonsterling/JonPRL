@@ -32,7 +32,7 @@ sig
 
   val Intro : intro_args -> tactic
   val Elim : elim_args -> world -> tactic
-  val EqCD : eq_cd_args -> tactic
+  val EqCD : eq_cd_args -> world -> tactic
   val Ext : ext_args -> tactic
   val UnfoldHead : world -> tactic
   val Match : match_args -> tactic

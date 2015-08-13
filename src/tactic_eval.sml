@@ -40,7 +40,7 @@ struct
         an a (RefinerUtil.EqCD {names = names,
                             invertible = false,
                             terms = terms,
-                            level = level})
+                            level = level} wld)
       | EXT ({freshVariable, level}, a) =>
         an a (RefinerUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
