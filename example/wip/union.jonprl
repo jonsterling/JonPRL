@@ -1,16 +1,16 @@
 Infix 20 "∈" := member.
 Infix 100 "~" := ceq.
 
-Operator snd : ().
-[snd] =def= [lam(x. spread(x; u.v.v))].
+Operator pi2 : ().
+[pi2] =def= [lam(x. spread(x; u.v.v))].
 
 Operator union : (0;1).
-[union(A; x.B[x])] =def= [image((x : A) * B[x]; snd)].
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; pi2)].
 
 Theorem union-wf : [
   {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
 ] {
-  unfold <union snd>; auto
+  unfold <union pi2>; auto
 }.
 
 ||| The least fixed point of a functor can be taken using the union type. This
@@ -32,20 +32,20 @@ Operator SU : (0).
 [SU(N)] =def= [inr(N)].
 
 Theorem NAT-wf : [NAT ∈ U{i}] {
-  unfold <NAT rec union>; auto
+  unfold <NAT rec union unit>; auto
 }.
 
 Theorem ZE-wf : [ZE ∈ NAT] {
   ||| In order to apply the image membership rule, we must wrangle the goal such
   ||| that ZE is in the right form (i.e. a function application); the part that is
   ||| lost in the redex is, then, the depth of the structure of ZE.
-  assert [ZE ~ (snd <succ(zero), ZE>)] <H>;
+  assert [ZE ~ (pi2 <succ(zero), ZE>)] <H>;
   focus 0 #{
-    unfold <ZE snd>; reduce; auto
+    unfold <ZE pi2>; reduce; auto;
   };
 
   chyp-subst -> <H> [h. h ∈ NAT]; thin <H>;
-  unfold <NAT ZE rec union>; auto;
+  unfold <NAT ZE rec union unit>; auto;
   reduce; auto
 }.
 
@@ -67,21 +67,21 @@ Operator nat-of : (0).
 
 Theorem nat-of-wf : [{n:NAT} nat-of(n) ∈ nat] {
   isect-NAT; NAT-induction;
-  unfold <snd>; reduce; auto
+  unfold <pi2>; reduce; auto
 }.
 
 Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   isect-NAT;
 
   ||| We use the same technique here as we did to prove the wellformedness of ZE.
-  assert [SU(n) ~ (snd <succ(nat-of(n)), SU(n)>)] <H>;
+  assert [SU(n) ~ (pi2 <succ(nat-of(n)), SU(n)>)] <H>;
   focus 0 #{
-    unfold <SU nat-of snd>; csymmetry; *{ step }; auto
+    unfold <SU nat-of pi2>; csymmetry; *{ step }; auto
   };
 
   chyp-subst -> <H> [h.h ∈ NAT];
   NAT-induction;
-  unfold <snd>; reduce; auto
+  unfold <pi2>; reduce; auto
 }.
 
 Theorem NAT-ind-wf : [
@@ -106,7 +106,7 @@ Theorem NAT-ind-wf : [
   };
 
   elim #3 [z]; auto;
-  NAT-induction; unfold <snd>;
+  NAT-induction; unfold <pi2>;
   focus 0 #{reduce 1; auto};
   unfold <SU>;
   ||| TODO: can someone figure out how to finish this proof?

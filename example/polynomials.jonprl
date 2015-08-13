@@ -1,9 +1,3 @@
-Operator fst : (0).
-Operator snd : (0).
-
-[fst(p)] =def= [spread(p; x.y.x)].
-[snd(p)] =def= [spread(p; x.y.y)].
-
 ||| Ambient category
 
 Operator CTT : (0;0).
@@ -78,7 +72,9 @@ Theorem Fam_wf : [{B:U{i}} member(Fam(B); U{i'})] {
   unfold <Fam>; auto
 }.
 Theorem dom_wf : [{B:U{i}} {f:Fam(B)} member(dom(f); U{i})] {
-  unfold <Fam map dom fst>; auto
+  unfold <Fam map dom fst>; auto;
+  unfold <fst>;
+  unfold <fst>
 }.
 Theorem map_wf : [
   {B:U{i}} {f:Fam(B)} {x:dom(f)} member(map(f;x); B)
@@ -142,7 +138,7 @@ Operator Θ : (0;0).
 
 ||| <> = <> member unit
 Theorem eq_unit_unit : [Θ(unit; <<>,<>>)] {
-  unfold <Θ δ Exists Lan Coend Copower Paths>; autoR;
+  unfold <Θ δ Exists Lan Coend Copower Paths unit>; autoR;
   intro [<>]; auto.
 }.
 
@@ -181,7 +177,7 @@ Operator Ext : (0;0).
 Theorem Ext_wf : [
   {p:Polynomial} {X:U{i}} member(Ext(p;X); U{i'})
 ] {
-  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd>; auto
+  unfold <Polynomial Ext Fam base-space Embed CTT Fiber fam dom map fst snd unit>; auto
 }.
 
 ||| Fam pullbacks

@@ -18,7 +18,7 @@ Operator cmp : (0;0;0;0;0;0).
 [cmp(C;X;Y;Z;f;g)] =def= [spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x) X Y Z f g].
 
 Tactic rawcat-unfold {
-  unfold <RawCat obj hom idn cmp>.
+  unfold <RawCat obj hom idn cmp unit>.
 }.
 
 Tactic autoR {
@@ -144,7 +144,9 @@ Theorem Cat-wf : [member(Cat; U{i'})] {
 Theorem InitialRawCat : [RawCat] {
   unfold <RawCat>;
   intro [void]; auto;
-  intro [lam(A. lam(B. void))]; auto
+  unfold <unit>; auto;
+  intro [lam(A. lam(B. void))];
+  auto
 }.
 
 Theorem InitialCat : [Cat] {
@@ -159,12 +161,13 @@ Theorem InitialCat : [Cat] {
 
 Theorem TerminalRawCat : [RawCat] {
   unfold <RawCat>;
-  intro [unit]; autoR;
+  intro [unit]; unfold <unit>; autoR;
   intro [lam(A. lam(B. unit))]; autoR;
+  unfold <unit>; auto
 }.
 
-Tactic unit-eta {
-  @{ [f : unit |- =(f; <>; unit)] => elim <f>; eq-cd }
+Tactic approx-eta {
+  @{ [f : approx(_;_) |- =(f; <>; approx(_;_))] => unfold <unit>; elim <f>; eq-cd }
 }.
 
 Theorem TerminalCat : [Cat] {
@@ -175,5 +178,6 @@ Theorem TerminalCat : [Cat] {
   };
 
   *{lawcat-unfold; auto; reduce};
-  symmetry; unit-eta
+  symmetry;
+  elim #1; approx-eta; auto
 }.
