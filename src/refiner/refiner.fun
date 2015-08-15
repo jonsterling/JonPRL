@@ -309,7 +309,7 @@ struct
         ] BY mkEvidence EQ_MEMBER_EQ
       end
 
-	  (*
+    (*
     fun VoidEq (H >> P) =
       let
         val #[void, void', univ] = P ^! EQ
@@ -1440,19 +1440,21 @@ struct
         end
 
       fun AssumeHasValue (onames, ok) (H >> P) =
-        let val #[M,N] = P ^! APPROX
-	    val y = case onames of
-			SOME names => names
-		      | NONE => Context.fresh (H, Variable.named "y")
-	    val hv = C.`> HASVALUE $$ #[M]
-	    val k = case ok of SOME k => k | NONE => inferLevel (H, hv)
-	    val uni = C.`> (UNIV k) $$ #[]
-	    val mem = C.`> MEM $$ #[hv, uni]
+        let
+          val #[M,N] = P ^! APPROX
+          val y =
+            case onames of
+                 SOME names => names
+               | NONE => Context.fresh (H, Variable.named "y")
+          val hv = C.`> HASVALUE $$ #[M]
+          val k = case ok of SOME k => k | NONE => inferLevel (H, hv)
+          val uni = C.`> (UNIV k) $$ #[]
+          val mem = C.`> MEM $$ #[hv, uni]
         in
-            [ H @@ (y, hv) >> P
-	    , H >> mem
-	    ] BY (fn [A,B] => D.`> ASSUME_HAS_VALUE $$ #[y \\ A,B]
-		 | _ => raise Refine)
+          [ H @@ (y, hv) >> P
+          , H >> mem
+          ] BY (fn [A,B] => D.`> ASSUME_HAS_VALUE $$ #[y \\ A,B]
+                 | _ => raise Refine)
         end
 
       fun BottomDiverges hyp (H >> P) =
