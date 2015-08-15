@@ -46,7 +46,7 @@ struct
        | APPROX_EXT_EQ => #[0]
        | APPROX_REFL => #[]
        | APPROX_ELIM => #[0,0]
-       | BOTTOM_DIVERGES => #[]
+       | BOTTOM_DIVERGES => #[0]
        | ASSUME_HAS_VALUE => #[1,0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]

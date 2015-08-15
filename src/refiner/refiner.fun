@@ -1449,7 +1449,7 @@ struct
           val #[M] = h ^! HASVALUE
           val #[] = M ^! BOT
         in
-          [] BY mkEvidence BOTTOM_DIVERGES
+          [] BY (fn _ => D.`> BOTTOM_DIVERGES $$ #[``x])
         end
 
       local
