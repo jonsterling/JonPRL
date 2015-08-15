@@ -1,6 +1,6 @@
 structure TacticEval :
 sig
-  exception RemainingSubgoals of Development.judgement list
+  exception RemainingSubgoals of Development.judgement Goal.goal list
   val eval : Development.world -> Tactic.t -> Refiner.tactic
 end =
 struct
@@ -84,4 +84,5 @@ struct
       | THIN (hyp, a) =>
           an a (Thin hyp)
       | FIAT a => an a Fiat
+      | ON_CLASS (c, tac) => RefinerUtil.OnClass c (eval wld tac)
 end

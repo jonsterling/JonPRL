@@ -2,12 +2,14 @@ functor Lcf
   (structure Sequent : SEQUENT
    type evidence) : LCF_APART =
 struct
-  type goal = Sequent.sequent
+  type goal = Sequent.sequent Goal.goal
   type evidence = evidence
   type validation = evidence list -> evidence
   type tactic = goal -> (goal list * validation)
-  val goalToString = Sequent.toString
-  val goalApart = not o Sequent.eq
+  val goalToString = Goal.toString Sequent.toString
+
+  fun goalApart (Goal.|: (_, s1), Goal.|: (_, s2)) =
+    not (Sequent.eq (s1, s2))
 end
 
 structure Lcf = Lcf

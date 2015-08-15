@@ -42,10 +42,10 @@ struct
            ^ "]: tactic '"
            ^ name
            ^ "' failed with goal: \n"
-           ^ Sequent.toString goal
+           ^ Goal.toString Sequent.toString goal
            ^ "\n\n" ^ prettyException error
        | TacticEval.RemainingSubgoals goals =>
-           ("Remaining subgoals:" ^ foldl (fn (g,r) => r ^ "\n" ^ Sequent.toString g ^ "\n") "" goals)
+           ("Remaining subgoals:\n" ^ foldl (fn (g,r) => r ^ "\n" ^ Goal.toString Sequent.toString g ^ "\n") "" goals)
        | Syntax.Malformed msg => "Syntax error: " ^ msg
        | _ => exnMessage E
 

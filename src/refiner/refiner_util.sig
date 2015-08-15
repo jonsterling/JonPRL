@@ -40,4 +40,6 @@ sig
   val Reduce : int option -> tactic
   val CutLemma : world * operator -> tactic
 
+  val OnClass : Goal.class -> tactic -> tactic
+
 end

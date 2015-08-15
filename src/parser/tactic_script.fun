@@ -61,12 +61,24 @@ struct
       || parseFail
       || parseTrace
       || $ (parseMatch w)
+      || $ (parseOnAux w)
+      || $ (parseOnMain w)
       || RuleParser.parse w
 
+  and parseOnAux w () =
+    symbol "aux" >>
+    whiteSpace >> middle (symbol "{") ($ (parseScript w)) (symbol "}")
+    wth (fn t => ON_CLASS (Goal.AUX, t))
+
+  and parseOnMain w () =
+    symbol "main" >>
+    whiteSpace >> middle (symbol "{") ($ (parseScript w)) (symbol "}")
+    wth (fn t => ON_CLASS (Goal.MAIN, t))
+
   and parseFocus w () =
-      symbol "focus" && parseInt &&
-      whiteSpace >> middle (symbol "#{") ($ (parseScript w)) (symbol "}")
-      wth (fn (_, (i, t)) => (i, t))
+    symbol "focus" && parseInt &&
+    whiteSpace >> middle (symbol "#{") ($ (parseScript w)) (symbol "}")
+    wth (fn (_, (i, t)) => (i, t))
 
   and parseTry w () =
     middle (symbol "?{") ($ (parseScript w)) (symbol "}")

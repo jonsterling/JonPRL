@@ -13,4 +13,3 @@ sig
   val eq : sequent * sequent -> bool
   val toString : sequent -> string
 end
-
