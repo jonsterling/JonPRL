@@ -1096,7 +1096,7 @@ struct
         Development.lookupDefinition world theta
           handle Subscript => convTheorem theta world
     in
-      fun Unfolds (world, thetas) (_ |: H >> P) =
+      fun Unfolds (world, thetas) (lbl |: H >> P) =
         let
           val conv =
             foldl (fn ((theta, ok), acc) =>
@@ -1110,7 +1110,7 @@ struct
               end) CID thetas
 
         in
-          [ MAIN |: Context.map conv H >> conv P
+          [ lbl |: Context.map conv H >> conv P
           ] BY (fn [D] => D
                  | _ => raise Refine)
         end

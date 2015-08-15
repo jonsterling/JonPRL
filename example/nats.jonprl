@@ -3,7 +3,7 @@ Theorem natp-example : [nat] {
 }.
 
 Theorem minus-one : [nat -> nat] {
-  intro <n>; focus 1 #{ auto };
+  intro <n>; aux {auto};
   elim #1;
   [ witness [zero]
   , hypothesis #2

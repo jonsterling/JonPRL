@@ -3,22 +3,18 @@ Infix 7 "≼" := approx.
 
 Theorem ceq-refl-thru-approx : [ {x:base} x ~ x ]
 {
-  intro; focus 1 #{auto};
+  intro; aux {auto};
   capprox; areflexivity
 }.
 
-Operator bottom : ().
-[bottom()] =def= [ fix(lam(x.x)) ].
-
-Operator has-value : (0).
 Postfix 11 "⇓" := has-value.
-[t ⇓] =def= [ <> ≼ cbv(t;_.<>) ].
 
 Operator not : (0).
 Prefix 10 "¬" := not.
 [¬ P] =def= [ P -> void ].
 
-Theorem bottom-diverges : [ ¬ bottom ⇓ ] {
-  unfold <not has-value bottom>;
-  auto; bot-div #1
+Theorem bottom-diverges : [ ¬ bot ⇓ ] {
+  unfold <not>;
+  intro; aux {auto; unfold <has-value>; auto};
+  bot-div #1
 }.

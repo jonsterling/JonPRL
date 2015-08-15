@@ -76,7 +76,7 @@ Operator CmpAssoc : (0).
 ].
 
 Tactic isect-RawCat {
-  @{ [|- {RC : RawCat} P] => intro @i'; focus 1 #{ lemma <RawCat-wf> }
+  @{ [|- {RC : RawCat} P] => intro @i'; aux { lemma <RawCat-wf> }
    }
 }.
 
