@@ -115,19 +115,23 @@ struct
 
     val unfoldVoid =
       makeConv VOID (fn #[] =>
-        let val ax = `> AX $$ #[]
-            val bot = `> BOT $$ #[]
-        in `> APPROX $$ #[ax,bot]
-	end
+        let
+          val ax = `> AX $$ #[]
+          val bot = `> BOT $$ #[]
+        in
+          `> APPROX $$ #[ax,bot]
+        end
       | _ => raise Conv)
 
     val unfoldHasValue =
       makeConv HASVALUE (fn #[T] =>
-        let val ax = `> AX $$ #[]
-	    val v = Variable.named ""
-	    val cbv = `> CBV $$ #[ax,v \\ T]
-        in `> APPROX $$ #[ax,cbv]
-	end
+        let
+          val ax = `> AX $$ #[]
+          val v = Variable.named ""
+          val cbv = `> CBV $$ #[ax,v \\ T]
+        in
+          `> APPROX $$ #[ax,cbv]
+        end
       | _ => raise Conv)
 
   in
