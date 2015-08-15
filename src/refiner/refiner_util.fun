@@ -110,12 +110,11 @@ struct
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   local
-      (*structure Tacticals = Tacticals (Lcf)*)
       structure AbtUtil = AbtUtil (Syntax)
       structure CI = CttCalculusInj
       structure C = CttCalculus
 
-      open (*Tacticals*) Sequent AbtUtil (*Syntax*)
+      open Sequent AbtUtil
       open Conversions Conversionals
 
       val DeepReduce = RewriteGoal (CDEEP Step)

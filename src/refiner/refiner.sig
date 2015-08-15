@@ -32,9 +32,6 @@ sig
     (* H >> U{l} = U{l} ∈ U{k} by UnivEq (l < k) *)
     val UnivEq : tactic
 
-(*    (* H >> Void = Void ∈ U{k} by VoidEq *)
-    val VoidEq : tactic*)
-
     (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
      * 1. H >> A = A' ∈ U{k}
      * 2. H >> M = M' ∈ A
@@ -48,11 +45,6 @@ sig
     val EqEqBase : tactic
 
     val EqMemEq : tactic
-
-(*    (* H >> A by VoidElim
-     * 1. H >> Void
-     *)
-    val VoidElim : tactic*)
 
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}

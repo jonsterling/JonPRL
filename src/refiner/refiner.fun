@@ -309,21 +309,6 @@ struct
         ] BY mkEvidence EQ_MEMBER_EQ
       end
 
-    (*
-    fun VoidEq (H >> P) =
-      let
-        val #[void, void', univ] = P ^! EQ
-        val #[] = void ^! VOID
-        val #[] = void' ^! VOID
-        val (UNIV _, #[]) = asApp univ
-      in
-        [] BY mkEvidence VOID_EQ
-      end
-
-    fun VoidElim (H >> P) =
-      [ H >> C.`> VOID $$ #[]
-      ] BY mkEvidence VOID_ELIM*)
-
     fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
       let
         val #[q1, q2, univ] = P ^! EQ
