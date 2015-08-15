@@ -19,7 +19,7 @@ struct
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
     | CEQUAL_APPROX
     | APPROX_EQ | APPROX_MEMBER_EQ | APPROX_EXT_EQ | APPROX_REFL | APPROX_ELIM
-    | BOTTOM_DIVERGES
+    | BOTTOM_DIVERGES | ASSUME_HAS_VALUE
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
@@ -46,7 +46,8 @@ struct
        | APPROX_EXT_EQ => #[0]
        | APPROX_REFL => #[]
        | APPROX_ELIM => #[0,0]
-       | BOTTOM_DIVERGES => #[]
+       | BOTTOM_DIVERGES => #[0]
+       | ASSUME_HAS_VALUE => #[1,0]
        | VOID_EQ => #[]
        | VOID_ELIM => #[0]
 
@@ -136,6 +137,7 @@ struct
        | APPROX_REFL => "~<=-refl"
        | APPROX_ELIM => "~<=-elim"
        | BOTTOM_DIVERGES => "bottom-div"
+       | ASSUME_HAS_VALUE => "assume-has-value"
        | UNIT_EQ => "unit⁼"
        | UNIT_INTRO => "unit-intro"
        | UNIT_ELIM => "unit-elim"

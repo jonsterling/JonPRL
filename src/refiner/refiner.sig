@@ -32,9 +32,6 @@ sig
     (* H >> U{l} = U{l} ∈ U{k} by UnivEq (l < k) *)
     val UnivEq : tactic
 
-    (* H >> Void = Void ∈ U{k} by VoidEq *)
-    val VoidEq : tactic
-
     (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
      * 1. H >> A = A' ∈ U{k}
      * 2. H >> M = M' ∈ A
@@ -43,16 +40,11 @@ sig
 
     (* H >> (M = N ∈ A) = (M' = N' ∈ A') ∈ U{k}
      * 1. H >> A = A' ∈ U{k}
-     * 2. H >> squash(M = M' ∈ A \/ M ~ M')
-     * 3. H >> squash(N = N' ∈ A \/ N ~ N') *)
+     * 2. H >> M = M' ∈ (A |_| Base)
+     * 3. H >> N = N' ∈ (A |_| Base) *)
     val EqEqBase : tactic
 
     val EqMemEq : tactic
-
-    (* H >> A by VoidElim
-     * 1. H >> Void
-     *)
-    val VoidElim : tactic
 
     (* H >> (Σx:A)B[x] = (Σx:A')B'[x] ∈ U{k} by ProdEq z
      * 1. H >> A = A' ∈ U{k}
@@ -184,11 +176,39 @@ sig
     val ApproxElim : hyp -> tactic
     val ApproxRefl  : tactic
 
+    (* H, x : has-value(bot), J >> P
+     *)
     val BottomDiverges : hyp -> tactic
 
+    (* H >> approx(M;N)
+     *   H, y : has-value(M) >> approx(M;N)
+     *   H >> has-value(M) in U{k}
+     *)
+    val AssumeHasValue : (name option * Level.t option) -> tactic
+
+    (* H >> image(A1;f1) = image(A2;f2) ∈ U{k}
+     *   H >> f1 = f2 ∈ Base
+     *   H >> A1 = A2 ∈ U{k}
+     *)
     val ImageEq    : tactic
+
+    (* H >> f a1 = f a2 ∈ image(A;f)
+     *   H >> a1 = a2 in A
+     *   H >> f = f ∈ Base
+     *)
     val ImageMemEq : tactic
+
+    (* H, z : image(A;f), J >> P
+     *   H, z : image(A;f), [w : A], J[z\f w] >> P[z\f w]
+     *)
     val ImageElim  : hyp * name option -> tactic
+
+    (* H, x : t2 = f t1 ∈ image(A;f), J >> t2 = f t1 ∈ T
+     *   H >> f ∈ Base
+     *   H >> t1 ∈ A
+     *   H >> f t1 ∈ T
+     *   H, a : Base, b : Base, y : f a ∈ T, z : a = b ∈ A >> f a = f b ∈ T
+     *)
     val ImageEqInd : hyp * (name * name * name * name) option -> tactic
 
     val HypEqSubst : Dir.dir * hyp * term * Level.t option -> tactic

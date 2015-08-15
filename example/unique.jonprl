@@ -14,7 +14,7 @@ Operator isContr : (0).
 ||| There is just one function void ⇒ A for any A.
 Theorem abort-unique : [{A:U{i}} unique(void -> A; _. unit)] {
   unfold <unique>; auto;
-  intro [lam(x. x)]; auto;unfold <unit>;auto;
+  intro [lam(x. x)]; auto;unfold <unit>; auto;
   ext; auto
 }.
 

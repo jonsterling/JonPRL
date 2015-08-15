@@ -42,6 +42,7 @@ struct
        | APPROX_REFL $ _ => ax
        | APPROX_ELIM $ #[_, D] => extract D
        | BOTTOM_DIVERGES $ _ => ax (* could be anything because one hypothesis is false *)
+       | ASSUME_HAS_VALUE $ _ => ax
 
        | BASE_INTRO $ _ => ax
        | BASE_EQ $ _ => ax

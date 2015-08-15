@@ -35,12 +35,12 @@ struct
                              freshVariable = freshVariable,
                              level = level})
       | ELIM ({target, term, names}, a) =>
-        an a (RefinerUtil.Elim {target = target, term = term, names = names})
+        an a (RefinerUtil.Elim {target = target, term = term, names = names} wld)
       | EQ_CD ({names, terms, level}, a) =>
         an a (RefinerUtil.EqCD {names = names,
                             invertible = false,
                             terms = terms,
-                            level = level})
+                            level = level} wld)
       | EXT ({freshVariable, level}, a) =>
         an a (RefinerUtil.Ext {freshVariable = freshVariable, level = level})
       | CUM (l, a) => an a (Cum l)
@@ -57,6 +57,7 @@ struct
       | CEQUAL_APPROX a => an a CEqApprox
       | APPROX_REFL a => an a ApproxRefl
       | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
+      | ASSUME_HAS_VALUE ({name, level}, a) => an a (AssumeHasValue (name, level))
       | EQ_EQ_BASE a => an a EqEqBase
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)

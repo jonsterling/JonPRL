@@ -55,6 +55,7 @@ struct
     | CEQUAL_APPROX of meta
     | APPROX_REFL of meta
     | BOTTOM_DIVERGES of hyp * meta
+    | ASSUME_HAS_VALUE of {name : name option, level : level option} * meta
     | EQ_EQ_BASE of meta
     | TRY of t
     | LIMIT of t
@@ -163,6 +164,7 @@ struct
           | ORELSE (ts, meta) => ORELSE (List.map go ts, meta)
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
+	  | ASSUME_HAS_VALUE ({name,level}, meta) => ASSUME_HAS_VALUE ({name = name, level = level}, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | THIN (h, meta) => THIN (applyHyp h, meta)
           | t => t

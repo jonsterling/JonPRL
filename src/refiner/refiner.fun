@@ -309,20 +309,6 @@ struct
         ] BY mkEvidence EQ_MEMBER_EQ
       end
 
-    fun VoidEq (H >> P) =
-      let
-        val #[void, void', univ] = P ^! EQ
-        val #[] = void ^! VOID
-        val #[] = void' ^! VOID
-        val (UNIV _, #[]) = asApp univ
-      in
-        [] BY mkEvidence VOID_EQ
-      end
-
-    fun VoidElim (H >> P) =
-      [ H >> C.`> VOID $$ #[]
-      ] BY mkEvidence VOID_ELIM
-
     fun QuantifierEq (Q, Q_EQ) oz (H >> P) =
       let
         val #[q1, q2, univ] = P ^! EQ
@@ -1438,21 +1424,32 @@ struct
           ] BY mkEvidence CEQUAL_APPROX
         end
 
+      fun AssumeHasValue (onames, ok) (H >> P) =
+        let
+          val #[M,N] = P ^! APPROX
+          val y =
+            case onames of
+                 SOME names => names
+               | NONE => Context.fresh (H, Variable.named "y")
+          val hv = C.`> HASVALUE $$ #[M]
+          val k = case ok of SOME k => k | NONE => inferLevel (H, hv)
+          val uni = C.`> (UNIV k) $$ #[]
+          val mem = C.`> MEM $$ #[hv, uni]
+        in
+          [ H @@ (y, hv) >> P
+          , H >> mem
+          ] BY (fn [A,B] => D.`> ASSUME_HAS_VALUE $$ #[y \\ A,B]
+                 | _ => raise Refine)
+        end
+
       fun BottomDiverges hyp (H >> P) =
         let
           val x = eliminationTarget hyp (H >> P)
           val h = Context.lookup H x
-          val #[M,N] = h ^! APPROX
-          val #[] = M ^! AX
-          val #[B,xA] = N ^! CBV
-          val (x,A) = unbind xA
-          val #[] = A ^! AX
-          val #[L] = B ^! FIX
-          val #[yF] = L ^! LAM
-          val (y,f) = unbind yF
-          val _ = Variable.eq (y, asVariable f)
+          val #[M] = h ^! HASVALUE
+          val #[] = M ^! BOT
         in
-          [] BY mkEvidence BOTTOM_DIVERGES
+          [] BY (fn _ => D.`> BOTTOM_DIVERGES $$ #[``x])
         end
 
       local
