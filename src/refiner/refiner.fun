@@ -1451,7 +1451,8 @@ struct
         in
             [ H @@ (y, hv) >> P
 	    , H >> mem
-	    ] BY mkEvidence ASSUME_HAS_VALUE
+	    ] BY (fn [A,B] => D.`> ASSUME_HAS_VALUE $$ #[y \\ A,B]
+		 | _ => raise Refine)
         end
 
       fun BottomDiverges hyp (H >> P) =
