@@ -18,14 +18,15 @@ functor RefinerUtil
       where type Sequent.sequent = Sequent.sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
-  structure Tacticals = ProgressTacticals(Lcf)
+  structure Tacticals = Tacticals(Lcf)
+  structure ProgressTacticals = ProgressTacticals(Lcf)
   open Conv Refiner
 
   structure Conversionals = Conversionals
     (structure Syntax = Syntax
      structure Conv = Conv)
 
-  open Tacticals Rules
+  open ProgressTacticals Tacticals Rules
   infix ORELSE ORELSE_LAZY THEN
 
   type intro_args =
@@ -58,8 +59,7 @@ struct
   val CEqRefl = CEqRules.Approx THEN ApproxRules.Refl
 
   local
-    structure Tacticals = Tacticals (Lcf)
-    open Tacticals Goal Sequent Syntax
+    open Goal Sequent Syntax
     infix THENL
     infix 3 >> infix 2 |:
     infix $

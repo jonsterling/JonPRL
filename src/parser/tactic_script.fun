@@ -18,10 +18,7 @@ struct
   infixr 3 &&
   infixr 4 << >>
 
-  structure TP = TokenParser
-    (open JonprlLanguageDef
-     val reservedNames = ["refine"])
-  open TP
+  open JonprlTokenParser
 
   val pipe = symbol "|"
 
@@ -58,6 +55,7 @@ struct
       || $ (parseProgress w)
       || $ (parseOrelse w)
       || $ (parseComplete w)
+      || $ (parsePrune w)
       || parseId
       || parseFail
       || parseTrace
@@ -80,6 +78,11 @@ struct
     symbol "focus" && parseInt &&
     whiteSpace >> middle (symbol "#{") ($ (parseScript w)) (symbol "}")
     wth (fn (_, (i, t)) => (i, t))
+
+  and parsePrune w () =
+    symbol "prune" >>
+    whiteSpace >> middle (symbol "{") ($ (parseScript w)) (symbol "}")
+    wth PRUNE
 
   and parseTry w () =
     middle (symbol "?{") ($ (parseScript w)) (symbol "}")

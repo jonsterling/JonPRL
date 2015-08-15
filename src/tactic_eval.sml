@@ -8,7 +8,7 @@ struct
   open Refiner.Rules
   open GeneralRules
 
-  structure T = ProgressTacticals(Lcf)
+  structure PT = ProgressTacticals(Lcf) and T = Tacticals(Lcf) and TT = TransformationalTacticals(Lcf)
   exception RemainingSubgoals = T.RemainingSubgoals
 
   fun an a t = AnnotatedLcf.annotate (a, t)
@@ -62,8 +62,8 @@ struct
       | ASSUME_HAS_VALUE ({name, level}, a) => an a (ApproxRules.AssumeHasValue (name, level))
       | EQ_EQ_BASE a => an a EqRules.EqBase
       | TRY tac => T.TRY (eval wld tac)
-      | LIMIT tac => T.LIMIT (eval wld tac)
-      | PROGRESS tac => T.PROGRESS (eval wld tac)
+      | LIMIT tac => PT.LIMIT (eval wld tac)
+      | PROGRESS tac => PT.PROGRESS (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
       | THEN ts =>
         List.foldl
@@ -72,6 +72,7 @@ struct
             | (FOCUS (i, x), rest) => T.THENF (rest, i, eval wld x))
           T.ID
           ts
+      | PRUNE tac => TT.PRUNE (eval wld tac)
       | ID a => an a T.ID
       | FAIL a => an a T.FAIL
       | TRACE (msg, a) => an a (T.TRACE msg)
