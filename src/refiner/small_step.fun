@@ -70,6 +70,11 @@ struct
          TOKEN tok $ #[] => (StringListDict.lookup branches tok handle _ => catchAll)
        | _ => raise Stuck e
 
+  fun stepTestAtomBeta (U, V, S, T) =
+    case (project U, project V) of
+         (TOKEN u $ #[], TOKEN v $ #[]) => if u = v then S else T
+       | _ => raise Stuck (TEST_ATOM $$ #[U, V, S, T])
+
   fun step' e =
     case project e of
         UNIV _ $ _ => CANON
@@ -150,6 +155,12 @@ struct
                 | CANON => STEP (stepMatchTokenBeta e (M, branches, catchAll))
                 | NEUTRAL => NEUTRAL)
           end
+      | TEST_ATOM $ #[U,V,S,T] =>
+          (case (step U, step V) of
+                (STEP U', _) => STEP (TEST_ATOM $$ #[U',V,S,T])
+              | (_, STEP V') => STEP (TEST_ATOM $$ #[U,V',S,T])
+              | (CANON, CANON) => STEP (stepTestAtomBeta (U, V, S, T))
+              | _ => NEUTRAL)
       | SO_APPLY $ #[L, R] =>
           (* This can't come up but I don't think it's wrong
            * Leaving this in here so it's an actual semantics

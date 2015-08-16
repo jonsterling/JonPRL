@@ -20,7 +20,7 @@ struct
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
-    | ATOM | TOKEN of string | MATCH_TOKEN of string vector
+    | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
     | SO_APPLY
 
   local
@@ -97,6 +97,7 @@ struct
        | ATOM => #[]
        | TOKEN _ => #[]
        | MATCH_TOKEN toks => Vector.tabulate (Vector.length toks + 2, fn _ => 0)
+       | TEST_ATOM => #[0,0,0,0]
        | SO_APPLY => #[0,0]
 
   fun toString theta =
@@ -151,6 +152,7 @@ struct
              ^ Vector.foldri (fn (i, s1, s2) => if i = n - 1 then s1 else s1 ^ "; " ^ s2) "" toks'
              ^ "}"
            end
+       | TEST_ATOM => "test_atom"
        | SO_APPLY => "so_apply"
 end
 
@@ -221,6 +223,7 @@ struct
          string "member" return MEM,
          string "subset" return SUBSET,
          string "so_apply" return SO_APPLY,
+         string "test_atom" return TEST_ATOM,
          string "nat" return NAT,
          string "zero" return ZERO,
          string "succ" return SUCC,
