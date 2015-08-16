@@ -128,21 +128,35 @@ struct
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   local
-      structure AbtUtil = AbtUtil (Syntax)
-      structure CI = CttCalculusInj
-      structure C = CttCalculus
+    structure AbtUtil = AbtUtil (Syntax)
+    structure CI = CttCalculusInj
+    structure C = CttCalculus
 
-      open Goal Sequent AbtUtil
-      open Conversions Conversionals
+    open Goal Sequent AbtUtil
+    open Conversions Conversionals
 
-      val DeepReduce = RewriteGoal (CDEEP Step)
+    val DeepReduce = RewriteGoal (CDEEP Step)
 
-      infix THENL
-      infix 3 >> infix 2 |:
-      infix 8 $$
-      infixr 8 \\
+    infix THENL
+    infix 3 >> infix 2 |:
+    infix 8 $$
+    infixr 8 \\
   in
-    fun VoidElim world (goal as _ |: H >> P) =
+    fun UnitEq world =
+      COMPLETE
+        (Unfolds (world, [(CI.`> C.UNIT, NONE)])
+          THEN ApproxEq
+          THEN BaseMemberEq
+          THEN CEqApprox
+          THEN ApproxRefl)
+
+    fun UnitMemEq world =
+      COMPLETE
+        (Unfolds (world, [(CI.`> C.UNIT, NONE)])
+          THEN ApproxMemEq
+          THEN ApproxRefl)
+
+    fun VoidElim world =
       let
         val oprv  = CI.`> C.VOID
         val oprb  = CI.`> C.BOT
@@ -176,7 +190,7 @@ struct
                        THEN ApproxRefl],
                    Assumption],
                  Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRefl],
-               BottomDiverges (HypSyn.NAME nameq)]]) goal
+               BottomDiverges (HypSyn.NAME nameq)]])
       end
 
     fun VoidEq world =
@@ -211,11 +225,13 @@ struct
     let
       val freshVariable = listAt (names, 0)
     in
-        EqEq
+      EqEq
         ORELSE AtomEq
         ORELSE TokenEq
         ORELSE MatchTokenEq
         ORELSE TestAtomEq freshVariable
+        ORELSE UnitEq world
+        ORELSE UnitMemEq world
         ORELSE EqMemEq
         ORELSE CEqEq
         ORELSE CEqMemEq

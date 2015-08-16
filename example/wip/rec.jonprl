@@ -75,7 +75,7 @@ Theorem isect-glb : [
   auto;
   focus 1 #{
     unfold <subtype_rel member>;
-    equality-wf; unfold <unit>; reduce; auto;
+    equality-wf; reduce; auto;
     elim #5; reduce; auto
   };
 
@@ -111,7 +111,7 @@ Theorem union-lub : [
 
   , unfold <subtype_rel member>;
     equality-wf;
-    unfold <unit>; reduce; auto;
+    reduce; auto;
     aux { elim #5; reduce; auto };
   ]
 }.
@@ -139,7 +139,7 @@ Theorem cont-wf : [{F : U{i} -> U{i}} member(cont(F); U{i'})] {
   unfold <subtype_rel member>;
   eq-eq-base; auto;
   ?{ bunion-eq-right; auto };
-  unfold <unit>; reduce; auto;
+  reduce; auto;
   aux { @{ [H: _ + _ |- _] => elim <H>; thin <H>; reduce; auto } };
   unfold <union>; auto
 }.

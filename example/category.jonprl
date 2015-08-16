@@ -162,8 +162,7 @@ Theorem InitialCat : [Cat] {
 Theorem TerminalRawCat : [RawCat] {
   unfold <RawCat>;
   intro [unit]; unfold <unit>; autoR;
-  intro [lam(A. lam(B. unit))]; autoR;
-  unfold <unit>; auto
+  intro [lam(A. lam(B. unit))]; autoR
 }.
 
 Tactic approx-eta {

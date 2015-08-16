@@ -39,13 +39,13 @@ Theorem subtype_rel_wf :
   auto;unfold <subtype_rel member>;eq-eq-base;unfold <bunion id>;
   [ auto
   , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
-    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;unfold <unit>;auto;
-    [reduce 1;auto, id];
-    elim <x>;reduce 1;auto
+    aux { unfold <snd>; reduce 2; auto }; auto;
+    focus 0 #{ reduce 1; auto };
+    elim <x>; reduce 1; auto
   , csubst [ceq(lam(x.x);lam(x.snd(x)) pair(inr(<>);lam(x.x)))] [h.=(h;h;_)];
-    [unfold <snd>; reduce 2; auto, id];eq-cd;auto;unfold <unit>;auto;
-    [reduce 1;auto, id];
-    elim <x>;reduce 1;auto
+    aux { unfold <snd>; reduce 2; auto }; auto;
+    main { reduce 1; auto };
+    elim <x>; reduce 1; auto
   ]
 }.
 
@@ -58,8 +58,8 @@ Theorem subtype_rel_eq :
    , reduce;auto
    ]
  , cut-lemma <subtype_rel_wf>;
-   elim #5 [A];[auto,id];
-   elim #6 [B];[auto,id];
+   elim #5 [A];auto;
+   elim #6 [B];auto;
    unfold <member>;auto
  ]
 }.
@@ -73,25 +73,25 @@ Theorem subtype_rel_trans : [{A : U{i}}{B : U{i}}{C : U{i}}
   auto;
   [ unfold <id>;eq-cd;[id,auto];
     cut-lemma <subtype_rel_eq>;
-    elim #7 [A];[auto,id];
-    elim #8 [B];[auto,id];
-    elim #10 [p];[auto,id];
-    elim #12 [p];[auto,id];
-    elim #14 [x];[auto;unfold <subtype_rel member id>;auto,id];
-    elim #16 [<>];[auto,id];
-    elim #7 [B];[auto,id]; (* here it looks like B is captured in 20*)
-    elim #20 [C];[auto,id];
-    elim #22 [p];[auto,id];
-    elim #24 [p];[auto,id];
-    elim #26 [x'];[auto;unfold <subtype_rel member id>;auto,id];
+    elim #7 [A]; aux { auto };
+    elim #8 [B]; aux { auto };
+    elim #10 [p]; aux { auto };
+    elim #12 [p]; aux { auto };
+    elim #14 [x]; aux { auto; unfold <subtype_rel member id>; auto };
+    elim #16 [<>]; aux { auto };
+    elim #7 [B]; aux { auto }; (* here it looks like B is captured in 20*)
+    elim #20 [C]; aux { auto };
+    elim #22 [p]; aux { auto };
+    elim #24 [p]; aux { auto };
+    elim #26 [x']; aux { auto;unfold <subtype_rel member id>;auto };
     elim #28 [y'''''];auto
   , cut-lemma <subtype_rel_wf>;
-    elim #5 [B];[auto,id];
-    elim #6 [C];[auto,id];
+    elim #5 [B]; aux { auto };
+    elim #6 [C]; aux { auto };
     unfold <member>;auto
   , cut-lemma <subtype_rel_wf>;
-    elim #4 [A];[auto,id];
-    elim #5 [B];[auto,id];
+    elim #4 [A]; aux { auto };
+    elim #5 [B]; aux { auto };
     unfold <member>;auto
   ]
 }.

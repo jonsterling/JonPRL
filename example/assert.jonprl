@@ -1,5 +1,4 @@
 Theorem trivial-assertion : [unit] {
   assert [unit -> unit];
-  unfold <unit>;
   auto
 }.
