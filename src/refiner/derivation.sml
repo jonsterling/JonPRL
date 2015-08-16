@@ -23,6 +23,7 @@ struct
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
 
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
+    | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
     | LEMMA of {label : Label.t}
 
@@ -67,6 +68,8 @@ struct
             (Vector.length toks + 2,
              fn i => if i = 0 then 0 else 2)
        | TEST_ATOM_EQ => #[0,0,1,1]
+       | TEST_ATOM_REDUCE_LEFT => #[0,0]
+       | TEST_ATOM_REDUCE_RIGHT => #[0,0]
 
        | PROD_EQ => #[0,1]
        | PROD_INTRO => #[0,0,0,1]
@@ -161,6 +164,8 @@ struct
              ^ "}"
            end
        | TEST_ATOM_EQ => "test_atom-eq"
+       | TEST_ATOM_REDUCE_LEFT => "test_atom-reduce-left"
+       | TEST_ATOM_REDUCE_RIGHT => "test_atom-reduce-right"
 
        | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"

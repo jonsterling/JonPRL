@@ -66,6 +66,8 @@ struct
        | TOKEN_EQ $ _ => ax
        | MATCH_TOKEN_EQ toks $ Ds => ax
        | TEST_ATOM_EQ $ _ => ax
+       | TEST_ATOM_REDUCE_LEFT $ _ => ax
+       | TEST_ATOM_REDUCE_RIGHT $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => `> PAIR $$ #[M, extract E]

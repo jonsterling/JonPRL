@@ -1076,6 +1076,26 @@ struct
              | _ => raise Refine)
     end
 
+  fun TestAtomReduceLeft (_ |: H >> P) =
+    let
+      val #[test, t2, T] = P ^! EQ
+      val #[u,v,s,t] = test ^! TEST_ATOM
+    in
+      [ MAIN |: H >> C.`> EQ $$ #[s, t2, T]
+      , AUX |: H >> C.`> EQ $$ #[u, v, C.`> ATOM $$ #[]]
+      ] BY mkEvidence TEST_ATOM_REDUCE_LEFT
+    end
+
+  fun TestAtomReduceRight (_ |: H >> P) =
+    let
+      val #[test, t2, T] = P ^! EQ
+      val #[u,v,s,t] = test ^! TEST_ATOM
+    in
+      [ MAIN |: H >> C.`> EQ $$ #[t, t2, T]
+      , AUX |: H >> C.`> NOT $$ #[C.`> EQ $$ #[u, v, C.`> ATOM $$ #[]]]
+      ] BY mkEvidence TEST_ATOM_REDUCE_RIGHT
+    end
+
    fun MatchTokenEq (_ |: H >> P) =
      let
        val #[match1, match2, C] = P ^! EQ
