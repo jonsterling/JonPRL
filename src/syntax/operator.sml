@@ -9,7 +9,7 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD | AND
     | FUN | LAM | AP | IMPLIES | IFF
-    | ID | BOT | SQUASH | FST | SND
+    | ID | BOT | SQUASH | FST | SND | NOT
     | SUBTYPE_REL | BUNION | HASVALUE
     | IMAGE
     | FIX
@@ -20,8 +20,8 @@ struct
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
+    | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
     | SO_APPLY
-
 
   local
     val i = Level.base
@@ -35,7 +35,7 @@ struct
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD, AND,
        FUN, LAM, AP, IMPLIES, IFF,
-       ID, BOT, SQUASH, FST, SND,
+       ID, BOT, SQUASH, FST, SND, NOT,
        SUBTYPE_REL, BUNION, HASVALUE,
        IMAGE,
        FIX,
@@ -43,6 +43,7 @@ struct
        ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
+       ATOM, TOKEN "token",
        CEQUAL, APPROX, BASE, SO_APPLY]
   end
 
@@ -69,6 +70,7 @@ struct
        | SQUASH => #[0]
        | FST => #[0]
        | SND => #[0]
+       | NOT => #[0]
        | SUBTYPE_REL => #[0,0]
        | BUNION => #[0,0]
        | HASVALUE => #[0]
@@ -93,6 +95,10 @@ struct
 
        | SUBSET => #[0,1]
 
+       | ATOM => #[]
+       | TOKEN _ => #[]
+       | MATCH_TOKEN toks => Vector.tabulate (Vector.length toks + 2, fn _ => 0)
+       | TEST_ATOM => #[0,0,0,0]
        | SO_APPLY => #[0,0]
 
   fun toString theta =
@@ -116,6 +122,7 @@ struct
        | SQUASH => "squash"
        | FST => "fst"
        | SND => "snd"
+       | NOT => "not"
        | SUBTYPE_REL => "subtype_rel"
        | BUNION => "bunion"
        | HASVALUE => "has-value"
@@ -135,9 +142,19 @@ struct
        | ZERO => "zero"
        | SUCC => "succ"
        | NATREC => "natrec"
-
        | SUBSET => "subset"
-
+       | ATOM => "atom"
+       | TOKEN tok => "\"" ^ tok ^ "\""
+       | MATCH_TOKEN toks =>
+           let
+             val n = Vector.length toks
+             val toks' = Vector.map (fn x => "\"" ^ x ^ "\"") toks
+           in
+             "match_token{"
+             ^ Vector.foldri (fn (i, s1, s2) => if i = n - 1 then s1 else s1 ^ "; " ^ s2) "" toks'
+             ^ "}"
+           end
+       | TEST_ATOM => "test_atom"
        | SO_APPLY => "so_apply"
 end
 
@@ -147,7 +164,7 @@ structure ParseCttOperator =
 struct
   open CttCalculus
   local
-    open ParserCombinators CharParser
+    open ParserCombinators CharParser JonprlTokenParser
     infix 2 return wth suchthat return guard when
     infixr 1 || <|>
     infixr 4 << >> --
@@ -165,9 +182,14 @@ struct
     fun choices xs =
       foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
 
+    val parseToken : t charParser =
+      stringLiteral wth TOKEN
+
     val parseOperator : t charParser =
       choices
         [parseUniv,
+         parseToken,
+         string "atom" return ATOM,
          string "base" return BASE,
          string "void" return VOID,
          string "unit" return UNIT,
@@ -190,6 +212,7 @@ struct
          string "squash" return SQUASH,
          string "fst" return FST,
          string "snd" return SND,
+         string "not" return NOT,
          string "subtype_rel" return SUBTYPE_REL,
          string "bunion" return BUNION,
          string "has-value" return HASVALUE,
@@ -203,6 +226,7 @@ struct
          string "member" return MEM,
          string "subset" return SUBSET,
          string "so_apply" return SO_APPLY,
+         string "test_atom" return TEST_ATOM,
          string "nat" return NAT,
          string "zero" return ZERO,
          string "succ" return SUCC,

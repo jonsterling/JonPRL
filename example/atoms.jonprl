@@ -1,0 +1,34 @@
+Infix 100 "∈" := member.
+Infix 100 "~" := ceq.
+Postfix 11 "⇓" := has-value.
+
+Operator decode : (0).
+[decode(A)] =def= [
+  match A {
+      "unit" => unit
+    | "void" => void
+    | _ => bot
+  }
+].
+
+Operator code : ().
+[code] =def= [{A : atom | decode(A) ⇓}].
+
+Theorem code-wf : [code ∈ U{i}] {
+  unfold <code has-value>; auto;
+}.
+
+Theorem decode-wf : [
+  {s:code} decode(s) ∈ U{i}
+] {
+  intro @i; aux {lemma <code-wf>};
+  unfold <code decode unit>; auto;
+
+  elim #1;
+  assert [bot ⇓] <bot-has-value>;
+  aux { chyp-subst <- #4 [h. h ⇓]; auto };
+  bot-div <bot-has-value>
+}.
+
+
+Eval [test_atom("a"; "aasdf"; unit; void)].

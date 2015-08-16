@@ -17,17 +17,11 @@ struct
   fun extract E =
     case project E of
          UNIV_EQ _ $ _ => ax
-       | VOID_EQ $ _ => ax
-       | VOID_ELIM $ _ => ax
        | CUM $ _ => ax
 
        | EQ_EQ $ _ => ax
        | EQ_EQ_BASE $ _ => ax
        | EQ_MEMBER_EQ $ _ => ax
-       | UNIT_EQ $ _ => ax
-       | UNIT_INTRO $ _ => ax
-       | UNIT_ELIM $ #[R, E] => extract E
-       | AX_EQ $ _ => ax
        | EQ_SYM $ _ => ax
        | CEQUAL_EQ $ _ => ax
        | CEQUAL_MEMBER_EQ $ _ => ax
@@ -67,6 +61,13 @@ struct
              (w \\ extract D) // ax
            end
        | IMAGE_EQ_IND $ _ => ax
+
+       | ATOM_EQ $ _ => ax
+       | TOKEN_EQ $ _ => ax
+       | MATCH_TOKEN_EQ toks $ Ds => ax
+       | TEST_ATOM_EQ $ _ => ax
+       | TEST_ATOM_REDUCE_LEFT $ _ => ax
+       | TEST_ATOM_REDUCE_RIGHT $ _ => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => `> PAIR $$ #[M, extract E]

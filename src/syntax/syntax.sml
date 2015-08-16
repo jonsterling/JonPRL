@@ -47,12 +47,15 @@ struct
                  succeed (Postfix (i, fn M => theta $$ #[M]))
         end) handle _ => fail "not a custom notation")
 
+    val pipe = symbol "|"
+
     fun parseRaw w st () =
       fancySubset w st
       || fancyProd w st
       || fancyFun w st
       || fancyIsect w st
       || fancyPair w st
+      || matchToken w st
       || ParseAbt.extensibleParseAbt w (parseAbt w) st
     and fancyQuantifier w st (wrap, sep, theta) =
       wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
@@ -73,6 +76,15 @@ struct
     and fixityItem w st =
       alt [customOperator w, plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
+    and matchToken w st =
+      symbol "match"
+        >> parseAbt w st
+        && braces (((sepEnd1 (matchTokenBranch w st) pipe) || succeed []) && matchTokenCatchAll w st)
+        wth (fn (z, (branches, catchAll)) =>
+          `> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
+              $$ Vector.fromList (z :: List.map #2 branches @ [catchAll]))
+    and matchTokenBranch w st = stringLiteral << symbol "=>" && parseAbt w st
+    and matchTokenCatchAll w st = symbol "_" >> symbol "=>" >> parseAbt w st
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => `> AP $$ #[M,N]) << spaces
   end
 
@@ -135,6 +147,22 @@ struct
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
            | PAIR $ #[M,N] =>
                Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
+           | MATCH_TOKEN toks $ es =>
+               let
+                 val target = Vector.sub (es, 0)
+                 val branches =
+                   Vector.tabulate
+                    (Vector.length es - 2,
+                     fn i => (Vector.sub (toks, i), Vector.sub (es, i + 1)))
+                 val catchAll = Vector.sub (es, Vector.length es - 1)
+                 val printedBranches =
+                   Vector.foldr
+                    (fn ((tok, E), str) => "\"" ^ tok ^ "\" => " ^ toString E ^ " | " ^  str)
+                    ("_ => " ^ toString catchAll)
+                    branches
+               in
+                 Unparse.atom ("match " ^ toString target ^ " {" ^ printedBranches ^ "}")
+               end
            | SO_APPLY $ #[M,N] =>
                Unparse.postfix (12, "[" ^ toString N ^ "]") (unparseAbt M)
            | _ => inner M

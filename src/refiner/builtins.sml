@@ -134,6 +134,11 @@ struct
         end
       | _ => raise Conv)
 
+    val unfoldNot =
+      makeConv NOT (fn #[P] =>
+        `> IMPLIES $$ #[P, `> VOID $$ #[]]
+      | _ => raise Conv)
+
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
   val definitions =
@@ -151,6 +156,7 @@ struct
       o unfoldUnit
       o unfoldVoid
       o unfoldHasValue
+      o unfoldNot
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)

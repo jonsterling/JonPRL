@@ -36,6 +36,7 @@ sig
   val Ext : ext_args -> tactic
   val UnfoldHead : world -> tactic
   val Match : match_args -> tactic
+  val ReduceEquand : Dir.dir -> tactic
 
   val Reduce : int option -> tactic
   val CutLemma : world * operator -> tactic
