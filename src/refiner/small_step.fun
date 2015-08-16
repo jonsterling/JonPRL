@@ -73,32 +73,8 @@ struct
       | AX $ _ => CANON
       | PROD $ _ => CANON
       | PAIR $ _ => CANON
-      | SPREAD $ #[P, E] => (
-          case step P of
-              STEP P' => STEP (SPREAD $$ #[P', E])
-            | CANON => STEP (stepSpreadBeta (P, E))
-            | NEUTRAL => NEUTRAL
-      )
       | FUN $ _ => CANON
       | LAM $ _ => CANON
-      | AP $ #[L, R] => (
-          case step L of
-              STEP L' => STEP (AP $$ #[L', R])
-            | CANON => STEP (stepApBeta (L, R))
-            | NEUTRAL => NEUTRAL
-      )
-      | FIX $ #[F] => (
-	  case step F of
-	      STEP F' => STEP (FIX $$ #[F'])
-	    | CANON => STEP (stepFix F)
-	    | NEUTRAL => NEUTRAL
-      )
-      | CBV $ #[A, F] => (
-          case step A of
-              STEP A' => STEP (CBV $$ #[A', F])
-            | CANON => STEP (stepCbv (A, F))
-            | NEUTRAL => NEUTRAL
-      )
       | ISECT $ _ => CANON
       | EQ $ _ => CANON
       | MEM $ _ => CANON
@@ -110,8 +86,30 @@ struct
       | ZERO $ _ => CANON
       | SUCC $ _ => CANON
       | IMAGE $ _ => CANON
+      | BASE $ _ => CANON
+      | TOKEN _ $ _ => CANON
       | APPROX $ _ => CANON
       | CEQUAL $ _ => CANON
+      | AP $ #[L, R] =>
+          (case step L of
+              STEP L' => STEP (AP $$ #[L', R])
+            | CANON => STEP (stepApBeta (L, R))
+            | NEUTRAL => NEUTRAL)
+      | SPREAD $ #[P, E] =>
+          (case step P of
+              STEP P' => STEP (SPREAD $$ #[P', E])
+            | CANON => STEP (stepSpreadBeta (P, E))
+            | NEUTRAL => NEUTRAL)
+      | FIX $ #[F] =>
+          (case step F of
+              STEP F' => STEP (FIX $$ #[F'])
+            | CANON => STEP (stepFix F)
+            | NEUTRAL => NEUTRAL)
+      | CBV $ #[A, F] =>
+          (case step A of
+              STEP A' => STEP (CBV $$ #[A', F])
+            | CANON => STEP (stepCbv (A, F))
+            | NEUTRAL => NEUTRAL)
       | DECIDE $ #[S, L, R] =>
           (case step S of
               STEP S' => STEP (DECIDE $$ #[S', L, R])
@@ -136,12 +134,11 @@ struct
                | STEP L' => STEP (SO_APPLY $$ #[L', R])
                | NEUTRAL => NEUTRAL))
       | ` _ => NEUTRAL (* Cannot step an open term *)
-      | x \ e => (
-        case step e of
+      | x \ e =>
+        (case step e of
             STEP e' => STEP (x \\ e')
           | NEUTRAL => NEUTRAL
-          | CANON => NEUTRAL
-      )
+          | CANON => NEUTRAL)
       | _ => raise Stuck e
 
     and step e =

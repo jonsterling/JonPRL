@@ -20,8 +20,8 @@ struct
     | PLUS | INL | INR | DECIDE
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
+    | ATOM | TOKEN of string | MATCH_TOKEN of string vector
     | SO_APPLY
-
 
   local
     val i = Level.base
@@ -43,6 +43,7 @@ struct
        ISECT, EQ, MEM, SUBSET,
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
+       ATOM, TOKEN "token",
        CEQUAL, APPROX, BASE, SO_APPLY]
   end
 
@@ -93,6 +94,9 @@ struct
 
        | SUBSET => #[0,1]
 
+       | ATOM => #[]
+       | TOKEN _ => #[]
+       | MATCH_TOKEN toks => Vector.tabulate (Vector.length toks + 2, fn _ => 0)
        | SO_APPLY => #[0,0]
 
   fun toString theta =
@@ -135,9 +139,18 @@ struct
        | ZERO => "zero"
        | SUCC => "succ"
        | NATREC => "natrec"
-
        | SUBSET => "subset"
-
+       | ATOM => "atom"
+       | TOKEN tok => "\"" ^ tok ^ "\""
+       | MATCH_TOKEN toks =>
+           let
+             val n = Vector.length toks
+             val toks' = Vector.map (fn x => "\"" ^ x ^ "\"") toks
+           in
+             "match_token{"
+             ^ Vector.foldri (fn (i, s1, s2) => if i = n - 1 then s1 else s1 ^ "; " ^ s2) "" toks'
+             ^ "}"
+           end
        | SO_APPLY => "so_apply"
 end
 
@@ -147,7 +160,7 @@ structure ParseCttOperator =
 struct
   open CttCalculus
   local
-    open ParserCombinators CharParser
+    open ParserCombinators CharParser JonprlTokenParser
     infix 2 return wth suchthat return guard when
     infixr 1 || <|>
     infixr 4 << >> --
@@ -165,9 +178,14 @@ struct
     fun choices xs =
       foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
 
+    val parseToken : t charParser =
+      stringLiteral wth TOKEN
+
     val parseOperator : t charParser =
       choices
         [parseUniv,
+         parseToken,
+         string "atom" return ATOM,
          string "base" return BASE,
          string "void" return VOID,
          string "unit" return UNIT,
