@@ -1091,7 +1091,13 @@ struct
        val y = Context.fresh (H, Variable.named "y")
 
        fun tokToGoal tok =
-         MAIN |: H >> C.`> EQ $$ #[StringListDict.lookup branches1 tok, StringListDict.lookup branches2 tok, C]
+         let
+           val X = C.`> CEQUAL $$ #[target1, C.`> (TOKEN tok) $$ #[]]
+           val Y = C.`> CEQUAL $$ #[target2, C.`> (TOKEN tok) $$ #[]]
+           val H' = H @@ (x, X) @@ (y, Y)
+         in
+           MAIN |: H' >> C.`> EQ $$ #[StringListDict.lookup branches1 tok, StringListDict.lookup branches2 tok, C]
+         end
 
        val positiveGoals =
          List.tabulate
@@ -1116,7 +1122,7 @@ struct
          D.`> (MATCH_TOKEN_EQ toks1) $$
            Vector.tabulate
              (List.length Ds, fn i =>
-                if i = List.length Ds - 1 then
+                if i > 0 then
                   x \\ (y \\ List.nth (Ds, i))
                 else
                   List.nth (Ds, i)))
