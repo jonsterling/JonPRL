@@ -4,7 +4,7 @@ functor Development
      where type term = Syntax.t
    structure Lcf : LCF
      where type evidence = Syntax.t
-     where type goal = Sequent.sequent
+     where type goal = Sequent.sequent Goal.goal
    structure PatternCompiler : PATTERN_COMPILER
      where type PatternTerm.t = Syntax.t
      where type PatternTerm.Operator.t = Syntax.Operator.t
@@ -22,7 +22,7 @@ struct
 
   type label = Telescope.label
   type term = Syntax.t
-  type judgement = Lcf.goal
+  type judgement = Sequent.sequent
   type evidence = Lcf.evidence
   type tactic = Lcf.tactic
   type operator = Syntax.Operator.t
@@ -54,7 +54,7 @@ struct
             val evidence' = Susp.force evidence
           in
             "Theorem " ^ Label.toString lbl
-              ^ " : ⸤" ^ goalToString statement ^ "⸥ {\n  "
+              ^ " : ⸤" ^ Sequent.toString statement ^ "⸥ {\n  "
               ^ Syntax.toString evidence' ^ "\n} ext {\n  "
               ^ Syntax.toString (Extract.extract evidence') ^ "\n}."
           end
@@ -126,7 +126,7 @@ struct
 
   fun prove T (lbl, theta, goal, tac) =
     let
-      val (subgoals, validation) = tac goal
+      val (subgoals, validation) = tac (Goal.|: (Goal.MAIN, goal))
     in
       case subgoals of
            [] => Telescope.snoc T (lbl, Object.THEOREM
@@ -151,8 +151,8 @@ struct
   fun searchObject T lbl =
     let
       open Telescope.SnocView
-      open Sequent
-      infix >>
+      open Goal Sequent
+      infix 3 >>
 
       fun termHasLbl lbl term =
         List.exists (fn oper => Syntax.Operator.toString oper = lbl)
@@ -293,4 +293,4 @@ structure Development : DEVELOPMENT =
      structure Lcf = Lcf
      structure Builtins = Builtins
 
-     val goalToString = Sequent.toString)
+     val goalToString = Goal.toString Sequent.toString)

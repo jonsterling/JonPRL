@@ -6,7 +6,7 @@ Theorem proj-equal : [
   assert [=(spread(<a,b>; x.y.x);
             spread(<a',b'>; x.y.x);
             A)];
-  focus 0 #{hyp-subst → #7 [h. =(spread(h; x.y.x); spread(<a',b'>; x.y.x); A)]};
+  aux {hyp-subst → #7 [h. =(spread(h; x.y.x); spread(<a',b'>; x.y.x); A)]};
   reduce;
   auto
 }.

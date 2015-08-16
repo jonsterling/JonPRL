@@ -40,7 +40,7 @@ Theorem ZE-wf : [ZE ∈ NAT] {
   ||| that ZE is in the right form (i.e. a function application); the part that is
   ||| lost in the redex is, then, the depth of the structure of ZE.
   assert [ZE ~ (pi2 <succ(zero), ZE>)] <H>;
-  focus 0 #{
+  aux {
     unfold <ZE pi2>; reduce; auto;
   };
 
@@ -51,7 +51,7 @@ Theorem ZE-wf : [ZE ∈ NAT] {
 
 
 Tactic isect-NAT {
-  @{ [|- {n:NAT} _] => intro @i; focus 1 #{ lemma <NAT-wf> }}
+  @{ [|- {n:NAT} _] => intro @i; aux { lemma <NAT-wf> }}
 }.
 
 Tactic NAT-induction {
@@ -75,7 +75,7 @@ Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
 
   ||| We use the same technique here as we did to prove the wellformedness of ZE.
   assert [SU(n) ~ (pi2 <succ(nat-of(n)), SU(n)>)] <H>;
-  focus 0 #{
+  aux {
     unfold <SU nat-of pi2>; csymmetry; *{ step }; auto
   };
 
@@ -88,7 +88,7 @@ Theorem NAT-ind-wf : [
   lam(pz. lam(psu. lam(n. fix(lam(F. decide(n; l.pz; r.psu r (F r))))))) ∈ {P : NAT -> U{i}} P ZE -> ((n : NAT) P n -> P (SU(n))) -> (z : NAT) P z
 ] {
   auto; eq-cd @i';
-  focus 1 #{
+  aux {
     auto; cut-lemma <NAT-wf>; cum @i; unfold <member>; auto
   }; auto;
 
@@ -96,12 +96,12 @@ Theorem NAT-ind-wf : [
     cut-lemma <ZE-wf>; unfold <member>; auto
   }; eq-cd @i;
 
-  focus 1 #{
+  aux {
     auto; [cut-lemma <NAT-wf>; unfold <member>; auto, cut-lemma <SU-wf>];
     unfold <member>; bhyp <SU-wf>; auto
   }; eq-cd @i;
 
-  focus 1 #{
+  aux {
     lemma <NAT-wf>
   };
 

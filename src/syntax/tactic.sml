@@ -68,6 +68,7 @@ struct
     | MATCH of (ctx_pattern * branch) list
     | THIN of hyp * meta
     | FIAT of meta
+    | ON_CLASS of Goal.class * t
   and then_tactic =
       APPLY of t
     | LIST of t list

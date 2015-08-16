@@ -11,6 +11,8 @@ group is
   level.sig
   level.sml
 
+  goal.sml
+
   dir.sml
 
   jonprl_language_def.sml

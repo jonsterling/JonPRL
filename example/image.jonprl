@@ -8,7 +8,7 @@ Theorem squash_wf : [ {T:U{i}} ↓ T ∈ U{i} ] {
 }.
 
 Theorem implies_squash : [ {T:U{i}} T => ↓ T ] {
-  *{intro; focus 1 #{auto}};
+  *{intro}; aux {auto};
   @{ [H: 'T |- _] => witness [lam(_.<>) H]};
   unfold <squash>; auto
 }.
@@ -19,17 +19,18 @@ Theorem approx_id_refl_wf : [
   unfold <member>; ext;
   cut-lemma <implies_squash>;
   elim #1 [lam(x.x) ≼ lam(x.x) ⇔ <> ≼ <>];
-  focus 0 #{ unfold <iff and implies>; auto };
-  assert [lam(x.x) ≼ lam(x.x) ⇔ <> ≼ <>];
-  focus 1 #{elim #2 [H]; auto};
-  unfold <iff and implies>; intro; intro; auto
+  main {
+    assert [lam(x.x) ≼ lam(x.x) ⇔ <> ≼ <>];
+    main { elim #2 [H]; auto };
+  };
+  aux {unfold <iff and implies>; auto}
 }.
 
 Theorem test_image_elim : [
   {n:nat} {m:nat} {x : ↓ =(n; m; nat)} x ∈ ↓ =(n; m; nat) => =(n; m; nat)
 ] {
   unfold <squash member>;
-  *{intro; focus 1 #{auto}};
+  *{intro}; aux {auto};
   @{[H : image(_;_) |- _] => elim <H>};
   auto
 }.

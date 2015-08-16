@@ -1,6 +1,12 @@
 functor RefinerUtil
-  (structure Lcf : LCF_APART
-   structure Syntax : ABT where type Operator.t = UniversalOperator.t
+  (structure Syntax : ABT
+     where type Operator.t = UniversalOperator.t
+   structure Sequent : SEQUENT
+     where type term = Syntax.t
+     where Context.Syntax = Syntax
+   structure Lcf : LCF_APART
+     where type evidence = Syntax.t
+     where type goal = Sequent.sequent Goal.goal
    structure Conv : CONV
      where type term = Syntax.t
    structure Refiner : REFINER
@@ -9,7 +15,7 @@ functor RefinerUtil
       where type term = Syntax.t
       where type name = Syntax.Variable.t
       where type operator = Syntax.Operator.t
-   sharing type Lcf.goal = Refiner.Sequent.sequent) : REFINER_UTIL =
+      where type Sequent.sequent = Sequent.sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = ProgressTacticals(Lcf)
@@ -53,11 +59,18 @@ struct
 
   local
     structure Tacticals = Tacticals (Lcf)
-    open Tacticals Sequent Syntax
-    infix THENL >>
+    open Tacticals Goal Sequent Syntax
+    infix THENL
+    infix 3 >> infix 2 |:
     infix $
   in
-    fun UnfoldHead world (goal as H >> P) =
+    fun OnClass cls tac (goal as cls' |: _) =
+      if cls = cls' then
+        tac goal
+      else
+        ID goal
+
+    fun UnfoldHead world (goal as _ |: H >> P) =
       case out P of
            theta $ _ => Unfolds (world, [(theta, NONE)]) goal
          | _ => raise Refine
@@ -114,61 +127,61 @@ struct
       structure CI = CttCalculusInj
       structure C = CttCalculus
 
-      open Sequent AbtUtil
+      open Goal Sequent AbtUtil
       open Conversions Conversionals
 
       val DeepReduce = RewriteGoal (CDEEP Step)
 
-      infix THENL >>
+      infix THENL
+      infix 3 >> infix 2 |:
       infix 8 $$
       infixr 8 \\
   in
+    fun VoidElim world (goal as _ |: H >> P) =
+      let
+        val oprv  = CI.`> C.VOID
+        val oprb  = CI.`> C.BOT
+        val oprh  = CI.`> C.HASVALUE
+        val opri  = CI.`> C.ID
+        val oprm  = CI.`> C.MEM
+        val namex = Variable.named "x"
+        val nameh = Variable.named "h"
+        val nameq = Variable.named "q"
+        val namev = Variable.named "v"
+        val void  = oprv $$ #[]
+        val bot   = oprb $$ #[]
+        val ax    = CI.`> C.AX $$ #[]
+        val hv    = oprh $$ #[bot]
+        val ceq   = CI.`> C.CEQUAL $$ #[bot, ax]
+        val hvx   = oprh $$ #[``namex]
+        val xC    = namex \\ hvx
+      in
+        (Assert (void, SOME nameh) THENL
+          [ID,
+           Unfolds (world, [(oprv, NONE)])
+            THEN Assert (hv, SOME nameq) THENL
+              [CEqSubst (ceq, xC) THENL
+                [CEqApprox THENL
+                  [AssumeHasValue (SOME namev, NONE) THENL
+                    [BottomDiverges (HypSyn.NAME namev),
+                     Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
+                       THEN ApproxEq
+                       THEN BaseMemberEq
+                       THEN CEqApprox
+                       THEN ApproxRefl],
+                   Assumption],
+                 Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRefl],
+               BottomDiverges (HypSyn.NAME nameq)]]) goal
+      end
 
-  fun VoidElim world (goal as H >> P) =
-    let
-      val oprv  = CI.`> C.VOID
-      val oprb  = CI.`> C.BOT
-      val oprh  = CI.`> C.HASVALUE
-      val opri  = CI.`> C.ID
-      val oprm  = CI.`> C.MEM
-      val namex = Variable.named "x"
-      val nameh = Variable.named "h"
-      val nameq = Variable.named "q"
-      val namev = Variable.named "v"
-      val void  = oprv $$ #[]
-      val bot   = oprb $$ #[]
-      val ax    = CI.`> C.AX $$ #[]
-      val hv    = oprh $$ #[bot]
-      val ceq   = CI.`> C.CEQUAL $$ #[bot, ax]
-      val hvx   = oprh $$ #[``namex]
-      val xC    = namex \\ hvx
-    in
-      (Assert (void, SOME nameh) THENL
-        [ID,
-         Unfolds (world, [(oprv, NONE)])
-          THEN Assert (hv, SOME nameq) THENL
-            [CEqSubst (ceq, xC) THENL
-              [CEqApprox THENL
-                [AssumeHasValue (SOME namev, NONE) THENL
-                  [BottomDiverges (HypSyn.NAME namev),
-                   Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
-                     THEN ApproxEq
-                     THEN BaseMemberEq
-                     THEN CEqApprox
-                     THEN ApproxRefl],
-                 Assumption],
-               Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRefl],
-             BottomDiverges (HypSyn.NAME nameq)]]) goal
-    end
-
-  fun VoidEq world =
-    let val oprv  = CI.`> C.VOID
-    in Unfolds (world, [(oprv, NONE)])
-       THEN ApproxEq
-       THEN BaseMemberEq
-       THEN CEqApprox
-       THEN ApproxRefl
-    end
+    fun VoidEq world =
+      let val oprv  = CI.`> C.VOID
+      in Unfolds (world, [(oprv, NONE)])
+         THEN ApproxEq
+         THEN BaseMemberEq
+         THEN CEqApprox
+         THEN ApproxRefl
+      end
   end
 
   fun Elim {target, names, term} world =
@@ -298,8 +311,7 @@ struct
           go n
         end
   end
-
 end
 
 structure RefinerUtil = RefinerUtil
-  (structure Syntax = Syntax and Lcf = Lcf and Conv = Conv and Refiner = Refiner)
+  (structure Syntax = Syntax and Sequent = Sequent and Lcf = Lcf and Conv = Conv and Refiner = Refiner)

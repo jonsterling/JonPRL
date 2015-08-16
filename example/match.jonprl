@@ -23,7 +23,7 @@ Theorem modus_ponens : [{A : U{i}}{B : U{i}}((B -> A) * B) -> A] {
 
 Tactic squash-intro {
   @{ [|- squash(A)] =>
-       assert [A]; focus 1 #{
+       assert [A]; main {
          @{[H : A |- _] => unfold <squash member>; witness [lam(_.<>) H]; auto}
        }
   }
@@ -33,5 +33,5 @@ Theorem test-binding : [(A : U{i}) -> squash(unit)] {
   (* Note that squash-intro correctly isn't confused by the A
    * already in the context and correctly binds a fresh variable
    *)
-  intro; [id, auto]; squash-intro; auto
+  intro; main {squash-intro}; auto
 }.
