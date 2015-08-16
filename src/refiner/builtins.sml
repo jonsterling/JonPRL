@@ -127,8 +127,8 @@ struct
       makeConv HASVALUE (fn #[T] =>
         let
           val ax = `> AX $$ #[]
-          val v = Variable.named ""
-          val cbv = `> CBV $$ #[ax,v \\ T]
+          val v = Variable.named "_"
+          val cbv = `> CBV $$ #[T,v \\ ax]
         in
           `> APPROX $$ #[ax,cbv]
         end
