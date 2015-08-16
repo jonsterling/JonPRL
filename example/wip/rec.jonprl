@@ -60,22 +60,29 @@ Tactic bunion-eq-right {
    }
 }.
 
+Tactic equality-wf {
+  @{ [|- =(=(_;_;_); =(_;_;_); _)] =>
+       eq-eq-base; auto; bunion-eq-right
+   }
+}.
+
 
 Theorem isect-glb : [
   {A : U{i}} {B : A -> U{i}} {C : U{i}}
   ({a : A} (C ⊂ B a)) =>
   C ⊂ ({a : A} B a)
 ] {
-  auto; unfold <subtype_rel member id>;
-  [ auto; elim #4 [a]; auto;
-    csubst [ceq(p; lam(z.z) p)] [h.=(h;h;_)]; aux { reduce; auto };
-    eq-cd [C -> B a]; auto
-  , eq-eq-base; auto
-  ];
+  auto;
+  focus 1 #{
+    unfold <subtype_rel member>;
+    equality-wf; unfold <unit>; reduce; auto;
+    elim #5; reduce; auto
+  };
 
-  bunion-eq-right;
-  unfold <unit>; reduce; auto;
-  elim #5; reduce; auto
+  unfold <id>; auto;
+  elim #4 [a]; auto;
+  csubst [ceq(p; lam(z.z) p)] [h.=(h;h;_)]; aux { reduce; auto };
+  eq-cd [C -> B a]; auto
 }.
 
 Theorem union-ub : [
@@ -103,8 +110,7 @@ Theorem union-lub : [
     eq-cd [B s -> C]; auto
 
   , unfold <subtype_rel member>;
-    eq-eq-base; auto;
-    bunion-eq-right;
+    equality-wf;
     unfold <unit>; reduce; auto;
     aux { elim #5; reduce; auto };
   ]
