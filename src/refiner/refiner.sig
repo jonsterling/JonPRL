@@ -213,6 +213,7 @@ sig
 
     val AtomEq : tactic
     val TokenEq : tactic
+    val TestAtomEq : name option -> tactic
 
     (* H >> match u with {P*} = match u' with {Q*} ∈ C by MatchTokenEq
      *   H >> u = u' ∈ atom

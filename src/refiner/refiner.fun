@@ -1057,12 +1057,25 @@ struct
         [] BY mkEvidence TOKEN_EQ
       end
 
-    (* H >> match u with {P*} = match u' with {Q*} ∈ C by MatchTokenEq
-     *   H >> u = u' ∈ atom
-     *   H >> P*@t = Q*@t ∈ C for all t ∈ dom[P*]
-     *           requires: dom[P*] =~= [Q*]
-     *   H >> P*@_ = Q*@_ ∈ C
-     *)
+
+  fun TestAtomEq oz (_ |: H >> P) =
+    let
+      val #[match1, match2, T] = P ^! EQ
+      val #[u1, v1, s1, t1] = match1 ^! TEST_ATOM
+      val #[u2, v2, s2, t2] = match2 ^! TEST_ATOM
+      val z = Context.fresh (H, case oz of NONE => Variable.named "z" | SOME z => z)
+      val atm = C.`> ATOM $$ #[]
+      val u1v1 = C.`> EQ $$ #[u1, v1, atm]
+      val u1v1' = C.`> FUN $$ #[u1v1, Variable.named "_" \\ (C.`> VOID $$ #[])]
+    in
+      [ MAIN |: H >> C.`> EQ $$ #[u1, u2, atm]
+      , MAIN |: H >> C.`> EQ $$ #[v1, v2, atm]
+      , MAIN |: H @@ (z, u1v1) >> C.`> EQ $$ #[s1, s2, T]
+      , MAIN |: H @@ (z, u1v1') >> C.`> EQ $$ #[t1, t2, T]
+      ] BY (fn [D,E,F,G] => D.`> TEST_ATOM_EQ $$ #[D,E,z \\ F, z \\ G]
+             | _ => raise Refine)
+    end
+
    fun MatchTokenEq (_ |: H >> P) =
      let
        val #[match1, match2, C] = P ^! EQ

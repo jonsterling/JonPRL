@@ -29,3 +29,6 @@ Theorem decode-wf : [
   aux { chyp-subst <- #4 [h. h ⇓]; auto };
   bot-div <bot-has-value>
 }.
+
+
+Eval [test_atom("a"; "aasdf"; unit; void)].

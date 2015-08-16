@@ -210,6 +210,7 @@ struct
         ORELSE AtomEq
         ORELSE TokenEq
         ORELSE MatchTokenEq
+        ORELSE TestAtomEq freshVariable
         ORELSE EqMemEq
         ORELSE CEqEq
         ORELSE CEqMemEq
