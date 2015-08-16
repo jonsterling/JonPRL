@@ -22,7 +22,7 @@ struct
 
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
 
-    | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector
+    | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
 
     | LEMMA of {label : Label.t}
 
@@ -66,6 +66,7 @@ struct
            Vector.tabulate
             (Vector.length toks + 2,
              fn i => if i = 0 then 0 else 2)
+       | TEST_ATOM_EQ => #[0,0,1,1]
 
        | PROD_EQ => #[0,1]
        | PROD_INTRO => #[0,0,0,1]
@@ -159,6 +160,7 @@ struct
              ^ Vector.foldri (fn (i, s1, s2) => if i = n - 1 then s1 else s1 ^ "; " ^ s2) "" toks'
              ^ "}"
            end
+       | TEST_ATOM_EQ => "test_atom-eq"
 
        | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"
