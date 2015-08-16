@@ -52,6 +52,14 @@ Theorem isect-lb : [
   hyp-subst <- #6 [h.=(h;h;_)]; auto;
 }.
 
+Tactic bunion-eq-right {
+  @{ [|- =(M;M;bunion(A;B))] =>
+       csubst [ceq(M; lam(x.snd(x)) <inr(<>), M>)] [h.=(h;h;_)];
+       aux { unfold <snd>; reduce; auto };
+       unfold <bunion>; auto
+   }
+}.
+
 
 Theorem isect-glb : [
   {A : U{i}} {B : A -> U{i}} {C : U{i}}
@@ -61,16 +69,13 @@ Theorem isect-glb : [
   auto; unfold <subtype_rel member id>;
   [ auto; elim #4 [a]; auto;
     csubst [ceq(p; lam(z.z) p)] [h.=(h;h;_)]; aux { reduce; auto };
-    eq-cd [C -> B a]
-
-  , eq-eq-base; unfold <bunion>; auto;
-    csubst [ceq(lam(x.x); lam(x.snd(x)) <inr(<>), lam(x.x)>)] [h.=(h;h;_)];
-    aux { unfold <snd>; reduce; auto };
-    auto; ?{ !{ unfold <unit>; auto } };
-    aux { elim #5; reduce; auto };
-    reduce
+    eq-cd [C -> B a]; auto
+  , eq-eq-base; auto
   ];
-  auto
+
+  bunion-eq-right;
+  unfold <unit>; reduce; auto;
+  elim #5; reduce; auto
 }.
 
 Theorem union-ub : [
@@ -99,10 +104,8 @@ Theorem union-lub : [
 
   , unfold <subtype_rel member>;
     eq-eq-base; auto;
-    unfold <bunion>;
-    csubst [ceq(id; lam(x.snd(x)) <inr(<>), id>)] [h.=(h; h; _)];
-    aux { unfold <snd>; reduce; auto };
-    auto; unfold <unit>; auto; reduce; auto;
+    bunion-eq-right;
+    unfold <unit>; reduce; auto;
     aux { elim #5; reduce; auto };
   ]
 }.
@@ -122,21 +125,27 @@ Operator cocont : (0).
 [cocont(F)] =def= [{A : U{i}}{B : A -> U{i}} ({a : A} F (B a)) ~ F ({a : A} B a)].
 
 Operator cont : (0).
-[cont(F)] =def= [{A : U{i}}{B : A -> U{i}}
-                 union(A; a. F (B a)) ~ F (union(A; a. B a))].
+[cont(F)] =def= [{A : U{i}}{B : A -> U{i}} union(A; a. F (B a)) ~ F (union(A; a. B a))].
+
+Theorem cont-wf : [{F : U{i} -> U{i}} member(cont(F); U{i'})] {
+  auto;
+  unfold <cont teq>; auto;
+  unfold <subtype_rel member>;
+  eq-eq-base; auto;
+  ?{ bunion-eq-right; auto };
+  unfold <unit>; reduce; auto;
+  aux { @{ [H: _ + _ |- _] => elim <H>; thin <H>; reduce; auto } };
+  unfold <union>; auto
+}.
+
 
 |||TODO: redo this
-||| Theorem rec-is-fixed : [
-|||   {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
-||| ] {
-|||   unfold <cont teq rec union>; auto;
-|||   elim #2 [nat]; auto; reduce;
-|||   elim #4 [lam(n.natrec(n; void; _.x.F x))]; auto;
-|||   elim #6; thin #6; thin #8; thin #5;
-|||   focus 0 #{
-|||     thin #6;
-|||     elim #5 [=(x';x';image((x:nat) * F (lam(n.natrec(n; void; _.x.F x)) x); lam(x.snd(x))))];
-|||     reduce; auto;
-|||     elim #3; elim #4; auto
-|||   }
-||| }.
+Theorem rec-is-fixed : [
+  {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
+] {
+  auto;
+  intro <F-cont> @i'; aux { cut-lemma <cont-wf>; bhyp <cont-wf>; auto };
+  unfold <cont rec>;
+  elim #2 [nat]; aux { auto };
+  ||| help me!!!
+}.
