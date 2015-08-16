@@ -1122,10 +1122,10 @@ struct
          D.`> (MATCH_TOKEN_EQ toks1) $$
            Vector.tabulate
              (List.length Ds, fn i =>
-                if i > 0 then
-                  x \\ (y \\ List.nth (Ds, i))
+                if i = 0 then
+                  List.nth (Ds, i)
                 else
-                  List.nth (Ds, i)))
+                  x \\ (y \\ List.nth (Ds, i))))
      end
 
     fun Hypothesis_ x (_ |: H >> P) =

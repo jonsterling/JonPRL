@@ -65,7 +65,7 @@ struct
        | MATCH_TOKEN_EQ toks =>
            Vector.tabulate
             (Vector.length toks + 2,
-             fn i => if i = Vector.length toks + 1 then 2 else 0)
+             fn i => if i = 0 then 0 else 2)
 
        | PROD_EQ => #[0,1]
        | PROD_INTRO => #[0,0,0,1]
