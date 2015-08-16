@@ -36,6 +36,8 @@ group is
 
   lcf.fun
 
+  rules/utils.fun
+
   refiner.fun
   refiner.sig
   refiner_util.fun
