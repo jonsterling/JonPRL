@@ -82,6 +82,12 @@ struct
     (symbol "→" || symbol "->") return Dir.RIGHT
       || (symbol "←" || symbol "<-") return Dir.LEFT
 
+  val parseReduceEquand : tactic_parser =
+    fn w => tactic "reduce-equand"
+      && parseDir
+      wth (fn (name, dir) => fn pos =>
+        REDUCE_EQUAND (dir, {name = name, pos = pos}))
+
   val parseHypSubst : tactic_parser =
     fn w => tactic "hyp-subst"
       && parseDir
@@ -289,6 +295,7 @@ struct
       || parseHypothesis w
       || parseEqSubst w
       || parseHypSubst w
+      || parseReduceEquand w
       || parseIntro w
       || parseElim w
       || parseEqCd w

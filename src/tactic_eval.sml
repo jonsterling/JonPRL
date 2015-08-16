@@ -84,5 +84,6 @@ struct
       | THIN (hyp, a) =>
           an a (Thin hyp)
       | FIAT a => an a Fiat
+      | REDUCE_EQUAND (dir, a) => an a (RefinerUtil.ReduceEquand dir)
       | ON_CLASS (c, tac) => RefinerUtil.OnClass c (eval wld tac)
 end

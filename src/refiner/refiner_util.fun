@@ -111,6 +111,11 @@ struct
         else
             FAIL)
 
+  fun ReduceEquand dir =
+    case dir of
+         Dir.LEFT => TestAtomReduceLeft
+       | Dir.RIGHT => TestAtomReduceRight
+
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
 

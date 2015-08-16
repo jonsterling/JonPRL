@@ -68,6 +68,7 @@ struct
     | MATCH of (ctx_pattern * branch) list
     | THIN of hyp * meta
     | FIAT of meta
+    | REDUCE_EQUAND of Dir.dir * meta
     | ON_CLASS of Goal.class * t
   and then_tactic =
       APPLY of t
