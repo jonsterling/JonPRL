@@ -65,6 +65,11 @@ struct
 
   fun stepCbv (A, F) = F // A
 
+  fun stepMatchTokenBeta e (M, branches, catchAll) =
+    case project M of
+         TOKEN tok $ #[] => (StringListDict.lookup branches tok handle _ => catchAll)
+       | _ => raise Stuck e
+
   fun step' e =
     case project e of
         UNIV _ $ _ => CANON
@@ -120,6 +125,32 @@ struct
                 STEP M' => STEP (NATREC $$ #[M', Z, xyS])
               | CANON => STEP (stepNatrecBeta (M, Z, xyS))
               | NEUTRAL => NEUTRAL)
+      | MATCH_TOKEN toks $ subterms =>
+          let
+            val M = Vector.sub (subterms, 0)
+            fun vectorToList v = List.tabulate (Vector.length v, fn i => Vector.sub (v, i))
+            val branches =
+              Vector.foldri
+                (fn (i, tok, dict) =>
+                  StringListDict.insert dict tok (Vector.sub (subterms, i + 1)))
+                StringListDict.empty
+                toks
+            val catchAll = Vector.sub (subterms, Vector.length subterms - 1)
+          in
+            (case step M of
+                  STEP M' =>
+                  let
+                    val subterms' =
+                      Vector.tabulate
+                        (Vector.length subterms,
+                         fn 0 => M'
+                          | i => Vector.sub (subterms, i))
+                  in
+                    STEP (MATCH_TOKEN toks $$ subterms')
+                  end
+                | CANON => STEP (stepMatchTokenBeta e (M, branches, catchAll))
+                | NEUTRAL => NEUTRAL)
+          end
       | SO_APPLY $ #[L, R] =>
           (* This can't come up but I don't think it's wrong
            * Leaving this in here so it's an actual semantics
