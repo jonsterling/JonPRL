@@ -9,7 +9,7 @@ struct
     | UNIT | AX
     | PROD | PAIR | SPREAD | AND
     | FUN | LAM | AP | IMPLIES | IFF
-    | ID | BOT | SQUASH | FST | SND
+    | ID | BOT | SQUASH | FST | SND | NOT
     | SUBTYPE_REL | BUNION | HASVALUE
     | IMAGE
     | FIX
@@ -35,7 +35,7 @@ struct
        VOID, UNIT, AX,
        PROD, PAIR, SPREAD, AND,
        FUN, LAM, AP, IMPLIES, IFF,
-       ID, BOT, SQUASH, FST, SND,
+       ID, BOT, SQUASH, FST, SND, NOT,
        SUBTYPE_REL, BUNION, HASVALUE,
        IMAGE,
        FIX,
@@ -70,6 +70,7 @@ struct
        | SQUASH => #[0]
        | FST => #[0]
        | SND => #[0]
+       | NOT => #[0]
        | SUBTYPE_REL => #[0,0]
        | BUNION => #[0,0]
        | HASVALUE => #[0]
@@ -121,6 +122,7 @@ struct
        | SQUASH => "squash"
        | FST => "fst"
        | SND => "snd"
+       | NOT => "not"
        | SUBTYPE_REL => "subtype_rel"
        | BUNION => "bunion"
        | HASVALUE => "has-value"
@@ -210,6 +212,7 @@ struct
          string "squash" return SQUASH,
          string "fst" return FST,
          string "snd" return SND,
+         string "not" return NOT,
          string "subtype_rel" return SUBTYPE_REL,
          string "bunion" return BUNION,
          string "has-value" return HASVALUE,

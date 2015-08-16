@@ -8,13 +8,10 @@ Theorem ceq-refl-thru-approx : [ {x:base} x ~ x ]
 }.
 
 Postfix 11 "⇓" := has-value.
-
-Operator not : (0).
 Prefix 10 "¬" := not.
-[¬ P] =def= [ P -> void ].
 
 Theorem bottom-diverges : [ ¬ bot ⇓ ] {
-  unfold <not>;
+  unfold <not implies>;
   intro; aux {auto; unfold <has-value>; auto};
   bot-div #1
 }.

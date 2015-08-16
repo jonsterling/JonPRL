@@ -1066,7 +1066,7 @@ struct
       val z = Context.fresh (H, case oz of NONE => Variable.named "z" | SOME z => z)
       val atm = C.`> ATOM $$ #[]
       val u1v1 = C.`> EQ $$ #[u1, v1, atm]
-      val u1v1' = C.`> FUN $$ #[u1v1, Variable.named "_" \\ (C.`> VOID $$ #[])]
+      val u1v1' = C.`> NOT $$ #[u1v1]
     in
       [ MAIN |: H >> C.`> EQ $$ #[u1, u2, atm]
       , MAIN |: H >> C.`> EQ $$ #[v1, v2, atm]
