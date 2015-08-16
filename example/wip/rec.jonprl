@@ -15,12 +15,8 @@ Theorem top-is-top :
 Operator corec : (1).
 [corec(x.F[x])] =def= [{n:nat} natrec(n; top; _.x. F[x])].
 
-||| Now induction
-Operator snd : ().
-[snd] =def= [lam(x. spread(x; u.v.v))].
-
 Operator union : (0;1).
-[union(A; x.B[x])] =def= [image((x : A) * B[x]; snd)].
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; lam(x.snd(x)))].
 
 Theorem union-wf : [
   {A : U{i}} {B : A -> U{i}} member(union(A; x.B x); U{i})
@@ -59,19 +55,30 @@ Theorem isect-lb : [
 
 Theorem isect-glb : [
   {A : U{i}} {B : A -> U{i}} {C : U{i}}
-  ({a : A} C ⊂ B a) =>
+  ({a : A} (C ⊂ B a)) =>
   C ⊂ ({a : A} B a)
 ] {
-  auto; unfold <subtype_rel member id>; auto;
-  trace "help!!!"
+  auto; unfold <subtype_rel member id>;
+  [ auto; elim #4 [a]; auto;
+    csubst [ceq(p; lam(z.z) p)] [h.=(h;h;_)]; aux { reduce; auto };
+    eq-cd [C -> B a]
+
+  , eq-eq-base; unfold <bunion>; auto;
+    csubst [ceq(lam(x.x); lam(x.snd(x)) <inr(<>), lam(x.x)>)] [h.=(h;h;_)];
+    aux { unfold <snd>; reduce; auto };
+    auto; ?{ !{ unfold <unit>; auto } };
+    aux { elim #5; reduce; auto };
+    reduce
+  ];
+  auto
 }.
 
 Theorem union-ub : [
   {A : U{i}} {B : A -> U{i}} {a : A} B a ⊂ union(A; a. B a)
 ] {
-  unfold <union>; auto;
-  csubst [ceq(x; snd <a, x>)] [h. =(h; h; _)];
-  focus 0 #{unfold <snd>; reduce; auto};
+  unfold <union>; auto; unfold <id>; auto;
+  csubst [ceq(p; lam(x.snd(x)) <a,p>)] [h. =(h;h;_)];
+  aux { unfold <snd>; reduce; auto };
   auto
 }.
 
@@ -82,8 +89,22 @@ Theorem union-lub : [
   union(A; a. B a) ⊂ C
 ] {
   unfold <union>; auto;
-  elim #5; unfold <snd>; elim #6; reduce;
-  elim #4 [s]; auto; elim #9 [=(t; t; B s)]; auto
+  [ unfold <id>; auto;
+    elim #5; elim #6;
+    unfold <snd>; reduce;
+    elim #4 [s]; auto;
+    csubst [ceq(t; lam(x.x) t)] [h.=(h; h; _)];
+    aux { reduce; auto };
+    eq-cd [B s -> C]; auto
+
+  , unfold <subtype_rel member>;
+    eq-eq-base; auto;
+    unfold <bunion>;
+    csubst [ceq(id; lam(x.snd(x)) <inr(<>), id>)] [h.=(h; h; _)];
+    aux { unfold <snd>; reduce; auto };
+    auto; unfold <unit>; auto; reduce; auto;
+    aux { elim #5; reduce; auto };
+  ]
 }.
 
 ||| So we now know that union and isect actually give us the
@@ -104,17 +125,18 @@ Operator cont : (0).
 [cont(F)] =def= [{A : U{i}}{B : A -> U{i}}
                  union(A; a. F (B a)) ~ F (union(A; a. B a))].
 
-Theorem rec-is-fixed : [
-  {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
-] {
-  unfold <cont teq rec union>; auto;
-  elim #2 [nat]; auto; reduce;
-  elim #4 [lam(n.natrec(n; void; _.x.F x))]; auto;
-  elim #6; thin #6; thin #8; thin #5;
-  focus 0 #{
-    thin #6;
-    elim #5 [=(x';x';image((x:nat) * F (lam(n.natrec(n; void; _.x.F x)) x); snd))];
-    reduce; auto;
-    elim #3; elim #4; auto
-  }
-}.
+|||TODO: redo this
+||| Theorem rec-is-fixed : [
+|||   {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
+||| ] {
+|||   unfold <cont teq rec union>; auto;
+|||   elim #2 [nat]; auto; reduce;
+|||   elim #4 [lam(n.natrec(n; void; _.x.F x))]; auto;
+|||   elim #6; thin #6; thin #8; thin #5;
+|||   focus 0 #{
+|||     thin #6;
+|||     elim #5 [=(x';x';image((x:nat) * F (lam(n.natrec(n; void; _.x.F x)) x); lam(x.snd(x))))];
+|||     reduce; auto;
+|||     elim #3; elim #4; auto
+|||   }
+||| }.
