@@ -17,16 +17,11 @@ struct
   fun extract E =
     case project E of
          UNIV_EQ _ $ _ => ax
-       | VOID_EQ $ _ => ax
-       | VOID_ELIM $ _ => ax
        | CUM $ _ => ax
 
        | EQ_EQ $ _ => ax
        | EQ_EQ_BASE $ _ => ax
        | EQ_MEMBER_EQ $ _ => ax
-       | UNIT_EQ $ _ => ax
-       | UNIT_INTRO $ _ => ax
-       | UNIT_ELIM $ #[R, E] => extract E
        | AX_EQ $ _ => ax
        | EQ_SYM $ _ => ax
        | CEQUAL_EQ $ _ => ax
