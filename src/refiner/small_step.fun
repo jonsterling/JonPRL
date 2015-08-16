@@ -128,7 +128,6 @@ struct
       | MATCH_TOKEN toks $ subterms =>
           let
             val M = Vector.sub (subterms, 0)
-            fun vectorToList v = List.tabulate (Vector.length v, fn i => Vector.sub (v, i))
             val branches =
               Vector.foldri
                 (fn (i, tok, dict) =>

@@ -160,6 +160,7 @@ struct
          | CEQUAL => true
          | APPROX => true
          | SQUASH => true
+         | HASVALUE => true
          | _ => false
 
     fun assertIrrelevant (H, P) =
@@ -1034,6 +1035,92 @@ struct
                  D.`> DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
                | _ => raise Refine)
       end
+
+    fun AtomEq (_ |: H >> P) =
+      let
+        val #[atm, atm', uni] = P ^! EQ
+        val #[] = atm ^! ATOM
+        val #[] = atm' ^! ATOM
+        val (UNIV _, _) = asApp uni
+      in
+        [] BY mkEvidence ATOM_EQ
+      end
+
+    fun TokenEq (_ |: H >> P) =
+      let
+        val #[tok, tok', atm] = P ^! EQ
+        val #[] = atm ^! ATOM
+        val (TOKEN s1, _) = asApp tok
+        val (TOKEN s2, _) = asApp tok'
+        val true = s1 = s2
+      in
+        [] BY mkEvidence TOKEN_EQ
+      end
+
+    (* H >> match u with {P*} = match u' with {Q*} ∈ C by MatchTokenEq
+     *   H >> u = u' ∈ atom
+     *   H >> P*@t = Q*@t ∈ C for all t ∈ dom[P*]
+     *           requires: dom[P*] =~= [Q*]
+     *   H >> P*@_ = Q*@_ ∈ C
+     *)
+   fun MatchTokenEq (_ |: H >> P) =
+     let
+       val #[match1, match2, C] = P ^! EQ
+       val (MATCH_TOKEN toks1, subterms1) = asApp match1
+       val (MATCH_TOKEN toks2, subterms2) = asApp match2
+       val target1 = Vector.sub (subterms1, 0)
+       val target2 = Vector.sub (subterms2, 0)
+       fun branches (toks, subterms)=
+         Vector.foldri
+           (fn (i, tok, dict) =>
+             StringListDict.insert dict tok (Vector.sub (subterms, i + 1)))
+           StringListDict.empty
+           toks
+
+       fun subdomain (keys, dict) = Vector.all (StringListDict.member dict) keys
+       val branches1 = branches (toks1, subterms1)
+       val branches2 = branches (toks2, subterms2)
+       val catchAll1 = Vector.sub (subterms1, Vector.length subterms1 - 1)
+       val catchAll2 = Vector.sub (subterms2, Vector.length subterms2 - 1)
+
+       val true =
+         subdomain (toks1, branches2)
+           andalso subdomain (toks2, branches1)
+
+       val x = Context.fresh (H, Variable.named "x")
+       val y = Context.fresh (H, Variable.named "y")
+
+       fun tokToGoal tok =
+         MAIN |: H >> C.`> EQ $$ #[StringListDict.lookup branches1 tok, StringListDict.lookup branches2 tok, C]
+
+       val positiveGoals =
+         List.tabulate
+           (Vector.length toks1,
+            fn i => tokToGoal (Vector.sub (toks1, i)))
+
+       val catchAllGoal =
+         let
+           val X = C.`> CEQUAL $$ #[match1, catchAll1]
+           val Y = C.`> CEQUAL $$ #[match2, catchAll2]
+           val H' = H @@ (x, X) @@ (y, Y)
+         in
+           MAIN |: H' >> C.`> EQ $$ #[catchAll1, catchAll2, C]
+         end
+
+       val subgoals =
+         (MAIN |: H >> C.`> EQ $$ #[target1, target2, C.`> ATOM $$ #[]])
+           :: positiveGoals
+            @ [catchAllGoal]
+     in
+       subgoals BY (fn Ds =>
+         D.`> (MATCH_TOKEN_EQ toks1) $$
+           Vector.tabulate
+             (List.length Ds, fn i =>
+                if i = List.length Ds - 1 then
+                  x \\ (y \\ List.nth (Ds, i))
+                else
+                  List.nth (Ds, i)))
+     end
 
     fun Hypothesis_ x (_ |: H >> P) =
       let

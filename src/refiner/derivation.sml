@@ -3,7 +3,6 @@ struct
   datatype t =
       UNIV_EQ of Level.t | CUM
     | EQ_EQ | EQ_EQ_BASE | EQ_MEMBER_EQ
-    | AX_EQ
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ | FUN_EXT
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
@@ -22,6 +21,8 @@ struct
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
+
+    | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector
 
     | LEMMA of {label : Label.t}
 
@@ -59,7 +60,12 @@ struct
        | IMAGE_ELIM => #[1]
        | IMAGE_EQ_IND => #[0,0,0,4]
 
-       | AX_EQ => #[]
+       | ATOM_EQ => #[]
+       | TOKEN_EQ => #[]
+       | MATCH_TOKEN_EQ toks =>
+           Vector.tabulate
+            (Vector.length toks + 2,
+             fn i => if i = Vector.length toks + 1 then 2 else 0)
 
        | PROD_EQ => #[0,1]
        | PROD_INTRO => #[0,0,0,1]
@@ -131,7 +137,6 @@ struct
        | APPROX_ELIM => "~<=-elim"
        | BOTTOM_DIVERGES => "bottom-div"
        | ASSUME_HAS_VALUE => "assume-has-value"
-       | AX_EQ => "<>-eq"
 
        | BASE_EQ => "base-eq"
        | BASE_INTRO => "base-intro"
@@ -142,6 +147,18 @@ struct
        | IMAGE_MEM_EQ => "image-mem-eq"
        | IMAGE_ELIM => "image-elim"
        | IMAGE_EQ_IND => "image-eq-ind"
+
+       | ATOM_EQ => "atom-eq"
+       | TOKEN_EQ => "token-eq"
+       | MATCH_TOKEN_EQ toks =>
+           let
+             val n = Vector.length toks
+             val toks' = Vector.map (fn x => "\"" ^ x ^ "\"") toks
+           in
+             "token-match-eq{"
+             ^ Vector.foldri (fn (i, s1, s2) => if i = n - 1 then s1 else s1 ^ "; " ^ s2) "" toks'
+             ^ "}"
+           end
 
        | PROD_EQ => "prod-eq"
        | PROD_INTRO => "prod-intro"

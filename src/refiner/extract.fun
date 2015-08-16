@@ -22,7 +22,6 @@ struct
        | EQ_EQ $ _ => ax
        | EQ_EQ_BASE $ _ => ax
        | EQ_MEMBER_EQ $ _ => ax
-       | AX_EQ $ _ => ax
        | EQ_SYM $ _ => ax
        | CEQUAL_EQ $ _ => ax
        | CEQUAL_MEMBER_EQ $ _ => ax
@@ -62,6 +61,10 @@ struct
              (w \\ extract D) // ax
            end
        | IMAGE_EQ_IND $ _ => ax
+
+       | ATOM_EQ $ _ => ax
+       | TOKEN_EQ $ _ => ax
+       | MATCH_TOKEN_EQ toks $ Ds => ax
 
        | PROD_EQ $ _ => ax
        | PROD_INTRO $ #[M, D, E, xF] => `> PAIR $$ #[M, extract E]

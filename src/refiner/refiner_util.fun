@@ -207,6 +207,9 @@ struct
       val freshVariable = listAt (names, 0)
     in
         EqEq
+        ORELSE AtomEq
+        ORELSE TokenEq
+        ORELSE MatchTokenEq
         ORELSE EqMemEq
         ORELSE CEqEq
         ORELSE CEqMemEq

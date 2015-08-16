@@ -211,6 +211,17 @@ sig
      *)
     val ImageEqInd : hyp * (name * name * name * name) option -> tactic
 
+    val AtomEq : tactic
+    val TokenEq : tactic
+
+    (* H >> match u with {P*} = match u' with {Q*} ∈ C by MatchTokenEq
+     *   H >> u = u' ∈ atom
+     *   H >> P*@t = Q*@t ∈ C for all t ∈ dom[P*]
+     *           requires: dom[P*] ~ [Q*]
+     *   H, x : match u with {P*} ~ P*@_, y : match u' with {Q*} ~ Q*@_ >> P*@_ = Q*@_ ∈ C
+     *)
+    val MatchTokenEq : tactic
+
     val HypEqSubst : Dir.dir * hyp * term * Level.t option -> tactic
 
     (* Match a single branch of a [match goal]. This needs to
