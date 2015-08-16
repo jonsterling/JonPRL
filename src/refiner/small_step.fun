@@ -110,6 +110,8 @@ struct
       | ZERO $ _ => CANON
       | SUCC $ _ => CANON
       | IMAGE $ _ => CANON
+      | APPROX $ _ => CANON
+      | CEQUAL $ _ => CANON
       | DECIDE $ #[S, L, R] =>
           (case step S of
               STEP S' => STEP (DECIDE $$ #[S', L, R])
