@@ -79,7 +79,7 @@ struct
     and matchToken w st =
       symbol "match"
         >> parseAbt w st
-        && braces ((sepEnd1 (matchTokenBranch w st) pipe) && matchTokenCatchAll w st)
+        && braces (((sepEnd1 (matchTokenBranch w st) pipe) || succeed []) && matchTokenCatchAll w st)
         wth (fn (z, (branches, catchAll)) =>
           `> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
               $$ Vector.fromList (z :: List.map #2 branches @ [catchAll]))
