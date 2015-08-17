@@ -71,153 +71,11 @@ struct
     structure FunRules = FunRules(Utils)
     open FunRules
 
-    val IsectEq = QuantifierEq (ISECT, ISECT_EQ)
+    structure ISectRules = ISectRules(Utils)
+    open ISectRules
 
-    fun IsectIntro (oz, ok) (_ |: H >> P) =
-      let
-        val #[P1, xP2] = P ^! ISECT
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xP2)
-               | SOME z => z)
-        val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
-        val H' = Context.insert H z Visibility.Hidden P1
-      in
-        [ MAIN |: H' >> xP2 // `` z
-        , AUX |: H >> C.`> MEM $$ #[P1, C.`> (UNIV k) $$ #[]]
-        ] BY (fn [D,E] => D.`> ISECT_INTRO $$ #[z \\ D, E]
-               | _ => raise Refine)
-      end
-
-    fun IsectElim (hyp, s, onames) (_ |: H >> P) =
-      let
-        val s = Context.rebind H s
-        val f = eliminationTarget hyp (H >> P)
-
-        val #[S, xT] = Context.lookup H f ^! ISECT
-        val Ts = xT // s
-        val (y, z) =
-          case onames of
-               SOME names => names
-             | NONE =>
-                 (Context.fresh (H, Variable.named "y"),
-                  Context.fresh (H, Variable.named "z"))
-
-        val fsTs = C.`> EQ $$ #[``y, ``f, Ts]
-      in
-        [ AUX |: H >> C.`> MEM $$ #[s, S]
-        , MAIN |: H @@ (y, Ts) @@ (z, fsTs) >> P
-        ] BY (fn [D, E] => D.`> FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
-                | _ => raise Refine)
-      end
-
-    fun IsectMemberEq (oz, ok) (_ |: H >> P) =
-      let
-        val #[M,N,A] = P ^! EQ
-        val #[P1, xP2] = A ^! ISECT
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xP2)
-               | SOME z => z)
-        val k = case ok of NONE => inferLevel (H, P1) | SOME k => k
-        val H' = Context.insert H z Visibility.Hidden P1
-      in
-        [ MAIN |: H' >> C.`> EQ $$ #[M,N, xP2 // ``z]
-        , AUX |: H >> C.`> MEM $$ #[P1, C.`> (UNIV k) $$ #[]]
-        ] BY (fn [D, E] => D.`> ISECT_MEMBER_EQ $$ #[z \\ D, E]
-               | _ => raise Refine)
-      end
-
-    fun IsectMemberCaseEq (oisect, t) (_ |: H >> P) =
-      let
-        val t = Context.rebind H t
-        val #[F1,F2, Tt] = P ^! EQ
-        val isect =
-          case oisect of
-               SOME isect => isect
-             | NONE => typeLub H (inferType (H, F1)) (inferType (H, F2))
-
-        val #[S, xT] = isect ^! ISECT
-        val _ = unify Tt (xT // t)
-      in
-        [ MAIN |: H >> C.`> EQ $$ #[F1, F2, isect]
-        , MAIN |: H >> C.`> MEM $$ #[t, S]
-        ] BY mkEvidence ISECT_MEMBER_CASE_EQ
-      end
-
-    val SubsetEq = QuantifierEq (SUBSET, SUBSET_EQ)
-
-    fun SubsetIntro (w, oz, ok) (_ |: H >> P) =
-      let
-        val w = Context.rebind H w
-        val #[P1, xP2] = P ^! SUBSET
-        val k = case ok of SOME k => k | NONE => inferLevel (H, P)
-        val z =
-          Context.fresh (H,
-            case oz of
-                 SOME z => z
-               | NONE => #1 (unbind xP2))
-      in
-        [ AUX |: H >> C.`> MEM $$ #[ w, P1]
-        , MAIN |: H >> xP2 // w
-        , AUX |: H @@ (z, P1) >> C.`> MEM $$ #[xP2 // ``z, C.`> (UNIV k) $$ #[]]
-        ] BY (fn [D, E, F] => D.`> SUBSET_INTRO $$ #[w, D, E, z \\ F]
-               | _ => raise Refine)
-      end
-
-    fun IndependentSubsetIntro (_ |: H >> P) =
-      let
-        val #[P1, xP2] = P ^! SUBSET
-        val (x, P2) = unbind xP2
-        val _ = if hasFree (P2, x) then raise Refine else ()
-      in
-        [ MAIN |: H >> P1
-        , MAIN |: H >> P2
-        ] BY mkEvidence IND_SUBSET_INTRO
-      end
-
-    fun SubsetElim_ (z : Sequent.name, onames) (_ |: H >> P) =
-      let
-        val #[S, xT] = Context.lookup H z ^! SUBSET
-        val (s, t) =
-          case onames of
-               SOME names => names
-             | NONE =>
-                 (Context.fresh (H, #1 (unbind xT)),
-                  Context.fresh (H, Variable.named "t"))
-
-        val G = Context.empty @@ (s, S)
-        val G' = Context.insert G t Visibility.Hidden (xT // ``s)
-        val H' = ctxSubst (Context.interposeAfter H (z, G')) (``s) z
-        val P' = subst (``s) z P
-      in
-        [ MAIN |: H' >> P'
-        ] BY (fn [D] => D.`> SUBSET_ELIM $$ #[``z, s \\ (t \\ D)]
-               | _ => raise Refine)
-      end
-
-    fun SubsetElim (hyp, onames) (goal as _ |: sequent) =
-      SubsetElim_ (eliminationTarget hyp sequent, onames) goal
-
-    fun SubsetMemberEq (oz, ok) (_ |: H >> P) =
-      let
-        val #[s,t,subset] = P ^! EQ
-        val #[S,xT] = subset ^! SUBSET
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xT)
-               | SOME z => z)
-        val k = case ok of SOME k => k | NONE => inferLevel (H, subset)
-      in
-        [ MAIN |: H >> C.`> EQ $$ #[s,t,S]
-        , MAIN |: H >> xT // s
-        , AUX |: H @@ (z,S) >> C.`> MEM $$ #[xT // ``z, C.`> (UNIV k) $$ #[]]
-        ] BY (fn [D, E, F] => D.`> SUBSET_MEMBER_EQ $$ #[D, E, z \\ F]
-               | _ => raise Refine)
-      end
+    structure SubsetRules = SubsetRules(Utils)
+    open SubsetRules
 
     fun NatEq (_ |: H >> P) =
       let
@@ -1280,24 +1138,6 @@ struct
                               $$ bindVars boundVars (Vector.fromList Ds)
                             handle _ => raise Refine)
           end
-        end
-    end
-
-    local
-      structure Tacticals = Tacticals(Lcf)
-      open Tacticals CttCalculusView infix THEN
-    in
-      fun EqInSupertype (goal as _ |: H >> P) =
-        let
-          val #[M,N,A] = P ^! EQ
-          val result =
-            Context.search H (fn A' =>
-              case project A' of
-                   SUBSET $ #[A'', _] => Syntax.eq (A, A'')
-                 | _ => false)
-          val x = case result of SOME (x,_) => x | NONE => raise Refine
-        in
-          (SubsetElim_ (x, NONE) THEN HypEq) goal
         end
     end
 
