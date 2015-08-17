@@ -41,6 +41,8 @@ group is
   rules/utils.fun
   rules/eq.sig
   rules/eq.fun
+  rules/univ.sig
+  rules/univ.fun
 
   refiner.fun
   refiner.sig
