@@ -36,19 +36,7 @@ struct
   type operator = Syntax.Operator.t
   type hyp = name HypSyn.t
 
-  structure Operator = Syntax.Operator
-  structure Conversionals = Conversionals
-    (structure Syntax = Syntax
-     structure Conv = Conv)
-
-  open Syntax CttCalculus Derivation
-  structure C = CttCalculusInj and D = DerivationInj
-
   type world = Development.world
-
-  infix $ \
-  infix 8 $$ //
-  infixr 8 \\
 
   exception Refine
 
@@ -66,11 +54,13 @@ struct
        exception Refine = Refine)
 
     open Utils
+    open Goal Sequent Syntax CttCalculus Derivation
+
+    infix $ \ BY ^!
     infix 3 >>
     infix 2 |:
-    infix BY
-    infix 8 @@
-    infix ^!
+    infix 8 $$ // @@
+    infixr 8 \\
 
     fun Cum ok : tactic =
       fn (_ |: H >> P) =>
@@ -1494,7 +1484,7 @@ struct
 
   structure Conversions =
   struct
-    open Conversionals Conv
+    open Conv
 
     val Step : conv = fn M =>
       case Semantics.step M of

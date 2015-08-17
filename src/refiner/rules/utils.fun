@@ -1,27 +1,11 @@
-functor RulesUtil
-  (structure Syntax : ABT_UTIL
-     where type Operator.t = UniversalOperator.t
-   structure Sequent : SEQUENT
-     where type term = Syntax.t
-     where Context.Syntax = Syntax
-   structure Lcf : LCF
-     where type evidence = Syntax.t
-     where type goal = Sequent.sequent Goal.goal
-
-   structure Development : DEVELOPMENT
-     where type judgement = Sequent.sequent
-     where type evidence = Lcf.evidence
-     where type tactic = Lcf.tactic
-     where type operator = UniversalOperator.t
-
-   structure Conv : CONV where type term = Syntax.t
-   structure Semantics : SMALL_STEP where type syn = Syntax.t
-   sharing type Development.term = Syntax.t
-   structure Builtins : BUILTINS
-     where type Conv.term = Conv.term
-
-   exception Refine) =
+(* Note, here : vs :> is very much necessary. It avoids
+ * us having to write a [sharing] clause for everything
+ * included in RULES_UTIL_INPUT.
+ *)
+functor RulesUtil(M : RULES_UTIL_INPUT) : RULES_UTIL =
 struct
+  open M
+
   type tactic = Lcf.tactic
   type conv = Conv.conv
   type name = Sequent.name
@@ -39,6 +23,10 @@ struct
   structure CttCalculusView = RestrictAbtView
     (structure Abt = Syntax
      structure Injection = CttCalculusInj)
+
+  structure Conversionals = Conversionals
+    (structure Syntax = Syntax
+     structure Conv = Conv)
 
   structure C = CttCalculusInj
   structure D = DerivationInj
