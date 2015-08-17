@@ -59,6 +59,8 @@ group is
   rules/general.fun
   rules/prod.sig
   rules/prod.fun
+  rules/plus.sig
+  rules/plus.fun
 
   refiner.fun
   refiner.sig
