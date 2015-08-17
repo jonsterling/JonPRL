@@ -146,34 +146,6 @@ struct
         end
     end
 
-      fun EqSym (_ |: H >> P) =
-        let
-          val #[M,N,A] = P ^! EQ
-        in
-          [ MAIN |: H >> C.`> EQ $$ #[N,M,A]
-          ] BY mkEvidence EQ_SYM
-        end
-
-      fun EqSubst (eq, xC, ok) (_ |: H >> P) =
-        let
-          val #[M,N,A] = Context.rebind H eq ^! EQ
-          val xC = Context.rebind H xC
-
-          val fvs = List.map #1 (Context.listItems H)
-          val meta = Meta.convertFree fvs (xC // M)
-          val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
-          val xC = applySolution solution (Meta.convertFree fvs xC)
-
-          val (H', x, C) = ctxUnbind (H, A, xC)
-          val k = case ok of SOME k => k | NONE => inferLevel (H', C)
-        in
-          [ AUX |: H >> eq
-          , MAIN |: H >> xC // N
-          , AUX |: H' >> C.`> MEM $$ #[C, C.`> (UNIV k) $$ #[]]
-          ] BY (fn [D,E,F] => D.`> EQ_SUBST $$ #[D, E, x \\ F]
-                 | _ => raise Refine)
-      end
-
     local
       open CttCalculusView
       datatype ForallType = ForallIsect | ForallFun

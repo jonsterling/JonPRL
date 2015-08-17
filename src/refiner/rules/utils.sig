@@ -61,13 +61,14 @@ sig
   structure Meta : META_CONVERT
     where A = Syntax
   structure MetaAbt : ABT_UTIL
+    where type t = Meta.Meta.t
     where Operator = Meta.MetaOperator
     where Variable = Syntax.Variable
   structure Unify : UNIFY
     where type t = MetaAbt.t
     where type var = MetaAbt.Variable.t
 
-  val applySolution : Unify.solution -> MetaAbt.t -> Syntax.t
+  val applySolution : Unify.solution -> MetaAbt.t -> term
 
   structure Context : CONTEXT
 
