@@ -57,6 +57,8 @@ group is
   rules/image.fun
   rules/general.sig
   rules/general.fun
+  rules/prod.sig
+  rules/prod.fun
 
   refiner.fun
   refiner.sig
