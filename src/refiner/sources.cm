@@ -53,6 +53,8 @@ group is
   rules/nat.fun
   rules/base.sig
   rules/base.fun
+  rules/image.sig
+  rules/image.fun
 
   refiner.fun
   refiner.sig
