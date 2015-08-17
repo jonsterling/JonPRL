@@ -43,6 +43,8 @@ group is
   rules/eq.fun
   rules/univ.sig
   rules/univ.fun
+  rules/fun.sig
+  rules/fun.fun
 
   refiner.fun
   refiner.sig

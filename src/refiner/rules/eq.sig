@@ -1,8 +1,8 @@
 signature EQ_RULES =
 sig
-  structure Lcf : LCF
+  type tactic
 
-  val EqEq : Lcf.tactic
-  val EqEqBase : Lcf.tactic
-  val EqMemEq : Lcf.tactic
+  val EqEq : tactic
+  val EqEqBase : tactic
+  val EqMemEq : tactic
 end

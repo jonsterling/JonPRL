@@ -1,7 +1,7 @@
 signature UNIV_RULES =
 sig
-  structure Lcf : LCF
+  type tactic
 
-  val Cum : Level.t option -> Lcf.tactic
-  val UnivEq : Lcf.tactic
+  val Cum : Level.t option -> tactic
+  val UnivEq : tactic
 end
