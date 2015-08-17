@@ -61,6 +61,8 @@ group is
   rules/prod.fun
   rules/plus.sig
   rules/plus.fun
+  rules/atom.sig
+  rules/atom.fun
 
   refiner.fun
   refiner.sig
