@@ -35,6 +35,7 @@ sig
 
   type operator = Syntax.Operator.t
   type hyp = name HypSyn.t
+  type world = Development.world
 
   structure CttCalculusView :
     sig
@@ -56,6 +57,17 @@ sig
   structure D : INJECTION
     where type t = Derivation.t
     where type ambient = Syntax.Operator.t
+
+  structure Meta : META_CONVERT
+    where A = Syntax
+  structure MetaAbt : ABT_UTIL
+    where Operator = Meta.MetaOperator
+    where Variable = Syntax.Variable
+  structure Unify : UNIFY
+    where type t = MetaAbt.t
+    where type var = MetaAbt.Variable.t
+
+  val applySolution : Unify.solution -> MetaAbt.t -> Syntax.t
 
   structure Context : CONTEXT
 
@@ -98,4 +110,6 @@ sig
 
   val QuantifierEq : CttCalculus.t * Derivation.t
                      -> Syntax.Variable.t option -> tactic
+
+  val Hypothesis_ : Syntax.Variable.t -> tactic
 end

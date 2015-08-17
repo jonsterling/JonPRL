@@ -86,35 +86,8 @@ struct
     structure ImageRules = ImageRules(Utils)
     open ImageRules
 
-    fun Witness M (_ |: H >> P) =
-      let
-        val M = Context.rebind H M
-        val _ = assertClosed H M
-        val hasHiddenVariables =
-          foldl
-            (fn (x, b) => b orelse #2 (Context.lookupVisibility H x) = Visibility.Hidden handle _ => false)
-            false
-            (freeVariables M)
-        val _ =
-          if hasHiddenVariables then
-            assertIrrelevant (H, P)
-          else
-            ()
-      in
-        [ AUX |: H >> C.`> MEM $$ #[M, P]
-        ] BY (fn [D] => D.`> WITNESS $$ #[M, D]
-               | _ => raise Refine)
-      end
-
-    fun HypEq (_ |: H >> P) =
-      let
-        val P = P
-        val #[M, M', A] = P ^! EQ
-        val x = asVariable (unify M M')
-        val _ = unify A (Context.lookup H x)
-      in
-        [] BY (fn _ => D.`> HYP_EQ $$ #[`` x])
-      end
+    structure GeneralRules = GeneralRules(Utils)
+    open GeneralRules
 
     val ProdEq = QuantifierEq (PROD, PROD_EQ)
 
@@ -474,40 +447,7 @@ struct
                   x \\ (y \\ List.nth (Ds, i))))
      end
 
-    fun Hypothesis_ x (_ |: H >> P) =
-      let
-        val (P', visibility) = Context.lookupVisibility H x
-        val P'' = unify P P'
-      in
-        (case visibility of
-             Visibility.Visible => ()
-           | Visibility.Hidden => assertIrrelevant (H, P''));
-        [] BY (fn _ => ``x)
-      end
-
-    fun Hypothesis hyp (goal as _ |: S) = Hypothesis_ (eliminationTarget hyp S) goal
-
-    fun Assumption (goal as _ |: H >> P) =
-      case Context.search H (fn x => Syntax.eq (P, x)) of
-           SOME (x, _) => Hypothesis_ x goal
-         | NONE => raise Refine
-
-    fun Assert (term, name) (_ |: H >> P) =
-      let
-        val z =
-            case name of
-                SOME z => z
-              | NONE => Context.fresh (H, Variable.named "H")
-        val term' = Context.rebind H term
-      in
-        [ AUX |: H >> term'
-        , MAIN |: H @@ (z, term') >> P
-        ] BY (fn [D, E] => subst D z E
-               | _ => raise Refine)
-      end
-
     structure LevelSolver = LevelSolver (SyntaxWithUniverses (Syntax))
-
     structure SequentLevelSolver = SequentLevelSolver
       (structure Solver = LevelSolver
        structure Abt = Syntax
@@ -555,24 +495,6 @@ struct
         end
     end
 
-      fun Lemma (world, theta) (_ |: H >> P) =
-        let
-          val {statement, evidence} = Development.lookupTheorem world theta
-          val constraints = SequentLevelSolver.generateConstraints (statement, H >> P)
-          val substitution = LevelSolver.Level.resolve constraints
-          val shovedEvidence = LevelSolver.subst substitution (Susp.force evidence)
-          val lemmaOperator = LEMMA {label = Operator.toString theta}
-        in
-          [] BY (fn _ => D.`> lemmaOperator $$ #[])
-        end
-
-      fun Fiat (_ |: H >> P) =
-        [] BY (fn _ => D.`> FIAT $$ #[])
-
-      fun RewriteGoal (c : conv) (_ |: H >> P) =
-        [ MAIN |: Context.map c H >> c P
-        ] BY (fn [D] => D | _ => raise Refine)
-
       fun EqSym (_ |: H >> P) =
         let
           val #[M,N,A] = P ^! EQ
@@ -580,20 +502,6 @@ struct
           [ MAIN |: H >> C.`> EQ $$ #[N,M,A]
           ] BY mkEvidence EQ_SYM
         end
-
-
-      structure Meta = MetaAbt(Syntax)
-      structure MetaAbt = AbtUtil(Meta.Meta)
-      structure Unify = AbtUnifyOperators
-        (structure A = MetaAbt
-         structure O = Meta.MetaOperator)
-
-      fun applySolution sol e =
-        Meta.unconvert (fn _ => raise Fail "Impossible")
-          (Unify.Solution.foldl
-            (fn (v, e', e) => MetaAbt.substOperator (fn _ => e') (Meta.MetaOperator.META v) e)
-            e
-            sol)
 
       fun EqSubst (eq, xC, ok) (_ |: H >> P) =
         let
@@ -615,43 +523,30 @@ struct
                  | _ => raise Refine)
       end
 
-    fun Thin hyp (_ |: H >> P) =
-      let
-        val z = eliminationTarget hyp (H >> P)
-        val H' = Context.thin H z
-      in
-        [ MAIN |: H' >> P
-        ] BY (fn [D] => D | _ => raise Refine)
-      end
-
     local
+      open CttCalculusView
+      datatype ForallType = ForallIsect | ForallFun
       structure Tacticals = Tacticals (Lcf)
       open Tacticals
       infix THEN THENL
     in
-      datatype ForallType = ForallIsect | ForallFun
-
-      local
-        open CttCalculusView
-      in
-        fun stripForalls (H, P) =
-          case project P of
-               ISECT $ #[A, xB] =>
-                 let
-                   val (H', x, B) = ctxUnbind (H, A, xB)
-                   val (xs, Q) = stripForalls (H', B)
-                 in
-                   (xs @ [(ForallIsect, x)], Q)
-                 end
-             | FUN $ #[A, xB] =>
-                 let
-                   val (H', x, B) = ctxUnbind (H, A, xB)
-                   val (xs, Q) = stripForalls (H', B)
-                 in
-                   (xs @ [(ForallFun, x)], Q)
-                 end
-             | _ => ([], P)
-      end
+      fun stripForalls (H, P) =
+        case project P of
+             ISECT $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripForalls (H', B)
+               in
+                 (xs @ [(ForallIsect, x)], Q)
+               end
+           | FUN $ #[A, xB] =>
+               let
+                 val (H', x, B) = ctxUnbind (H, A, xB)
+                 val (xs, Q) = stripForalls (H', B)
+               in
+                 (xs @ [(ForallFun, x)], Q)
+               end
+           | _ => ([], P)
 
       fun BHyp hyp (goal as _ |: (sequent as H >> P)) =
         let
@@ -687,8 +582,13 @@ struct
         in
           go (rev instantiations) goal
         end
+    end
 
-
+    local
+      structure Tacticals = Tacticals (Lcf)
+      open Tacticals
+      infix THEN THENL
+    in
       fun HypEqSubst (dir, hyp, xC, ok) (goal as _ |: H >> P) =
         let
           val z = eliminationTarget hyp (H >> P)
@@ -946,20 +846,6 @@ struct
           end
         end
     end
-
-    local
-      structure Unify = UnifySequent(Sequent)
-    in
-      fun MatchSingle (hyps, goal, body) (l |: H >> P) =
-        let
-          val {matched, subst} =
-            Unify.unify ({hyps = hyps, goal = goal}, (H >> P))
-              handle Unify.Mismatch => raise Refine
-        in
-          body subst (l |: H >> P)
-        end
-    end
-
   end
 
   structure Conversions =

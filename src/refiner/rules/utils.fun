@@ -5,6 +5,14 @@
 functor RulesUtil(M : RULES_UTIL_INPUT) : RULES_UTIL =
 struct
   open M
+  open Syntax CttCalculus Derivation
+  open Goal Sequent
+  infix 3 >>
+  infix 2 |:
+
+  infix $ \
+  infix 8 $$ //
+  infixr 8 \\
 
   type tactic = Lcf.tactic
   type conv = Conv.conv
@@ -14,11 +22,7 @@ struct
 
   type operator = Syntax.Operator.t
   type hyp = name HypSyn.t
-
-  open Syntax CttCalculus Derivation
-  infix $ \
-  infix 8 $$ //
-  infixr 8 \\
+  type world = Development.world
 
   structure CttCalculusView = RestrictAbtView
     (structure Abt = Syntax
@@ -31,9 +35,18 @@ struct
   structure C = CttCalculusInj
   structure D = DerivationInj
 
-  open Goal Sequent
-  infix 3 >>
-  infix 2 |:
+  structure Meta = MetaAbt(Syntax)
+  structure MetaAbt = AbtUtil(Meta.Meta)
+  structure Unify = AbtUnifyOperators
+    (structure A = MetaAbt
+     structure O = Meta.MetaOperator)
+
+  fun applySolution sol e =
+    Meta.unconvert (fn _ => raise Fail "Impossible")
+      (Unify.Solution.foldl
+        (fn (v, e', e) => MetaAbt.substOperator (fn _ => e') (Meta.MetaOperator.META v) e)
+        e
+        sol)
 
   fun ctxSubst (H : context) (m : Syntax.t) (x : Context.name) =
     Context.mapAfter x (Syntax.subst m x) H
@@ -236,5 +249,16 @@ struct
       , MAIN |: H @@ (z,A) >> C.`> EQ $$ #[xB // ``z, yB' // `` z, univ]
       ] BY (fn [D, E] => D.`> Q_EQ $$ #[D, z \\ E]
              | _ => raise Refine)
+    end
+
+  fun Hypothesis_ x (_ |: H >> P) =
+    let
+      val (P', visibility) = Context.lookupVisibility H x
+      val P'' = unify P P'
+    in
+      (case visibility of
+           Visibility.Visible => ()
+         | Visibility.Hidden => assertIrrelevant (H, P''));
+      [] BY (fn _ => ``x)
     end
 end
