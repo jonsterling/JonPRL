@@ -98,53 +98,6 @@ struct
     structure AtomRules = AtomRules(Utils)
     open AtomRules
 
-    structure LevelSolver = LevelSolver (SyntaxWithUniverses (Syntax))
-    structure SequentLevelSolver = SequentLevelSolver
-      (structure Solver = LevelSolver
-       structure Abt = Syntax
-       structure Sequent = Sequent)
-
-    local
-      open Conversionals
-      infix CTHEN
-
-      fun convTheorem theta world =
-        let
-          val extract = Development.lookupExtract world theta
-        in
-          fn M =>
-            case out M of
-               theta' $ #[] =>
-                 if Syntax.Operator.eq (theta, theta') then
-                   extract
-                 else
-                   raise Conv.Conv
-             | _ => raise Conv.Conv
-        end
-
-      fun convOperator theta world =
-        Development.lookupDefinition world theta
-          handle Subscript => convTheorem theta world
-    in
-      fun Unfolds (world, thetas) (lbl |: H >> P) =
-        let
-          val conv =
-            foldl (fn ((theta, ok), acc) =>
-              let
-                val k = case ok of SOME k => k | NONE => Level.base
-                val conv =
-                  LevelSolver.subst (LevelSolver.Level.yank k)
-                    o CDEEP (convOperator theta world)
-              in
-                acc CTHEN conv
-              end) CID thetas
-
-        in
-          [ lbl |: Context.map conv H >> conv P
-          ] BY (fn [D] => D
-                 | _ => raise Refine)
-        end
-    end
 
     local
       open CttCalculusView

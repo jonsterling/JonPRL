@@ -20,4 +20,5 @@ sig
   val Fiat : tactic
   val RewriteGoal : conv -> tactic
   val Lemma : world * operator -> tactic
+  val Unfolds : world * (operator * Level.t option) list -> tactic
 end
