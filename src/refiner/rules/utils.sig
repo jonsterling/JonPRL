@@ -95,4 +95,7 @@ sig
 
   val inferLevel : Sequent.context * term -> Level.t
   val inferType : Sequent.context * term -> term
+
+  val QuantifierEq : CttCalculus.t * Derivation.t
+                     -> Syntax.Variable.t option -> tactic
 end

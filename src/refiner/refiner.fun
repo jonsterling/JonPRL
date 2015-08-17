@@ -68,25 +68,6 @@ struct
     structure EqRules = EqRules(Utils)
     open EqRules
 
-    fun QuantifierEq (Q, Q_EQ) oz (_ |: H >> P) =
-      let
-        val #[q1, q2, univ] = P ^! EQ
-        val #[A, xB] = q1 ^! Q
-        val #[A', yB'] = q2 ^! Q
-        val (UNIV _, #[]) = asApp univ
-
-        val z =
-          Context.fresh (H,
-            case oz of
-                 NONE => #1 (unbind xB)
-               | SOME z => z)
-      in
-        [ MAIN |: H >> C.`> EQ $$ #[A,A',univ]
-        , MAIN |: H @@ (z,A) >> C.`> EQ $$ #[xB // ``z, yB' // `` z, univ]
-        ] BY (fn [D, E] => D.`> Q_EQ $$ #[D, z \\ E]
-               | _ => raise Refine)
-      end
-
     val FunEq = QuantifierEq (FUN, FUN_EQ)
 
     fun FunIntro (oz, ok) (_ |: H >> P) =

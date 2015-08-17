@@ -64,8 +64,10 @@ struct
   fun mkEvidence operator = fn Ds => D.`> operator $$ Vector.fromList Ds
 
   fun BY (Ds, V) = (Ds, V)
+  infix BY
 
   fun @@ (H, (x,A)) = Context.insert H x Visibility.Visible A
+  infix 8 @@
 
   fun asApp M =
     case out M of
@@ -216,4 +218,23 @@ struct
          | ` x => Context.lookup H x
          | _ => raise Refine
   end
+
+  fun QuantifierEq (Q, Q_EQ) oz (_ |: H >> P) =
+    let
+      val #[q1, q2, univ] = P ^! EQ
+      val #[A, xB] = q1 ^! Q
+      val #[A', yB'] = q2 ^! Q
+      val (UNIV _, #[]) = asApp univ
+
+      val z =
+        Context.fresh (H,
+          case oz of
+               NONE => #1 (unbind xB)
+             | SOME z => z)
+    in
+      [ MAIN |: H >> C.`> EQ $$ #[A,A',univ]
+      , MAIN |: H @@ (z,A) >> C.`> EQ $$ #[xB // ``z, yB' // `` z, univ]
+      ] BY (fn [D, E] => D.`> Q_EQ $$ #[D, z \\ E]
+             | _ => raise Refine)
+    end
 end
