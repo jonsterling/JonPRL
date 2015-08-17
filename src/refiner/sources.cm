@@ -49,6 +49,8 @@ group is
   rules/isect.fun
   rules/subset.sig
   rules/subset.fun
+  rules/nat.sig
+  rules/nat.fun
 
   refiner.fun
   refiner.sig
