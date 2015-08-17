@@ -51,6 +51,8 @@ group is
   rules/subset.fun
   rules/nat.sig
   rules/nat.fun
+  rules/base.sig
+  rules/base.fun
 
   refiner.fun
   refiner.sig
