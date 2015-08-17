@@ -52,10 +52,10 @@ sig
 
   structure C : INJECTION
     where type t = CttCalculus.t
-    where type ambient = OperatorUniverse.t
+    where type ambient = Syntax.Operator.t
   structure D : INJECTION
     where type t = Derivation.t
-    where type ambient = OperatorUniverse.t
+    where type ambient = Syntax.Operator.t
 
   structure Context : CONTEXT
 
@@ -68,22 +68,22 @@ sig
 
   val assertClosed : Sequent.context -> term -> unit
 
-  val mkEvidence : DerivationInj.t -> term list -> term
+  val mkEvidence : Derivation.t -> term list -> term
   val BY : 'a * 'b -> 'a * 'b
 
   val @@ : Sequent.Context.context *
            (Sequent.Context.name * Sequent.Context.term)
            -> Sequent.Context.context
 
-  val asApp : term -> CttCalculusInj.t * term vector
-  val ^! : term * CttCalculusInj.t -> term vector
+  val asApp : term -> CttCalculus.t * term vector
+  val ^! : term * CttCalculus.t -> term vector
   val asVariable : term -> Syntax.Variable.t
 
   val unify : term -> term -> term
   val assertSubtype_ : (Sequent.context
-                        -> term -> term -> term)
+                       -> term -> term -> term)
                        -> Sequent.context
-                          -> term -> term -> term
+                       -> term -> term -> term
   val typeLub : Sequent.context -> term -> term -> term
 
   val operatorIrrelevant : CttCalculus.t -> bool
