@@ -45,6 +45,10 @@ group is
   rules/univ.fun
   rules/fun.sig
   rules/fun.fun
+  rules/isect.sig
+  rules/isect.fun
+  rules/subset.sig
+  rules/subset.fun
 
   refiner.fun
   refiner.sig
