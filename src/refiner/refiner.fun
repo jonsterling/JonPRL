@@ -50,60 +50,31 @@ struct
        structure Sequent = Sequent
        structure Development = Development
        structure Builtins = Builtins
-
        exception Refine = Refine)
 
     structure UnivRules = UnivRules(Utils)
-    open UnivRules
-
     structure EqRules = EqRules(Utils)
-    open EqRules
-
     structure FunRules = FunRules(Utils)
-    open FunRules
-
     structure ISectRules = ISectRules(Utils)
-    open ISectRules
-
     structure SubsetRules = SubsetRules(Utils)
-    open SubsetRules
-
     structure NatRules = NatRules(Utils)
-    open NatRules
-
     structure BaseRules = BaseRules(Utils)
-    open BaseRules
-
     structure ImageRules = ImageRules(Utils)
-    open ImageRules
-
     structure GeneralRules = GeneralRules(Utils)
-    open GeneralRules
-
     structure ProdRules = ProdRules(Utils)
-    open ProdRules
-
     structure PlusRules = PlusRules(Utils)
-    open PlusRules
-
     structure AtomRules = AtomRules(Utils)
-    open AtomRules
-
     structure CEqRules = CEqRules(Utils)
-    open CEqRules
-
     structure ApproxRules = ApproxRules(Utils)
-    open ApproxRules
 
     (* BHyp gets its own special functor because it depends
      * on a number of other tactics.
      *)
     structure BHypRules = BHypRules
      (structure U = Utils
-      val FunElim = FunElim
-      val IsectElim = IsectElim
-      val Thin = Thin)
-    open BHypRules
+      val FunElim = FunRules.FunElim
+      val IsectElim = ISectRules.IsectElim
+      val Thin = GeneralRules.Thin)
   end
 
   structure Conversions =

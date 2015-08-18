@@ -39,10 +39,10 @@ group is
 
   rules/utils.sig
   rules/utils.fun
-  rules/eq.sig
-  rules/eq.fun
   rules/univ.sig
   rules/univ.fun
+  rules/eq.sig
+  rules/eq.fun
   rules/fun.sig
   rules/fun.fun
   rules/isect.sig

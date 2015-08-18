@@ -6,6 +6,8 @@ end =
 struct
   open Tactic
   open Refiner.Rules
+  open GeneralRules
+
   structure T = ProgressTacticals(Lcf)
   exception RemainingSubgoals = T.RemainingSubgoals
 
@@ -14,20 +16,20 @@ struct
   fun eval wld t =
     case t of
         LEMMA (theta, a) => an a (Lemma (wld, theta))
-      | BHYP (hyp, a) => an a (BHyp hyp)
+      | BHYP (hyp, a) => an a (BHypRules.BHyp hyp)
       | UNFOLD (thetas, a) => an a (Unfolds (wld, thetas))
       | CUSTOM_TACTIC (lbl, a) =>
         an a (Development.lookupTactic wld lbl)
       | WITNESS (t, a) => an a (Witness t)
       | HYPOTHESIS (i, a) => an a (Hypothesis i)
       | EQ_SUBST ({equality, domain, level}, a) =>
-        an a (EqSubst (equality, domain, level))
+        an a (EqRules.EqSubst (equality, domain, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
-        an a (HypEqSubst (dir, index, domain, level))
+        an a (EqRules.HypEqSubst (dir, index, domain, level))
       | CEQ_SUBST ({equality, domain}, a) =>
-        an a (CEqSubst (equality, domain))
+        an a (CEqRules.CEqSubst (equality, domain))
       | CHYP_SUBST ({dir, index, domain}, a) =>
-        an a (HypCEqSubst (dir, index, domain))
+        an a (CEqRules.HypCEqSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (RefinerUtil.Intro {term = term,
                              rule = rule,
@@ -38,27 +40,27 @@ struct
         an a (RefinerUtil.Elim {target = target, term = term, names = names} wld)
       | EQ_CD ({names, terms, level}, a) =>
         an a (RefinerUtil.EqCD {names = names,
-                            invertible = false,
-                            terms = terms,
-                            level = level} wld)
+                                invertible = false,
+                                terms = terms,
+                                level = level} wld)
       | EXT ({freshVariable, level}, a) =>
         an a (RefinerUtil.Ext {freshVariable = freshVariable, level = level})
-      | CUM (l, a) => an a (Cum l)
+      | CUM (l, a) => an a (UnivRules.Cum l)
       | AUTO (oi, a) => an a (RefinerUtil.Auto (wld, oi))
       | REDUCE (i, a) => an a (RefinerUtil.Reduce i)
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
       | CUT_LEMMA (theta, a) => an a (RefinerUtil.CutLemma (wld, theta))
-      | SYMMETRY a => an a EqSym
-      | CEQUAL_SYM a => an a CEqSym
-      | CEQUAL_STEP a => an a CEqStep
-      | CEQUAL_STRUCT a => an a CEqStruct
-      | CEQUAL_APPROX a => an a CEqApprox
-      | APPROX_REFL a => an a ApproxRefl
-      | BOTTOM_DIVERGES (i, a) => an a (BottomDiverges i)
-      | ASSUME_HAS_VALUE ({name, level}, a) => an a (AssumeHasValue (name, level))
-      | EQ_EQ_BASE a => an a EqEqBase
+      | SYMMETRY a => an a EqRules.EqSym
+      | CEQUAL_SYM a => an a CEqRules.CEqSym
+      | CEQUAL_STEP a => an a CEqRules.CEqStep
+      | CEQUAL_STRUCT a => an a CEqRules.CEqStruct
+      | CEQUAL_APPROX a => an a CEqRules.CEqApprox
+      | APPROX_REFL a => an a ApproxRules.ApproxRefl
+      | BOTTOM_DIVERGES (i, a) => an a (ApproxRules.BottomDiverges i)
+      | ASSUME_HAS_VALUE ({name, level}, a) => an a (ApproxRules.AssumeHasValue (name, level))
+      | EQ_EQ_BASE a => an a EqRules.EqEqBase
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
