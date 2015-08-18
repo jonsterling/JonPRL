@@ -216,7 +216,7 @@ struct
         ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
         ORELSE ImageRules.ImageEqInd (target, fourNames)
         ORELSE ImageRules.ImageElim (target, listAt (names, 0))
-        ORELSE NatRules.NatElim (target, twoNames)
+        ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
     end
 
@@ -257,7 +257,7 @@ struct
                [M, N] => ISectRules.MemberCaseEq (SOME M, N)
              | [N] => ISectRules.MemberCaseEq (NONE, N)
              | _ => FAIL)
-        ORELSE NatRules.NatEq
+        ORELSE NatRules.Eq
         ORELSE NatRules.ZeroEq
         ORELSE NatRules.SuccEq
         ORELSE UnivRules.Cum level
@@ -266,7 +266,7 @@ struct
         ORELSE ImageRules.ImageMemEq
         ORELSE
         (if not invertible then
-             NatRules.NatRecEq (listAt (terms, 0), take2 names)
+             NatRules.RecEq (listAt (terms, 0), take2 names)
                ORELSE_LAZY (fn _ => PlusRules.DecideEq (List.nth (terms, 0))
                                                        (List.nth (terms, 1),
                                                         List.nth (terms, 2),

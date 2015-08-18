@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun NatEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[nat1, nat2, univ] = P ^! EQ
       val (UNIV _, _) = asApp univ
@@ -19,7 +19,7 @@ struct
       [] BY mkEvidence NAT_EQ
     end
 
-  fun NatElim (hyp, onames) (_ |: H >> C) =
+  fun Elim (hyp, onames) (_ |: H >> C) =
     let
       val z = eliminationTarget hyp (H >> C)
       val #[] = Context.lookup H z ^! NAT
@@ -63,7 +63,7 @@ struct
       ] BY mkEvidence SUCC_EQ
     end
 
-  fun NatRecEq (ozC, onames) (_ |: H >> P) =
+  fun RecEq (ozC, onames) (_ |: H >> P) =
     let
       val #[rec1, rec2, A] = P ^! EQ
       val #[n, zero, succ] = rec1 ^! NATREC
