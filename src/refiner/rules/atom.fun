@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun AtomEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[atm, atm', uni] = P ^! EQ
       val #[] = atm ^! ATOM
@@ -30,7 +30,7 @@ struct
       [] BY mkEvidence TOKEN_EQ
     end
 
-  fun TestAtomEq oz (_ |: H >> P) =
+  fun TestEq oz (_ |: H >> P) =
     let
       val #[match1, match2, T] = P ^! EQ
       val #[u1, v1, s1, t1] = match1 ^! TEST_ATOM
@@ -48,7 +48,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun TestAtomReduceLeft (_ |: H >> P) =
+  fun TestReduceLeft (_ |: H >> P) =
     let
       val #[test, t2, T] = P ^! EQ
       val #[u,v,s,t] = test ^! TEST_ATOM
@@ -58,7 +58,7 @@ struct
       ] BY mkEvidence TEST_ATOM_REDUCE_LEFT
     end
 
-  fun TestAtomReduceRight (_ |: H >> P) =
+  fun TestReduceRight (_ |: H >> P) =
     let
       val #[test, t2, T] = P ^! EQ
       val #[u,v,s,t] = test ^! TEST_ATOM

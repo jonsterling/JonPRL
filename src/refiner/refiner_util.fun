@@ -112,8 +112,8 @@ struct
 
   fun ReduceEquand dir =
     case dir of
-         Dir.LEFT => AtomRules.TestAtomReduceLeft
-       | Dir.RIGHT => AtomRules.TestAtomReduceRight
+         Dir.LEFT => AtomRules.TestReduceLeft
+       | Dir.RIGHT => AtomRules.TestReduceRight
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -225,10 +225,10 @@ struct
       val freshVariable = listAt (names, 0)
     in
       EqRules.Eq
-        ORELSE AtomRules.AtomEq
+        ORELSE AtomRules.Eq
         ORELSE AtomRules.TokenEq
         ORELSE AtomRules.MatchTokenEq
-        ORELSE AtomRules.TestAtomEq freshVariable
+        ORELSE AtomRules.TestEq freshVariable
         ORELSE UnitEq world
         ORELSE UnitMemEq world
         ORELSE EqRules.MemEq

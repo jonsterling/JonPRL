@@ -3,11 +3,11 @@ sig
   type tactic
   type name
 
-  val AtomEq : tactic
+  val Eq : tactic
   val TokenEq : tactic
-  val TestAtomEq : name option -> tactic
-  val TestAtomReduceLeft : tactic
-  val TestAtomReduceRight : tactic
+  val TestEq : name option -> tactic
+  val TestReduceLeft : tactic
+  val TestReduceRight : tactic
 
   (* H >> match u with {P*} = match u' with {Q*} ∈ C by MatchTokenEq
    *   H >> u = u' ∈ atom
