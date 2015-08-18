@@ -20,7 +20,7 @@ struct
         [MAIN |: H >> C.`> EQ $$ #[A,B, C.`> (UNIV k) $$ #[]]] BY mkEvidence CUM
       end
 
-  fun UnivEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[univ1, univ2, univ3] = P ^! EQ
       val (UNIV l, #[]) = asApp univ1

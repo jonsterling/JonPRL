@@ -238,7 +238,7 @@ struct
         ORELSE ApproxRules.ApproxMemEq
         ORELSE VoidEq world
         ORELSE GeneralRules.HypEq
-        ORELSE UnivRules.UnivEq
+        ORELSE UnivRules.Eq
         ORELSE PlusRules.PlusEq
         ORELSE PlusRules.InlEq level
         ORELSE PlusRules.InrEq level

@@ -8,5 +8,5 @@ sig
   val Cum : Level.t option -> tactic
 
   (* H >> U{l} = U{l} ∈ U{k} by UnivEq (l < k) *)
-  val UnivEq : tactic
+  val Eq : tactic
 end
