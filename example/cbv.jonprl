@@ -1,0 +1,3 @@
+Theorem hmm : [=(cbv(bot; _.<>); cbv(bot; _.<>); unit)] {
+  eq-cd
+}.
