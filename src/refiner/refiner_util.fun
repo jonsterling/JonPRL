@@ -109,7 +109,7 @@ struct
             CEqRules.Struct
         else
             ID)
-       ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+       ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                 (Development.lookupResource D Resource.INTRO)
 
   fun ReduceEquand dir =
@@ -220,7 +220,7 @@ struct
         ORELSE ImageRules.Elim (target, listAt (names, 0))
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
-        ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+        ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                  (Development.lookupResource world Resource.ELIM)
     end
 
@@ -279,7 +279,7 @@ struct
                ORELSE FunRules.ApEq (listAt (terms, 0))
          else
              ID)
-        ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+        ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                  (Development.lookupResource world Resource.EQ_CD)
 
     end
@@ -327,13 +327,13 @@ struct
              ORELSE InvAutoIntro wld
              ORELSE AutoVoidElim wld
              ORELSE InvAutoEqCD wld
-             ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+             ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID
                       (Development.lookupResource wld Resource.AUTO))
       | FinAuto (wld, n) =
         FinAuto (wld, 0)
         THEN (AutoIntro wld
               ORELSE AutoEqCD wld
-              ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+              ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID
                        (Development.lookupResource wld Resource.AUTO))
         THEN FinAuto (wld, n - 1)
 
@@ -342,7 +342,7 @@ struct
              ORELSE AutoIntro wld
              ORELSE AutoVoidElim wld
              ORELSE AutoEqCD wld
-             ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+             ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID
                       (Development.lookupResource wld Resource.AUTO))
 
     fun Auto (wld, opt) =

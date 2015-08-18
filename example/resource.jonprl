@@ -1,8 +1,8 @@
 (* Obviously this is completely evil, but provides good evidence for
  * us actually using the hints
  *)
-Resource auto += { !{trace "Should Print First\n"} }.
-Resource auto += { !{trace "Should Print Second\n"} }.
+Resource auto += {trace "Should Print First\n"}.
+Resource auto += {trace "Should Print Second\n"}.
 Resource auto += {fiat}.
 
 Theorem easy-with-fiat : [void] {
