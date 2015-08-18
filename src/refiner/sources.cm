@@ -63,6 +63,8 @@ group is
   rules/plus.fun
   rules/atom.sig
   rules/atom.fun
+  rules/ceq.sig
+  rules/ceq.fun
 
   refiner.fun
   refiner.sig
