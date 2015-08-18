@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun ApproxEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[approx1, approx2, univ] = P ^! EQ
       val (UNIV _, _) = asApp univ
@@ -22,7 +22,7 @@ struct
       ] BY mkEvidence APPROX_EQ
     end
 
-  fun ApproxMemEq (_ |: H >> P) =
+  fun MemEq (_ |: H >> P) =
     let
       val #[M, N, E] = P ^! EQ
       val #[] = M ^! AX
@@ -33,7 +33,7 @@ struct
       ] BY mkEvidence APPROX_MEMBER_EQ
     end
 
-  fun ApproxExtEq (_ |: H >> P) =
+  fun ExtEq (_ |: H >> P) =
     let
       val #[approx1, approx2, univ] = P ^! EQ
       val (UNIV _, _) = asApp univ
@@ -53,7 +53,7 @@ struct
         (Semantics.step N; raise Refine)
            handle Semantics.Stuck _ => ()
   in
-    fun ApproxRefl (_ |: H >> P) =
+    fun Refl (_ |: H >> P) =
       let
         val #[M, N] = P ^! APPROX
         val () = (unify M N; ()) handle Refine => bothStuck M N
@@ -62,7 +62,7 @@ struct
       end
   end
 
-  fun ApproxElim hyp (goal as _ |: (sequent as H >> P)) =
+  fun Elim hyp (goal as _ |: (sequent as H >> P)) =
     let
       val z = eliminationTarget hyp sequent
       val _ = Context.lookup H z ^! APPROX

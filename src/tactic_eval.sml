@@ -57,7 +57,7 @@ struct
       | CEQUAL_STEP a => an a CEqRules.Step
       | CEQUAL_STRUCT a => an a CEqRules.Struct
       | CEQUAL_APPROX a => an a CEqRules.Approx
-      | APPROX_REFL a => an a ApproxRules.ApproxRefl
+      | APPROX_REFL a => an a ApproxRules.Refl
       | BOTTOM_DIVERGES (i, a) => an a (ApproxRules.BottomDiverges i)
       | ASSUME_HAS_VALUE ({name, level}, a) => an a (ApproxRules.AssumeHasValue (name, level))
       | EQ_EQ_BASE a => an a EqRules.EqBase

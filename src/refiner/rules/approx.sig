@@ -5,11 +5,11 @@ sig
   type name
   type term
 
-  val ApproxEq    : tactic
-  val ApproxMemEq : tactic
-  val ApproxExtEq : tactic
-  val ApproxElim : hyp -> tactic
-  val ApproxRefl  : tactic
+  val Eq    : tactic
+  val MemEq : tactic
+  val ExtEq : tactic
+  val Elim : hyp -> tactic
+  val Refl  : tactic
 
   (* H, x : has-value(bot), J >> P
    *)

@@ -55,7 +55,7 @@ struct
      goal   : term,
      branch : (name * term) list -> tactic} list
 
-  val CEqRefl = CEqRules.Approx THEN ApproxRules.ApproxRefl
+  val CEqRefl = CEqRules.Approx THEN ApproxRules.Refl
 
   local
     structure Tacticals = Tacticals (Lcf)
@@ -102,7 +102,7 @@ struct
        ORELSE_LAZY (fn _ => SubsetRules.Intro (valOf term, freshVariable, level))
        ORELSE SubsetRules.IndependentIntro
        ORELSE CEqRefl
-       ORELSE ApproxRules.ApproxRefl
+       ORELSE ApproxRules.Refl
        ORELSE BaseRules.Intro
        ORELSE
        (if not invertible then
@@ -144,16 +144,16 @@ struct
     fun UnitEq world =
       COMPLETE
         (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
-          THEN ApproxRules.ApproxEq
+          THEN ApproxRules.Eq
           THEN BaseRules.MemberEq
           THEN CEqRules.Approx
-          THEN ApproxRules.ApproxRefl)
+          THEN ApproxRules.Refl)
 
     fun UnitMemEq world =
       COMPLETE
         (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
-          THEN ApproxRules.ApproxMemEq
-          THEN ApproxRules.ApproxRefl)
+          THEN ApproxRules.MemEq
+          THEN ApproxRules.Refl)
 
     fun VoidElim world =
       let
@@ -183,22 +183,22 @@ struct
                   [ApproxRules.AssumeHasValue (SOME namev, NONE) THENL
                     [ApproxRules.BottomDiverges (HypSyn.NAME namev),
                      GeneralRules.Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
-                       THEN ApproxRules.ApproxEq
+                       THEN ApproxRules.Eq
                        THEN BaseRules.MemberEq
                        THEN CEqRules.Approx
-                       THEN ApproxRules.ApproxRefl],
+                       THEN ApproxRules.Refl],
                    GeneralRules.Assumption],
-                 GeneralRules.Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRules.ApproxRefl],
+                 GeneralRules.Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRules.Refl],
                ApproxRules.BottomDiverges (HypSyn.NAME nameq)]])
       end
 
     fun VoidEq world =
       let val oprv  = CI.`> C.VOID
       in GeneralRules.Unfolds (world, [(oprv, NONE)])
-         THEN ApproxRules.ApproxEq
+         THEN ApproxRules.Eq
          THEN BaseRules.MemberEq
          THEN CEqRules.Approx
-         THEN ApproxRules.ApproxRefl
+         THEN ApproxRules.Refl
       end
   end
 
@@ -208,7 +208,7 @@ struct
       val fourNames = take4 names
     in
       (VoidElim world THEN GeneralRules.Hypothesis target)
-        ORELSE ApproxRules.ApproxElim target
+        ORELSE ApproxRules.Elim target
         ORELSE_LAZY (fn _ => BaseRules.ElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusRules.Elim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdRules.Elim (target, twoNames))
@@ -234,8 +234,8 @@ struct
         ORELSE EqRules.MemEq
         ORELSE CEqRules.Eq
         ORELSE CEqRules.MemEq
-        ORELSE ApproxRules.ApproxEq
-        ORELSE ApproxRules.ApproxMemEq
+        ORELSE ApproxRules.Eq
+        ORELSE ApproxRules.MemEq
         ORELSE VoidEq world
         ORELSE GeneralRules.HypEq
         ORELSE UnivRules.Eq
@@ -280,7 +280,7 @@ struct
 
   fun Ext {freshVariable, level} =
     FunRules.FunExt (freshVariable, level)
-    ORELSE ApproxRules.ApproxExtEq
+    ORELSE ApproxRules.ExtEq
 
   fun Match [] = FAIL
     | Match [{hyps, goal, branch}] = GeneralRules.MatchSingle (hyps, goal, branch)
