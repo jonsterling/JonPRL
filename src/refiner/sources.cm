@@ -65,6 +65,8 @@ group is
   rules/atom.fun
   rules/ceq.sig
   rules/ceq.fun
+  rules/approx.sig
+  rules/approx.fun
 
   refiner.fun
   refiner.sig
