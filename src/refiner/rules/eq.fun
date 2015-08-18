@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun EqEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[E1, E2, univ] = P ^! EQ
       val (UNIV k, #[]) = asApp univ
@@ -22,7 +22,7 @@ struct
       ] BY mkEvidence EQ_EQ
     end
 
-  fun EqEqBase (_ |: H >> P) =
+  fun EqBase (_ |: H >> P) =
     let
       val #[E1, E2, univ] = P ^! EQ
       val (UNIV k, #[]) = asApp univ
@@ -37,7 +37,7 @@ struct
       ] BY mkEvidence EQ_EQ_BASE
     end
 
-  fun EqMemEq (_ |: H >> P) =
+  fun MemEq (_ |: H >> P) =
     let
       val #[M, N, E] = P ^! EQ
       val #[] = M ^! AX
@@ -48,7 +48,7 @@ struct
       ] BY mkEvidence EQ_MEMBER_EQ
     end
 
-  fun EqSym (_ |: H >> P) =
+  fun Sym (_ |: H >> P) =
     let
       val #[M,N,A] = P ^! EQ
     in
@@ -56,7 +56,7 @@ struct
       ] BY mkEvidence EQ_SYM
     end
 
-  fun EqSubst (eq, xC, ok) (_ |: H >> P) =
+  fun Subst (eq, xC, ok) (_ |: H >> P) =
     let
       val #[M,N,A] = Context.rebind H eq ^! EQ
       val xC = Context.rebind H xC
@@ -81,19 +81,19 @@ struct
     open Tacticals
     infix THEN THENL
   in
-    fun HypEqSubst (dir, hyp, xC, ok) (goal as _ |: H >> P) =
+    fun HypSubst (dir, hyp, xC, ok) (goal as _ |: H >> P) =
       let
         val z = eliminationTarget hyp (H >> P)
         val X = Context.lookup H z
       in
         case dir of
-             Dir.RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) goal
+             Dir.RIGHT => (Subst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) goal
            | Dir.LEFT =>
                let
                  val #[M,N,A] = X ^! EQ
                in
-                 (EqSubst (C.`> EQ $$ #[N,M,A], xC, ok)
-                   THENL [EqSym THEN Hypothesis_ z, ID, ID]) goal
+                 (Subst (C.`> EQ $$ #[N,M,A], xC, ok)
+                   THENL [Sym THEN Hypothesis_ z, ID, ID]) goal
                end
       end
   end

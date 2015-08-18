@@ -73,7 +73,7 @@ struct
     structure BHypRules = BHypRules
      (structure U = Utils
       val FunElim = FunRules.Elim
-      val IsectElim = ISectRules.IsectElim
+      val IsectElim = ISectRules.Elim
       val Thin = GeneralRules.Thin)
   end
 

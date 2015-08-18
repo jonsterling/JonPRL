@@ -23,9 +23,9 @@ struct
       | WITNESS (t, a) => an a (Witness t)
       | HYPOTHESIS (i, a) => an a (Hypothesis i)
       | EQ_SUBST ({equality, domain, level}, a) =>
-        an a (EqRules.EqSubst (equality, domain, level))
+        an a (EqRules.Subst (equality, domain, level))
       | HYP_SUBST ({dir, index, domain, level}, a) =>
-        an a (EqRules.HypEqSubst (dir, index, domain, level))
+        an a (EqRules.HypSubst (dir, index, domain, level))
       | CEQ_SUBST ({equality, domain}, a) =>
         an a (CEqRules.CEqSubst (equality, domain))
       | CHYP_SUBST ({dir, index, domain}, a) =>
@@ -52,7 +52,7 @@ struct
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
       | CUT_LEMMA (theta, a) => an a (RefinerUtil.CutLemma (wld, theta))
-      | SYMMETRY a => an a EqRules.EqSym
+      | SYMMETRY a => an a EqRules.Sym
       | CEQUAL_SYM a => an a CEqRules.CEqSym
       | CEQUAL_STEP a => an a CEqRules.CEqStep
       | CEQUAL_STRUCT a => an a CEqRules.CEqStruct
@@ -60,7 +60,7 @@ struct
       | APPROX_REFL a => an a ApproxRules.ApproxRefl
       | BOTTOM_DIVERGES (i, a) => an a (ApproxRules.BottomDiverges i)
       | ASSUME_HAS_VALUE ({name, level}, a) => an a (ApproxRules.AssumeHasValue (name, level))
-      | EQ_EQ_BASE a => an a EqRules.EqEqBase
+      | EQ_EQ_BASE a => an a EqRules.EqBase
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))

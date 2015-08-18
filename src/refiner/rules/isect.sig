@@ -5,9 +5,9 @@ sig
   type term
   type hyp
 
-  val IsectEq : name option -> tactic
-  val IsectIntro : name option * Level.t option -> tactic
-  val IsectElim : hyp * term * (name * name) option -> tactic
-  val IsectMemberEq : name option * Level.t option -> tactic
-  val IsectMemberCaseEq : term option * term -> tactic
+  val Eq : name option -> tactic
+  val Intro : name option * Level.t option -> tactic
+  val Elim : hyp * term * (name * name) option -> tactic
+  val MemberEq : name option * Level.t option -> tactic
+  val MemberCaseEq : term option * term -> tactic
 end

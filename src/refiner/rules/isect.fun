@@ -9,9 +9,9 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  val IsectEq = QuantifierEq (ISECT, ISECT_EQ)
+  val Eq = QuantifierEq (ISECT, ISECT_EQ)
 
-  fun IsectIntro (oz, ok) (_ |: H >> P) =
+  fun Intro (oz, ok) (_ |: H >> P) =
     let
       val #[P1, xP2] = P ^! ISECT
       val z =
@@ -28,7 +28,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun IsectElim (hyp, s, onames) (_ |: H >> P) =
+  fun Elim (hyp, s, onames) (_ |: H >> P) =
     let
       val s = Context.rebind H s
       val f = eliminationTarget hyp (H >> P)
@@ -50,7 +50,7 @@ struct
               | _ => raise Refine)
     end
 
-  fun IsectMemberEq (oz, ok) (_ |: H >> P) =
+  fun MemberEq (oz, ok) (_ |: H >> P) =
     let
       val #[M,N,A] = P ^! EQ
       val #[P1, xP2] = A ^! ISECT
@@ -68,7 +68,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun IsectMemberCaseEq (oisect, t) (_ |: H >> P) =
+  fun MemberCaseEq (oisect, t) (_ |: H >> P) =
     let
       val t = Context.rebind H t
       val #[F1,F2, Tt] = P ^! EQ

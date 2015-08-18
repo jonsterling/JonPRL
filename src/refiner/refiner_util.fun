@@ -96,7 +96,7 @@ struct
                               | 1 => PlusRules.PlusIntroR level
                               | _ => raise Fail "Out of range for PLUS")
        ORELSE FunRules.Intro (freshVariable, level)
-       ORELSE ISectRules.IsectIntro (freshVariable, level)
+       ORELSE ISectRules.Intro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdRules.ProdIntro (valOf term, freshVariable, level))
        ORELSE ProdRules.IndependentProdIntro
        ORELSE_LAZY (fn _ => SubsetRules.SubsetIntro (valOf term, freshVariable, level))
@@ -213,7 +213,7 @@ struct
         ORELSE_LAZY (fn _ => PlusRules.PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdRules.ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
-        ORELSE_LAZY (fn _ => ISectRules.IsectElim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
         ORELSE ImageRules.ImageEqInd (target, fourNames)
         ORELSE ImageRules.ImageElim (target, listAt (names, 0))
         ORELSE NatRules.NatElim (target, twoNames)
@@ -224,14 +224,14 @@ struct
     let
       val freshVariable = listAt (names, 0)
     in
-      EqRules.EqEq
+      EqRules.Eq
         ORELSE AtomRules.AtomEq
         ORELSE AtomRules.TokenEq
         ORELSE AtomRules.MatchTokenEq
         ORELSE AtomRules.TestAtomEq freshVariable
         ORELSE UnitEq world
         ORELSE UnitMemEq world
-        ORELSE EqRules.EqMemEq
+        ORELSE EqRules.MemEq
         ORELSE CEqRules.CEqEq
         ORELSE CEqRules.CEqMemEq
         ORELSE ApproxRules.ApproxEq
@@ -245,17 +245,17 @@ struct
         ORELSE BaseRules.BaseEq
         ORELSE BaseRules.BaseMemberEq
         ORELSE FunRules.Eq freshVariable
-        ORELSE ISectRules.IsectEq freshVariable
+        ORELSE ISectRules.Eq freshVariable
         ORELSE ProdRules.ProdEq freshVariable
         ORELSE SubsetRules.SubsetEq freshVariable
         ORELSE ProdRules.PairEq (freshVariable, level)
         ORELSE FunRules.LamEq (freshVariable, level)
         ORELSE SubsetRules.SubsetMemberEq (freshVariable, level)
-        ORELSE ISectRules.IsectMemberEq (freshVariable, level)
+        ORELSE ISectRules.MemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
           case terms of
-               [M, N] => ISectRules.IsectMemberCaseEq (SOME M, N)
-             | [N] => ISectRules.IsectMemberCaseEq (NONE, N)
+               [M, N] => ISectRules.MemberCaseEq (SOME M, N)
+             | [N] => ISectRules.MemberCaseEq (NONE, N)
              | _ => FAIL)
         ORELSE NatRules.NatEq
         ORELSE NatRules.ZeroEq
