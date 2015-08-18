@@ -13,6 +13,7 @@ functor Refiner
      where type evidence = Lcf.evidence
      where type tactic = Lcf.tactic
      where type operator = UniversalOperator.t
+     where type resource = Resource.t
 
    structure Conv : CONV where type term = Syntax.t
    structure Semantics : SMALL_STEP where type syn = Syntax.t

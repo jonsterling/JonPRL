@@ -21,7 +21,7 @@ struct
                   SOME obj => Object.toString (lbl, obj)
                 | NONE => "Operator " ^ lbl ^ " : " ^ Arity.toString (Syntax.Operator.arity theta) ^ "."
          in
-           print ("\n" ^ declString ^ "\n")
+           print ("\n" ^ declString ^ "\n"); D
          end
        | EVAL (M, gas) =>
          let
@@ -29,8 +29,9 @@ struct
            val result = Sum.INR (SmallStep.steps (M, gas)) handle SmallStep.Stuck R => Sum.INL R
          in
            case result of
-                Sum.INR (M',n) => print ("\n" ^ termString M ^ " ⇒ " ^ termString M' ^ " in " ^ Int.toString n ^ " steps.\n")
-              | Sum.INL R => print ("\n" ^ termString M ^ " gets stuck at " ^ termString R ^ ".\n")
+               Sum.INR (M',n) => print ("\n" ^ termString M ^ " ⇒ " ^ termString M' ^ " in " ^ Int.toString n ^ " steps.\n")
+             | Sum.INL R => print ("\n" ^ termString M ^ " gets stuck at " ^ termString R ^ ".\n");
+            D
          end
        | SEARCH oper =>
          let
@@ -41,8 +42,10 @@ struct
            print ("\nResults for " ^ lbl ^ ":\n");
            List.app
              (fn (lbl, obj) => print ("\n" ^ Object.toString (lbl, obj) ^ "\n"))
-             results
+             results;
+           D
          end
+       | ADD_RESOURCE (r, t) => Development.addResource D (r, TacticEval.eval D t)
 
   fun evalDecl D ast =
     case ast of
@@ -67,8 +70,7 @@ struct
         Development.defineOperator D {definiendum = pat, definiens = term}
       | NOTATION (notation, theta) =>
         Development.declareNotation D (theta, notation)
-      | COMMAND cmd =>
-        (evalCommand D cmd; D)
+      | COMMAND cmd => evalCommand D cmd
 
   fun eval D = List.foldl (fn (decl, D) => evalDecl D decl) D
 end

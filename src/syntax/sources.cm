@@ -31,6 +31,9 @@ group is
   notation.sig
   notation.sml
 
+  resource.sig
+  resource.sml
+
   development_ast.sig
   development_ast.sml
 

@@ -16,6 +16,7 @@ sig
     where type tactic = tactic
     where type judgement = Sequent.sequent
     where type operator = operator
+    where type resource = Resource.t
 
   type world = Development.world
   type hyp = name HypSyn.t

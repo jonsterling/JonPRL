@@ -1,0 +1,28 @@
+(* Obviously this is completely evil, but provides good evidence for
+ * us actually using the hints
+ *)
+Resource auto += {trace "Should Print First\n"}.
+Resource auto += {trace "Should Print Second\n"}.
+Resource auto += {fiat}.
+
+Theorem easy-with-fiat : [void] {
+  auto
+}.
+
+Resource elim += {fiat}.
+
+Theorem easy-with-fiat2 : [void] {
+  elim #1
+}.
+
+Resource intro += {fiat}.
+
+Theorem easy-with-fiat3 : [void] {
+  intro
+}.
+
+Resource eq-cd += {fiat}.
+
+Theorem easy-with-fiat4 : [void] {
+  eq-cd
+}.
