@@ -9,6 +9,7 @@ struct
       PRINT of Syntax.Operator.t
     | EVAL of Syntax.t * int option
     | SEARCH of Syntax.Operator.t
+    | ADD_RESOURCE of Resource.t * Tactic.t
 
   datatype t =
       THEOREM of label * Syntax.Operator.t * Syntax.t * Tactic.t
