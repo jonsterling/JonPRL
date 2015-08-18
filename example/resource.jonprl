@@ -1,0 +1,23 @@
+(* Obviously this is completely evil, but provides good evidence for
+ * us actually using the hints
+ *)
+Resource auto += {fiat}.
+Resource eq-cd += {fiat}.
+Resource elim += {fiat}.
+Resource intro += {fiat}.
+
+Theorem easy-with-fiat : [void] {
+  auto
+}.
+
+Theorem easy-with-fiat2 : [void] {
+  elim #1
+}.
+
+Theorem easy-with-fiat3 : [void] {
+  intro
+}.
+
+Theorem easy-with-fiat4 : [void] {
+  eq-cd
+}.
