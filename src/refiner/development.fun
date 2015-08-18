@@ -309,7 +309,8 @@ struct
                 userDefined = false}
            end
 
-  fun lookupResource {context, resources} r = ResourcePool.lookup resources r
+  fun lookupResource {context, resources} r =
+    Option.getOpt (ResourcePool.find resources r, [])
 end
 
 structure Development : DEVELOPMENT =
