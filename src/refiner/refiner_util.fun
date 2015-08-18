@@ -89,7 +89,7 @@ struct
 
 
   (* VR: Intro should try to unfold abstractions *)
-  fun Intro {term,rule,invertible,freshVariable,level} =
+  fun Intro {term,rule,invertible,freshVariable,level} D =
        GeneralRules.Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
                                 0 => PlusRules.IntroL level
@@ -108,7 +108,9 @@ struct
        (if not invertible then
             CEqRules.Struct
         else
-            FAIL)
+            ID)
+       ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+                (Development.lookupResource D Resource.INTRO)
 
   fun ReduceEquand dir =
     case dir of
@@ -218,6 +220,8 @@ struct
         ORELSE ImageRules.Elim (target, listAt (names, 0))
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
+        ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+                 (Development.lookupResource world Resource.ELIM)
     end
 
   fun EqCD {names, level, invertible, terms} world =
@@ -274,7 +278,9 @@ struct
                ORELSE ProdRules.SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
                ORELSE FunRules.ApEq (listAt (terms, 0))
          else
-             FAIL)
+             ID)
+        ORELSE List.foldl (fn (t, ts) => t ORELSE ts) FAIL
+                 (Development.lookupResource world Resource.EQ_CD)
 
     end
 
@@ -316,10 +322,28 @@ struct
 
     val DeepReduce = GeneralRules.RewriteGoal (CDEEP Step)
   in
-    fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim wld ORELSE InvAutoEqCD wld)
-      | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD wld) THEN FinAuto (wld, n - 1)
+    fun FinAuto (wld, 0) =
+      LIMIT (UnfoldHead wld
+             ORELSE InvAutoIntro wld
+             ORELSE AutoVoidElim wld
+             ORELSE InvAutoEqCD wld
+             ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+                      (Development.lookupResource wld Resource.AUTO))
+      | FinAuto (wld, n) =
+        FinAuto (wld, 0)
+        THEN (AutoIntro wld
+              ORELSE AutoEqCD wld
+              ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+                       (Development.lookupResource wld Resource.AUTO))
+        THEN FinAuto (wld, n - 1)
 
-    fun InfAuto wld = LIMIT (UnfoldHead wld ORELSE AutoIntro ORELSE AutoVoidElim wld ORELSE AutoEqCD wld)
+    fun InfAuto wld =
+      LIMIT (UnfoldHead wld
+             ORELSE AutoIntro wld
+             ORELSE AutoVoidElim wld
+             ORELSE AutoEqCD wld
+             ORELSE List.foldl (fn (t, ts) => t ORELSE ts) ID
+                      (Development.lookupResource wld Resource.AUTO))
 
     fun Auto (wld, opt) =
       case opt of

@@ -32,10 +32,10 @@ struct
         an a (CEqRules.HypSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (RefinerUtil.Intro {term = term,
-                             rule = rule,
-                             invertible = false,
-                             freshVariable = freshVariable,
-                             level = level})
+                                 rule = rule,
+                                 invertible = false,
+                                 freshVariable = freshVariable,
+                                 level = level} wld)
       | ELIM ({target, term, names}, a) =>
         an a (RefinerUtil.Elim {target = target, term = term, names = names} wld)
       | EQ_CD ({names, terms, level}, a) =>

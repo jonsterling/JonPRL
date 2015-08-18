@@ -30,7 +30,7 @@ sig
      goal   : term,
      branch : (name * term) list -> tactic} list
 
-  val Intro : intro_args -> tactic
+  val Intro : intro_args -> world -> tactic
   val Elim : elim_args -> world -> tactic
   val EqCD : eq_cd_args -> world -> tactic
   val Ext : ext_args -> tactic
