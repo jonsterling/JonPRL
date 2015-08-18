@@ -11,6 +11,7 @@ sig
   type judgement
   type evidence
   type tactic
+  type resource
 
   type term
   type operator
@@ -55,6 +56,9 @@ sig
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
   val declareNotation : world -> operator * Notation.t -> world
 
+  (* extend the resource pool with a new tactic *)
+  val addResource : world -> resource * tactic -> world
+
   (* lookup the statement & evidence of a theorem *)
   val lookupTheorem : world -> operator -> {statement : judgement, evidence : evidence Susp.susp}
   val lookupExtract : world -> operator -> term
@@ -64,6 +68,9 @@ sig
 
   (* lookup the definiens *)
   val lookupDefinition : world -> operator -> conv
+
+  (* Lookup the collection of tactics for a given resource *)
+  val lookupResource : world -> resource -> tactic list
 
   val lookupObject : world -> operator -> Object.t
   val searchObject : world -> label -> (label * Object.t) list
