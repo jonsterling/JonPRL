@@ -92,13 +92,13 @@ struct
   fun Intro {term,rule,invertible,freshVariable,level} =
        GeneralRules.Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
-                                0 => PlusRules.PlusIntroL level
-                              | 1 => PlusRules.PlusIntroR level
+                                0 => PlusRules.IntroL level
+                              | 1 => PlusRules.IntroR level
                               | _ => raise Fail "Out of range for PLUS")
        ORELSE FunRules.Intro (freshVariable, level)
        ORELSE ISectRules.Intro (freshVariable, level)
-       ORELSE_LAZY (fn _ => ProdRules.ProdIntro (valOf term, freshVariable, level))
-       ORELSE ProdRules.IndependentProdIntro
+       ORELSE_LAZY (fn _ => ProdRules.Intro (valOf term, freshVariable, level))
+       ORELSE ProdRules.IndependentIntro
        ORELSE_LAZY (fn _ => SubsetRules.Intro (valOf term, freshVariable, level))
        ORELSE SubsetRules.IndependentIntro
        ORELSE CEqRefl
@@ -210,8 +210,8 @@ struct
       (VoidElim world THEN GeneralRules.Hypothesis target)
         ORELSE ApproxRules.ApproxElim target
         ORELSE_LAZY (fn _ => BaseRules.ElimEq (target, listAt (names, 0)))
-        ORELSE_LAZY (fn _ => PlusRules.PlusElim (target, twoNames))
-        ORELSE_LAZY (fn _ => ProdRules.ProdElim (target, twoNames))
+        ORELSE_LAZY (fn _ => PlusRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => ProdRules.Elim (target, twoNames))
         ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
         ORELSE ImageRules.EqInd (target, fourNames)
@@ -239,14 +239,14 @@ struct
         ORELSE VoidEq world
         ORELSE GeneralRules.HypEq
         ORELSE UnivRules.Eq
-        ORELSE PlusRules.PlusEq
+        ORELSE PlusRules.Eq
         ORELSE PlusRules.InlEq level
         ORELSE PlusRules.InrEq level
         ORELSE BaseRules.Eq
         ORELSE BaseRules.MemberEq
         ORELSE FunRules.Eq freshVariable
         ORELSE ISectRules.Eq freshVariable
-        ORELSE ProdRules.ProdEq freshVariable
+        ORELSE ProdRules.Eq freshVariable
         ORELSE SubsetRules.Eq freshVariable
         ORELSE ProdRules.PairEq (freshVariable, level)
         ORELSE FunRules.LamEq (freshVariable, level)

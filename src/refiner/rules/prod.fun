@@ -9,9 +9,9 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  val ProdEq = QuantifierEq (PROD, PROD_EQ)
+  val Eq = QuantifierEq (PROD, PROD_EQ)
 
-  fun ProdIntro (w, oz, ok) (_ |: H >> P) =
+  fun Intro (w, oz, ok) (_ |: H >> P) =
     let
       val w = Context.rebind H w
       val #[P1, xP2] = P ^! PROD
@@ -29,7 +29,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun IndependentProdIntro (_ |: H >> P) =
+  fun IndependentIntro (_ |: H >> P) =
     let
       val #[P1, xP2] = P ^! PROD
       val (x, P2) = unbind xP2
@@ -40,7 +40,7 @@ struct
       ] BY mkEvidence IND_PROD_INTRO
     end
 
-  fun ProdElim (hyp, onames) (_ |: H >> P) =
+  fun Elim (hyp, onames) (_ |: H >> P) =
     let
       val z = eliminationTarget hyp (H >> P)
       val #[S, xT] = Context.lookup H z ^! PROD

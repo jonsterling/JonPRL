@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun PlusEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[L, R, U] = P ^! EQ
       val (UNIV _, #[]) = asApp U
@@ -22,7 +22,7 @@ struct
               | _ => raise Refine)
     end
 
-  fun PlusIntroL x (_ |: H >> P) =
+  fun IntroL x (_ |: H >> P) =
     let
       val #[A, B] = P ^! PLUS
       val k = case x of SOME k => k | NONE => inferLevel (H, B)
@@ -33,7 +33,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun PlusIntroR x (_ |: H >> P) =
+  fun IntroR x (_ |: H >> P) =
     let
       val #[A, B] = P ^! PLUS
       val k = case x of SOME k => k | NONE => inferLevel (H, A)
@@ -44,7 +44,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun PlusElim (i, onames) (_ |: H >> P) =
+  fun Elim (i, onames) (_ |: H >> P) =
     let
       val z = eliminationTarget i (H >> P)
       val #[A, B] = Context.lookup H z ^! PLUS
