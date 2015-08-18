@@ -103,7 +103,7 @@ struct
        ORELSE SubsetRules.IndependentIntro
        ORELSE CEqRefl
        ORELSE ApproxRules.ApproxRefl
-       ORELSE BaseRules.BaseIntro
+       ORELSE BaseRules.Intro
        ORELSE
        (if not invertible then
             CEqRules.CEqStruct
@@ -145,7 +145,7 @@ struct
       COMPLETE
         (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
           THEN ApproxRules.ApproxEq
-          THEN BaseRules.BaseMemberEq
+          THEN BaseRules.MemberEq
           THEN CEqRules.CEqApprox
           THEN ApproxRules.ApproxRefl)
 
@@ -184,7 +184,7 @@ struct
                     [ApproxRules.BottomDiverges (HypSyn.NAME namev),
                      GeneralRules.Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
                        THEN ApproxRules.ApproxEq
-                       THEN BaseRules.BaseMemberEq
+                       THEN BaseRules.MemberEq
                        THEN CEqRules.CEqApprox
                        THEN ApproxRules.ApproxRefl],
                    GeneralRules.Assumption],
@@ -196,7 +196,7 @@ struct
       let val oprv  = CI.`> C.VOID
       in GeneralRules.Unfolds (world, [(oprv, NONE)])
          THEN ApproxRules.ApproxEq
-         THEN BaseRules.BaseMemberEq
+         THEN BaseRules.MemberEq
          THEN CEqRules.CEqApprox
          THEN ApproxRules.ApproxRefl
       end
@@ -209,7 +209,7 @@ struct
     in
       (VoidElim world THEN GeneralRules.Hypothesis target)
         ORELSE ApproxRules.ApproxElim target
-        ORELSE_LAZY (fn _ => BaseRules.BaseElimEq (target, listAt (names, 0)))
+        ORELSE_LAZY (fn _ => BaseRules.ElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusRules.PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdRules.ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
@@ -242,8 +242,8 @@ struct
         ORELSE PlusRules.PlusEq
         ORELSE PlusRules.InlEq level
         ORELSE PlusRules.InrEq level
-        ORELSE BaseRules.BaseEq
-        ORELSE BaseRules.BaseMemberEq
+        ORELSE BaseRules.Eq
+        ORELSE BaseRules.MemberEq
         ORELSE FunRules.Eq freshVariable
         ORELSE ISectRules.Eq freshVariable
         ORELSE ProdRules.ProdEq freshVariable

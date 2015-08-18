@@ -4,8 +4,8 @@ sig
   type hyp
   type name
 
-  val BaseEq : tactic
-  val BaseIntro : tactic
-  val BaseMemberEq : tactic
-  val BaseElimEq : hyp * name option -> tactic
+  val Eq : tactic
+  val Intro : tactic
+  val MemberEq : tactic
+  val ElimEq : hyp * name option -> tactic
 end

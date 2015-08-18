@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun BaseEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
       val #[] = M ^! BASE
@@ -20,7 +20,7 @@ struct
               | _ => raise Refine)
     end
 
-  fun BaseIntro (_ |: H >> P) =
+  fun Intro (_ |: H >> P) =
     let
       val #[] = P ^! BASE
     in
@@ -28,7 +28,7 @@ struct
               | _ => raise Refine)
     end
 
-  fun BaseMemberEq (_ |: H >> P) =
+  fun MemberEq (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
       val #[] = U ^! BASE
@@ -38,7 +38,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun BaseElimEq (hyp, z) (_ |: H >> P) =
+  fun ElimEq (hyp, z) (_ |: H >> P) =
     let
       val eq = eliminationTarget hyp (H >> P)
       val #[M, N, U] = Context.lookup H eq ^! EQ
