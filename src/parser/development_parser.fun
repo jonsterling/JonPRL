@@ -29,7 +29,8 @@ struct
                           "Operator",
                           "Print",
                           "Eval",
-                          "Search"])
+                          "Search",
+                          "Resource"])
   open TP
 
   (* Make sure that our version of braces smartly handles whitespace *)
@@ -109,8 +110,13 @@ struct
       parseOperator w
       wth DevelopmentAst.SEARCH
 
+  fun parseAddResource w =
+    (reserved "Resource" >> Resource.parse) &&
+      (spaces >> string "+=" >> spaces >> braces (TacticScript.parse w))
+      wth DevelopmentAst.ADD_RESOURCE
+
   fun parseCommand w =
-    (parsePrint w || parseEval w || parseSearch w)
+    (parsePrint w || parseEval w || parseSearch w || parseAddResource w)
     wth (fn cmd => (w, DevelopmentAst.COMMAND cmd))
 
   fun parseDecl w =
