@@ -8,7 +8,8 @@ struct
   infix 2 |:
   infix 8 $$ // @@
   infixr 8 \\
-  fun ImageEq (_ |: H >> P) =
+
+  fun Eq (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
       val #[A1,f1] = M ^! IMAGE
@@ -20,7 +21,7 @@ struct
       ] BY mkEvidence IMAGE_EQ
     end
 
-  fun ImageMemEq (_ |: H >> P) =
+  fun MemEq (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
       val #[f1,a1] = M ^! AP
@@ -34,7 +35,7 @@ struct
       ] BY mkEvidence IMAGE_MEM_EQ
     end
 
-  fun ImageElim (hyp, ow) (_ |: H >> P) =
+  fun Elim (hyp, ow) (_ |: H >> P) =
     let
       val z = eliminationTarget hyp (H >> P)
       val #[A,F] = Context.lookup H z ^! IMAGE
@@ -55,7 +56,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun ImageEqInd (hyp, onames) (_ |: H >> P) =
+  fun EqInd (hyp, onames) (_ |: H >> P) =
     let
       val x = eliminationTarget hyp (H >> P)
       val #[T2',AP1,U] = Context.lookup H x ^! EQ

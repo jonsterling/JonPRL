@@ -214,8 +214,8 @@ struct
         ORELSE_LAZY (fn _ => ProdRules.ProdElim (target, twoNames))
         ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
-        ORELSE ImageRules.ImageEqInd (target, fourNames)
-        ORELSE ImageRules.ImageElim (target, listAt (names, 0))
+        ORELSE ImageRules.EqInd (target, fourNames)
+        ORELSE ImageRules.Elim (target, listAt (names, 0))
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
     end
@@ -262,8 +262,8 @@ struct
         ORELSE NatRules.SuccEq
         ORELSE UnivRules.Cum level
         ORELSE SubsetRules.EqInSupertype
-        ORELSE ImageRules.ImageEq
-        ORELSE ImageRules.ImageMemEq
+        ORELSE ImageRules.Eq
+        ORELSE ImageRules.MemEq
         ORELSE
         (if not invertible then
              NatRules.RecEq (listAt (terms, 0), take2 names)
