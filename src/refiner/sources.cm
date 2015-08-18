@@ -67,6 +67,8 @@ group is
   rules/ceq.fun
   rules/approx.sig
   rules/approx.fun
+  rules/bhyp.sig
+  rules/bhyp.fun
 
   refiner.fun
   refiner.sig
