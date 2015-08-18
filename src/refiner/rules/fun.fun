@@ -9,9 +9,9 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  val FunEq = QuantifierEq (FUN, FUN_EQ)
+  val Eq = QuantifierEq (FUN, FUN_EQ)
 
-  fun FunIntro (oz, ok) (_ |: H >> P) =
+  fun Intro (oz, ok) (_ |: H >> P) =
     let
       val #[P1, xP2] = P ^! FUN
       val z =
@@ -27,7 +27,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun FunElim (hyp, s, onames) (_ |: H >> P) =
+  fun Elim (hyp, s, onames) (_ |: H >> P) =
     let
       val s = Context.rebind H s
       val f = eliminationTarget hyp (H >> P)

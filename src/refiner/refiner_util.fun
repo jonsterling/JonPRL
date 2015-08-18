@@ -95,7 +95,7 @@ struct
                                 0 => PlusRules.PlusIntroL level
                               | 1 => PlusRules.PlusIntroR level
                               | _ => raise Fail "Out of range for PLUS")
-       ORELSE FunRules.FunIntro (freshVariable, level)
+       ORELSE FunRules.Intro (freshVariable, level)
        ORELSE ISectRules.IsectIntro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdRules.ProdIntro (valOf term, freshVariable, level))
        ORELSE ProdRules.IndependentProdIntro
@@ -212,7 +212,7 @@ struct
         ORELSE_LAZY (fn _ => BaseRules.BaseElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusRules.PlusElim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdRules.ProdElim (target, twoNames))
-        ORELSE_LAZY (fn _ => FunRules.FunElim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => ISectRules.IsectElim (target, valOf term, twoNames))
         ORELSE ImageRules.ImageEqInd (target, fourNames)
         ORELSE ImageRules.ImageElim (target, listAt (names, 0))
@@ -244,7 +244,7 @@ struct
         ORELSE PlusRules.InrEq level
         ORELSE BaseRules.BaseEq
         ORELSE BaseRules.BaseMemberEq
-        ORELSE FunRules.FunEq freshVariable
+        ORELSE FunRules.Eq freshVariable
         ORELSE ISectRules.IsectEq freshVariable
         ORELSE ProdRules.ProdEq freshVariable
         ORELSE SubsetRules.SubsetEq freshVariable
