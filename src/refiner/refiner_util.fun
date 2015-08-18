@@ -55,7 +55,7 @@ struct
      goal   : term,
      branch : (name * term) list -> tactic} list
 
-  val CEqRefl = CEqApprox THEN ApproxRefl
+  val CEqRefl = CEqRules.Approx THEN ApproxRules.Refl
 
   local
     structure Tacticals = Tacticals (Lcf)
@@ -72,7 +72,7 @@ struct
 
     fun UnfoldHead world (goal as _ |: H >> P) =
       case out P of
-           theta $ _ => Unfolds (world, [(theta, NONE)]) goal
+           theta $ _ => GeneralRules.Unfolds (world, [(theta, NONE)]) goal
          | _ => raise Refine
 
     fun CutLemma (world, theta : operator) =
@@ -82,39 +82,38 @@ struct
         val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
         val name = Syntax.Variable.named (Syntax.Operator.toString theta)
       in
-        Assert (P, SOME name)
-          THENL [Lemma (world, theta), ID]
+        GeneralRules.Assert (P, SOME name)
+          THENL [GeneralRules.Lemma (world, theta), ID]
       end
   end
 
 
   (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} =
-     (*UnitIntro
-       ORELSE*) Assumption
+       GeneralRules.Assumption
        ORELSE_LAZY (fn _ => case valOf rule of
-                                0 => PlusIntroL level
-                              | 1 => PlusIntroR level
+                                0 => PlusRules.IntroL level
+                              | 1 => PlusRules.IntroR level
                               | _ => raise Fail "Out of range for PLUS")
-       ORELSE FunIntro (freshVariable, level)
-       ORELSE IsectIntro (freshVariable, level)
-       ORELSE_LAZY (fn _ => ProdIntro (valOf term, freshVariable, level))
-       ORELSE IndependentProdIntro
-       ORELSE_LAZY (fn _ => SubsetIntro (valOf term, freshVariable, level))
-       ORELSE IndependentSubsetIntro
+       ORELSE FunRules.Intro (freshVariable, level)
+       ORELSE ISectRules.Intro (freshVariable, level)
+       ORELSE_LAZY (fn _ => ProdRules.Intro (valOf term, freshVariable, level))
+       ORELSE ProdRules.IndependentIntro
+       ORELSE_LAZY (fn _ => SubsetRules.Intro (valOf term, freshVariable, level))
+       ORELSE SubsetRules.IndependentIntro
        ORELSE CEqRefl
-       ORELSE ApproxRefl
-       ORELSE BaseIntro
+       ORELSE ApproxRules.Refl
+       ORELSE BaseRules.Intro
        ORELSE
        (if not invertible then
-            CEqStruct
+            CEqRules.Struct
         else
             FAIL)
 
   fun ReduceEquand dir =
     case dir of
-         Dir.LEFT => TestAtomReduceLeft
-       | Dir.RIGHT => TestAtomReduceRight
+         Dir.LEFT => AtomRules.TestReduceLeft
+       | Dir.RIGHT => AtomRules.TestReduceRight
 
   fun take2 (x::y::_) = SOME (x,y)
     | take2 _ = NONE
@@ -135,7 +134,7 @@ struct
     open Goal Sequent AbtUtil
     open Conversions Conversionals
 
-    val DeepReduce = RewriteGoal (CDEEP Step)
+    val DeepReduce = GeneralRules.RewriteGoal (CDEEP Step)
 
     infix THENL
     infix 3 >> infix 2 |:
@@ -144,17 +143,17 @@ struct
   in
     fun UnitEq world =
       COMPLETE
-        (Unfolds (world, [(CI.`> C.UNIT, NONE)])
-          THEN ApproxEq
-          THEN BaseMemberEq
-          THEN CEqApprox
-          THEN ApproxRefl)
+        (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
+          THEN ApproxRules.Eq
+          THEN BaseRules.MemberEq
+          THEN CEqRules.Approx
+          THEN ApproxRules.Refl)
 
     fun UnitMemEq world =
       COMPLETE
-        (Unfolds (world, [(CI.`> C.UNIT, NONE)])
-          THEN ApproxMemEq
-          THEN ApproxRefl)
+        (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
+          THEN ApproxRules.MemEq
+          THEN ApproxRules.Refl)
 
     fun VoidElim world =
       let
@@ -175,31 +174,31 @@ struct
         val hvx   = oprh $$ #[``namex]
         val xC    = namex \\ hvx
       in
-        (Assert (void, SOME nameh) THENL
+        (GeneralRules.Assert (void, SOME nameh) THENL
           [ID,
-           Unfolds (world, [(oprv, NONE)])
-            THEN Assert (hv, SOME nameq) THENL
-              [CEqSubst (ceq, xC) THENL
-                [CEqApprox THENL
-                  [AssumeHasValue (SOME namev, NONE) THENL
-                    [BottomDiverges (HypSyn.NAME namev),
-                     Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
-                       THEN ApproxEq
-                       THEN BaseMemberEq
-                       THEN CEqApprox
-                       THEN ApproxRefl],
-                   Assumption],
-                 Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRefl],
-               BottomDiverges (HypSyn.NAME nameq)]])
+           GeneralRules.Unfolds (world, [(oprv, NONE)])
+            THEN GeneralRules.Assert (hv, SOME nameq) THENL
+              [CEqRules.Subst (ceq, xC) THENL
+                [CEqRules.Approx THENL
+                  [ApproxRules.AssumeHasValue (SOME namev, NONE) THENL
+                    [ApproxRules.BottomDiverges (HypSyn.NAME namev),
+                     GeneralRules.Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
+                       THEN ApproxRules.Eq
+                       THEN BaseRules.MemberEq
+                       THEN CEqRules.Approx
+                       THEN ApproxRules.Refl],
+                   GeneralRules.Assumption],
+                 GeneralRules.Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRules.Refl],
+               ApproxRules.BottomDiverges (HypSyn.NAME nameq)]])
       end
 
     fun VoidEq world =
       let val oprv  = CI.`> C.VOID
-      in Unfolds (world, [(oprv, NONE)])
-         THEN ApproxEq
-         THEN BaseMemberEq
-         THEN CEqApprox
-         THEN ApproxRefl
+      in GeneralRules.Unfolds (world, [(oprv, NONE)])
+         THEN ApproxRules.Eq
+         THEN BaseRules.MemberEq
+         THEN CEqRules.Approx
+         THEN ApproxRules.Refl
       end
   end
 
@@ -208,85 +207,85 @@ struct
       val twoNames = take2 names
       val fourNames = take4 names
     in
-      (VoidElim world THEN Hypothesis target)
-        ORELSE ApproxElim target
-        ORELSE_LAZY (fn _ => BaseElimEq (target, listAt (names, 0)))
-        ORELSE_LAZY (fn _ => PlusElim (target, twoNames))
-        ORELSE_LAZY (fn _ => ProdElim (target, twoNames))
-        ORELSE_LAZY (fn _ => FunElim (target, valOf term, twoNames))
-        ORELSE_LAZY (fn _ => IsectElim (target, valOf term, twoNames))
-        ORELSE ImageEqInd (target, fourNames)
-        ORELSE ImageElim (target, listAt (names, 0))
-        ORELSE NatElim (target, twoNames)
-        ORELSE SubsetElim (target, twoNames)
+      (VoidElim world THEN GeneralRules.Hypothesis target)
+        ORELSE ApproxRules.Elim target
+        ORELSE_LAZY (fn _ => BaseRules.ElimEq (target, listAt (names, 0)))
+        ORELSE_LAZY (fn _ => PlusRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => ProdRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
+        ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
+        ORELSE ImageRules.EqInd (target, fourNames)
+        ORELSE ImageRules.Elim (target, listAt (names, 0))
+        ORELSE NatRules.Elim (target, twoNames)
+        ORELSE SubsetRules.Elim (target, twoNames)
     end
 
   fun EqCD {names, level, invertible, terms} world =
     let
       val freshVariable = listAt (names, 0)
     in
-      EqEq
-        ORELSE AtomEq
-        ORELSE TokenEq
-        ORELSE MatchTokenEq
-        ORELSE TestAtomEq freshVariable
+      EqRules.Eq
+        ORELSE AtomRules.Eq
+        ORELSE AtomRules.TokenEq
+        ORELSE AtomRules.MatchTokenEq
+        ORELSE AtomRules.TestEq freshVariable
         ORELSE UnitEq world
         ORELSE UnitMemEq world
-        ORELSE EqMemEq
-        ORELSE CEqEq
-        ORELSE CEqMemEq
-        ORELSE ApproxEq
-        ORELSE ApproxMemEq
+        ORELSE EqRules.MemEq
+        ORELSE CEqRules.Eq
+        ORELSE CEqRules.MemEq
+        ORELSE ApproxRules.Eq
+        ORELSE ApproxRules.MemEq
         ORELSE VoidEq world
-        ORELSE HypEq
-        ORELSE UnivEq
-        ORELSE PlusEq
-        ORELSE InlEq level
-        ORELSE InrEq level
-        ORELSE BaseEq
-        ORELSE BaseMemberEq
-        ORELSE FunEq freshVariable
-        ORELSE IsectEq freshVariable
-        ORELSE ProdEq freshVariable
-        ORELSE SubsetEq freshVariable
-        ORELSE PairEq (freshVariable, level)
-        ORELSE LamEq (freshVariable, level)
-        ORELSE SubsetMemberEq (freshVariable, level)
-        ORELSE IsectMemberEq (freshVariable, level)
+        ORELSE GeneralRules.HypEq
+        ORELSE UnivRules.Eq
+        ORELSE PlusRules.Eq
+        ORELSE PlusRules.InlEq level
+        ORELSE PlusRules.InrEq level
+        ORELSE BaseRules.Eq
+        ORELSE BaseRules.MemberEq
+        ORELSE FunRules.Eq freshVariable
+        ORELSE ISectRules.Eq freshVariable
+        ORELSE ProdRules.Eq freshVariable
+        ORELSE SubsetRules.Eq freshVariable
+        ORELSE ProdRules.PairEq (freshVariable, level)
+        ORELSE FunRules.LamEq (freshVariable, level)
+        ORELSE SubsetRules.MemberEq (freshVariable, level)
+        ORELSE ISectRules.MemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
           case terms of
-               [M, N] => IsectMemberCaseEq (SOME M, N)
-             | [N] => IsectMemberCaseEq (NONE, N)
+               [M, N] => ISectRules.MemberCaseEq (SOME M, N)
+             | [N] => ISectRules.MemberCaseEq (NONE, N)
              | _ => FAIL)
-        ORELSE NatEq
-        ORELSE ZeroEq
-        ORELSE SuccEq
-        ORELSE Cum level
-        ORELSE EqInSupertype
-        ORELSE ImageEq
-        ORELSE ImageMemEq
+        ORELSE NatRules.Eq
+        ORELSE NatRules.ZeroEq
+        ORELSE NatRules.SuccEq
+        ORELSE UnivRules.Cum level
+        ORELSE SubsetRules.EqInSupertype
+        ORELSE ImageRules.Eq
+        ORELSE ImageRules.MemEq
         ORELSE
         (if not invertible then
-             NatRecEq (listAt (terms, 0), take2 names)
-               ORELSE_LAZY (fn _ => DecideEq (List.nth (terms, 0))
-                                             (List.nth (terms, 1),
-                                              List.nth (terms, 2),
-                                              take3 names))
-               ORELSE SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
-               ORELSE ApEq (listAt (terms, 0))
+             NatRules.RecEq (listAt (terms, 0), take2 names)
+               ORELSE_LAZY (fn _ => PlusRules.DecideEq (List.nth (terms, 0))
+                                                       (List.nth (terms, 1),
+                                                        List.nth (terms, 2),
+                                                        take3 names))
+               ORELSE ProdRules.SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
+               ORELSE FunRules.ApEq (listAt (terms, 0))
          else
              FAIL)
 
     end
 
   fun Ext {freshVariable, level} =
-    FunExt (freshVariable, level)
-    ORELSE ApproxExtEq
+    FunRules.FunExt (freshVariable, level)
+    ORELSE ApproxRules.ExtEq
 
   fun Match [] = FAIL
-    | Match [{hyps, goal, branch}] = MatchSingle (hyps, goal, branch)
+    | Match [{hyps, goal, branch}] = GeneralRules.MatchSingle (hyps, goal, branch)
     | Match ({hyps, goal, branch} :: branches) =
-      MatchSingle (hyps, goal, branch)
+      GeneralRules.MatchSingle (hyps, goal, branch)
       ORELSE_LAZY (fn () => Match branches)
 
   local
@@ -299,7 +298,7 @@ struct
                               invertible = false,
                               terms = []} world
 
-    fun AutoVoidElim world = VoidElim world THEN Assumption
+    fun AutoVoidElim world = VoidElim world THEN GeneralRules.Assumption
 
     val InvAutoIntro = Intro {term = NONE,
                               rule = NONE,
@@ -315,7 +314,7 @@ struct
     open Conversions Conversionals
     infix CORELSE
 
-    val DeepReduce = RewriteGoal (CDEEP Step)
+    val DeepReduce = GeneralRules.RewriteGoal (CDEEP Step)
   in
     fun FinAuto (wld, 0) = LIMIT (UnfoldHead wld ORELSE InvAutoIntro ORELSE AutoVoidElim wld ORELSE InvAutoEqCD wld)
       | FinAuto (wld, n) = FinAuto (wld, 0) THEN (AutoIntro ORELSE AutoEqCD wld) THEN FinAuto (wld, n - 1)

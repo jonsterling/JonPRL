@@ -6,6 +6,7 @@ group is
   $libs/sml-lcf/lcf.cm
   $libs/sml-conv/conv.cm
   $libs/sml-abt-unify/abt-unify.cm
+  $libs/sml-open-ended/open-ended.cm
   $libs/sml-open-abt/open-abt.cm
   $libs/sml-parcom-wrapper/parcom.cm
 
@@ -35,6 +36,39 @@ group is
   unify_sequent.fun
 
   lcf.fun
+
+  rules/utils.sig
+  rules/utils.fun
+  rules/univ.sig
+  rules/univ.fun
+  rules/eq.sig
+  rules/eq.fun
+  rules/fun.sig
+  rules/fun.fun
+  rules/isect.sig
+  rules/isect.fun
+  rules/subset.sig
+  rules/subset.fun
+  rules/nat.sig
+  rules/nat.fun
+  rules/base.sig
+  rules/base.fun
+  rules/image.sig
+  rules/image.fun
+  rules/general.sig
+  rules/general.fun
+  rules/prod.sig
+  rules/prod.fun
+  rules/plus.sig
+  rules/plus.fun
+  rules/atom.sig
+  rules/atom.fun
+  rules/ceq.sig
+  rules/ceq.fun
+  rules/approx.sig
+  rules/approx.fun
+  rules/bhyp.sig
+  rules/bhyp.fun
 
   refiner.fun
   refiner.sig
