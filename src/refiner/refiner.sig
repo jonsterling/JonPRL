@@ -159,6 +159,7 @@ sig
     val RewriteGoal : conv -> tactic
 
     val EqSubst : term * term * Level.t option -> tactic
+    val HypEqSubst : Dir.dir * hyp * term * Level.t option -> tactic
     val EqSym : tactic
 
     val CEqEq       : tactic
@@ -224,8 +225,6 @@ sig
      *   H, x : match u with {P*} ~ P*@_, y : match u' with {Q*} ~ Q*@_ >> P*@_ = Q*@_ ∈ C
      *)
     val MatchTokenEq : tactic
-
-    val HypEqSubst : Dir.dir * hyp * term * Level.t option -> tactic
 
     (* Match a single branch of a [match goal]. This needs to
      * be primitive because it needs access to the structure of

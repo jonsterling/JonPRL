@@ -164,28 +164,6 @@ struct
           go (rev instantiations) goal
         end
     end
-
-    local
-      structure Tacticals = Tacticals (Lcf)
-      open Tacticals
-      infix THEN THENL
-    in
-      fun HypEqSubst (dir, hyp, xC, ok) (goal as _ |: H >> P) =
-        let
-          val z = eliminationTarget hyp (H >> P)
-          val X = Context.lookup H z
-        in
-          case dir of
-               Dir.RIGHT => (EqSubst (X, xC, ok) THENL [Hypothesis_ z, ID, ID]) goal
-             | Dir.LEFT =>
-                 let
-                   val #[M,N,A] = X ^! EQ
-                 in
-                   (EqSubst (C.`> EQ $$ #[N,M,A], xC, ok)
-                     THENL [EqSym THEN Hypothesis_ z, ID, ID]) goal
-                 end
-        end
-    end
   end
 
   structure Conversions =
