@@ -99,8 +99,8 @@ struct
        ORELSE ISectRules.Intro (freshVariable, level)
        ORELSE_LAZY (fn _ => ProdRules.ProdIntro (valOf term, freshVariable, level))
        ORELSE ProdRules.IndependentProdIntro
-       ORELSE_LAZY (fn _ => SubsetRules.SubsetIntro (valOf term, freshVariable, level))
-       ORELSE SubsetRules.IndependentSubsetIntro
+       ORELSE_LAZY (fn _ => SubsetRules.Intro (valOf term, freshVariable, level))
+       ORELSE SubsetRules.IndependentIntro
        ORELSE CEqRefl
        ORELSE ApproxRules.ApproxRefl
        ORELSE BaseRules.BaseIntro
@@ -217,7 +217,7 @@ struct
         ORELSE ImageRules.ImageEqInd (target, fourNames)
         ORELSE ImageRules.ImageElim (target, listAt (names, 0))
         ORELSE NatRules.NatElim (target, twoNames)
-        ORELSE SubsetRules.SubsetElim (target, twoNames)
+        ORELSE SubsetRules.Elim (target, twoNames)
     end
 
   fun EqCD {names, level, invertible, terms} world =
@@ -247,10 +247,10 @@ struct
         ORELSE FunRules.Eq freshVariable
         ORELSE ISectRules.Eq freshVariable
         ORELSE ProdRules.ProdEq freshVariable
-        ORELSE SubsetRules.SubsetEq freshVariable
+        ORELSE SubsetRules.Eq freshVariable
         ORELSE ProdRules.PairEq (freshVariable, level)
         ORELSE FunRules.LamEq (freshVariable, level)
-        ORELSE SubsetRules.SubsetMemberEq (freshVariable, level)
+        ORELSE SubsetRules.MemberEq (freshVariable, level)
         ORELSE ISectRules.MemberEq (freshVariable, level)
         ORELSE_LAZY (fn _ =>
           case terms of

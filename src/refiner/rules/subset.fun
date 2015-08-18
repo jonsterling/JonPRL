@@ -9,9 +9,9 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  val SubsetEq = QuantifierEq (SUBSET, SUBSET_EQ)
+  val Eq = QuantifierEq (SUBSET, SUBSET_EQ)
 
-  fun SubsetIntro (w, oz, ok) (_ |: H >> P) =
+  fun Intro (w, oz, ok) (_ |: H >> P) =
     let
       val w = Context.rebind H w
       val #[P1, xP2] = P ^! SUBSET
@@ -29,7 +29,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun IndependentSubsetIntro (_ |: H >> P) =
+  fun IndependentIntro (_ |: H >> P) =
     let
       val #[P1, xP2] = P ^! SUBSET
       val (x, P2) = unbind xP2
@@ -60,10 +60,10 @@ struct
              | _ => raise Refine)
     end
 
-  fun SubsetElim (hyp, onames) (goal as _ |: sequent) =
+  fun Elim (hyp, onames) (goal as _ |: sequent) =
     SubsetElim_ (eliminationTarget hyp sequent, onames) goal
 
-  fun SubsetMemberEq (oz, ok) (_ |: H >> P) =
+  fun MemberEq (oz, ok) (_ |: H >> P) =
     let
       val #[s,t,subset] = P ^! EQ
       val #[S,xT] = subset ^! SUBSET
