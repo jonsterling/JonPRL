@@ -9,7 +9,7 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
-  fun CEqEq (_ |: H >> P) =
+  fun Eq (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
       val (UNIV _, _) = asApp U
@@ -22,7 +22,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun CEqMemEq (_ |: H >> P) =
+  fun MemEq (_ |: H >> P) =
     let
       val #[M, N, E] = P ^! EQ
       val #[] = M ^! AX
@@ -33,7 +33,7 @@ struct
       ] BY mkEvidence CEQUAL_MEMBER_EQ
     end
 
-  fun CEqSym (_ |: H >> P) =
+  fun Sym (_ |: H >> P) =
     let
       val #[M, N] = P ^! CEQUAL
     in
@@ -42,7 +42,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun CEqStep (_ |: H >> P) =
+  fun Step (_ |: H >> P) =
     let
       val #[M, N] = P ^! CEQUAL
       val M' =
@@ -56,7 +56,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun CEqApprox (_ |: H >> P) =
+  fun Approx (_ |: H >> P) =
     let
       val #[M, N] = P ^! CEQUAL
     in
@@ -65,7 +65,7 @@ struct
       ] BY mkEvidence CEQUAL_APPROX
     end
 
-  fun CEqSubst (eq, xC) (_ |: H >> P) =
+  fun Subst (eq, xC) (_ |: H >> P) =
     let
       val eq = Context.rebind H eq
       val #[M, N] = eq ^! CEQUAL
@@ -88,20 +88,20 @@ struct
     open Tacticals
     infix THEN THENL
   in
-    fun HypCEqSubst (dir, hyp, xC) (goal as _ |: H >> P) =
+    fun HypSubst (dir, hyp, xC) (goal as _ |: H >> P) =
       let
         val z = eliminationTarget hyp (H >> P)
         val X = Context.lookup H z
       in
         case dir of
             Dir.RIGHT =>
-            (CEqSubst (X, xC) THENL [Hypothesis_ z, ID]) goal
+            (Subst (X, xC) THENL [Hypothesis_ z, ID]) goal
           | Dir.LEFT =>
             let
               val #[M,N] = X ^! CEQUAL
             in
-              (CEqSubst (C.`> CEQUAL $$ #[N,M], xC)
-                        THENL [CEqSym THEN Hypothesis_ z, ID]) goal
+              (Subst (C.`> CEQUAL $$ #[N,M], xC)
+                 THENL [Sym THEN Hypothesis_ z, ID]) goal
             end
       end
   end
@@ -141,7 +141,7 @@ struct
                                     (Vector.sub (terms, i)))
       end
    in
-     fun CEqStruct (_ |: H >> P) =
+     fun Struct (_ |: H >> P) =
        let
          val #[M, N] = P ^! CEQUAL
          val (oper, subterms) = asApp M

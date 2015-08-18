@@ -27,9 +27,9 @@ struct
       | HYP_SUBST ({dir, index, domain, level}, a) =>
         an a (EqRules.HypSubst (dir, index, domain, level))
       | CEQ_SUBST ({equality, domain}, a) =>
-        an a (CEqRules.CEqSubst (equality, domain))
+        an a (CEqRules.Subst (equality, domain))
       | CHYP_SUBST ({dir, index, domain}, a) =>
-        an a (CEqRules.HypCEqSubst (dir, index, domain))
+        an a (CEqRules.HypSubst (dir, index, domain))
       | INTRO ({term, rule, freshVariable, level}, a) =>
         an a (RefinerUtil.Intro {term = term,
                              rule = rule,
@@ -53,10 +53,10 @@ struct
         an a (Assert (t, name))
       | CUT_LEMMA (theta, a) => an a (RefinerUtil.CutLemma (wld, theta))
       | SYMMETRY a => an a EqRules.Sym
-      | CEQUAL_SYM a => an a CEqRules.CEqSym
-      | CEQUAL_STEP a => an a CEqRules.CEqStep
-      | CEQUAL_STRUCT a => an a CEqRules.CEqStruct
-      | CEQUAL_APPROX a => an a CEqRules.CEqApprox
+      | CEQUAL_SYM a => an a CEqRules.Sym
+      | CEQUAL_STEP a => an a CEqRules.Step
+      | CEQUAL_STRUCT a => an a CEqRules.Struct
+      | CEQUAL_APPROX a => an a CEqRules.Approx
       | APPROX_REFL a => an a ApproxRules.ApproxRefl
       | BOTTOM_DIVERGES (i, a) => an a (ApproxRules.BottomDiverges i)
       | ASSUME_HAS_VALUE ({name, level}, a) => an a (ApproxRules.AssumeHasValue (name, level))

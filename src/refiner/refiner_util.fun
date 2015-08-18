@@ -55,7 +55,7 @@ struct
      goal   : term,
      branch : (name * term) list -> tactic} list
 
-  val CEqRefl = CEqRules.CEqApprox THEN ApproxRules.ApproxRefl
+  val CEqRefl = CEqRules.Approx THEN ApproxRules.ApproxRefl
 
   local
     structure Tacticals = Tacticals (Lcf)
@@ -106,7 +106,7 @@ struct
        ORELSE BaseRules.Intro
        ORELSE
        (if not invertible then
-            CEqRules.CEqStruct
+            CEqRules.Struct
         else
             FAIL)
 
@@ -146,7 +146,7 @@ struct
         (GeneralRules.Unfolds (world, [(CI.`> C.UNIT, NONE)])
           THEN ApproxRules.ApproxEq
           THEN BaseRules.MemberEq
-          THEN CEqRules.CEqApprox
+          THEN CEqRules.Approx
           THEN ApproxRules.ApproxRefl)
 
     fun UnitMemEq world =
@@ -178,14 +178,14 @@ struct
           [ID,
            GeneralRules.Unfolds (world, [(oprv, NONE)])
             THEN GeneralRules.Assert (hv, SOME nameq) THENL
-              [CEqRules.CEqSubst (ceq, xC) THENL
-                [CEqRules.CEqApprox THENL
+              [CEqRules.Subst (ceq, xC) THENL
+                [CEqRules.Approx THENL
                   [ApproxRules.AssumeHasValue (SOME namev, NONE) THENL
                     [ApproxRules.BottomDiverges (HypSyn.NAME namev),
                      GeneralRules.Unfolds (world, [(oprh, NONE),(oprb, NONE),(oprm, NONE),(opri, NONE)])
                        THEN ApproxRules.ApproxEq
                        THEN BaseRules.MemberEq
-                       THEN CEqRules.CEqApprox
+                       THEN CEqRules.Approx
                        THEN ApproxRules.ApproxRefl],
                    GeneralRules.Assumption],
                  GeneralRules.Unfolds (world, [(oprh, NONE)]) THEN DeepReduce THEN ApproxRules.ApproxRefl],
@@ -197,7 +197,7 @@ struct
       in GeneralRules.Unfolds (world, [(oprv, NONE)])
          THEN ApproxRules.ApproxEq
          THEN BaseRules.MemberEq
-         THEN CEqRules.CEqApprox
+         THEN CEqRules.Approx
          THEN ApproxRules.ApproxRefl
       end
   end
@@ -232,8 +232,8 @@ struct
         ORELSE UnitEq world
         ORELSE UnitMemEq world
         ORELSE EqRules.MemEq
-        ORELSE CEqRules.CEqEq
-        ORELSE CEqRules.CEqMemEq
+        ORELSE CEqRules.Eq
+        ORELSE CEqRules.MemEq
         ORELSE ApproxRules.ApproxEq
         ORELSE ApproxRules.ApproxMemEq
         ORELSE VoidEq world
