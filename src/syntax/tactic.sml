@@ -58,6 +58,7 @@ struct
     | ASSUME_HAS_VALUE of {name : name option, level : level option} * meta
     | EQ_EQ_BASE of meta
     | TRY of t
+    | PROGRESS of t
     | LIMIT of t
     | ORELSE of t list * meta
     | THEN of then_tactic list
@@ -208,6 +209,7 @@ struct
      "trace \"MESSAGE\"",
      "cum @LEVEL?",
      "focus NUM #{TACTIC}",
+     "progress NUM #{TACTIC}",
      "thin (#NUM | <NAME>)",
      "bhyp (#NUM | <NAME>)"]
 end
