@@ -55,6 +55,7 @@ struct
   and plain w () =
     $ (parseTry w)
       || $ (parseRepeat w)
+      || $ (parseProgress w)
       || $ (parseOrelse w)
       || $ (parseComplete w)
       || parseId
@@ -87,6 +88,11 @@ struct
   and parseRepeat w () =
     middle (symbol "*{") ($ (parseScript w)) (symbol "}")
     wth LIMIT
+
+  and parseProgress w () =
+    symbol "progress" >>
+    whiteSpace >> middle (symbol "{") ($ (parseScript w)) (symbol "}")
+    wth PROGRESS
 
   and parseMatch w () =
     let

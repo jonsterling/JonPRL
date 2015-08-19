@@ -63,6 +63,7 @@ struct
       | EQ_EQ_BASE a => an a EqRules.EqBase
       | TRY tac => T.TRY (eval wld tac)
       | LIMIT tac => T.LIMIT (eval wld tac)
+      | PROGRESS tac => T.PROGRESS (eval wld tac)
       | ORELSE (tacs, a) => an a (List.foldl T.ORELSE T.FAIL (map (eval wld) tacs))
       | THEN ts =>
         List.foldl
