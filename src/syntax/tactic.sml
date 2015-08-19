@@ -209,7 +209,7 @@ struct
      "trace \"MESSAGE\"",
      "cum @LEVEL?",
      "focus NUM #{TACTIC}",
-     "progress NUM #{TACTIC}",
+     "progress {TACTIC}",
      "thin (#NUM | <NAME>)",
      "bhyp (#NUM | <NAME>)"]
 end
