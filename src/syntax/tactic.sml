@@ -210,6 +210,8 @@ struct
      "cum @LEVEL?",
      "focus NUM #{TACTIC}",
      "progress {TACTIC}",
+     "main {TACTIC}",
+     "aux {TACTIC}",
      "thin (#NUM | <NAME>)",
      "bhyp (#NUM | <NAME>)"]
 end
