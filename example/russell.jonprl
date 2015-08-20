@@ -1,0 +1,107 @@
+||| This is a proof that U{i} : U{i} is a contradiction in JonPRL.
+||| Proving this follows the reasoning from Russell's paradox: we
+||| construct a type which contains all types that don't contain themselves
+||| and show that *it* both is and isn't a member.
+|||
+||| The well-formedness conditions in this proof are absolutely
+||| killer and lead to most of the bloat in the proofs.
+
+
+Operator Russell : ().
+[Russell] =def= [{x : U{i} | not(member(x; x))}].
+
+Tactic break-plus {
+  @{ [x : _ + _ |- _] => elim <x> }
+}.
+
+Theorem u-in-u-wf : [member(member(U{i}; U{i}); U{i'})] {
+  unfold <member>; eq-eq-base; unfold <bunion>; auto;
+  csubst [ceq(U{i}; lam(x.snd(x)) pair(inr(<>); U{i}))]
+         [h.=(h; h; _)];
+  aux {unfold <snd>; reduce; auto};
+  eq-cd; ?{@{[|- =(_; _; base)] => auto}};
+  eq-cd @i'; ?{break-plus}; reduce; auto
+}.
+
+Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
+  unfold <not implies>; intro;
+
+  aux {lemma <u-in-u-wf>};
+
+  ||| This can't really be a separate theorem since
+  ||| the well-formedness of Russells' set depends on
+  ||| U ∈ U
+  assert [member(Russell; U{i})] <russell-wf>;
+  aux {
+    unfold <member Russell>; eq-cd; ?{assumption};
+    unfold <not implies>; eq-cd; auto;
+    unfold <member>; eq-eq-base; auto;
+    unfold <bunion>;
+    csubst [ceq(x'; lam(x.snd(x)) pair(inr(<>); x'))]
+           [h.=(h; h; _)];
+    aux {unfold <snd>; reduce; auto};
+    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
+    eq-cd @i'; ?{break-plus}; reduce; auto
+  };
+
+
+  assert [member(member(Russell; Russell); U{i})] <russell-in-russell-wf>;
+  aux {
+    unfold <member>; eq-eq-base; unfold <bunion>; auto;
+    csubst [ceq(Russell; lam(x.snd(x)) pair(inr(<>); Russell))]
+           [h.=(h; h; _)];
+    aux {unfold <snd>; reduce; auto};
+    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
+    eq-cd; ?{break-plus}; reduce; auto
+  };
+
+  ||| We can now start the proof.
+  assert [not(member(Russell; Russell))] <russell-not-in-russell>;
+  aux {
+    unfold <not implies>;
+    intro @i; aux {assumption};
+
+    assert [(x : Russell) * ceq(x; Russell)];
+    aux {
+      intro [Russell] @i; auto
+    };
+
+    elim #5;
+    unfold <Russell>; elim #6;
+    assert [not(member({x:U{i} | not(member(x; x))}; {x:U{i} | not(member(x; x))}))];
+    aux {
+      chyp-subst ← #9 [h. not(member(h; h))];
+      unfold <not implies>;
+      intro;
+      aux {
+        unfold <member>; eq-eq-base; unfold <bunion>; auto;
+        csubst [ceq(x''; lam(x.snd(x)) pair(inr(<>); x''))]
+               [h.=(h; h; _)];
+        aux {unfold <snd>; reduce; auto};
+        eq-cd; ?{@{[|- =(_; _; base)] => auto}};
+        eq-cd; ?{break-plus}; reduce; auto
+      };
+      elim #8 [x''']; auto
+    };
+    unfold <not implies>;
+    elim #10 [x']; auto
+  };
+
+  assert [member(Russell; Russell)];
+  aux {
+    unfold <member Russell>; eq-cd;
+
+    ||| We've already done all the hard work of proving this
+    main {unfold <member>; assumption};
+
+    unfold <not implies>; unfold <member>; eq-cd; ?{!{auto}};
+    eq-eq-base; unfold <bunion>; auto;
+    csubst [ceq(x'; lam(x.snd(x)) pair(inr(<>); x'))]
+           [h.=(h; h; _)];
+    aux {unfold <snd>; reduce; auto};
+    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
+    eq-cd; ?{break-plus}; reduce; auto
+  };
+
+  unfold <not implies>; elim #4 [H]; auto
+}.

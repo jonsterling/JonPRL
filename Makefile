@@ -14,6 +14,7 @@ test:
 	bin/jonprl stdlib/*.jonprl
 	bin/jonprl example/tautology.jonprl
 	bin/jonprl example/computational-equality.jonprl
+	bin/jonprl example/russell.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
