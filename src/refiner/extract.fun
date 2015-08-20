@@ -122,6 +122,7 @@ struct
        | FIAT $ #[] => raise Fail "FIAT may not appear in extract"
 
        | LEMMA {label} $ _ => ``(Variable.named label)
+       | ASSERT $ #[D, E] => extract E // extract D
 
        | ` x => `` x
        | x \ E => x \\ extract E

@@ -26,6 +26,7 @@ struct
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
     | LEMMA of {label : Label.t}
+    | ASSERT
 
   val eq : t * t -> bool = op=
 
@@ -118,6 +119,7 @@ struct
 
        | FIAT => #[]
        | LEMMA _ => #[]
+       | ASSERT => #[0, 1]
 
   fun toString theta =
     case theta of
@@ -213,6 +215,7 @@ struct
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
        | LEMMA {label} => Label.toString label
+       | ASSERT => "assert"
 end
 
 structure DerivationInj = OperatorInjection (Derivation)
