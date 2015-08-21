@@ -14,13 +14,30 @@ Tactic break-plus {
   @{ [x : _ + _ |- _] => elim <x> }
 }.
 
-Theorem u-in-u-wf : [member(member(U{i}; U{i}); U{i'})] {
-  unfold <member>; eq-eq-base; unfold <bunion>; auto;
-  csubst [ceq(U{i}; lam(x.snd(x)) pair(inr(<>); U{i}))]
-         [h.=(h; h; _)];
-  aux {unfold <snd>; reduce; auto};
+Tactic bunion-eq-right {
+  @{ [|- =(M; N; bunion(L;R))] =>
+       csubst [ceq(M; lam(x. snd(x)) <inr(<>), M>)] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [ceq(N; lam(x. snd(x)) <inr(<>), N>)] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+  }
+}.
+
+Tactic eq-base-tac {
+  @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
+       eq-eq-base; auto;
+       bunion-eq-right; unfold <bunion>
+   }
+}.
+
+Tactic impredicativity-wf-tac {
+  unfold <member>; eq-base-tac;
   eq-cd; ?{@{[|- =(_; _; base)] => auto}};
   eq-cd @i'; ?{break-plus}; reduce; auto
+}.
+
+Theorem u-in-u-wf : [member(member(U{i}; U{i}); U{i'})] {
+  impredicativity-wf-tac
 }.
 
 Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
@@ -35,25 +52,12 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
   aux {
     unfold <member Russell>; eq-cd; ?{assumption};
     unfold <not implies>; eq-cd; auto;
-    unfold <member>; eq-eq-base; auto;
-    unfold <bunion>;
-    csubst [ceq(x'; lam(x.snd(x)) pair(inr(<>); x'))]
-           [h.=(h; h; _)];
-    aux {unfold <snd>; reduce; auto};
-    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-    eq-cd @i'; ?{break-plus}; reduce; auto
+    impredicativity-wf-tac;
   };
 
 
   assert [member(member(Russell; Russell); U{i})] <russell-in-russell-wf>;
-  aux {
-    unfold <member>; eq-eq-base; unfold <bunion>; auto;
-    csubst [ceq(Russell; lam(x.snd(x)) pair(inr(<>); Russell))]
-           [h.=(h; h; _)];
-    aux {unfold <snd>; reduce; auto};
-    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-    eq-cd; ?{break-plus}; reduce; auto
-  };
+  aux { impredicativity-wf-tac; cum @i; auto };
 
   ||| We can now start the proof.
   assert [not(member(Russell; Russell))] <russell-not-in-russell>;
@@ -72,15 +76,7 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
     aux {
       chyp-subst ← #9 [h. not(member(h; h))];
       unfold <not implies>;
-      intro;
-      aux {
-        unfold <member>; eq-eq-base; unfold <bunion>; auto;
-        csubst [ceq(x''; lam(x.snd(x)) pair(inr(<>); x''))]
-               [h.=(h; h; _)];
-        aux {unfold <snd>; reduce; auto};
-        eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-        eq-cd; ?{break-plus}; reduce; auto
-      };
+      intro; aux { impredicativity-wf-tac };
       elim #8 [x''']; auto
     };
     unfold <not implies>;
@@ -90,17 +86,13 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
   assert [member(Russell; Russell)];
   aux {
     unfold <member Russell>; eq-cd;
+    unfold <member>;
 
     ||| We've already done all the hard work of proving this
-    main {unfold <member>; assumption};
+    main {assumption};
 
-    unfold <not implies>; unfold <member>; eq-cd; ?{!{auto}};
-    eq-eq-base; unfold <bunion>; auto;
-    csubst [ceq(x'; lam(x.snd(x)) pair(inr(<>); x'))]
-           [h.=(h; h; _)];
-    aux {unfold <snd>; reduce; auto};
-    eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-    eq-cd; ?{break-plus}; reduce; auto
+    unfold <not implies>; eq-cd; ?{!{auto}};
+    impredicativity-wf-tac;
   };
 
   unfold <not implies>; elim #4 [H]; auto
