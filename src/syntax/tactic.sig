@@ -73,6 +73,7 @@ sig
       | FIAT of meta
       | REDUCE_EQUAND of Dir.dir * meta
       | ON_CLASS of Goal.class * t
+      | RESOURCE of Resource.t * meta
     and then_tactic =
         APPLY of t
       | LIST of t list
