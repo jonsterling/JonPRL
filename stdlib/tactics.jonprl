@@ -10,3 +10,36 @@ Tactic squash-intro {
        }
   }
 }.
+
+Resource intro += {squash-intro}.
+
+|||
+Tactic bunion-eq-right {
+  @{ [|- =(M; N; bunion(L; R))] =>
+       csubst [ceq(M; lam(x. snd(x)) <inr(<>), M>)] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [ceq(N; lam(x. snd(x)) <inr(<>), N>)] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+
+       unfold <bunion>; eq-cd; auto; reduce;
+       aux {
+         @{[H : unit + unit |- _] => elim <H>; thin <H>};
+         reduce; auto
+       }
+  }
+}.
+
+Tactic bunion-eq-left {
+  @{ [|- =(M; N; bunion(L; R))] =>
+       csubst [ceq(M; lam(x. snd(x)) <inl(<>), M>)] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [ceq(N; lam(x. snd(x)) <inl(<>), N>)] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+
+       unfold <bunion>; eq-cd; auto; reduce;
+       aux {
+         @{[H : unit + unit |- _] => elim <H>; thin <H>};
+         reduce; auto
+       }
+  }
+}.
