@@ -89,6 +89,6 @@ struct
       | FIAT a => an a Fiat
       | REDUCE_EQUAND (dir, a) => an a (RefinerUtil.ReduceEquand dir)
       | ON_CLASS (c, tac) => RefinerUtil.OnClass c (eval wld tac)
-      | RESOURCE (r, _) =>
-        List.foldl T.THEN T.ID (Development.lookupResource wld r)
+      | RESOURCE (r, a) =>
+        an a (List.foldl T.THEN T.ID (Development.lookupResource wld r))
 end
