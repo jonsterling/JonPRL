@@ -15,7 +15,7 @@ Operator Russell : ().
 [Russell] =def= [{x : U{i} | ¬ (x ∈ x)}].
 
 Tactic break-plus {
-  @{ [x : _ + _ |- _] => elim <x> }
+  @{ [H : _ + _ |- _] => elim <H>; thin <H> }
 }.
 
 Tactic bunion-eq-right {
