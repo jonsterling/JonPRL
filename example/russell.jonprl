@@ -6,19 +6,23 @@
 ||| The well-formedness conditions in this proof are absolutely
 ||| killer and lead to most of the bloat in the proofs.
 
+Infix 20 "∈" := member.
+Infix 40 "~" := ceq.
+Infix 60 "∪" := bunion.
+Prefix 40 "¬" := not.
 
 Operator Russell : ().
-[Russell] =def= [{x : U{i} | not(member(x; x))}].
+[Russell] =def= [{x : U{i} | ¬ (x ∈ x)}].
 
 Tactic break-plus {
   @{ [x : _ + _ |- _] => elim <x> }
 }.
 
 Tactic bunion-eq-right {
-  @{ [|- =(M; N; bunion(L;R))] =>
-       csubst [ceq(M; lam(x. snd(x)) <inr(<>), M>)] [h.=(h;_;_)];
+  @{ [|- =(M; N; L ∪ R)] =>
+       csubst [M ~ lam(x. snd(x)) <inr(<>), M>] [h.=(h;_;_)];
        aux { unfold <snd>; reduce; auto };
-       csubst [ceq(N; lam(x. snd(x)) <inr(<>), N>)] [h.=(_;h;_)];
+       csubst [N ~ lam(x. snd(x)) <inr(<>), N>] [h.=(_;h;_)];
        aux { unfold <snd>; reduce; auto };
   }
 }.
@@ -45,11 +49,11 @@ Tactic contradiction {
    }
 }.
 
-Theorem u-in-u-wf : [member(member(U{i}; U{i}); U{i'})] {
+Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {
   impredicativity-wf-tac
 }.
 
-Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
+Theorem type-not-in-type : [¬ (U{i} ∈ U{i})] {
   unfold <not implies>; intro;
 
   aux {lemma <u-in-u-wf>};
@@ -57,7 +61,7 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
   ||| This can't really be a separate theorem since
   ||| the well-formedness of Russells' set depends on
   ||| U ∈ U
-  assert [member(Russell; U{i})] <russell-wf>;
+  assert [Russell ∈ U{i}] <russell-wf>;
   aux {
     unfold <member Russell>; eq-cd; ?{assumption};
     unfold <not implies>; eq-cd; auto;
@@ -65,25 +69,25 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
   };
 
 
-  assert [member(member(Russell; Russell); U{i})] <russell-in-russell-wf>;
+  assert [(Russell ∈ Russell) ∈ U{i}] <russell-in-russell-wf>;
   aux { impredicativity-wf-tac; cum @i; auto };
 
   ||| We can now start the proof.
-  assert [not(member(Russell; Russell))] <russell-not-in-russell>;
+  assert [¬ (Russell ∈ Russell)] <russell-not-in-russell>;
   aux {
     unfold <not implies>;
     intro @i; aux {assumption};
 
-    assert [(x : Russell) * ceq(x; Russell)];
+    assert [(R : Russell) * R ~ Russell];
     aux {
       intro [Russell] @i; auto
     };
 
     elim #5;
     unfold <Russell>; elim #6;
-    assert [not(member({x:U{i} | not(member(x; x))}; {x:U{i} | not(member(x; x))}))];
+    assert [¬ ({x:U{i} | ¬ (x ∈ x)} ∈ {x:U{i} | ¬ (x ∈ x)})];
     aux {
-      chyp-subst ← #9 [h. not(member(h; h))];
+      chyp-subst ← #9 [h. ¬ (h ∈ h)];
       unfold <not implies>;
       intro; aux { impredicativity-wf-tac };
     };
@@ -91,7 +95,7 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
     contradiction
   };
 
-  assert [member(Russell; Russell)];
+  assert [Russell ∈ Russell];
   aux {
     unfold <member Russell>; eq-cd;
     unfold <member>;
