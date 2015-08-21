@@ -36,6 +36,15 @@ Tactic impredicativity-wf-tac {
   eq-cd @i'; ?{break-plus}; reduce; auto
 }.
 
+Tactic contradiction {
+  unfold <not implies>;
+  @{ [H : P -> void, H' : P |- void] =>
+       elim <H> [H'];
+       unfold <member>;
+       auto
+   }
+}.
+
 Theorem u-in-u-wf : [member(member(U{i}; U{i}); U{i'})] {
   impredicativity-wf-tac
 }.
@@ -77,10 +86,9 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
       chyp-subst ← #9 [h. not(member(h; h))];
       unfold <not implies>;
       intro; aux { impredicativity-wf-tac };
-      elim #8 [x''']; auto
     };
-    unfold <not implies>;
-    elim #10 [x']; auto
+
+    contradiction
   };
 
   assert [member(Russell; Russell)];
@@ -95,5 +103,5 @@ Theorem type-not-in-type : [not(member(U{i}; U{i}))] {
     impredicativity-wf-tac;
   };
 
-  unfold <not implies>; elim #4 [H]; auto
+  contradiction
 }.
