@@ -64,6 +64,7 @@ sig
       | LIMIT of t
       | ORELSE of t list * meta
       | THEN of then_tactic list
+      | PRUNE of t
       | ID of meta
       | FAIL of meta
       | TRACE of string * meta
