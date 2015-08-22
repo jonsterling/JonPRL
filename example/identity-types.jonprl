@@ -135,11 +135,12 @@ Theorem identity-type-symmetric : [{A:U{i}} (I:identity-type(A)) is-symmetric(A;
   destruct-identity-type;
   unfold <id-rel fst>; reduce; auto;
   unfold <J-principle>;
-  elim #5 [a]; auto; thin #10;
-  elim #9 [lam(y.lam(p.R y a))]; auto; reduce; thin #11;
-  elim #10 [Refl a]; aux { unfold <is-reflexive>; auto}; thin #12;
-  elim #11 [b]; auto; thin #13;
-  elim #12 [x]; auto
+  main { elim #5 [a] };
+  main { elim #9 [lam(y.lam(p.R y a))]};
+  main { elim #11 [Refl a]};
+  main { elim #13 [b] };
+  main { elim #15 [x] };
+  unfold <is-reflexive>; reduce; auto
 }.
 
 Theorem identity-type-transitive : [{A:U{i}} (I:identity-type(A)) is-transitive(A; id-rel(I))] {
@@ -148,22 +149,33 @@ Theorem identity-type-transitive : [{A:U{i}} (I:identity-type(A)) is-transitive(
   unfold <id-rel fst>; reduce; auto;
   unfold <J-principle>;
 
-  elim #5 [b]; auto; thin #12;
-  elim #11 [lam(y.lam(p.R y c))]; auto; reduce; thin #13;
-  elim #12 [x']; auto; thin #14;
-  elim #13 [a]; auto; thin #15;
+  main { elim #5 [b] };
+  main { elim #11 [lam(y.lam(p.R y c))] };
+  main { elim #13 [x'] };
+  main { elim #15 [a] };
+
+  reduce; auto;
+  *{ @{ [H : =(_;_;_) |- _] => thin <H> } };
+
 
   assert [R b a] <Rba>; auto;
   aux {
     cut-lemma <identity-type-symmetric>;
-    elim <identity-type-symmetric> [A]; auto; thin #17;
-    elim #16 [<R,Refl,J>]; unfold <identity-type J-principle is-reflexive rel member>;
-    [eq-cd; unfold <member>; eq-cd @i'; auto, id];
-    unfold <is-symmetric id-rel fst>; reduce; thin #18;
-    elim #17 [a]; auto; thin #19;
-    elim #18 [b]; auto; thin #20;
-    elim #19 [x]; auto
+    main { elim <identity-type-symmetric> [A] };
+    main { elim #16 [<R,Refl,J>] };
+    main { unfold <is-symmetric>; elim #18 [a] };
+    main { elim #20 [b] };
+    main { elim #22 [x] };
+
+    *{ @{ [H : =(_;_;_) |- _] => thin <H> } }; auto;
+    unfold <id-rel fst>; reduce; auto;
+    focus 0 #{
+      unfold <identity-type J-principle is-reflexive rel>;
+      focus 0 #{
+        eq-cd; unfold <member>; eq-cd @i'; auto
+      }
+    };
   };
 
-  elim #14 [Rba]; auto
+  @{ [H:P -> Q, H' : P |- Q] => elim <H> [H']}; auto
 }.
