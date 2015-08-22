@@ -75,12 +75,12 @@ struct
            theta $ _ => GeneralRules.Unfolds (world, [(theta, NONE)]) goal
          | _ => raise Refine
 
-    fun CutLemma (world, theta : operator) =
+    fun CutLemma (world, theta : operator, oname) =
       let
         val {statement,...} = Development.lookupTheorem world theta
         val H >> P = statement
         val _ = if Context.eq (H, Context.empty) then () else raise Fail "nonempty context"
-        val name = Syntax.Variable.named (Syntax.Operator.toString theta)
+        val name = case oname of SOME name => name | NONE => Syntax.Variable.named (Syntax.Operator.toString theta)
       in
         GeneralRules.Assert (P, SOME name)
           THENL [GeneralRules.Lemma (world, theta), ID]

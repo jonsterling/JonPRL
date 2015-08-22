@@ -47,7 +47,7 @@ struct
     | ASSUMPTION of meta
     | ASSERT of {assertion : term,
                  name : name option} * meta
-    | CUT_LEMMA of operator * meta
+    | CUT_LEMMA of operator * name option * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta

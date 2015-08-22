@@ -39,7 +39,7 @@ sig
   val ReduceEquand : Dir.dir -> tactic
 
   val Reduce : int option -> tactic
-  val CutLemma : world * operator -> tactic
+  val CutLemma : world * operator * name option  -> tactic
 
   val OnClass : Goal.class -> tactic -> tactic
 
