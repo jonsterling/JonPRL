@@ -35,6 +35,8 @@ Theorem NAT-wf : [NAT ∈ U{i}] {
   unfold <NAT rec union unit>; auto
 }.
 
+Resource wf += { wf-lemma <NAT-wf> }.
+
 Theorem ZE-wf : [ZE ∈ NAT] {
   ||| In order to apply the image membership rule, we must wrangle the goal such
   ||| that ZE is in the right form (i.e. a function application); the part that is
@@ -49,9 +51,10 @@ Theorem ZE-wf : [ZE ∈ NAT] {
   reduce; auto
 }.
 
+Resource wf += { wf-lemma <ZE-wf> }.
 
-Tactic isect-NAT {
-  @{ [|- {n:NAT} _] => intro @i; aux { lemma <NAT-wf> }}
+Resource intro += {
+  @{ [|- {n:NAT} _] => intro @i; aux { auto }}
 }.
 
 Tactic NAT-induction {
@@ -66,12 +69,12 @@ Operator nat-of : (0).
 [nat-of(N)] =def= [fix(lam(F.decide(N; l.zero; r.succ(F r))))].
 
 Theorem nat-of-wf : [{n:NAT} nat-of(n) ∈ nat] {
-  isect-NAT; NAT-induction;
+  intro; NAT-induction;
   unfold <pi2>; reduce; auto
 }.
 
 Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
-  isect-NAT;
+  intro;
 
   ||| We use the same technique here as we did to prove the wellformedness of ZE.
   assert [SU(n) ~ (pi2 <succ(nat-of(n)), SU(n)>)] <H>;
@@ -84,30 +87,20 @@ Theorem SU-wf : [{n:NAT} SU(n) ∈ NAT] {
   unfold <pi2>; reduce; auto
 }.
 
+Resource wf += { wf-lemma <SU-wf> }.
+
 Theorem NAT-ind-wf : [
   lam(pz. lam(psu. lam(n. fix(lam(F. decide(n; l.pz; r.psu r (F r))))))) ∈ {P : NAT -> U{i}} P ZE -> ((n : NAT) P n -> P (SU(n))) -> (z : NAT) P z
 ] {
   auto; eq-cd @i';
   aux {
-    auto; cut-lemma <NAT-wf>; cum @i; unfold <member>; auto
+    auto; cum @i; wf-lemma <NAT-wf>
   }; auto;
 
-  focus 1 #{
-    cut-lemma <ZE-wf>; unfold <member>; auto
-  }; eq-cd @i;
-
-  aux {
-    auto; [cut-lemma <NAT-wf>; unfold <member>; auto, cut-lemma <SU-wf>];
-    unfold <member>; bhyp <SU-wf>; auto
-  }; eq-cd @i;
-
-  aux {
-    lemma <NAT-wf>
-  };
-
+  eq-cd @i; auto;
+  eq-cd @i; auto;
   elim #3 [z]; auto;
   NAT-induction; unfold <pi2>;
   focus 0 #{reduce 1; auto};
   unfold <SU>;
-  ||| TODO: can someone figure out how to finish this proof?
 }.

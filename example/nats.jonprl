@@ -18,31 +18,27 @@ Operator add : (0;0).
 Infix -> 100 "N+" := add.
 [M N+ N] =def= [natrec(M; N; _.n.succ(n))].
 
-Tactic t {
-  unfold <add>; auto 0; elim #1; reduce; auto 0.
-}.
-
 Theorem add-id-left : [{n:nat} =(zero N+ n; n; nat)] {
-  t
+  auto; unfold <add>; reduce; auto
 }.
 
 Theorem add-id-right : [{n:nat} =(n N+ zero; n; nat)] {
-  t
+  auto; unfold <add>; elim #1; reduce; auto
 }.
 
 Theorem succ-right : [
   {n:nat} {m:nat} =(n N+ succ(m); succ(n N+ m); nat)
 ] {
-  t
+  auto; unfold <add>; elim #1; reduce; auto
 }.
 
 Theorem add-commutes : [
   {n:nat} {m:nat} =(n N+ m; m N+ n; nat)
 ] {
   ||| Kick off the induction and do the boring computation thingies.
-  t;
+  auto; unfold <add>; elim #1; reduce; auto;
 
-  ||| The base case immeidately follows from add-id-right
+  ||| The base case immediately follows from add-id-right
   focus 0 #{
     cut-lemma <add-id-right>; unfold <add>;
     symmetry;

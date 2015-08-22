@@ -85,8 +85,25 @@ struct
         GeneralRules.Assert (P, SOME name)
           THENL [GeneralRules.Lemma (world, theta), ID]
       end
-  end
 
+    structure CttCalculusView = RestrictAbtView
+      (structure Abt = Syntax and Injection = CttCalculusInj)
+
+    fun WfLemma (world, theta : operator) =
+      let
+        val name = Syntax.Variable.named (Syntax.Operator.toString theta)
+        val hyp = HypSyn.NAME name
+        val cutWfLemma = CutLemma (world, theta, SOME name)
+        val useHyp = GeneralRules.Hypothesis hyp ORELSE BHypRules.BHyp hyp
+        open CttCalculusInj CttCalculus CttCalculusView
+      in
+        fn goal as (_ |: H >> P) =>
+          (case project P of
+               MEM $ _ => cutWfLemma THEN useHyp
+             | EQ $ _ => cutWfLemma THEN GeneralRules.Unfolds (world, [(`> MEM, NONE)]) THEN useHyp
+             | _ => FAIL) goal
+      end
+  end
 
   (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} D =
@@ -288,6 +305,12 @@ struct
     FunRules.FunExt (freshVariable, level)
     ORELSE ApproxRules.ExtEq
 
+  fun Wf world =
+    List.foldl
+     (fn (t, ts) => PROGRESS t ORELSE ts)
+     FAIL
+     (Development.lookupResource world Resource.WF)
+
   fun Match [] = FAIL
     | Match [{hyps, goal, branch}] = GeneralRules.MatchSingle (hyps, goal, branch)
     | Match ({hyps, goal, branch} :: branches) =
@@ -333,8 +356,8 @@ struct
         FinAuto (wld, 0)
         THEN (AutoIntro wld
               ORELSE AutoEqCD wld
-              ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID
-                       (Development.lookupResource wld Resource.AUTO))
+              ORELSE Wf wld
+              ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID (Development.lookupResource wld Resource.AUTO))
         THEN FinAuto (wld, n - 1)
 
     fun InfAuto wld =
@@ -342,8 +365,8 @@ struct
              ORELSE AutoIntro wld
              ORELSE AutoVoidElim wld
              ORELSE AutoEqCD wld
-             ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID
-                      (Development.lookupResource wld Resource.AUTO))
+             ORELSE Wf wld
+             ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) ID (Development.lookupResource wld Resource.AUTO))
 
     fun Auto (wld, opt) =
       case opt of

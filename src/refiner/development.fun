@@ -99,6 +99,7 @@ struct
            | toInt ELIM  = 1
            | toInt EQ_CD = 2
            | toInt INTRO = 3
+           | toInt WF = 4
 
          val eq = op=
          fun compare (l, r) = Int.compare (toInt l, toInt r)
