@@ -173,6 +173,13 @@ struct
                end
            | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
+           | SUP $ #[S, rR] =>
+               let
+                 val (r, R) = unbind rR
+                 val R' = if hasFree (R, r) then rR else R
+               in
+                 Unparse.infix' (Unparse.Right, 10, "⌢") (unparseAbt S, unparseAbt R')
+               end
            | PAIR $ #[M,N] =>
                Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
            | MATCH_TOKEN toks $ es =>
