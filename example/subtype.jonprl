@@ -49,19 +49,15 @@ Theorem subtype_rel_wf :
   ]
 }.
 
+Resource wf += { wf-lemma <subtype_rel_wf> }.
+
 Theorem subtype_rel_eq :
 [ {A : U{i}}{B : U{i}}{x : A}{y : A} subtype_rel(A;B) -> =(x;y;A) -> =(x;y;B) ] {
  auto;
- [ unfold <subtype_rel id>;
-   assert [=(lam(x.x)x;lam(x.x)y;B)] <h>;
-   [ eq-cd [A -> B];[unfold <member>;auto, auto]
-   , reduce;auto
-   ]
- , cut-lemma <subtype_rel_wf>;
-   elim #5 [A];auto;
-   elim #6 [B];auto;
-   unfold <member>;auto
- ]
+ unfold <subtype_rel id>;
+ assert [=(lam(x.x)x;lam(x.x)y;B)] <h>;
+ aux { eq-cd [A -> B]; unfold <member> };
+ reduce; auto
 }.
 
 Theorem subtype_rel_reflexive : [{A : U{i}} subtype_rel(A; A)] {
@@ -85,14 +81,6 @@ Theorem subtype_rel_trans : [{A : U{i}}{B : U{i}}{C : U{i}}
     elim #24 [p]; aux { auto };
     elim #26 [x']; aux { auto;unfold <subtype_rel member id>;auto };
     elim #28 [y'''''];auto
-  , cut-lemma <subtype_rel_wf>;
-    elim #5 [B]; aux { auto };
-    elim #6 [C]; aux { auto };
-    unfold <member>;auto
-  , cut-lemma <subtype_rel_wf>;
-    elim #4 [A]; aux { auto };
-    elim #5 [B]; aux { auto };
-    unfold <member>;auto
   ]
 }.
 

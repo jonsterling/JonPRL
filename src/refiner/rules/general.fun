@@ -142,9 +142,8 @@ struct
            foldl (fn ((theta, ok), acc) =>
              let
                val k = case ok of SOME k => k | NONE => Level.base
-               val conv =
-                 LevelSolver.subst (LevelSolver.Level.yank k)
-                   o CDEEP (convOperator theta world)
+               val levelConv = LevelSolver.subst (LevelSolver.Level.yank k)
+               val conv = CDEEP (convOperator theta world CTHEN levelConv)
              in
                acc CTHEN conv
              end) CID thetas

@@ -24,6 +24,8 @@ Theorem union-wf : [
   unfold <union snd>; auto
 }.
 
+Resource wf += { wf-lemma <union-wf> }.
+
 Operator rec : (1).
 [rec(x.F[x])] =def= [union(nat; n. lam(n. natrec(n; void; _.x. F[x])) n)].
 
@@ -144,13 +146,15 @@ Theorem cont-wf : [{F : U{i} -> U{i}} member(cont(F); U{i'})] {
   unfold <union>; auto
 }.
 
+Resource wf += { wf-lemma <cont-wf> }.
+
 
 |||TODO: redo this
 Theorem rec-is-fixed : [
   {F : U{i} -> U{i}} cont(F) -> rec(x. F x) ~ F (rec(x. F x))
 ] {
   auto;
-  intro <F-cont> @i'; aux { cut-lemma <cont-wf>; bhyp <cont-wf>; auto };
+  intro <F-cont> @i'; aux { auto };
   unfold <cont rec>;
   elim #2 [nat]; aux { auto };
   ||| help me!!!

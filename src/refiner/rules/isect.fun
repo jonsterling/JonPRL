@@ -46,7 +46,7 @@ struct
     in
       [ AUX |: H >> C.`> MEM $$ #[s, S]
       , MAIN |: H @@ (y, Ts) @@ (z, fsTs) >> P
-      ] BY (fn [D, E] => D.`> FUN_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
+      ] BY (fn [D, E] => D.`> ISECT_ELIM $$ #[``f, s, D, y \\ (z \\ E)]
               | _ => raise Refine)
     end
 

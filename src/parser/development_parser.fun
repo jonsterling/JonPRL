@@ -54,7 +54,8 @@ struct
                   x <> "auto"
                   andalso x <> "eq-cd"
                   andalso x <> "elim"
-                  andalso x <> "intro")
+                  andalso x <> "intro"
+                  andalso x <> "wf")
 
   val parseLabel = identifier
 

@@ -47,7 +47,8 @@ struct
     | ASSUMPTION of meta
     | ASSERT of {assertion : term,
                  name : name option} * meta
-    | CUT_LEMMA of operator * meta
+    | CUT_LEMMA of operator * name option * meta
+    | WF_LEMMA of operator * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta
@@ -199,7 +200,8 @@ struct
      "reduce NUM?",
      "reduce-equand DIR",
      "lemma <NAME>",
-     "cut-lemma <NAME>",
+     "cut-lemma <NAME> <NAME>?",
+     "wf-lemma <NAME>",
      "unfold <(NAME @NUM)+>",
      "witness [TERM]",
      "hypothesis (#NUM | <NAME>)",

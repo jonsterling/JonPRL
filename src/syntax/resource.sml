@@ -2,12 +2,13 @@ structure Resource :> RESOURCE =
 struct
   structure Variable = Variable ()
 
-  datatype t = AUTO | ELIM | EQ_CD | INTRO | CUSTOM of Variable.t
+  datatype t = AUTO | ELIM | EQ_CD | INTRO | WF | CUSTOM of Variable.t
 
   fun toString AUTO = "auto"
     | toString ELIM = "elim"
     | toString EQ_CD = "eq-cd"
     | toString INTRO = "intro"
+    | toString WF = "wf"
     | toString (CUSTOM v) = Variable.toString v
 
   open ParserCombinators CharParser JonprlTokenParser
@@ -23,5 +24,6 @@ struct
        string "elim" return ELIM,
        string "eq-cd" return EQ_CD,
        string "intro" return INTRO,
+       string "wf" return WF,
        identifier wth lookupCustom]
 end

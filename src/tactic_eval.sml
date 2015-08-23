@@ -51,7 +51,8 @@ struct
       | ASSUMPTION a => an a Assumption
       | ASSERT ({assertion = t, name = name}, a) =>
         an a (Assert (t, name))
-      | CUT_LEMMA (theta, a) => an a (RefinerUtil.CutLemma (wld, theta))
+      | CUT_LEMMA (theta, name, a) => an a (RefinerUtil.CutLemma (wld, theta, name))
+      | WF_LEMMA (theta, a) => an a (RefinerUtil.WfLemma (wld, theta))
       | SYMMETRY a => an a EqRules.Sym
       | CEQUAL_SYM a => an a CEqRules.Sym
       | CEQUAL_STEP a => an a CEqRules.Step

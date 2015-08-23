@@ -260,12 +260,19 @@ struct
   val parseCutLemma : tactic_parser =
     fn w => tactic "cut-lemma"
       && brackets (ParseSyntax.ParseOperator.parseOperator w)
+      && opt (brackets parseName)
+      wth (fn (name, (theta, oz)) => fn pos =>
+             CUT_LEMMA (theta, oz, {name = name, pos = pos}))
+
+  val parseWfLemma : tactic_parser =
+    fn w => tactic "wf-lemma"
+      && brackets (ParseSyntax.ParseOperator.parseOperator w)
       wth (fn (name, theta) => fn pos =>
-             CUT_LEMMA (theta, {name = name, pos = pos}))
+             WF_LEMMA (theta, {name = name, pos = pos}))
 
   val parseUnfold : tactic_parser =
     fn w => tactic "unfold"
-      && brackets (separate (ParseSyntax.ParseOperator.parseOperator w && opt parseLevel) whiteSpace)
+      && brackets (separate (ParseSyntax.ParseOperator.parseOperator w && opt (whiteSpace >> parseLevel)) whiteSpace)
       wth (fn (name, thetas) => fn pos =>
              UNFOLD (thetas, ({name = name, pos = pos})))
 
@@ -294,6 +301,7 @@ struct
     parseLemma w
       || parseBHyp w
       || parseCutLemma w
+      || parseWfLemma w
       || parseUnfold w
       || parseWitness w
       || parseHypothesis w
