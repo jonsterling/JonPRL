@@ -30,7 +30,8 @@ struct
                           "Print",
                           "Eval",
                           "Search",
-                          "Resource"])
+                          "Resource",
+                          "Declare"])
   open TP
 
   (* Make sure that our version of braces smartly handles whitespace *)
@@ -98,26 +99,39 @@ struct
   fun parsePrint (w : world) =
     reserved "Print" >>
       parseOperator w
-      wth DevelopmentAst.PRINT
+      wth (fn oper => (w, DevelopmentAst.PRINT oper))
 
   fun parseEval w =
     reserved "Eval" >>
       opt parseInt << spaces && parseTm [] w
-      wth (fn (gas, M) => DevelopmentAst.EVAL (M, gas))
+      wth (fn (gas, M) => (w, DevelopmentAst.EVAL (M, gas)))
 
   fun parseSearch w =
     reserved "Search" >>
       parseOperator w
-      wth DevelopmentAst.SEARCH
+      wth (fn oper => (w, DevelopmentAst.SEARCH oper))
 
   fun parseAddResource w =
     (reserved "Resource" >> Resource.parse (ParserContext.lookupResource w)) &&
       (spaces >> string "+=" >> spaces >> braces (TacticScript.parse w))
-      wth DevelopmentAst.ADD_RESOURCE
+      wth (fn pair => (w, DevelopmentAst.ADD_RESOURCE pair))
+
+  fun parseNewResource w =
+    reserved "Declare" >> identifier
+             wth (fn id =>
+                    let
+                      val w' = declareResource w id
+                    in
+                      (w', DevelopmentAst.NEW_RESOURCE (lookupResource w' id))
+                    end)
 
   fun parseCommand w =
-    (parsePrint w || parseEval w || parseSearch w || parseAddResource w)
-    wth (fn cmd => (w, DevelopmentAst.COMMAND cmd))
+    (parsePrint w
+       || parseEval w
+       || parseSearch w
+       || parseNewResource w
+       || parseAddResource w)
+    wth (fn (w', cmd) => (w', DevelopmentAst.COMMAND cmd))
 
   fun parseDecl w =
       parseTheorem w

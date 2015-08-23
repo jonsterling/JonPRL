@@ -271,6 +271,11 @@ struct
       end
   end
 
+  fun declareResource {context, resources} r =
+    {context = context,
+     resources = ResourcePool.insert resources r []}
+
+
   fun addResource {context, resources} (r, t) =
     {context = context,
      resources = ResourcePool.insertMerge resources r [t] (fn ts => t :: ts)}

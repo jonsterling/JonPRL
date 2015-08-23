@@ -72,11 +72,12 @@ struct
     NotationDict.lookup notations
 
   fun declareResource {initial, added, notations, resources} s =
-      {initial = initial,
-       added = added,
-       notations = notations,
-       resources = ResourceDict.insert resources s
-                                       (Resource.CUSTOM (Resource.Variable.named s))}
+    {initial = initial,
+     added = added,
+     notations = notations,
+     resources = ResourceDict.insert
+                   resources s
+                   (Resource.CUSTOM (Resource.Variable.named s))}
 
   fun lookupResource {initial, added, notations, resources} s =
     ResourceDict.lookup resources s handle ResourceDict.Absent =>

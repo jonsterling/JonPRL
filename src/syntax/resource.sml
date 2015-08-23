@@ -15,7 +15,7 @@ struct
   infixr 1 ||
 
   fun choices xs =
-    foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
+    foldr (fn (p, p') => p || try p') (fail "unknown operator") xs
 
   fun parse lookupCustom =
     choices

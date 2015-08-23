@@ -56,6 +56,9 @@ sig
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
   val declareNotation : world -> operator * Notation.t -> world
 
+  (* declare a new resource with no registered tactics *)
+  val declareResource : world -> resource -> world
+
   (* extend the resource pool with a new tactic *)
   val addResource : world -> resource * tactic -> world
 
