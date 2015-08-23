@@ -94,6 +94,7 @@ sig
       where type tactic = tactic
       where type term = term
       where type hyp = hyp
+      where type name = name
 
     structure ApproxRules : APPROX_RULES
       where type tactic = tactic
