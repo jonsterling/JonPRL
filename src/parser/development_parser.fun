@@ -111,7 +111,7 @@ struct
       wth DevelopmentAst.SEARCH
 
   fun parseAddResource w =
-    (reserved "Resource" >> Resource.parse) &&
+    (reserved "Resource" >> Resource.parse (ParserContext.lookupResource w)) &&
       (spaces >> string "+=" >> spaces >> braces (TacticScript.parse w))
       wth DevelopmentAst.ADD_RESOURCE
 

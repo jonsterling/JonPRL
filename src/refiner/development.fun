@@ -96,8 +96,8 @@ struct
        struct
          open Resource
 
-         val eq = op=
          fun compare (l, r) = String.compare (toString l, toString r)
+         fun eq (l, r) = compare (l, r) = EQUAL
        end)
 
   type object = Object.t

@@ -1,7 +1,9 @@
 signature RESOURCE =
 sig
-  datatype t = AUTO | ELIM | EQ_CD | INTRO | CUSTOM of StringVariable.t
+  structure Variable : VARIABLE
+
+  datatype t = AUTO | ELIM | EQ_CD | INTRO | CUSTOM of Variable.t
 
   val toString : t -> string
-  val parse : t CharParser.charParser
+  val parse : (string -> t) -> t CharParser.charParser
 end
