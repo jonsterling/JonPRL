@@ -169,7 +169,7 @@ struct
                  val (x, B) = unbind xB
                in
                  Unparse.atom
-                   (Variable.toString x ^ ":" ^ toString A ^ " ◃ " ^ toString B)
+                   (Variable.toString x ^ ":" ^ toString A ^ " <: " ^ toString B)
                end
            | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
@@ -178,7 +178,7 @@ struct
                  val (r, R) = unbind rR
                  val R' = if hasFree (R, r) then rR else R
                in
-                 Unparse.infix' (Unparse.Right, 10, "⌢") (unparseAbt S, unparseAbt R')
+                 Unparse.infix' (Unparse.Right, 10, "^") (unparseAbt S, unparseAbt R')
                end
            | PAIR $ #[M,N] =>
                Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
