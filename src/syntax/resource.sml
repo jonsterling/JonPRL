@@ -1,14 +1,15 @@
 structure Resource :> RESOURCE =
 struct
-  datatype t = AUTO | ELIM | EQ_CD | INTRO
+  datatype t = AUTO | ELIM | EQ_CD | INTRO | CUSTOM of StringVariable.t
 
   fun toString AUTO = "auto"
     | toString ELIM = "elim"
     | toString EQ_CD = "eq-cd"
     | toString INTRO = "intro"
+    | toString (CUSTOM v) = StringVariable.toString v
 
   open ParserCombinators CharParser JonprlTokenParser
-  infix 2 return
+  infix 2 return wth
   infixr 1 ||
 
   fun choices xs =
@@ -19,5 +20,6 @@ struct
       [string "auto" return AUTO,
        string "elim" return ELIM,
        string "eq-cd" return EQ_CD,
-       string "intro" return INTRO]
+       string "intro" return INTRO,
+       identifier wth CUSTOM o StringVariable.named]
 end

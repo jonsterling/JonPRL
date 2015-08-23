@@ -95,13 +95,9 @@ struct
     (structure Key =
        struct
          open Resource
-         fun toInt AUTO  = 0
-           | toInt ELIM  = 1
-           | toInt EQ_CD = 2
-           | toInt INTRO = 3
 
          val eq = op=
-         fun compare (l, r) = Int.compare (toInt l, toInt r)
+         fun compare (l, r) = String.compare (toString l, toString r)
        end)
 
   type object = Object.t
