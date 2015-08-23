@@ -29,11 +29,7 @@ Theorem RawCat-wf : [member(RawCat; U{i'})] {
   rawcat-unfold; auto.
 }.
 
-Resource eq-cd += {
-  @{ [|- =(RawCat; RawCat; _)] =>
-       cut-lemma <RawCat-wf>; unfold <member>; hypothesis <RawCat-wf>
-   }
-}.
+Resource wf += { wf-lemma <RawCat-wf> }.
 
 Resource intro += {
   @{ [|- {RC : RawCat} P] => intro @i'
@@ -45,12 +41,7 @@ Theorem obj-wf : [{RC:RawCat} member(obj(RC); U{i})] {
   auto; unfold <obj RawCat>; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(obj(C); obj(C); _)] =>
-       cut-lemma <obj-wf>; unfold <member>; bhyp <obj-wf>
-   }
-}.
-
+Resource wf += { wf-lemma <obj-wf> }.
 
 Theorem hom-wf : [
   {RC:RawCat} {A:obj(RC)} {B:obj(RC)} member(hom(RC;A;B); U{i})
@@ -60,11 +51,7 @@ Theorem hom-wf : [
   auto; reduce; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(hom(C; A; B); hom(C; A; B); _)] =>
-       cut-lemma <hom-wf>; unfold <member>; bhyp <hom-wf>
-   }
-}.
+Resource wf += { wf-lemma <hom-wf> }.
 
 Theorem idn-wf : [
   {RC:RawCat} {A:obj(RC)} member(idn(RC; A); hom(RC; A; A))
@@ -73,11 +60,7 @@ Theorem idn-wf : [
   auto; reduce; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(idn(C; A); idn(C; A); hom(C; A; A))] =>
-       cut-lemma <idn-wf>; unfold <member>; bhyp <idn-wf>
-   }
-}.
+Resource wf += { wf-lemma <idn-wf> }.
 
 Theorem cmp-wf : [
   {RC:RawCat}
@@ -92,11 +75,7 @@ Theorem cmp-wf : [
   auto; reduce; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(cmp(C; X; Y; Z; f; g); cmp(C; X; Y; Z; f; g); hom(C; X; Z))] =>
-       cut-lemma <cmp-wf>; unfold <member>; bhyp <cmp-wf>
-   }
-}.
+Resource wf += { wf-lemma <cmp-wf> }.
 
 Operator LeftIdentity : (0).
 [LeftIdentity(C)] =def= [{A:obj(C)} {B:obj(C)} {f:hom(C;A;B)} =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B))].
@@ -135,22 +114,15 @@ Tactic lawcat-unfold {
   rawcat-unfold.
 }.
 
-Resource eq-cd += {
-  @{ [|- =(LeftIdentity(C); LeftIdentity(C); _)] => cut-lemma <LeftIdentity-wf>; unfold <member>; bhyp <LeftIdentity-wf>
-   | [|- =(RightIdentity(C); RightIdentity(C); _)] => cut-lemma <RightIdentity-wf>; unfold <member>; bhyp <RightIdentity-wf>
-   | [|- =(CmpAssoc(C); CmpAssoc(C); _)] => cut-lemma <CmpAssoc-wf>; unfold <member>; bhyp <CmpAssoc-wf>
-   }
-}.
+Resource wf += { wf-lemma <LeftIdentity-wf> }.
+Resource wf += { wf-lemma <RightIdentity-wf> }.
+Resource wf += { wf-lemma <CmpAssoc-wf> }.
 
 Theorem LawCat-wf : [{RC:RawCat} member(LawCat(RC); U{i})] {
   unfold <LawCat>; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(LawCat(C); LawCat(C); _)] =>
-       cut-lemma <LawCat-wf>; unfold <member>; bhyp <LawCat-wf>
-   }
-}.
+Resource wf += { wf-lemma <LawCat-wf> }.
 
 Operator Cat : ().
 [Cat] =def= [{C : RawCat | LawCat(C)}].
@@ -174,7 +146,7 @@ Theorem InitialCat : [Cat] {
   unfold <Cat>;
   intro [InitialRawCat] @i;
   unfold <InitialRawCat>;
-  [id, id, cut-lemma <LawCat-wf>; elim #2 [C]; auto];
+  [id, id, auto; elim #2 [C]; auto];
 
   |||TODO: we need a rule that says "this is the extract of this lemma, and is thence well-formed"
   *{lawcat-unfold; auto; reduce}

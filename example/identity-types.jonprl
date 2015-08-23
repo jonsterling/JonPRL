@@ -1,0 +1,181 @@
+||| An axiomatization of Martin-Loef-style identity types.
+
+Infix 20 "∈" := member.
+Infix 60 "~" := ceq.
+Postfix 50 "⇓" := has-value.
+Prefix 50 "¬" := not.
+Prefix 50 "↓" := squash.
+
+Operator rel : (0).
+[rel(A)] =def= [A -> A -> U{i}].
+
+Theorem rel-wf : [{A:U{i}} rel(A) ∈ U{i'}] {
+  unfold <rel>; auto
+}.
+
+Resource wf += { wf-lemma <rel-wf> }.
+Resource intro += {
+  @{ [|- {R:rel(A)} _] => intro @i'; aux { wf-lemma <rel-wf> }
+   | [|- (R:rel(A)) _] => intro @i'; aux { wf-lemma <rel-wf> }
+   }
+}.
+
+Resource eq-cd += {
+  @{ [R : rel(A) |- =(R a b; R a b; _)] => !{ unfold <rel>; auto }
+   }
+}.
+
+Operator is-reflexive : (0;0).
+[is-reflexive(A;R)] =def= [(a:A) R a a].
+
+Operator is-symmetric : (0;0).
+[is-symmetric(A;R)] =def= [(a:A) (b:A) R a b -> R b a].
+
+Operator is-transitive : (0;0).
+[is-transitive(A;R)] =def= [(a:A) (b:A) (c:A) R a b -> R b c -> R a c].
+
+Theorem is-reflexive-wf : [{A:U{i}} {R:rel(A)} is-reflexive(A;R) ∈ U{i}] {
+  unfold <is-reflexive rel>;
+  auto
+}.
+
+Theorem is-symmetric-wf : [{A:U{i}} {R:rel(A)} is-symmetric(A;R) ∈ U{i}] {
+  unfold <is-symmetric rel>; auto
+}.
+
+Theorem is-transitive-wf : [{A:U{i}} {R:rel(A)} is-transitive(A;R) ∈ U{i}] {
+  unfold <is-transitive rel>; auto
+}.
+
+Resource wf += { wf-lemma <is-reflexive-wf> }.
+Resource wf += { wf-lemma <is-symmetric-wf> }.
+Resource wf += { wf-lemma <is-transitive-wf> }.
+
+
+Operator J-principle : (0;0;0).
+[J-principle(A; R; Refl)] =def= [
+  (M:A) (C : (y:A) R M y -> U{i})
+    C M (Refl M) -> (N:A) (P : R M N) C N P
+].
+
+Theorem J-principle-wf : [{A:U{i}} {R:rel(A)} {Refl : is-reflexive(A; R)} J-principle(A; R; Refl) ∈ U{i'}] {
+  auto; unfold <J-principle>;
+  intro @i; auto;
+  unfold <is-reflexive>; auto
+}.
+
+Resource wf += { wf-lemma <J-principle-wf> }.
+
+Operator identity-type : (0).
+[identity-type(A)] =def= [
+  (R : rel(A))
+    * (Refl : is-reflexive(A; R))
+    * J-principle(A; R; Refl)
+].
+
+
+Theorem identity-type-wf : [{A:U{i}} identity-type(A) ∈ U{i'}] {
+  unfold <identity-type>; auto;
+  cum @i; auto
+}.
+
+Resource wf += { wf-lemma <identity-type-wf> }.
+Resource intro += {
+  @{ [|- {I:identity-type(A)} _] => intro @i'; aux { wf-lemma <identity-type-wf> }
+   | [|- (I:identity-type(A)) _] => intro @i'; aux { wf-lemma <identity-type-wf> }
+   }
+}.
+
+Operator id-rel : (0).
+[id-rel(I)] =def= [fst(I)].
+
+Operator id-refl : (0).
+[id-refl(I)] =def= [fst(snd(I))].
+
+Operator id-J : (0).
+[id-J(I)] =def= [snd(snd(I))].
+
+
+Theorem id-rel-wf : [{A:U{i}} {I:identity-type(A)} id-rel(I) ∈ rel(A)] {
+  auto; unfold <id-rel identity-type fst>; auto
+}.
+
+Resource wf += { wf-lemma <id-rel-wf> }.
+
+Tactic destruct-identity-type {
+  @{ [H:identity-type(A) |- _] =>
+       unfold <identity-type>;
+       elim <H> <R,H'>;
+       elim <H'> <Refl, J>; thin <H'>
+   }
+}.
+
+Tactic destruct-hyp {
+  @{ [H:A * B |- _] => elim <H>; thin <H>; reduce }
+}.
+
+Theorem id-refl-wf : [{A:U{i}} {I:identity-type(A)} id-refl(I) ∈ is-reflexive(A; id-rel(I))] {
+  auto; destruct-identity-type;
+  unfold <id-J id-refl id-rel fst snd>;
+  reduce; auto
+}.
+
+Resource wf += { wf-lemma <id-refl-wf> }.
+
+Theorem id-J-wf : [{A:U{i}} {I:identity-type(A)} id-J(I) ∈ J-principle(A; id-rel(I); id-refl(I))] {
+  auto; destruct-identity-type;
+  unfold <id-J id-refl id-rel fst snd>;
+  reduce; auto
+}.
+
+Resource wf += { wf-lemma <id-J-wf> }.
+
+Theorem identity-type-symmetric : [{A:U{i}} (I:identity-type(A)) is-symmetric(A; id-rel(I))] {
+  *{ intro; ?{ !{ auto } } };
+  destruct-identity-type;
+  unfold <id-rel fst>; reduce; auto;
+  unfold <J-principle>;
+  main { elim #5 [a] };
+  main { elim #9 [lam(y.lam(p.R y a))]};
+  main { elim #11 [Refl a]};
+  main { elim #13 [b] };
+  main { elim #15 [x] };
+  unfold <is-reflexive>; reduce; auto
+}.
+
+Theorem identity-type-transitive : [{A:U{i}} (I:identity-type(A)) is-transitive(A; id-rel(I))] {
+  *{ intro; ?{ !{ auto } } };
+  destruct-identity-type;
+  unfold <id-rel fst>; reduce; auto;
+  unfold <J-principle>;
+
+  main { elim #5 [b] };
+  main { elim #11 [lam(y.lam(p.R y c))] };
+  main { elim #13 [x'] };
+  main { elim #15 [a] };
+
+  reduce; auto;
+  *{ @{ [H : =(_;_;_) |- _] => thin <H> } };
+
+
+  assert [R b a] <Rba>; auto;
+  aux {
+    cut-lemma <identity-type-symmetric>;
+    main { elim <identity-type-symmetric> [A] };
+    main { elim #16 [<R,Refl,J>] };
+    main { unfold <is-symmetric>; elim #18 [a] };
+    main { elim #20 [b] };
+    main { elim #22 [x] };
+
+    *{ @{ [H : =(_;_;_) |- _] => thin <H> } }; auto;
+    unfold <id-rel fst>; reduce; auto;
+    focus 0 #{
+      unfold <identity-type J-principle is-reflexive rel>;
+      focus 0 #{
+        eq-cd; unfold <member>; eq-cd @i'; auto
+      }
+    };
+  };
+
+  @{ [H:P -> Q, H' : P |- Q] => elim <H> [H']}; auto
+}.

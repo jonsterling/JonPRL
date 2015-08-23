@@ -29,21 +29,14 @@ Theorem MonoidSig-wf : [member(MonoidSig; U{i'})] {
   monoid-sig-unfold; auto.
 }.
 
-Resource eq-cd += {
-  @{ [|- =(MonoidSig; MonoidSig; _)] => cut-lemma <MonoidSig-wf>; unfold <member>; hypothesis <MonoidSig-wf>
-   }
-}.
+Resource wf += { wf-lemma <MonoidSig-wf> }.
 
 Theorem car-wf : [{M:MonoidSig} member(car(M); U{i})] {
   intro @i'; auto;
   unfold <MonoidSig car>; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(car(M); car(M); _)] =>
-       cut-lemma <car-wf>; unfold <member>; bhyp <car-wf>
-   }
-}.
+Resource wf += { wf-lemma <car-wf> }.
 
 Theorem ze-wf : [{M:MonoidSig} member(ze(M); car(M))] {
   intro @i'; auto;
@@ -51,11 +44,7 @@ Theorem ze-wf : [{M:MonoidSig} member(ze(M); car(M))] {
   auto; reduce; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(ze(M); ze(M); _)] =>
-       cut-lemma <ze-wf>; unfold <member>; bhyp <ze-wf>
-   }
-}.
+Resource wf += { wf-lemma <ze-wf> }.
 
 Theorem op-wf : [{M:MonoidSig} {X:car(M)} {Y:car(M)} member(op(M; X; Y); car(M))] {
   intro @i'; auto; *{ intro @i; auto };
@@ -63,11 +52,7 @@ Theorem op-wf : [{M:MonoidSig} {X:car(M)} {Y:car(M)} member(op(M; X; Y); car(M))
   auto; reduce; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(op(M;X;Y); op(M;X;Y); _)] =>
-       cut-lemma <op-wf>; unfold <member>; bhyp <op-wf>
-   }
-}.
+Resource wf += { wf-lemma <op-wf> }.
 
 Theorem LeftUnit-wf : [{M:MonoidSig} member(LeftUnit(M); U{i})] {
   intro @i'; auto;
@@ -85,26 +70,16 @@ Theorem Assoc-wf : [{M:MonoidSig} member(Assoc(M); U{i})] {
   unfold <Assoc>; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(LeftUnit(M); LeftUnit(M); _)] =>
-       cut-lemma <LeftUnit-wf>; unfold <member>; bhyp <LeftUnit-wf>
-   | [|- =(RightUnit(M); RightUnit(M); _)] =>
-       cut-lemma <RightUnit-wf>; unfold <member>; bhyp <RightUnit-wf>
-   | [|- =(Assoc(M); Assoc(M); _)] =>
-       cut-lemma <Assoc-wf>; unfold <member>; bhyp <Assoc-wf>
-   }
-}.
+Resource wf += { wf-lemma <LeftUnit-wf> }.
+Resource wf += { wf-lemma <RightUnit-wf> }.
+Resource wf += { wf-lemma <Assoc-wf> }.
 
 Theorem MonoidLaws-wf : [{M:MonoidSig} member(MonoidLaws(M); U{i})] {
   intro @i'; auto;
   unfold <MonoidLaws>; auto
 }.
 
-Resource eq-cd += {
-  @{ [|- =(MonoidLaws(M); MonoidLaws(M); _)] =>
-       cut-lemma <MonoidLaws-wf>; unfold <member>; bhyp <MonoidLaws-wf>
-   }
-}.
+Resource wf += { wf-lemma <MonoidLaws-wf> }.
 
 Theorem Monoid-wf : [member(Monoid; U{i'})] {
   unfold <Monoid>; auto; cum @i; auto
@@ -144,4 +119,3 @@ Theorem UnitMonoid-RightUnit : [RightUnit(UnitMonoidStruct)] {
   unfold <UnitMonoidStruct>;
   monoid-simplify; auto
 }.
-
