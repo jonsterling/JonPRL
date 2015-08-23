@@ -46,6 +46,7 @@ struct
            D
          end
        | ADD_RESOURCE (r, t) => Development.addResource D (r, TacticEval.eval D t)
+       | NEW_RESOURCE r => Development.declareResource D r
 
   fun evalDecl D ast =
     case ast of

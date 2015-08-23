@@ -294,7 +294,7 @@ struct
             FIAT {name = name, pos = pos})
 
   val parseResource : tactic_parser =
-    fn w => tactic "resource" && Resource.parse
+    fn w => tactic "resource" && Resource.parse (ParserContext.lookupResource w)
      wth (fn (name, r) => fn pos => RESOURCE (r, {name = name, pos = pos}))
 
   fun tacticParsers w =

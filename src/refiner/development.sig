@@ -41,6 +41,7 @@ sig
   val enumerate : world -> object Telescope.telescope
   val enumerateOperators : world -> (label * operator * Notation.t option) list
   val enumerateTactics : world -> label list
+  val enumerateResources : world -> Resource.t list
 
   (* the empty world *)
   val empty : world
@@ -55,6 +56,9 @@ sig
   val declareOperator : world -> label * operator -> world
   val defineOperator : world -> {definiendum : term, definiens : term} -> world
   val declareNotation : world -> operator * Notation.t -> world
+
+  (* declare a new resource with no registered tactics *)
+  val declareResource : world -> resource -> world
 
   (* extend the resource pool with a new tactic *)
   val addResource : world -> resource * tactic -> world

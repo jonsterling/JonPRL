@@ -95,14 +95,9 @@ struct
     (structure Key =
        struct
          open Resource
-         fun toInt AUTO  = 0
-           | toInt ELIM  = 1
-           | toInt EQ_CD = 2
-           | toInt INTRO = 3
-           | toInt WF = 4
 
-         val eq = op=
-         fun compare (l, r) = Int.compare (toInt l, toInt r)
+         fun compare (l, r) = String.compare (toString l, toString r)
+         fun eq (l, r) = compare (l, r) = EQUAL
        end)
 
   type object = Object.t
@@ -139,7 +134,23 @@ struct
       go (out t) []
     end
 
-  val empty = {context = Telescope.empty, resources = ResourcePool.empty}
+  fun enumerateResources {context, resources} = ResourcePool.domain resources
+
+  val empty : world=
+    let
+      val resources =
+        ResourcePool.insert
+          (ResourcePool.insert
+             (ResourcePool.insert
+                (ResourcePool.insert
+                   (ResourcePool.insert ResourcePool.empty Resource.AUTO [])
+                   Resource.INTRO [])
+                Resource.EQ_CD [])
+             Resource.ELIM [])
+          Resource.WF []
+    in
+      {context = Telescope.empty, resources = resources}
+    end
 
   fun prove {context = T, resources} (lbl, theta, goal, tac) =
     let
@@ -264,6 +275,11 @@ struct
       end
   end
 
+  fun declareResource {context, resources} r =
+    {context = context,
+     resources = ResourcePool.insert resources r []}
+
+
   fun addResource {context, resources} (r, t) =
     {context = context,
      resources = ResourcePool.insertMerge resources r [t] (fn ts => t :: ts)}
@@ -311,7 +327,9 @@ struct
            end
 
   fun lookupResource {context, resources} r =
-    Option.getOpt (ResourcePool.find resources r, [])
+    ResourcePool.lookup resources r
+      handle ResourcePool.Absent =>
+        raise Fail ("Unknown resource " ^ Resource.toString r)
 end
 
 structure Development : DEVELOPMENT =
