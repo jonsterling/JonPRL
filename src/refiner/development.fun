@@ -140,10 +140,12 @@ struct
         ResourcePool.insert
           (ResourcePool.insert
              (ResourcePool.insert
-                (ResourcePool.insert ResourcePool.empty Resource.AUTO [])
-                Resource.INTRO [])
-             Resource.EQ_CD [])
-          Resource.ELIM []
+                (ResourcePool.insert
+                   (ResourcePool.insert ResourcePool.empty Resource.AUTO [])
+                   Resource.INTRO [])
+                Resource.EQ_CD [])
+             Resource.ELIM [])
+          Resource.WF []
     in
       {context = Telescope.empty, resources = resources}
     end
