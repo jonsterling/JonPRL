@@ -41,6 +41,7 @@ sig
   val enumerate : world -> object Telescope.telescope
   val enumerateOperators : world -> (label * operator * Notation.t option) list
   val enumerateTactics : world -> label list
+  val enumerateResources : world -> Resource.t list
 
   (* the empty world *)
   val empty : world

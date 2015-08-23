@@ -6,7 +6,9 @@ sig
   exception NoSuchOperator of label
   exception NoSuchResource of string
 
-  val new : (label * operator * Notation.t option) list -> world
+  val new : (label * operator * Notation.t option) list ->
+            Resource.t list ->
+            world
 
   val lookupOperator : world -> label -> operator * Notation.t option
   val declareOperator : world -> label * Arity.t -> world

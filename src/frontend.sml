@@ -61,6 +61,7 @@ struct
       val initialContext =
         ParserContext.new
           (Development.enumerateOperators initialDevelopment)
+          (Development.enumerateResources initialDevelopment)
 
       open CttDevelopmentParser
     in

@@ -134,6 +134,8 @@ struct
       go (out t) []
     end
 
+  fun enumerateResources {context, resources} = ResourcePool.domain resources
+
   val empty : world=
     let
       val resources =

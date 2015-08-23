@@ -23,7 +23,7 @@ struct
   exception NoSuchOperator of label
   exception NoSuchResource of string
 
-  fun new bnds =
+  fun new bnds resources =
     {initial =
        List.foldl
          (fn ((lbl, a, n), wld) => Dict.insert wld lbl (a, n))
@@ -36,7 +36,13 @@ struct
            | (_, wld) => wld)
          NotationDict.empty
          bnds,
-     resources = ResourceDict.empty}
+     resources =
+     List.foldl
+       (fn (Resource.CUSTOM v, d) =>
+           ResourceDict.insert d (Resource.Variable.toString v) (Resource.CUSTOM v)
+         | (_, d) => d)
+       ResourceDict.empty
+       resources}
 
   fun lookupOperator {initial, added, notations, resources} lbl =
     case Dict.find added lbl of
