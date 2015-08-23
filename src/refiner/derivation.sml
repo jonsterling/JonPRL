@@ -25,7 +25,7 @@ struct
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
-    | WTREE_EQ | WTREE_MEM_EQ | WTREE_REC_EQ | WTREE_INTRO
+    | WTREE_EQ | WTREE_MEM_EQ | WTREE_REC_EQ | WTREE_INTRO | WTREE_ELIM
 
     | LEMMA of {label : Label.t}
     | ASSERT
@@ -123,6 +123,7 @@ struct
        | WTREE_MEM_EQ => #[0,1]
        | WTREE_REC_EQ => #[3]
        | WTREE_INTRO => #[0,0,1]
+       | WTREE_ELIM => #[0,3]
 
        | FIAT => #[]
        | LEMMA _ => #[]
@@ -226,6 +227,7 @@ struct
        | WTREE_MEM_EQ => "wtree-mem-eq"
        | WTREE_REC_EQ => "wtree-rec-eq"
        | WTREE_INTRO => "wtree-intro"
+       | WTREE_ELIM => "wtree-elim"
 
        | LEMMA {label} => Label.toString label
        | ASSERT => "assert"

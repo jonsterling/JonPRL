@@ -119,6 +119,7 @@ struct
        | WTREE_MEM_EQ $ _ => ax
        | WTREE_REC_EQ $ _ => ax
        | WTREE_INTRO $ #[s,_,xE] => `> SUP $$ #[s, extract xE]
+       | WTREE_ELIM $ #[z, xyzD] => `> WTREE_REC $$ #[z, extract xyzD]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

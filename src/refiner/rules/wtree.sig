@@ -10,4 +10,5 @@ sig
   val RecEq : term option * term -> tactic
 
   val Intro : term * name option -> tactic
+  val Elim : hyp * (name * name * name) option -> tactic
 end

@@ -89,4 +89,32 @@ struct
              | _ => raise Refine)
     end
 
+  fun Elim (hyp, onames) (_ |: H >> C) =
+    let
+      val z = eliminationTarget hyp (H >> C)
+      val wtree = Context.lookup H z
+      val #[X] = wtree ^! WTREE
+      val (a, b, c) =
+        case onames of
+             SOME names => names
+           | NONE =>
+               (Context.fresh (H, Variable.named "s"),
+                Context.fresh (H, Variable.named "r"),
+                Context.fresh (H, Variable.named "h"))
+      val shape = C.`> SHAPE $$ #[X]
+      val refinement = C.`> REFINEMENT $$ #[X, ``a]
+      val r = Variable.named "r"
+      val v = Variable.named "v"
+      val sup = C.`> SUP $$ #[``a, r \\ (C.`> AP $$ #[``b, ``r])]
+      val J =
+        Context.empty
+          @@ (a, shape)
+          @@ (b, C.`> FUN $$ #[refinement, r \\ wtree])
+          @@ (c, C.`> FUN $$ #[refinement, v \\ subst (C.`> AP $$ #[``b, ``v]) z C])
+      val H' = ctxSubst (Context.interposeAfter H (z, J)) sup z
+    in
+      [ MAIN |: H' >> subst sup z C
+      ] BY (fn [D] => D.`> WTREE_ELIM $$ #[``z, a \\ b \\ c \\ D]
+             | _ => raise Refine)
+    end
 end

@@ -225,6 +225,7 @@ struct
   fun Elim {target, names, term} world =
     let
       val twoNames = take2 names
+      val threeNames = take3 names
       val fourNames = take4 names
     in
       (VoidElim world THEN GeneralRules.Hypothesis target)
@@ -238,6 +239,7 @@ struct
         ORELSE ImageRules.Elim (target, listAt (names, 0))
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
+        ORELSE WTreeRules.Elim (target, threeNames)
         ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                  (Development.lookupResource world Resource.ELIM)
     end
