@@ -72,4 +72,21 @@ struct
              | _ => raise Refine)
     end
 
+  fun Intro (s, oname) (_ |: H >> P) =
+    let
+      val #[X] = P ^! WTREE
+      val shape = C.`> SHAPE $$ #[X]
+      val refinement = C.`> REFINEMENT $$ #[X, s]
+      val name =
+        Context.fresh (H,
+          case oname of
+               SOME name => name
+             | NONE => Variable.named "r")
+    in
+      [ AUX |: H >> C.`> MEM $$ #[s, shape]
+      , MAIN |: H @@ (name, refinement) >> P
+      ] BY (fn [D, E] => D.`> WTREE_INTRO $$ #[D, name \\ E]
+             | _ => raise Refine)
+    end
+
 end

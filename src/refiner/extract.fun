@@ -118,6 +118,7 @@ struct
        | WTREE_EQ $ _ => ax
        | WTREE_MEM_EQ $ _ => ax
        | WTREE_REC_EQ $ _ => ax
+       | WTREE_INTRO $ #[D,xE] => `> SUP $$ #[extract D, extract xE]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

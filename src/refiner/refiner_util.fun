@@ -121,6 +121,7 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRules.Refl
        ORELSE BaseRules.Intro
+       ORELSE_LAZY (fn _ => WTreeRules.Intro (valOf term, freshVariable))
        ORELSE
        (if not invertible then
             CEqRules.Struct
