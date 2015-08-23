@@ -47,8 +47,26 @@ Theorem nat'-wf : [nat' ∈ U{i}] {
 
 Resource wf += { wf-lemma <nat'-wf> }.
 
-Theorem zero-test : [=("ze" ⌢ <>; "ze" ⌢ <<> , <>>; nat')] {
-  unfold <nat' nat-con>; auto;
-  unfold <shape refinement nat-con fst snd make-container nat-decode nat-code>; reduce; auto;
+Operator ze : ().
+[ze] =def= ["ze" ⌢ <>].
+
+Operator su : (0).
+[su(N)] =def= ["su" ⌢ N].
+
+Theorem ze-wf : [ze ∈ nat'] {
+  unfold <ze nat' nat-con>; auto;
+  unfold <shape refinement nat-con fst snd make-container nat-code>;
+  reduce; auto;
   unfold <nat-decode>; reduce; auto
 }.
+
+Resource wf += { wf-lemma <ze-wf> }.
+
+Theorem su-wf : [{N:nat'} su(N) ∈ nat'] {
+  intro @i; auto;
+  unfold <su nat'>; auto;
+  unfold <nat-con shape fst make-container>; reduce;
+  unfold <nat-code nat-decode>; auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <su-wf> }.
