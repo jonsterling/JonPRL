@@ -117,6 +117,7 @@ struct
 
        | WTREE_EQ $ _ => ax
        | WTREE_MEM_EQ $ _ => ax
+       | WTREE_REC_EQ $ _ => ax
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

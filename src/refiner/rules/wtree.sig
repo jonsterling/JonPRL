@@ -7,4 +7,5 @@ sig
 
   val Eq : tactic
   val MemEq : tactic
+  val RecEq : term option * term -> tactic
 end

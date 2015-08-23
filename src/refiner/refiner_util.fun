@@ -278,6 +278,11 @@ struct
                [M, N] => ISectRules.MemberCaseEq (SOME M, N)
              | [N] => ISectRules.MemberCaseEq (NONE, N)
              | _ => FAIL)
+        ORELSE_LAZY (fn _ =>
+          case terms of
+               [M, N] => WTreeRules.RecEq (SOME M, N)
+             | [N] => WTreeRules.RecEq (NONE, N)
+             | _ => FAIL)
         ORELSE NatRules.Eq
         ORELSE NatRules.ZeroEq
         ORELSE NatRules.SuccEq

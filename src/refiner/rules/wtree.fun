@@ -38,4 +38,38 @@ struct
              | _ => raise Refine)
     end
 
+  fun RecEq (ocont, zC) (_ |: H >> P) =
+    let
+      val #[rec1, rec2, C] = P ^! EQ
+      val #[t1, xyzD1] = rec1 ^! WTREE_REC
+      val #[t2, xyzD2] = rec2 ^! WTREE_REC
+
+      val C' = unify C (zC // t1)
+
+      val cont =
+        case ocont of
+             SOME cont => cont
+           | NONE =>
+             let
+               val ty = typeLub H (inferType (H, t1)) (inferType (H, t2))
+               val #[cont] = ty ^! WTREE
+             in
+               cont
+             end
+      val shape = C.`> SHAPE $$ #[cont]
+      fun refinement s = C.`> REFINEMENT $$ #[cont, s]
+
+      val (Hx, x, yzD1) = ctxUnbind (H, shape, xyzD1)
+      val r = Context.fresh (Hx, Variable.named "r")
+      val (Hxy, y, zD1) = ctxUnbind (Hx, C.`> FUN $$ #[refinement (``x), r \\ (C.`> WTREE $$ #[cont])], yzD1)
+      val v = Context.fresh (Hxy, Variable.named "v")
+      val (Hxyz, z, D1) = ctxUnbind (H, C.`> FUN $$ #[refinement (``x), v \\ (zC // (C.`> AP $$ #[``y, ``v]))], zD1)
+      val Cxy = zC // (C.`> SUP $$ #[``x, r \\ (C.`> AP $$ #[``y, ``r])])
+      val D2 = xyzD2 // ``x // ``y // ``z
+    in
+      [ MAIN |: Hxyz >> C.`> EQ $$ #[D1, D2, Cxy]
+      ] BY (fn [D] => D.`> WTREE_REC_EQ $$ #[x \\ y \\ z \\ D]
+             | _ => raise Refine)
+    end
+
 end
