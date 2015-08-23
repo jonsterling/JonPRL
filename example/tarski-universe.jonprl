@@ -1,0 +1,158 @@
+Infix 20 "∈" := member.
+Infix 3 "~" := ceq.
+Postfix 20 "⇓" := has-value.
+
+Operator univ-decode : (0).
+[univ-decode(c)] =def= [
+  match c {
+      "0" => void
+    | "1" => void
+    | "+" => unit + unit
+    | "*" => unit + unit
+    | "⊃" => unit + unit
+    | _ => bot
+  }
+].
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator univ-code : ().
+[univ-code] =def= [{c:atom | univ-decode(c) ⇓}].
+
+Theorem univ-code-wf : [univ-code ∈ U{i}] {
+  unfold <univ-code>; auto
+}.
+
+Resource wf += { wf-lemma <univ-code-wf> }.
+
+
+Tactic code-mem-wf-tac {
+  unfold <univ-code univ-decode>; auto; reduce; auto
+}.
+
+Theorem void-code-wf : ["0" ∈ univ-code] { code-mem-wf-tac }.
+Theorem unit-code-wf : ["1" ∈ univ-code] { code-mem-wf-tac }.
+Theorem plus-code-wf : ["+" ∈ univ-code] { code-mem-wf-tac }.
+Theorem times-code-wf : ["*" ∈ univ-code] { code-mem-wf-tac }.
+Theorem implies-code-wf : ["⊃" ∈ univ-code] { code-mem-wf-tac }.
+Resource wf += { wf-lemma <void-code-wf> }.
+Resource wf += { wf-lemma <unit-code-wf> }.
+Resource wf += { wf-lemma <plus-code-wf> }.
+Resource wf += { wf-lemma <times-code-wf> }.
+Resource wf += { wf-lemma <implies-code-wf> }.
+
+Theorem univ-decode-wf : [{c:univ-code} univ-decode(c) ∈ U{i}] {
+  intro @i; auto;
+  unfold <univ-decode>; auto;
+  [ unfold <univ-code>; auto
+  , assert [bot ⇓];
+    aux {
+      unfold <univ-code univ-decode>;
+      elim #1;
+      chyp-subst <- #4 [h.h ⇓];
+      auto
+    };
+    bot-div #4
+  ]
+}.
+
+Resource wf += { wf-lemma <univ-decode-wf> }.
+
+Theorem univ-container-wf : [(c:univ-code <: univ-decode(c)) ∈ container] {
+  unfold <make-container container>; auto;
+  eq-cd @i; auto
+}.
+
+Resource wf += { wf-lemma <univ-container-wf> }.
+
+
+Operator univ : ().
+[univ] =def= [wtree(c:univ-code <: univ-decode(c))].
+
+Theorem univ-wf : [univ ∈ U{i}] {
+  unfold <univ>; auto
+}.
+
+Resource wf += { wf-lemma <univ-wf> }.
+
+Resource auto += {
+  unfold <shape refinement fst snd>
+}.
+
+Tactic univ-mem-wf {
+  unfold <univ>; auto; unfold <make-container univ-decode>; reduce; auto;
+}.
+
+Operator plus' : (0;0).
+[plus'(A;B)] =def= ["+" ^ r. decide(r; _.A; _.B)].
+
+Operator times' : (0;0).
+[times'(A;B)] =def= ["*" ^ r. decide(r; _.A; _.B)].
+
+Theorem void'-wf : [ {M:base} ("0" ^ M) ∈ univ ] { univ-mem-wf }.
+Theorem unit'-wf : [ {M:base} ("1" ^ M) ∈ univ ] { univ-mem-wf }.
+
+Theorem plus'-wf : [ {A:univ} {B:univ} plus'(A;B) ∈ univ ] {
+  unfold <plus'>;
+  univ-mem-wf;
+  elim #3;
+  univ-mem-wf
+}.
+
+Theorem times'-wf : [ {A:univ} {B:univ} times'(A;B) ∈ univ ] {
+  unfold <times'>;
+  univ-mem-wf;
+  elim #3;
+  univ-mem-wf
+}.
+
+Resource wf += { wf-lemma <unit'-wf> }.
+Resource wf += { wf-lemma <void'-wf> }.
+Resource wf += { wf-lemma <plus'-wf> }.
+Resource wf += { wf-lemma <times'-wf> }.
+
+Theorem wf-test : [plus'(plus'("0" ^ <>; "1" ^ <>); "0" ^ <>) ∈ univ] {
+  auto
+}.
+
+Operator el : (0).
+[el(u)] =def= [
+  wtree-rec(u; sh.kids.ih.
+    match sh {
+        "0" => void
+      | "1" => unit
+      | "+" => ih inl(<>) + ih inr(<>)
+      | "*" => ih inl(<>) * ih inr(<>)
+      | "⊃" => ih inl(<>) -> ih inr(<>)
+      | _ => void
+    }
+  )
+].
+
+Theorem el-wf : [{c:univ-code} el(c) ∈ U{i}] {
+  intro @i; auto;
+  unfold <univ-code>;
+  elim #1;
+  unfold <el>; auto;
+  eq-cd [x:univ-code <: univ-decode(x),  _.U{i}]; auto;
+  unfold <make-container univ-code>; reduce; auto;
+  @{ [H : sh ~ tok |- =(_; _; univ-decode(sh))] =>
+       chyp-subst -> <H> [h. =(_; _; univ-decode(h))];
+       unfold <univ-decode>; reduce; auto
+   };
+}.
+
+Resource wf += { wf-lemma <el-wf> }.
+
+Operator bool' : ().
+[bool'] =def= [plus'("1" ^ <>; "1" ^ <>)].
+
+Theorem bool'-computes : [el(bool')] {
+  unfold <el bool' plus'>; reduce;
+  intro #0; auto
+}.
+
