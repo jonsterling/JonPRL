@@ -68,7 +68,8 @@ struct
       val D2 = xyzD2 // ``x // ``y // ``z
     in
       [ MAIN |: Hxyz >> C.`> EQ $$ #[D1, D2, Cxy]
-      ] BY (fn [D] => D.`> WTREE_REC_EQ $$ #[x \\ y \\ z \\ D]
+      , AUX |: H >> C.`> EQ $$ #[t1, t2, C.`> WTREE $$ #[cont]]
+      ] BY (fn [D, E] => D.`> WTREE_REC_EQ $$ #[x \\ y \\ z \\ D, E]
              | _ => raise Refine)
     end
 

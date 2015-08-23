@@ -133,13 +133,13 @@ Operator el : (0).
   )
 ].
 
-Theorem el-wf : [{c:univ-code} el(c) ∈ U{i}] {
+Theorem el-wf : [{c:univ} el(c) ∈ U{i}] {
   intro @i; auto;
-  unfold <univ-code>;
+  unfold <univ>;
   elim #1;
   unfold <el>; auto;
-  eq-cd [x:univ-code <: univ-decode(x),  _.U{i}]; auto;
-  unfold <make-container univ-code>; reduce; auto;
+  eq-cd [x:univ-code <: univ-decode(x),  _.U{i}]; ||| auto;
+  unfold <make-container univ-code>; reduce; auto; reduce; auto;
   @{ [H : sh ~ tok |- =(_; _; univ-decode(sh))] =>
        chyp-subst -> <H> [h. =(_; _; univ-decode(h))];
        unfold <univ-decode>; reduce; auto
@@ -155,4 +155,3 @@ Theorem bool'-computes : [el(bool')] {
   unfold <el bool' plus'>; reduce;
   intro #0; auto
 }.
-

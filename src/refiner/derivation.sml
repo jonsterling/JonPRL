@@ -122,7 +122,7 @@ struct
 
        | WTREE_EQ => #[0]
        | WTREE_MEM_EQ => #[0,1]
-       | WTREE_REC_EQ => #[3]
+       | WTREE_REC_EQ => #[3,0]
        | WTREE_INTRO => #[0,0,1]
        | WTREE_ELIM => #[0,3]
 
