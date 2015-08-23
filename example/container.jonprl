@@ -67,10 +67,10 @@ Operator ze : ().
 Operator su : (0).
 [su(N)] =def= ["su" ⌢ N].
 
-Resource auto += { unfold <fst snd shape refinement make-container> }.
+Resource auto += { unfold <fst snd shape refinement make-container nat-con> }.
 
 Theorem ze-wf : [ze ∈ nat'] {
-  unfold <ze nat' nat-con>; auto;
+  unfold <ze nat'>; auto;
   unfold <nat-decode>; reduce; auto
 }.
 
@@ -78,9 +78,17 @@ Resource wf += { wf-lemma <ze-wf> }.
 
 Theorem su-wf : [{N:nat'} su(N) ∈ nat'] {
   intro @i; auto;
-  unfold <su nat' nat-con>;
+  unfold <su nat'>;
   auto; reduce; auto
 }.
 
 Resource wf += { wf-lemma <su-wf> }.
 
+Theorem wtree-intro-test : [nat'] {
+  unfold <nat'>;
+  intro ["su"]; auto; reduce; auto;
+  intro ["ze"]; *{ reduce; auto };
+  unfold <nat-decode>; reduce; auto
+}.
+
+Print wtree-intro-test.

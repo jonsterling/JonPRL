@@ -85,7 +85,7 @@ struct
     in
       [ AUX |: H >> C.`> MEM $$ #[s, shape]
       , MAIN |: H @@ (name, refinement) >> P
-      ] BY (fn [D, E] => D.`> WTREE_INTRO $$ #[D, name \\ E]
+      ] BY (fn [D, E] => D.`> WTREE_INTRO $$ #[s, D, name \\ E]
              | _ => raise Refine)
     end
 
