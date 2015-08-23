@@ -1,0 +1,103 @@
+Infix 20 "∈" := member.
+Postfix 20 "⇓" := has-value.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator nat-decode : (0).
+[nat-decode(x)] =def= [
+  match x {
+      "ze" => void
+    | "su" => unit
+    | _ => bot
+  }
+].
+
+Operator nat-code : ().
+[nat-code] =def= [{a : atom | nat-decode(a) ⇓}].
+
+Operator nat-con : ().
+[nat-con] =def= [x : nat-code ◃ nat-decode(x)].
+
+Theorem nat-code-wf : [nat-code ∈ U{i}] {
+  unfold <nat-code has-value>; auto
+}.
+
+Resource wf += { wf-lemma <nat-code-wf> }.
+
+Theorem nat-con-wf : [nat-con ∈ container] {
+  unfold <nat-con container make-container nat-code nat-decode has-value>; auto;
+  elim #1;
+  assert [bot ⇓];
+  aux {chyp-subst <- #4 [h. h ⇓]; auto;};
+  bot-div #6
+}.
+
+Resource wf += { wf-lemma <nat-con-wf> }.
+
+Operator nat' : ().
+[nat'] =def= [wtree(nat-con)].
+
+Theorem nat'-wf : [nat' ∈ U{i}] {
+  unfold <nat'>; auto
+}.
+
+Resource wf += { wf-lemma <nat'-wf> }.
+
+Theorem ze-code-wf : ["ze" ∈ nat-code] {
+  unfold <nat-code has-value nat-decode>;
+  auto; reduce; auto
+}.
+
+Theorem su-code-wf : ["su" ∈ nat-code] {
+  unfold <nat-code has-value nat-decode>;
+  auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <ze-code-wf> }.
+Resource wf += { wf-lemma <su-code-wf> }.
+
+
+Operator ze : ().
+[ze] =def= ["ze" ^ <>].
+
+Operator su : (0).
+[su(N)] =def= ["su" ^ N].
+
+Resource auto += { unfold <fst snd shape refinement nat-con> }.
+
+Theorem ze-wf : [ze ∈ nat'] {
+  unfold <ze nat'>; auto;
+  unfold <nat-decode make-container>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <ze-wf> }.
+
+Theorem su-wf : [{N:nat'} su(N) ∈ nat'] {
+  intro @i; auto;
+  unfold <su nat'>;
+  auto; reduce; auto;
+  unfold <make-container>;
+  reduce; auto
+}.
+
+Resource wf += { wf-lemma <su-wf> }.
+
+Theorem wtree-intro-test : [nat'] {
+  unfold <nat'>;
+  intro ["su"]; auto; reduce; auto;
+  unfold <make-container>; reduce; auto;
+  intro ["ze"]; reduce; auto; reduce; auto;
+  unfold <nat-decode>; reduce; auto
+}.
+
+Theorem nat'-elim-test : [nat' -> atom] {
+  intro @i; auto;
+  unfold <nat'>;
+  elim #1; auto; unfold <make-container>; reduce;
+  witness [a];
+  unfold <nat-code>; auto
+}.

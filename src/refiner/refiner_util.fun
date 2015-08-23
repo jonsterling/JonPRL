@@ -121,6 +121,7 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRules.Refl
        ORELSE BaseRules.Intro
+       ORELSE_LAZY (fn _ => WTreeRules.Intro (valOf term, freshVariable))
        ORELSE
        (if not invertible then
             CEqRules.Struct
@@ -197,7 +198,7 @@ struct
           [ID,
            GeneralRules.Unfolds (world, [(oprv, NONE)])
             THEN GeneralRules.Assert (hv, SOME nameq) THENL
-              [CEqRules.Subst (ceq, xC) THENL
+              [CEqRules.Subst (ceq, SOME xC) THENL
                 [CEqRules.Approx THENL
                   [ApproxRules.AssumeHasValue (SOME namev, NONE) THENL
                     [ApproxRules.BottomDiverges (HypSyn.NAME namev),
@@ -224,6 +225,7 @@ struct
   fun Elim {target, names, term} world =
     let
       val twoNames = take2 names
+      val threeNames = take3 names
       val fourNames = take4 names
     in
       (VoidElim world THEN GeneralRules.Hypothesis target)
@@ -237,6 +239,8 @@ struct
         ORELSE ImageRules.Elim (target, listAt (names, 0))
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
+        ORELSE WTreeRules.Elim (target, threeNames)
+        ORELSE CEqRules.Elim (target, twoNames)
         ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                  (Development.lookupResource world Resource.ELIM)
     end
@@ -278,6 +282,11 @@ struct
                [M, N] => ISectRules.MemberCaseEq (SOME M, N)
              | [N] => ISectRules.MemberCaseEq (NONE, N)
              | _ => FAIL)
+        ORELSE_LAZY (fn _ =>
+          case terms of
+               [M, N] => WTreeRules.RecEq (SOME M, N)
+             | [N] => WTreeRules.RecEq (NONE, N)
+             | _ => FAIL)
         ORELSE NatRules.Eq
         ORELSE NatRules.ZeroEq
         ORELSE NatRules.SuccEq
@@ -285,6 +294,8 @@ struct
         ORELSE SubsetRules.EqInSupertype
         ORELSE ImageRules.Eq
         ORELSE ImageRules.MemEq
+        ORELSE WTreeRules.Eq
+        ORELSE WTreeRules.MemEq
         ORELSE
         (if not invertible then
              NatRules.RecEq (listAt (terms, 0), take2 names)

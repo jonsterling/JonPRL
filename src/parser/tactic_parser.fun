@@ -103,7 +103,7 @@ struct
 
   val parseCEqSubst : tactic_parser =
     fn w => tactic "csubst"
-      && parseTm w && parseTm w
+      && parseTm w && opt (parseTm w)
       wth (fn (name, (M, N)) => fn pos =>
               CEQ_SUBST ({equality = M, domain = N},
                          {name = name, pos = pos}))
@@ -112,7 +112,7 @@ struct
     fn w => tactic "chyp-subst"
       && parseDir
       && parseHyp
-      && parseTm w
+      && opt (parseTm w)
       wth (fn (name, (dir, (i, M))) => fn pos =>
               CHYP_SUBST
                 ({dir = dir,

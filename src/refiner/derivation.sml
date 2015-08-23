@@ -15,7 +15,7 @@ struct
     | FIAT
     | CEQUAL_EQ | CEQUAL_MEMBER_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
-    | CEQUAL_APPROX
+    | CEQUAL_APPROX | CEQUAL_ELIM
     | APPROX_EQ | APPROX_MEMBER_EQ | APPROX_EXT_EQ | APPROX_REFL | APPROX_ELIM
     | BOTTOM_DIVERGES | ASSUME_HAS_VALUE
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
@@ -24,6 +24,8 @@ struct
 
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
+
+    | WTREE_EQ | WTREE_MEM_EQ | WTREE_REC_EQ | WTREE_INTRO | WTREE_ELIM
 
     | LEMMA of {label : Label.t}
     | ASSERT
@@ -44,6 +46,7 @@ struct
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
+       | CEQUAL_ELIM => #[0,2]
        | APPROX_EQ => #[0,0]
        | APPROX_MEMBER_EQ => #[0]
        | APPROX_EXT_EQ => #[0]
@@ -117,6 +120,12 @@ struct
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
+       | WTREE_EQ => #[0]
+       | WTREE_MEM_EQ => #[0,1]
+       | WTREE_REC_EQ => #[3]
+       | WTREE_INTRO => #[0,0,1]
+       | WTREE_ELIM => #[0,3]
+
        | FIAT => #[]
        | LEMMA _ => #[]
        | ASSERT => #[0, 1]
@@ -136,6 +145,7 @@ struct
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
+       | CEQUAL_ELIM => "~-elim"
        | APPROX_EQ => "~<=-eq"
        | APPROX_MEMBER_EQ => "~<=-mem-eq"
        | APPROX_EXT_EQ => "~<=-ext-eq"
@@ -214,6 +224,13 @@ struct
        | IND_SUBSET_INTRO => "independent-subset-intro"
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
+
+       | WTREE_EQ => "wtree-eq"
+       | WTREE_MEM_EQ => "wtree-mem-eq"
+       | WTREE_REC_EQ => "wtree-rec-eq"
+       | WTREE_INTRO => "wtree-intro"
+       | WTREE_ELIM => "wtree-elim"
+
        | LEMMA {label} => Label.toString label
        | ASSERT => "assert"
 end

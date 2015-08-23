@@ -30,6 +30,7 @@ struct
        | CEQUAL_SUBST $ #[D, E] => extract E
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
+       | CEQUAL_ELIM $ _ => ax
        | APPROX_MEMBER_EQ $ _ => ax
        | APPROX_EQ $ _ => ax
        | APPROX_EXT_EQ $ _ => ax
@@ -114,6 +115,12 @@ struct
        | ZERO_EQ $ _ => ax
        | SUCC_EQ $ _ => ax
        | NATREC_EQ $ _ => ax
+
+       | WTREE_EQ $ _ => ax
+       | WTREE_MEM_EQ $ _ => ax
+       | WTREE_REC_EQ $ _ => ax
+       | WTREE_INTRO $ #[s,_,xE] => `> SUP $$ #[s, extract xE]
+       | WTREE_ELIM $ #[z, xyzD] => `> WTREE_REC $$ #[z, extract xyzD]
 
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M

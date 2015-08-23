@@ -69,6 +69,8 @@ group is
   rules/approx.fun
   rules/bhyp.sig
   rules/bhyp.fun
+  rules/wtree.sig
+  rules/wtree.fun
 
   refiner.fun
   refiner.sig

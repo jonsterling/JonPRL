@@ -31,6 +31,14 @@ struct
     val plusOpr =
       (spaces >> symbol "+" >> spaces) return Infix (Right, 10, fn (A,B) => `> PLUS $$ #[A,B])
 
+    fun forceBinding M =
+      case out M of
+           Abt.\ _ => M
+         | _ => Abt.Variable.named "_" \\ M
+
+    val supOpr =
+      (spaces >> (symbol "⌢" || symbol "^") >> spaces) return Infix (Right, 10, fn (A,B) => `> SUP $$ #[A, forceBinding B])
+
     fun customOperator w =
       (spaces >> identifier << spaces) -- (fn sym =>
         (let
@@ -55,7 +63,9 @@ struct
       || fancyFun w st
       || fancyIsect w st
       || fancyPair w st
+      || fancyMakeContainer w st
       || matchToken w st
+      || matchTokenBinding w st
       || ParseAbt.extensibleParseAbt w (parseAbt w) st
     and fancyQuantifier w st (wrap, sep, theta) =
       wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
@@ -65,6 +75,7 @@ struct
     and fancyIsect w st = fancyQuantifier w st (braces, opt (symbol "->") return (), ISECT)
     and fancyProd w st = fancyQuantifier w st (parens, symbol "*" return (), PROD)
     and fancySubset w st = braces (fancyQuantifier w st (fn x => x, symbol "|" return (), SUBSET))
+    and fancyMakeContainer w st = fancyQuantifier w st (fn x => x, (symbol "◃" || symbol "<:") return (), MAKE_CONTAINER)
     and fancyPair w st =
       brackets (commaSep (parseAbt w st)) wth rev --
         (fn [] => fail "Not enough components to product"
@@ -74,7 +85,7 @@ struct
       squares (parseAbt w st) wth (fn N => Postfix (12, fn M => `> SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [customOperator w, plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
+      alt [customOperator w, plusOpr, supOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and matchToken w st =
       symbol "match"
@@ -83,6 +94,16 @@ struct
         wth (fn (z, (branches, catchAll)) =>
           `> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
               $$ Vector.fromList (z :: List.map #2 branches @ [catchAll]))
+    and matchTokenBinding w st =
+      symbol "match"
+        >> braces (((sepEnd1 (matchTokenBranch w st) pipe) || succeed []) && matchTokenCatchAll w st)
+        wth (fn (branches, catchAll) =>
+          let
+            val z = Abt.Variable.named "z"
+          in
+            z \\ (`> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
+                  $$ Vector.fromList ((`` z) :: List.map #2 branches @ [catchAll]))
+          end)
     and matchTokenBranch w st = stringLiteral << symbol "=>" && parseAbt w st
     and matchTokenCatchAll w st = symbol "_" >> symbol "=>" >> parseAbt w st
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => `> AP $$ #[M,N]) << spaces
@@ -143,8 +164,22 @@ struct
                  Unparse.atom
                    ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
                end
+           | MAKE_CONTAINER $ #[A, xB] =>
+               let
+                 val (x, B) = unbind xB
+               in
+                 Unparse.atom
+                   (Variable.toString x ^ ":" ^ toString A ^ " <: " ^ toString B)
+               end
            | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
+           | SUP $ #[S, rR] =>
+               let
+                 val (r, R) = unbind rR
+                 val R' = if hasFree (R, r) then rR else R
+               in
+                 Unparse.infix' (Unparse.Right, 10, "^") (unparseAbt S, unparseAbt R')
+               end
            | PAIR $ #[M,N] =>
                Unparse.atom ("<" ^ toString M ^ ", " ^ toString N ^ ">")
            | MATCH_TOKEN toks $ es =>
