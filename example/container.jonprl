@@ -62,10 +62,10 @@ Resource wf += { wf-lemma <su-code-wf> }.
 
 
 Operator ze : ().
-[ze] =def= ["ze" ⌢ <>].
+[ze] =def= ["ze" ^ <>].
 
 Operator su : (0).
-[su(N)] =def= ["su" ⌢ N].
+[su(N)] =def= ["su" ^ N].
 
 Resource auto += { unfold <fst snd shape refinement nat-con> }.
 
@@ -101,4 +101,3 @@ Theorem nat'-elim-test : [nat' -> atom] {
   witness [s];
   unfold <nat-code>; auto
 }.
-
