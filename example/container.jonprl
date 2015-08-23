@@ -98,6 +98,6 @@ Theorem nat'-elim-test : [nat' -> atom] {
   intro @i; auto;
   unfold <nat'>;
   elim #1; auto; unfold <make-container>; reduce;
-  witness [s];
+  witness [a];
   unfold <nat-code>; auto
 }.
