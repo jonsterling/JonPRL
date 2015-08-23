@@ -31,7 +31,8 @@ struct
   structure View = RestrictAbtView (structure Abt = Syn and Injection = CttCalculusInj)
   open View
 
-  infix $ \ $$ \\ //
+  infix 8 $ $$ //
+  infixr 7 \ \\
 
   fun theta $$ es =
     Syn.$$ (`> theta, es)
@@ -60,6 +61,16 @@ struct
          ZERO $ #[] => Z
        | SUCC $ #[N] => (xyS // N) // (NATREC $$ #[N, Z, xyS])
        | _ => raise Stuck (NATREC $$ #[M, Z, xyS])
+
+  fun stepWTreeRecBeta (M, xyzD) =
+    case project M of
+         SUP $ #[S, sR] =>
+         let
+           val v = Variable.named "v"
+         in
+           xyzD // S // (LAM $$ #[sR]) // (LAM $$ #[v \\ WTREE_REC $$ #[sR // ``v, xyzD]])
+         end
+       | _ => raise Stuck (WTREE_REC $$ #[M, xyzD])
 
   fun stepFix (F) = AP $$ #[F, FIX $$ #[F]]
 
@@ -131,6 +142,11 @@ struct
           (case step M of
                 STEP M' => STEP (NATREC $$ #[M', Z, xyS])
               | CANON => STEP (stepNatrecBeta (M, Z, xyS))
+              | NEUTRAL => NEUTRAL)
+      | WTREE_REC $ #[M, xyzD] =>
+          (case step M of
+                STEP M' => STEP (WTREE_REC $$ #[M', xyzD])
+              | CANON => STEP (stepWTreeRecBeta (M, xyzD))
               | NEUTRAL => NEUTRAL)
       | MATCH_TOKEN toks $ subterms =>
           let

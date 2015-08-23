@@ -21,7 +21,7 @@ struct
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
     | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
-    | CONTAINER | MAKE_CONTAINER | SHAPE | REFINEMENT | WTREE | SUP
+    | CONTAINER | MAKE_CONTAINER | SHAPE | REFINEMENT | WTREE | SUP | WTREE_REC
     | SO_APPLY
 
   local
@@ -46,7 +46,7 @@ struct
        NAT, ZERO, SUCC, NATREC,
        ATOM, TOKEN "token",
        CEQUAL, APPROX, BASE,
-       CONTAINER, MAKE_CONTAINER, SHAPE, REFINEMENT, WTREE, SUP,
+       CONTAINER, MAKE_CONTAINER, SHAPE, REFINEMENT, WTREE, SUP, WTREE_REC,
        SO_APPLY]
   end
 
@@ -107,6 +107,7 @@ struct
        | CONTAINER => #[]
        | WTREE => #[0]
        | SUP => #[0,1]
+       | WTREE_REC => #[0,3]
        | MAKE_CONTAINER => #[0,1]
        | SHAPE => #[0]
        | REFINEMENT => #[0,0]
@@ -170,6 +171,7 @@ struct
        | SHAPE => "shape"
        | REFINEMENT => "refinement"
        | WTREE => "wtree"
+       | WTREE_REC => "wtree-rec"
        | SUP => "sup"
        | SO_APPLY => "so_apply"
 end
@@ -252,6 +254,7 @@ struct
          string "shape" return SHAPE,
          string "refinement" return REFINEMENT,
          string "wtree" return WTREE,
+         string "wtree-rec" return WTREE_REC,
          string "sup" return SUP]
   end
 end
