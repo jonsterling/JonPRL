@@ -126,7 +126,7 @@ struct
       wth (fn pair => (w, DevelopmentAst.ADD_RESOURCE pair))
 
   fun parseNewResource w =
-    reserved "Declare" >> parseResourceName
+    reserved "Declare" >> reserved "Resource" >> parseResourceName
              wth (fn id =>
                     let
                       val w' = declareResource w id

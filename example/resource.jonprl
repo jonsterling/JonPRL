@@ -27,7 +27,7 @@ Theorem easy-with-fiat4 : [void] {
   eq-cd
 }.
 
-Declare my-custom-resource.
+Declare Resource my-custom-resource.
 Resource my-custom-resource += {auto}.
 
 Theorem easy-with-fiat5 : [void] {
