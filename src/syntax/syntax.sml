@@ -65,6 +65,7 @@ struct
       || fancyPair w st
       || fancyMakeContainer w st
       || matchToken w st
+      || matchTokenBinding w st
       || ParseAbt.extensibleParseAbt w (parseAbt w) st
     and fancyQuantifier w st (wrap, sep, theta) =
       wrap (parseBoundVariable st && colon >> parseAbt w st) << sep -- (fn ((x, st'), A) =>
@@ -93,6 +94,16 @@ struct
         wth (fn (z, (branches, catchAll)) =>
           `> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
               $$ Vector.fromList (z :: List.map #2 branches @ [catchAll]))
+    and matchTokenBinding w st =
+      symbol "match"
+        >> braces (((sepEnd1 (matchTokenBranch w st) pipe) || succeed []) && matchTokenCatchAll w st)
+        wth (fn (branches, catchAll) =>
+          let
+            val z = Abt.Variable.named "z"
+          in
+            z \\ (`> (MATCH_TOKEN (Vector.fromList (List.map #1 branches)))
+                  $$ Vector.fromList ((`` z) :: List.map #2 branches @ [catchAll]))
+          end)
     and matchTokenBranch w st = stringLiteral << symbol "=>" && parseAbt w st
     and matchTokenCatchAll w st = symbol "_" >> symbol "=>" >> parseAbt w st
     and parseAbt w st = spaces >> parsefixityadj (fixityItem w st) Left (fn (M,N) => `> AP $$ #[M,N]) << spaces
