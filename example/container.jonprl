@@ -1,0 +1,54 @@
+Infix 20 "∈" := member.
+Postfix 20 "⇓" := has-value.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator nat-decode : (0).
+[nat-decode(x)] =def= [
+  match x {
+      "ze" => void
+    | "su" => unit
+    | _ => bot
+  }
+].
+
+Operator nat-code : ().
+[nat-code] =def= [{a : atom | nat-decode(a) ⇓}].
+
+Operator nat-con : ().
+[nat-con] =def= [x : nat-code ◃ nat-decode(x)].
+
+Theorem nat-code-wf : [nat-code ∈ U{i}] {
+  unfold <nat-code has-value>; auto
+}.
+
+Resource wf += { wf-lemma <nat-code-wf> }.
+
+Theorem nat-con-wf : [nat-con ∈ container] {
+  unfold <nat-con container make-container nat-code nat-decode has-value>; auto;
+  elim #1;
+  assert [bot ⇓];
+  aux {chyp-subst <- #4 [h. h ⇓]; auto;};
+  bot-div #6
+}.
+
+Resource wf += { wf-lemma <nat-con-wf> }.
+
+Operator nat' : ().
+[nat'] =def= [wtree(nat-con)].
+
+Theorem nat'-wf : [nat' ∈ U{i}] {
+  unfold <nat'>; auto
+}.
+
+Resource wf += { wf-lemma <nat'-wf> }.
+
+Theorem zero-test : [=("ze" ⌢ <>; "ze" ⌢ <<> , <>>; nat')] {
+  unfold <nat' nat-con>; auto;
+  unfold <shape refinement nat-con fst snd make-container nat-decode nat-code>; reduce; auto;
+  unfold <nat-decode>; reduce; auto
+}.

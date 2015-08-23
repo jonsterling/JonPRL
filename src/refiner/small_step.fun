@@ -100,6 +100,8 @@ struct
       | TOKEN _ $ _ => CANON
       | APPROX $ _ => CANON
       | CEQUAL $ _ => CANON
+      | WTREE $ _ => CANON
+      | SUP $ _ => CANON
       | AP $ #[L, R] =>
           (case step L of
               STEP L' => STEP (AP $$ #[L', R])

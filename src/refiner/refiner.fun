@@ -67,6 +67,7 @@ struct
     structure AtomRules = AtomRules(Utils)
     structure CEqRules = CEqRules(Utils)
     structure ApproxRules = ApproxRules(Utils)
+    structure WTreeRules = WTreeRules(Utils)
 
     (* BHyp gets its own special functor because it depends
      * on a number of other tactics.

@@ -115,6 +115,9 @@ struct
        | SUCC_EQ $ _ => ax
        | NATREC_EQ $ _ => ax
 
+       | WTREE_EQ $ _ => ax
+       | WTREE_MEM_EQ $ _ => ax
+
        | HYP_EQ $ _ => ax
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D

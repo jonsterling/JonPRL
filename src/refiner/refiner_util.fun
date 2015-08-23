@@ -285,6 +285,8 @@ struct
         ORELSE SubsetRules.EqInSupertype
         ORELSE ImageRules.Eq
         ORELSE ImageRules.MemEq
+        ORELSE WTreeRules.Eq
+        ORELSE WTreeRules.MemEq
         ORELSE
         (if not invertible then
              NatRules.RecEq (listAt (terms, 0), take2 names)

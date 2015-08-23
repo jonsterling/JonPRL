@@ -21,6 +21,7 @@ struct
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
     | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
+    | CONTAINER | MAKE_CONTAINER | SHAPE | REFINEMENT | WTREE | SUP
     | SO_APPLY
 
   local
@@ -44,7 +45,9 @@ struct
        PLUS, INL, INR, DECIDE,
        NAT, ZERO, SUCC, NATREC,
        ATOM, TOKEN "token",
-       CEQUAL, APPROX, BASE, SO_APPLY]
+       CEQUAL, APPROX, BASE,
+       CONTAINER, MAKE_CONTAINER, SHAPE, REFINEMENT, WTREE, SUP,
+       SO_APPLY]
   end
 
   val eq : t * t -> bool = op=
@@ -101,6 +104,13 @@ struct
        | TEST_ATOM => #[0,0,0,0]
        | SO_APPLY => #[0,0]
 
+       | CONTAINER => #[]
+       | WTREE => #[0]
+       | SUP => #[0,1]
+       | MAKE_CONTAINER => #[0,1]
+       | SHAPE => #[0]
+       | REFINEMENT => #[0,0]
+
   fun toString theta =
     case theta of
          UNIV i => "U{" ^ Level.toString i ^ "}"
@@ -155,6 +165,12 @@ struct
              ^ "}"
            end
        | TEST_ATOM => "test_atom"
+       | CONTAINER => "container"
+       | MAKE_CONTAINER => "make-container"
+       | SHAPE => "shape"
+       | REFINEMENT => "refinement"
+       | WTREE => "wtree"
+       | SUP => "sup"
        | SO_APPLY => "so_apply"
 end
 
@@ -230,7 +246,13 @@ struct
          string "nat" return NAT,
          string "zero" return ZERO,
          string "succ" return SUCC,
-         string "natrec" return NATREC]
+         string "natrec" return NATREC,
+         string "container" return CONTAINER,
+         string "make-container" return MAKE_CONTAINER,
+         string "shape" return SHAPE,
+         string "refinement" return REFINEMENT,
+         string "wtree" return WTREE,
+         string "sup" return SUP]
   end
 end
 

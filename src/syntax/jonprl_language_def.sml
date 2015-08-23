@@ -10,7 +10,7 @@ struct
   val nestedComments = false
 
   val fancyChars =
-      "-'_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω¬⊗⊕∫+-!@#$%^&*⇓↓↼⇀↽⇁↿↾⇃⇂≼≅≡≈~⇔∩∪⋃⋂"
+      "-'_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω¬⊗⊕∫+-!@#$%^&*⇓↓↼⇀↽⇁↿↾⇃⇂≼≅≡≈~⇔∩∪⋃⋂`◃"
 
   val identLetter = letter || oneOf (String.explode fancyChars) || digit
   val identStart = identLetter

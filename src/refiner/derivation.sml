@@ -25,6 +25,8 @@ struct
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
+    | WTREE_EQ | WTREE_MEM_EQ
+
     | LEMMA of {label : Label.t}
     | ASSERT
 
@@ -116,6 +118,9 @@ struct
        | IND_SUBSET_INTRO => #[0,0]
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
+
+       | WTREE_EQ => #[0]
+       | WTREE_MEM_EQ => #[0,1]
 
        | FIAT => #[]
        | LEMMA _ => #[]
@@ -214,6 +219,10 @@ struct
        | IND_SUBSET_INTRO => "independent-subset-intro"
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
+
+       | WTREE_EQ => "wtree-eq"
+       | WTREE_MEM_EQ => "wtree-mem-eq"
+
        | LEMMA {label} => Label.toString label
        | ASSERT => "assert"
 end

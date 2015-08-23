@@ -31,6 +31,14 @@ struct
     val plusOpr =
       (spaces >> symbol "+" >> spaces) return Infix (Right, 10, fn (A,B) => `> PLUS $$ #[A,B])
 
+    fun forceBinding M =
+      case out M of
+           Abt.\ _ => M
+         | _ => Abt.Variable.named "_" \\ M
+
+    val supOpr =
+      (spaces >> (symbol "⌢" || symbol "^") >> spaces) return Infix (Right, 10, fn (A,B) => `> SUP $$ #[A, forceBinding B])
+
     fun customOperator w =
       (spaces >> identifier << spaces) -- (fn sym =>
         (let
@@ -55,6 +63,7 @@ struct
       || fancyFun w st
       || fancyIsect w st
       || fancyPair w st
+      || fancyMakeContainer w st
       || matchToken w st
       || ParseAbt.extensibleParseAbt w (parseAbt w) st
     and fancyQuantifier w st (wrap, sep, theta) =
@@ -65,6 +74,7 @@ struct
     and fancyIsect w st = fancyQuantifier w st (braces, opt (symbol "->") return (), ISECT)
     and fancyProd w st = fancyQuantifier w st (parens, symbol "*" return (), PROD)
     and fancySubset w st = braces (fancyQuantifier w st (fn x => x, symbol "|" return (), SUBSET))
+    and fancyMakeContainer w st = fancyQuantifier w st (fn x => x, (symbol "◃" || symbol "<:") return (), MAKE_CONTAINER)
     and fancyPair w st =
       brackets (commaSep (parseAbt w st)) wth rev --
         (fn [] => fail "Not enough components to product"
@@ -74,7 +84,7 @@ struct
       squares (parseAbt w st) wth (fn N => Postfix (12, fn M => `> SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [customOperator w, plusOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
+      alt [customOperator w, plusOpr, supOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and matchToken w st =
       symbol "match"
@@ -142,6 +152,13 @@ struct
                in
                  Unparse.atom
                    ("{" ^ Variable.toString x ^ ":" ^ toString A ^ " | " ^ toString B ^ "}")
+               end
+           | MAKE_CONTAINER $ #[A, xB] =>
+               let
+                 val (x, B) = unbind xB
+               in
+                 Unparse.atom
+                   (Variable.toString x ^ ":" ^ toString A ^ " ◃ " ^ toString B)
                end
            | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)

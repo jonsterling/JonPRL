@@ -104,6 +104,12 @@ sig
     structure BHypRules : BHYP_RULES
       where type tactic = tactic
       where type hyp = hyp
+
+    structure WTreeRules : WTREE_RULES
+      where type tactic = tactic
+      where type term = term
+      where type hyp = hyp
+      where type name = name
   end
 
   structure Conversions :
