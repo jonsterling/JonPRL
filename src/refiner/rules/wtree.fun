@@ -63,7 +63,7 @@ struct
       val r = Context.fresh (Hx, Variable.named "r")
       val (Hxy, y, zD1) = ctxUnbind (Hx, C.`> FUN $$ #[refinement (``x), r \\ (C.`> WTREE $$ #[cont])], yzD1)
       val v = Context.fresh (Hxy, Variable.named "v")
-      val (Hxyz, z, D1) = ctxUnbind (H, C.`> FUN $$ #[refinement (``x), v \\ (zC // (C.`> AP $$ #[``y, ``v]))], zD1)
+      val (Hxyz, z, D1) = ctxUnbind (Hxy, C.`> FUN $$ #[refinement (``x), v \\ (zC // (C.`> AP $$ #[``y, ``v]))], zD1)
       val Cxy = zC // (C.`> SUP $$ #[``x, r \\ (C.`> AP $$ #[``y, ``r])])
       val D2 = xyzD2 // ``x // ``y // ``z
     in
