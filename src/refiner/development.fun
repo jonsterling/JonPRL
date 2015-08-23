@@ -134,7 +134,19 @@ struct
       go (out t) []
     end
 
-  val empty = {context = Telescope.empty, resources = ResourcePool.empty}
+  val empty : world=
+    let
+      val resources =
+        ResourcePool.insert
+          (ResourcePool.insert
+             (ResourcePool.insert
+                (ResourcePool.insert ResourcePool.empty Resource.AUTO [])
+                Resource.INTRO [])
+             Resource.EQ_CD [])
+          Resource.ELIM []
+    in
+      {context = Telescope.empty, resources = resources}
+    end
 
   fun prove {context = T, resources} (lbl, theta, goal, tac) =
     let
@@ -306,7 +318,9 @@ struct
            end
 
   fun lookupResource {context, resources} r =
-    Option.getOpt (ResourcePool.find resources r, [])
+    ResourcePool.lookup resources r
+      handle ResourcePool.Absent =>
+        raise Fail ("Unknown resource " ^ Resource.toString r)
 end
 
 structure Development : DEVELOPMENT =
