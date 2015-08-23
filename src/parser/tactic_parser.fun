@@ -272,7 +272,7 @@ struct
 
   val parseUnfold : tactic_parser =
     fn w => tactic "unfold"
-      && brackets (separate (ParseSyntax.ParseOperator.parseOperator w && opt parseLevel) whiteSpace)
+      && brackets (separate (ParseSyntax.ParseOperator.parseOperator w && opt (whiteSpace >> parseLevel)) whiteSpace)
       wth (fn (name, thetas) => fn pos =>
              UNFOLD (thetas, ({name = name, pos = pos})))
 
