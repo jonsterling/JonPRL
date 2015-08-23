@@ -1,7 +1,7 @@
 functor CEqRules(Utils : RULES_UTIL) : CEQ_RULES =
 struct
   open Utils
-  open Goal Sequent Syntax CttCalculus Derivation
+  open Goal Sequent Syntax CttCalculus Derivation Conversionals Conv
 
   infix $ \ BY ^!
   infix 3 >>
@@ -65,20 +65,44 @@ struct
       ] BY mkEvidence CEQUAL_APPROX
     end
 
-  fun Subst (eq, xC) (_ |: H >> P) =
+  fun Elim (hyp, onames) (_ |: H >> C) =
+    let
+      val z = eliminationTarget hyp (H >> C)
+      val #[M,N] = Context.lookup H z ^! CEQUAL
+      val (a,b) =
+        case onames of
+             SOME names => names
+           | NONE =>
+               (Context.fresh (H, Variable.named "a"),
+                Context.fresh (H, Variable.named "b"))
+      val H' = H @@ (a, C.`> APPROX $$ #[M,N]) @@ (b, C.`> APPROX $$ #[N,M])
+    in
+      [ MAIN |: H' >> C
+      ] BY (fn [D] => D.`> CEQUAL_ELIM $$ #[``z, a \\ b \\ D]
+             | _ => raise Refine)
+    end
+
+  fun Subst (eq, oxC) (_ |: H >> P) =
     let
       val eq = Context.rebind H eq
       val #[M, N] = eq ^! CEQUAL
 
-      val fvs = List.map #1 (Context.listItems H)
-      val meta = Meta.convertFree fvs (xC // M)
-      val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
-      val xC = applySolution solution (Meta.convertFree fvs xC)
-
-      val _ = unify P (xC // M)
+      val P' =
+        case oxC of
+             SOME xC =>
+             let
+               val fvs = List.map #1 (Context.listItems H)
+               val meta = Meta.convertFree fvs (xC // M)
+               val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
+               val xC = applySolution solution (Meta.convertFree fvs xC)
+               val _ = unify P (xC // M)
+             in
+               xC // N
+             end
+           | NONE => CDEEP (fn M' => if Syntax.eq (M,M') then N else raise Conv) P
     in
       [ AUX |: H >> eq
-      , MAIN |: H >> xC // N
+      , MAIN |: H >> P'
       ] BY (fn [D, E] => D.`> CEQUAL_SUBST $$ #[D, E]
              | _ => raise Refine)
     end

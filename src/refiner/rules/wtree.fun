@@ -98,13 +98,13 @@ struct
         case onames of
              SOME names => names
            | NONE =>
-               (Context.fresh (H, Variable.named "s"),
-                Context.fresh (H, Variable.named "r"),
-                Context.fresh (H, Variable.named "h"))
+               (Context.fresh (H, Variable.named "a"),
+                Context.fresh (H, Variable.named "b"),
+                Context.fresh (H, Variable.named "c"))
       val shape = C.`> SHAPE $$ #[X]
       val refinement = C.`> REFINEMENT $$ #[X, ``a]
-      val r = Variable.named "r"
-      val v = Variable.named "v"
+      val r = Context.fresh (H, Variable.named "r")
+      val v = Context.fresh (H, Variable.named "v")
       val sup = C.`> SUP $$ #[``a, r \\ (C.`> AP $$ #[``b, ``r])]
       val J =
         Context.empty

@@ -15,7 +15,7 @@ struct
     | FIAT
     | CEQUAL_EQ | CEQUAL_MEMBER_EQ | CEQUAL_SYM | CEQUAL_STEP
     | CEQUAL_SUBST | CEQUAL_STRUCT of Arity.t
-    | CEQUAL_APPROX
+    | CEQUAL_APPROX | CEQUAL_ELIM
     | APPROX_EQ | APPROX_MEMBER_EQ | APPROX_EXT_EQ | APPROX_REFL | APPROX_ELIM
     | BOTTOM_DIVERGES | ASSUME_HAS_VALUE
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
@@ -46,6 +46,7 @@ struct
        | CEQUAL_SUBST => #[0, 0]
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
+       | CEQUAL_ELIM => #[0,2]
        | APPROX_EQ => #[0,0]
        | APPROX_MEMBER_EQ => #[0]
        | APPROX_EXT_EQ => #[0]
@@ -144,6 +145,7 @@ struct
        | CEQUAL_SUBST => "~-subst"
        | CEQUAL_STRUCT _ => "~-struct"
        | CEQUAL_APPROX => "~-~<="
+       | CEQUAL_ELIM => "~-elim"
        | APPROX_EQ => "~<=-eq"
        | APPROX_MEMBER_EQ => "~<=-mem-eq"
        | APPROX_EXT_EQ => "~<=-ext-eq"

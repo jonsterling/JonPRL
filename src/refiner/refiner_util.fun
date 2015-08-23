@@ -198,7 +198,7 @@ struct
           [ID,
            GeneralRules.Unfolds (world, [(oprv, NONE)])
             THEN GeneralRules.Assert (hv, SOME nameq) THENL
-              [CEqRules.Subst (ceq, xC) THENL
+              [CEqRules.Subst (ceq, SOME xC) THENL
                 [CEqRules.Approx THENL
                   [ApproxRules.AssumeHasValue (SOME namev, NONE) THENL
                     [ApproxRules.BottomDiverges (HypSyn.NAME namev),
@@ -240,6 +240,7 @@ struct
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
         ORELSE WTreeRules.Elim (target, threeNames)
+        ORELSE CEqRules.Elim (target, twoNames)
         ORELSE List.foldl (fn (t, ts) => PROGRESS t ORELSE ts) FAIL
                  (Development.lookupResource world Resource.ELIM)
     end

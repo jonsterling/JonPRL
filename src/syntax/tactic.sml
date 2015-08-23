@@ -25,10 +25,10 @@ struct
                     domain : term,
                     level : level option} * meta
     | CEQ_SUBST of {equality : term,
-                    domain : term} * meta
+                    domain : term option} * meta
     | CHYP_SUBST of {dir : Dir.dir,
                      index : hyp,
-                     domain : term} * meta
+                     domain : term option} * meta
     | INTRO of {term : term option,
                 rule : int option,
                 freshVariable : name option,
@@ -133,11 +133,11 @@ struct
                         level = level}, meta)
           | CEQ_SUBST ({equality, domain}, meta) =>
             CEQ_SUBST ({equality = apply equality,
-                        domain = apply domain}, meta)
+                        domain = Option.map apply domain}, meta)
           | CHYP_SUBST ({dir, index, domain}, meta) =>
             CHYP_SUBST ({dir = dir,
                          index = applyHyp index,
-                         domain = apply domain}, meta)
+                         domain = Option.map apply domain}, meta)
           | INTRO ({term, rule, freshVariable, level}, meta) =>
             INTRO ({term = Option.map apply term,
                     rule = rule,
@@ -209,8 +209,8 @@ struct
      "bot-div (#NUM | <NAME>)",
      "subst [TERM] [TERM] @NUM?",
      "hyp-subst (←|→) (#NUM | <NAME>) [TERM] @NUM?",
-     "csubst [TERM] [TERM] @NUM?",
-     "chyp-subst (←|→) (#NUM | <NAME>) [TERM] @NUM?",
+     "csubst [TERM] [TERM]? @NUM?",
+     "chyp-subst (←|→) (#NUM | <NAME>) [TERM]? @NUM?",
      "id",
      "fail",
      "fiat",

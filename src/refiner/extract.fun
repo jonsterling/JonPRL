@@ -30,6 +30,7 @@ struct
        | CEQUAL_SUBST $ #[D, E] => extract E
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
+       | CEQUAL_ELIM $ _ => ax
        | APPROX_MEMBER_EQ $ _ => ax
        | APPROX_EQ $ _ => ax
        | APPROX_EXT_EQ $ _ => ax

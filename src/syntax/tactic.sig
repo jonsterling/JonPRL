@@ -27,10 +27,10 @@ sig
                       domain : term,
                       level : level option} * meta
       | CEQ_SUBST of {equality : term,
-                      domain : term} * meta
+                      domain : term option} * meta
       | CHYP_SUBST of {dir : Dir.dir,
                        index : hyp,
-                       domain : term} * meta
+                       domain : term option} * meta
       | INTRO of {term : term option,
                   rule : int option,
                   freshVariable : name option,
