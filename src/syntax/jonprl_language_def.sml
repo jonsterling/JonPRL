@@ -7,7 +7,7 @@ struct
   val commentStart = SOME "(*"
   val commentEnd = SOME "*)"
   val commentLine = SOME "|||"
-  val nestedComments = false
+  val nestedComments = true
 
   val fancyChars =
       "-'_ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσΤτΥυΦφΧχΨψΩω¬⊗⊕∫+-!@#$%^&*⇓↓↼⇀↽⇁↿↾⇃⇂≼≅≡≈~⇔∩∪⋃⋂"
