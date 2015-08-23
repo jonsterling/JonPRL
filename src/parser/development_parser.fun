@@ -48,6 +48,14 @@ struct
     identifier
       wth Syntax.Variable.named
 
+  val parseResourceName =
+    identifier
+      suchthat (fn x =>
+                  x <> "auto"
+                  andalso x <> "eq-cd"
+                  andalso x <> "elim"
+                  andalso x <> "intro")
+
   val parseLabel = identifier
 
   fun parseTheorem w =
@@ -117,7 +125,7 @@ struct
       wth (fn pair => (w, DevelopmentAst.ADD_RESOURCE pair))
 
   fun parseNewResource w =
-    reserved "Declare" >> identifier
+    reserved "Declare" >> parseResourceName
              wth (fn id =>
                     let
                       val w' = declareResource w id
