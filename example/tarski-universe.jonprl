@@ -155,3 +155,16 @@ Theorem bool'-computes : [el(bool')] {
   unfold <el bool' plus'>; reduce;
   intro #0; auto
 }.
+
+
+(* you can build a cumulative hierarchy of sets using a universe and its denotation *)
+Operator aczel : ().
+[aczel] =def= [wtree(u:univ <: el(u))].
+
+Theorem aczel-wf : [aczel ∈ U{i}] {
+  unfold <aczel>; auto;
+  unfold <container make-container>; auto;
+  eq-cd @i; auto
+}.
+
+Resource wf += { wf-lemma <aczel-wf> }.
