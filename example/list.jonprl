@@ -1,0 +1,127 @@
+||| Some handy notation:
+Infix 2 "∈" := member.
+
+||| First we define the option/maybe type constructor
+Operator option : (0).
+Postfix 10 "?" := option.
+[A ?] =def= [A + unit].
+
+Theorem option-wf : [{A:U{i}} A? ∈ U{i}] {
+  unfold <option>; auto
+}.
+
+Resource wf += { wf-lemma <option-wf> }.
+
+Operator some : (0).
+[some(M)] =def= [inl(M)].
+
+Theorem some-wf : [{A:U{i}} {M:A} some(M) ∈ A?] {
+  unfold <some option>; auto
+}.
+
+Resource wf += { wf-lemma <some-wf> }.
+
+Operator none : ().
+[none] =def= [inr(<>)].
+
+Theorem none-wf : [{A:U{i}} none ∈ A?] {
+  unfold <none option>; auto
+}.
+
+Resource wf += { wf-lemma <none-wf> }.
+
+||| some is some, none is not some
+Operator is-some : (0).
+[is-some(M)] =def= [decide(M; _.unit; _.void)].
+
+Theorem is-some-wf : [{A:U{i}} {M:A?} is-some(M) ∈ U{i}] {
+  auto; intro @i; auto;
+  unfold <is-some option>; auto;
+  elim #2; reduce; auto
+}.
+
+Resource wf += { wf-lemma <is-some-wf> }.
+
+||| We go about defining inductive types by giving their constructors a
+||| signature as a "container", which is written "s : shape <: refinement[s]".
+||| The shape is the name of the constructor, and the type of refinements at a
+||| shape s are all the tree branches that should grow from that node. If you
+||| think of a tree as a set of paths, then the refinements are the possible
+||| upward moves that you may make at a point in the tree.
+Operator list-container : (0).
+[list-container(A)] =def= [a:A? <: is-some(a)].
+
+Theorem list-container-wf : [{A:U{i}} list-container(A) ∈ container] {
+  auto; unfold <list-container make-container container>; auto;
+  eq-cd @i; auto;
+  cut-lemma <is-some-wf>;
+  elim #3 [A]; auto; unfold <member>;
+  bhyp #4; auto
+}.
+
+Resource wf += { wf-lemma <list-container-wf> }.
+
+||| A list is the well-founded tree generated from the list container.
+Operator list : (0).
+Postfix 5 "list" := list.
+[A list] =def= [wtree(list-container(A))].
+
+Theorem list-wf : [{A:U{i}} A list ∈ U{i}] {
+  auto;
+  unfold <list make-container>;
+  auto; unfold <container>; auto;
+  elim #2; reduce;
+  auto
+}.
+
+Resource wf += { wf-lemma <list-wf> }.
+
+||| We can define the basic list constructors in terms of the primitive
+||| constructors for well-founded trees. The expression means "s ^ r. T[r]"
+||| means, "begin a node at s, with subtrees T[r] for each refinement r"; when
+||| the refinements are not differentiated (as in our case, where there is at
+||| most one possible refinement), the notation "s ^ T" is supported.
+Operator nil : ().
+[nil] =def= [none ^ <>].
+
+Operator cons : (0;0).
+[cons(x; xs)] =def= [some(x) ^ xs].
+
+Infix -> 5 "#" := cons.
+
+Tactic list-wf-tac {
+  unfold <shape fst refinement snd list-container make-container>;
+  reduce; auto
+}.
+
+Theorem nil-wf : [{A:U{i}} nil ∈ A list] {
+  unfold <nil list>; auto;
+  list-wf-tac;
+  unfold <is-some none>; reduce; auto
+}.
+
+Theorem cons-wf : [{A:U{i}} {x:A} {xs:A list} cons(x; xs) ∈ A list] {
+  auto; intro @i; auto;
+  unfold <cons list>; auto;
+  list-wf-tac
+}.
+
+Resource wf += { wf-lemma <nil-wf> }.
+Resource wf += { wf-lemma <cons-wf> }.
+
+||| Even though it was annoying to have to prove the wellformedness lemmas about
+||| our constructors, because of the "Resource" mechanism, we only have to prove
+||| them once. Going forward, JonPRL's tactics integrate these lemmas into their
+||| type-checking heuristics. (Typecheckers and elaborators should be seen as a particular
+||| family of tactic programs.)
+Theorem test : [("1" # "2" # "4" # nil) ∈ atom list] {
+  auto
+}.
+
+||| JonPRL behaves a bit like a notebook, where you can interactively print
+||| objects. If you uncomment the following, you can see the evidence for the
+||| example wellformedness lemma, which contains a reference to nil-wf and
+||| cons-wf.
+
+||| Print test.
+
