@@ -66,7 +66,7 @@ struct
       | OPERATOR (lbl, theta) =>
         Development.declareOperator D (lbl, theta)
       | TACTIC (lbl, tac) =>
-        Development.defineTactic D (lbl, TacticEval.eval D tac)
+        Development.defineTactic D (lbl, fn D => TacticEval.eval D tac)
       | DEFINITION (pat, term) =>
         Development.defineOperator D {definiendum = pat, definiens = term}
       | NOTATION (notation, theta) =>

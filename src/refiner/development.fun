@@ -45,9 +45,9 @@ struct
        notation : Notation.t option,
        userDefined : bool}
 
-    datatype t =
+    datatype 'w t =
         THEOREM of theorem
-      | TACTIC of tactic
+      | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
 
     fun toString (lbl, THEOREM {statement, evidence,...}) =
@@ -100,13 +100,13 @@ struct
          fun eq (l, r) = compare (l, r) = EQUAL
        end)
 
-  type object = Object.t
-  type world = {context : object Telescope.telescope,
-                resources : tactic list ResourcePool.dict}
+  datatype world = World of {context : object Telescope.telescope,
+                             resources : tactic list ResourcePool.dict}
+    withtype object = world Object.t
 
-  fun enumerate {context, resources} = context
+  fun enumerate (World {context, resources}) = context
 
-  fun enumerateOperators {context = t, resources} =
+  fun enumerateOperators (World {context = t, resources}) =
     let
       open Telescope.SnocView
       fun go Empty bind = bind
@@ -120,7 +120,7 @@ struct
       go (out t) []
     end
 
-  fun enumerateTactics {context = t, resources} =
+  fun enumerateTactics (World {context = t, resources}) =
     let
       open Telescope.SnocView
       fun go Empty bind = bind
@@ -134,7 +134,7 @@ struct
       go (out t) []
     end
 
-  fun enumerateResources {context, resources} = ResourcePool.domain resources
+  fun enumerateResources (World {context, resources}) = ResourcePool.domain resources
 
   val empty : world=
     let
@@ -149,38 +149,38 @@ struct
              Resource.ELIM [])
           Resource.WF []
     in
-      {context = Telescope.empty, resources = resources}
+      World {context = Telescope.empty, resources = resources}
     end
 
-  fun prove {context = T, resources} (lbl, theta, goal, tac) =
+  fun prove (World {context = T, resources}) (lbl, theta, goal, tac) =
     let
       val (subgoals, validation) = tac (Goal.|: (Goal.MAIN, goal))
     in
       case subgoals of
-          [] => {context =
-                  Telescope.snoc T (lbl, Object.THEOREM
-                  {operator = theta,
-                   statement = goal,
-                   script = tac,
-                   evidence = Susp.delay (fn _ => validation [])}),
-                resources = resources}
+          [] => World {context =
+                        Telescope.snoc T (lbl, Object.THEOREM
+                        {operator = theta,
+                         statement = goal,
+                         script = tac,
+                         evidence = Susp.delay (fn _ => validation [])}),
+                      resources = resources}
         | _ => raise Fail "Subgoals not discharged"
     end
 
-  fun defineTactic {context, resources} (lbl, tac) =
-      {context = Telescope.snoc context (lbl, Object.TACTIC tac),
-       resources = resources}
+  fun defineTactic (World {context, resources}) (lbl, tac) =
+      World {context = Telescope.snoc context (lbl, Object.TACTIC tac),
+             resources = resources}
 
-  fun declareOperator {context, resources} (lbl, operator) =
-    {context = Telescope.snoc context
-                 (lbl, Object.OPERATOR
-                         {operator = operator,
-                          conversion = NONE,
-                          notation = NONE,
-                          userDefined = true}),
-     resources = resources}
+  fun declareOperator (World {context, resources}) (lbl, operator) =
+    World {context = Telescope.snoc context
+                       (lbl, Object.OPERATOR
+                               {operator = operator,
+                                conversion = NONE,
+                                notation = NONE,
+                                userDefined = true}),
+           resources = resources}
 
-  fun searchObject {context = T, resources} lbl =
+  fun searchObject (World {context = T, resources}) lbl =
     let
       open Telescope.SnocView
       open Goal Sequent
@@ -224,7 +224,7 @@ struct
         foldl (fn (x,R) => R andalso Set.member ys' x) true xs
       end
   in
-    fun defineOperator {context = T, resources} (rule as {definiendum, definiens}) =
+    fun defineOperator (World {context = T, resources}) (rule as {definiendum, definiens}) =
       let
         val Syntax.$ (oper, _) = Syntax.out definiendum
         val lbl = Syntax.Operator.toString oper
@@ -239,52 +239,52 @@ struct
       in
         case Telescope.find T lbl of
              SOME (Object.OPERATOR {operator, conversion = NONE,notation, userDefined = true}) =>
-               {context = Telescope.modify T (lbl, fn _ =>
-                            Object.OPERATOR
-                              {operator = operator,
-                               conversion = conversion,
-                               notation = notation,
-                               userDefined = true}),
-                resources = resources}
+               World {context = Telescope.modify T (lbl, fn _ =>
+                                  Object.OPERATOR
+                                    {operator = operator,
+                                     conversion = conversion,
+                                     notation = notation,
+                                     userDefined = true}),
+                      resources = resources}
            | SOME _ => raise Subscript
            | NONE => raise Fail "Cannot define undeclared operator"
       end
 
-    fun declareNotation {context = T, resources} (theta, notation) =
+    fun declareNotation (World {context = T, resources}) (theta, notation) =
       let
         val lbl = Syntax.Operator.toString theta
       in
         case Telescope.find T lbl of
              SOME (Object.OPERATOR {operator, conversion, notation = NONE, userDefined}) =>
-               {context = Telescope.modify T (lbl, fn _ =>
-                            Object.OPERATOR
-                              {operator = operator,
-                               conversion = conversion,
-                               notation = SOME notation,
-                               userDefined = userDefined}),
-                resources = resources}
+               World {context = Telescope.modify T (lbl, fn _ =>
+                                  Object.OPERATOR
+                                    {operator = operator,
+                                     conversion = conversion,
+                                     notation = SOME notation,
+                                     userDefined = userDefined}),
+                      resources = resources}
            | SOME _ => raise Fail "Cannot redefined notation"
            | NONE =>
-               {context = Telescope.snoc T (lbl,
-                            Object.OPERATOR
-                              {operator = theta,
-                               conversion = NONE,
-                               notation = SOME notation,
-                               userDefined = false}),
-                resources = resources}
+               World {context = Telescope.snoc T (lbl,
+                                  Object.OPERATOR
+                                    {operator = theta,
+                                     conversion = NONE,
+                                     notation = SOME notation,
+                                     userDefined = false}),
+                      resources = resources}
       end
   end
 
-  fun declareResource {context, resources} r =
-    {context = context,
-     resources = ResourcePool.insert resources r []}
+  fun declareResource (World {context, resources}) r =
+    World {context = context,
+           resources = ResourcePool.insert resources r []}
 
 
-  fun addResource {context, resources} (r, t) =
-    {context = context,
-     resources = ResourcePool.insertMerge resources r [t] (fn ts => t :: ts)}
+  fun addResource (World {context, resources}) (r, t) =
+    World {context = context,
+           resources = ResourcePool.insertMerge resources r [t] (fn ts => t :: ts)}
 
-  fun lookupDefinition {context = T, resources} theta =
+  fun lookupDefinition (World {context = T, resources}) theta =
     case SOME (Builtins.unfold theta) handle _ => NONE of
          NONE =>
            (case Telescope.lookup T (Syntax.Operator.toString theta) of
@@ -292,7 +292,7 @@ struct
                | _ => raise Subscript)
        | SOME conv => conv
 
-  fun lookupTheorem {context = T, resources} theta =
+  fun lookupTheorem (World {context = T, resources}) theta =
     case Telescope.lookup T (Syntax.Operator.toString theta) of
          Object.THEOREM {statement,evidence,...} => {statement = statement, evidence = evidence}
        | _ => raise Subscript
@@ -304,12 +304,12 @@ struct
       Extract.extract (Susp.force evidence)
     end
 
-  fun lookupTactic {context = T, resources} lbl =
+  fun lookupTactic (D as (World {context = T, resources})) lbl =
     case Telescope.lookup T lbl of
-         Object.TACTIC tac => tac
+         Object.TACTIC tac => tac D
        | _ => raise Subscript
 
-  fun lookupObject {context = T, resources} theta =
+  fun lookupObject (World {context = T, resources}) theta =
     case SOME (Builtins.unfold theta) handle _ => NONE of
          NONE => Telescope.lookup T (Syntax.Operator.toString theta)
        | SOME conv =>
@@ -326,7 +326,7 @@ struct
                 userDefined = false}
            end
 
-  fun lookupResource {context, resources} r =
+  fun lookupResource (World {context, resources}) r =
     ResourcePool.lookup resources r
       handle ResourcePool.Absent =>
         raise Fail ("Unknown resource " ^ Resource.toString r)

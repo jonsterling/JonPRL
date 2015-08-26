@@ -27,15 +27,15 @@ sig
     type theorem
     type operator_decl
 
-    datatype t =
+    datatype 'w t =
         THEOREM of theorem
-      | TACTIC of tactic
+      | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
 
-    val toString : label * t -> string
+    val toString : label * 'a t -> string
   end
 
-  type object = Object.t
+  type object = world Object.t
 
   (* enumerate the objects and knowledge available at a world *)
   val enumerate : world -> object Telescope.telescope
@@ -50,7 +50,7 @@ sig
   val prove : world -> label * operator * judgement * tactic -> world
 
   (* extend a development with a custom tactic *)
-  val defineTactic : world -> label * tactic -> world
+  val defineTactic : world -> label * (world -> tactic) -> world
 
   (* extend a development with a new operator *)
   val declareOperator : world -> label * operator -> world
@@ -76,6 +76,6 @@ sig
   (* Lookup the collection of tactics for a given resource *)
   val lookupResource : world -> resource -> tactic list
 
-  val lookupObject : world -> operator -> Object.t
-  val searchObject : world -> label -> (label * Object.t) list
+  val lookupObject : world -> operator -> object
+  val searchObject : world -> label -> (label * object) list
 end
