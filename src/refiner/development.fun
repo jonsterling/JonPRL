@@ -45,9 +45,9 @@ struct
        notation : Notation.t option,
        userDefined : bool}
 
-    datatype 'a t =
+    datatype 'w t =
         THEOREM of theorem
-      | TACTIC of 'a -> tactic
+      | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
 
     fun toString (lbl, THEOREM {statement, evidence,...}) =
@@ -100,9 +100,9 @@ struct
          fun eq (l, r) = compare (l, r) = EQUAL
        end)
 
-  datatype world = World of {context : world Object.t Telescope.telescope,
+  datatype world = World of {context : object Telescope.telescope,
                              resources : tactic list ResourcePool.dict}
-  type object = world Object.t
+    withtype object = world Object.t
 
   fun enumerate (World {context, resources}) = context
 

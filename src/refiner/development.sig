@@ -27,9 +27,9 @@ sig
     type theorem
     type operator_decl
 
-    datatype 'a t =
+    datatype 'w t =
         THEOREM of theorem
-      | TACTIC of 'a -> tactic
+      | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
 
     val toString : label * 'a t -> string
