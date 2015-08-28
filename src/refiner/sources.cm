@@ -71,6 +71,12 @@ group is
   rules/bhyp.fun
   rules/wtree.sig
   rules/wtree.fun
+  rules/container.sig
+  rules/container.fun
+  rules/container_extension.sig
+  rules/container_extension.fun
+  rules/neighborhood.sig
+  rules/neighborhood.fun
 
   refiner.fun
   refiner.sig

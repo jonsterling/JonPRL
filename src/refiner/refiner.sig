@@ -106,6 +106,22 @@ sig
       where type tactic = tactic
       where type hyp = hyp
 
+    structure ContainerRules : CONTAINER_RULES
+      where type tactic = tactic
+      where type hyp = hyp
+      where type name = name
+
+    structure ContainerExtensionRules : CONTAINER_EXTENSION_RULES
+      where type tactic = tactic
+      where type hyp = hyp
+      where type name = name
+
+    structure NeighborhoodRules : NEIGHBORHOOD_RULES
+      where type tactic = tactic
+      where type term = term
+      where type hyp = hyp
+      where type name = name
+
     structure WTreeRules : WTREE_RULES
       where type tactic = tactic
       where type term = term

@@ -84,6 +84,7 @@ struct
   fun mapLevel f theta =
     case C.`<? theta of
          SOME (UNIV k) => C.`> (UNIV (Level.subst f k))
+       | SOME (CONTAINER k) => C.`> (CONTAINER (Level.subst f k))
        | _ =>
            (case D.`<? theta of
                  SOME (UNIV_EQ k) => D.`> (UNIV_EQ (Level.subst f k))
@@ -92,6 +93,7 @@ struct
   fun getLevelParameter theta =
     case C.`<? theta of
          SOME (UNIV k) => SOME k
+       | SOME (CONTAINER k) => SOME k
        | _ =>
            (case D.`<? theta of
                  SOME (UNIV_EQ k) => SOME k
@@ -100,6 +102,7 @@ struct
   fun eqModLevel (theta, theta') =
     case (C.`<? theta, C.`<? theta') of
          (SOME (UNIV _), SOME (UNIV _)) => true
+       | (SOME (CONTAINER _), SOME (CONTAINER _)) => true
        | _ =>
            (case (D.`<? theta, D.`<? theta') of
                  (SOME (UNIV_EQ _), SOME (UNIV_EQ _)) => true

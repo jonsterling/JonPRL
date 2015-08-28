@@ -60,7 +60,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun PairEq (oz, ok) (_ |: H >> P) =
+  fun MemEq (oz, ok) (_ |: H >> P) =
     let
       val #[pair, pair', prod] = P ^! EQ
       val #[M, N] = pair ^! PAIR

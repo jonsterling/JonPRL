@@ -43,33 +43,30 @@ Theorem is-some-wf : [{A:U{i}} {M:A?} is-some(M) ∈ U{i}] {
 Resource wf += { wf-lemma <is-some-wf> }.
 
 ||| We go about defining inductive types by giving their constructors a
-||| signature as a "container", which is written "s : shape <: refinement[s]".
-||| The shape is the name of the constructor, and the type of refinements at a
+||| signature as a "container", which is written "s : shape <: position[s]".
+||| The shape is the name of the constructor, and the type of positions at a
 ||| shape s are all the tree branches that should grow from that node. If you
-||| think of a tree as a set of paths, then the refinements are the possible
+||| think of a tree as a set of paths, then the positions are the possible
 ||| upward moves that you may make at a point in the tree.
-Operator list-container : (0).
-[list-container(A)] =def= [a:A? <: is-some(a)].
+Operator list-sig : (0).
+[list-sig(A)] =def= [a:A? <: is-some(a)].
 
-Theorem list-container-wf : [{A:U{i}} list-container(A) ∈ container] {
-  auto; unfold <list-container make-container container>; auto;
-  eq-cd @i; auto;
+Theorem list-sig-wf : [{A:U{i}} list-sig(A) ∈ container{i}] {
+  auto; unfold <list-sig>; auto;
   cut-lemma <is-some-wf>;
   elim #3 [A]; auto; unfold <member>;
   bhyp #4; auto
 }.
 
-Resource wf += { wf-lemma <list-container-wf> }.
+Resource wf += { wf-lemma <list-sig-wf> }.
 
 ||| A list is the well-founded tree generated from the list container.
 Operator list : (0).
 Postfix 5 "list" := list.
-[A list] =def= [wtree(list-container(A))].
+[A list] =def= [wtree(list-sig(A))].
 
 Theorem list-wf : [{A:U{i}} A list ∈ U{i}] {
-  auto;
-  unfold <list make-container>;
-  auto; unfold <container>; auto;
+  auto; unfold <list>; auto;
   elim #2; reduce;
   auto
 }.
@@ -78,20 +75,19 @@ Resource wf += { wf-lemma <list-wf> }.
 
 ||| We can define the basic list constructors in terms of the primitive
 ||| constructors for well-founded trees. The expression means "s ^ r. T[r]"
-||| means, "begin a node at s, with subtrees T[r] for each refinement r"; when
-||| the refinements are not differentiated (as in our case, where there is at
-||| most one possible refinement), the notation "s ^ T" is supported.
+||| means, "begin a node at s, with subtrees T[r] for each position r"; when
+||| the positions are not differentiated (as in our case, where there is at
+||| most one possible position), the notation "s ^ T" is supported.
 Operator nil : ().
-[nil] =def= [none ^ <>].
+[nil] =def= [sup(none ^ <>)].
 
 Operator cons : (0;0).
-[cons(x; xs)] =def= [some(x) ^ xs].
+[cons(x; xs)] =def= [sup(some(x) ^ xs)].
 
 Infix -> 5 "#" := cons.
 
 Tactic list-wf-tac {
-  unfold <shape fst refinement snd list-container make-container>;
-  reduce; auto
+  unfold <list-sig>; reduce; auto
 }.
 
 Theorem nil-wf : [{A:U{i}} nil ∈ A list] {

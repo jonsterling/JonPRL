@@ -140,32 +140,14 @@ struct
         `> IMPLIES $$ #[P, `> VOID $$ #[]]
       | _ => raise Conv)
 
-    val unfoldContainer =
-      makeConv CONTAINER (fn #[] =>
+    val unfoldContainerNeigh =
+      makeConv CONTAINER_NEIGH (fn #[F] =>
         let
-          val A = Variable.named "A"
-          val univ = `> (UNIV Level.base) $$ #[]
-          val x = Variable.named "a"
+          val u = Variable.named "u"
         in
-          `> PROD $$ #[univ, A \\ `> FUN $$ #[``A, x \\ univ]]
+          `> MAKE_CONTAINER $$ #[`> NEIGH $$ #[F], u \\ `> REFINEMENT $$ #[F, ``u]]
         end
       | _ => raise Conv)
-
-    val unfoldMakeContainer =
-      makeConv MAKE_CONTAINER (fn #[A,xB] =>
-        `> PAIR $$ #[A, `> LAM $$ #[xB]]
-      | _ => raise Conv)
-
-    val unfoldShape =
-      makeConv SHAPE (fn #[C] =>
-        `> FST $$ #[C]
-      | _ => raise Conv)
-
-    val unfoldRefinement =
-      makeConv REFINEMENT (fn #[C,s] =>
-        `> AP $$ #[`> SND $$ #[C], s]
-      | _ => raise Conv)
-
   in
     (* add definitions here via composition: unfoldX o unfoldY o unfoldZ... *)
     val definitions =
@@ -184,10 +166,7 @@ struct
       o unfoldVoid
       o unfoldHasValue
       o unfoldNot
-      o unfoldContainer
-      o unfoldMakeContainer
-      o unfoldShape
-      o unfoldRefinement
+      o unfoldContainerNeigh
   end
 
   val unfold = Dict.lookup (definitions Dict.empty)
