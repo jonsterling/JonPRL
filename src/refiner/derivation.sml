@@ -21,6 +21,7 @@ struct
     | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
 
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
+    | PER_EQ | PER_MEM_EQ | PER_ELIM
 
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
@@ -64,6 +65,10 @@ struct
        | IMAGE_MEM_EQ => #[0,0]
        | IMAGE_ELIM => #[1]
        | IMAGE_EQ_IND => #[0,0,0,4]
+
+       | PER_EQ => #[2,2,3,3,3,5]
+       | PER_MEM_EQ => #[0,0,0,0]
+       | PER_ELIM => #[1,0]
 
        | ATOM_EQ => #[]
        | TOKEN_EQ => #[]
@@ -163,6 +168,10 @@ struct
        | IMAGE_MEM_EQ => "image-mem-eq"
        | IMAGE_ELIM => "image-elim"
        | IMAGE_EQ_IND => "image-eq-ind"
+
+       | PER_EQ => "per-eq"
+       | PER_MEM_EQ => "per-mem-eq"
+       | PER_ELIM => "per-elim"
 
        | ATOM_EQ => "atom-eq"
        | TOKEN_EQ => "token-eq"
