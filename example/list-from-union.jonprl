@@ -1,0 +1,128 @@
+Infix 20 "∈" := member.
+Infix 100 "~" := ceq.
+
+Operator pi2 : ().
+[pi2] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; pi2)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
+] {
+  unfold <union pi2>; auto
+}.
+
+Resource wf += { wf-lemma <union-wf> }.
+
+Operator vec : (0;0).
+[vec(A; n)] =def= [
+  natrec(n; void + unit; _.ih. (A * ih) + void)
+].
+
+Theorem vec-wf : [{A:U{i}} {n:nat} vec(A; n) ∈ U{i}] {
+  unfold <vec>; auto
+}.
+
+Resource wf += { wf-lemma <vec-wf> }.
+
+Operator list : (0).
+[list(A)] =def= [union(nat; i.vec(A; i))].
+
+Theorem list-wf : [{A:U{i}} list(A) ∈ U{i}] {
+  unfold <list union>; auto
+}.
+
+Resource wf += { wf-lemma <list-wf> }.
+
+Operator nil : ().
+[nil] =def= [inr(<>)].
+
+Operator cons : (0;0).
+Infix -> 30 "#" := cons.
+[h # t] =def= [inl(<h,t>)].
+
+Theorem nil-wf-vec : [{A:U{i}} nil ∈ vec(A; zero)] {
+  unfold <nil vec>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <nil-wf-vec> }.
+
+Theorem cons-wf-vec : [{A:U{i}} {n:nat} {h:A} {t:vec(A; n)} h # t ∈ vec(A; succ(n))] {
+  unfold <cons vec>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <cons-wf-vec> }.
+
+Theorem nil-wf : [{A:U{i}} nil ∈ list(A)] {
+  unfold <list union>; auto;
+  csubst [nil ~ pi2 <zero, nil>];
+  aux {unfold <pi2>; reduce; auto};
+  auto
+}.
+
+Resource wf += { wf-lemma <nil-wf> }.
+
+Theorem cons-wf : [{A:U{i}} {h:A} {t:list(A)} h # t ∈ list(A)] {
+  auto; intro @i; auto;
+  unfold <list union>;
+  elim #3; elim #4;
+
+  main { csubst [pi2 <s, t'> ~ t'] };
+  main { csubst [(h # t') ~ pi2 <succ(s), h # t'>] };
+  aux { unfold <pi2>; reduce; auto };
+
+  auto
+}.
+
+Resource wf += { wf-lemma <cons-wf> }.
+
+Operator list-induction-principle : ().
+[list-induction-principle] =def= [
+  {A:U{i}} {C:list(A) -> U{i}} C nil -> ((h:A) (t:list(A)) C t -> C (h # t)) -> (l:list(A)) C l
+].
+
+Theorem list-induction-principle-wf : [list-induction-principle ∈ U{i'}] {
+  unfold <list-induction-principle>; auto;
+  cum @i; auto
+}.
+
+Resource wf += { wf-lemma <list-induction-principle-wf> }.
+
+||| One would think that we could prove [list-induction-principle] by setting it
+||| as our goal and proceeding by refinement, but at whichever point we wish to
+||| eliminate the list in the premise (which is, in the end, of the image type),
+||| the rules for the image type require a squash-stable motive, whereas our
+||| motive is [C l] for some arbitrary [C].
+
+||| The way to get around this is to come up with the intended computational
+||| content of the induction principle first, and then prove the theorem that
+||| this object witnesses the induction principle (which is a squash-stable
+||| goal). Once this goes through, we can prove the induction principle by
+||| supplying the witness.
+
+Operator list-recursion : ().
+[list-recursion] =def= [
+  lam(n. lam(c. lam(l. decide(l; ht.c ht; _.n))))
+].
+
+Theorem list-recursion-wf : [list-recursion ∈ list-induction-principle] {
+  unfold <list-recursion list-induction-principle>; auto;
+  eq-cd @i'; aux { auto; cum @i; auto };
+  eq-cd <nil-case>; auto;
+  eq-cd <cons-case> @i; auto;
+  eq-cd <l> @i; auto;
+  unfold <list union>;
+  elim #5; elim #6;
+  unfold <pi2 vec>; reduce;
+  elim #7; reduce; auto;
+  elim #8; reduce; auto;
+  unfold <nil unit>;
+  elim #9; auto
+}.
+
+Resource wf += { wf-lemma <list-recursion-wf> }.
+
+Theorem list-induction : [list-induction-principle] {
+  witness [list-recursion]; auto
+}.
