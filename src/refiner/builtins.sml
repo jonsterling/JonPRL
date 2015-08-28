@@ -4,7 +4,7 @@ struct
   structure Conv = Conv
 
   open CttCalculus CttCalculusInj Syntax Conv
-  infix 8 $ $$
+  infix 8 $ $$ //
   infix 7 \\
 
   type operator = UniversalOperator.t
@@ -132,6 +132,22 @@ struct
           val cbv = `> CBV $$ #[T,v \\ ax]
         in
           `> APPROX $$ #[ax,cbv]
+        end
+      | _ => raise Conv)
+
+    val unfoldQuotient =
+      makeConv QUOTIENT (fn #[T,E] =>
+        let
+          val x = Variable.named "x"
+          val y = Variable.named "y"
+	  val memx = `> MEM $$ #[``x, T]
+	  val memy = `> MEM $$ #[``y, T]
+	  val rel  = (E // ``x) // ``y
+	  val exp  = `> AND $$ #[memx, `> AND $$ #[memy, rel]]
+	  val lam1 = `> LAM $$ #[y \\ exp]
+          val lam2 = `> LAM $$ #[x \\ lam1]
+        in
+          `> PER $$ #[lam2]
         end
       | _ => raise Conv)
 

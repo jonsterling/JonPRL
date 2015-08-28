@@ -12,7 +12,7 @@ struct
     | ID | BOT | SQUASH | FST | SND | NOT
     | SUBTYPE_REL | BUNION | HASVALUE
     | IMAGE
-    | PER
+    | PER | QUOTIENT
     | FIX
     | CBV
     | ISECT
@@ -40,7 +40,7 @@ struct
        ID, BOT, SQUASH, FST, SND, NOT,
        SUBTYPE_REL, BUNION, HASVALUE,
        IMAGE,
-       PER,
+       PER, QUOTIENT,
        FIX,
        CBV,
        ISECT, EQ, MEM, SUBSET,
@@ -81,6 +81,7 @@ struct
        | HASVALUE => #[0]
        | IMAGE => #[0,0]
        | PER => #[0]
+       | QUOTIENT => #[0,2]
        | FIX => #[0]
        | CBV => #[0, 1]
        | PLUS => #[0, 0]
@@ -142,6 +143,7 @@ struct
        | HASVALUE => "has-value"
        | IMAGE => "image"
        | PER => "per"
+       | QUOTIENT => "quotient"
        | FIX => "fix"
        | CBV => "cbv"
        | ISECT => "isect"
@@ -240,6 +242,7 @@ struct
          string "has-value" return HASVALUE,
          string "image" return IMAGE,
          string "per" return PER,
+         string "quotient" return QUOTIENT,
          string "fix" return FIX,
          string "cbv" return CBV,
          string "isect" return ISECT,
