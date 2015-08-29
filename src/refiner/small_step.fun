@@ -59,7 +59,7 @@ struct
 
   fun stepRefinementBeta (F, u) =
     case project u of
-        AX $ #[] => UNIT $$ #[]
+        NEIGH_NIL $ #[] => UNIT $$ #[]
       | EXTEND $ #[v, pE] =>
           let
             val s = Variable.named "s"
@@ -87,7 +87,7 @@ struct
 
   fun stepNeighIndBeta (M, Z, xypS) =
     case project M of
-         AX $ #[] => Z
+         NEIGH_NIL $ #[] => Z
        | EXTEND $ #[U, rE] =>
            let
            in
@@ -149,6 +149,7 @@ struct
       | CONTAINER _ $ _ => CANON
       | MAKE_CONTAINER $ _ => CANON
       | EXTEND $ _ => CANON
+      | NEIGH_NIL $ _ => CANON
       | NEIGH $ _ => CANON
       | AP $ #[L, R] =>
           (case step L of

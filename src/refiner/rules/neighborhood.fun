@@ -23,10 +23,10 @@ struct
 
   fun NilEq k (_ |: H >> P) =
     let
-      val #[ax1, ax2, neigh] = P ^! EQ
+      val #[Nil1, Nil2, neigh] = P ^! EQ
       val #[F] = neigh ^! NEIGH
-      val #[] = ax1 ^! AX
-      val #[] = ax2 ^! AX
+      val #[] = Nil1 ^! NEIGH_NIL
+      val #[] = Nil2 ^! NEIGH_NIL
     in
       [ AUX |: H >> C.`> MEM $$ #[F, C.`> (CONTAINER k) $$ #[]]
       ] BY mkEvidence NEIGH_NIL_EQ
@@ -72,7 +72,7 @@ struct
                 Context.fresh (H, Variable.named "ih"))
 
       val r = Context.fresh (H, Variable.named "r")
-      val ax = C.`> AX $$ #[]
+      val Nil = C.`> NEIGH_NIL $$ #[]
       val snocu = C.`> EXTEND $$ #[``u, r \\ (C.`> AP $$ #[``e,``r])]
 
       val J =
@@ -83,7 +83,7 @@ struct
 
       val H' = Context.mapAfter u (Syntax.subst snocu z) (Context.interposeAfter H (z, J))
     in
-      [ MAIN |: ctxSubst H ax z >> subst ax z C
+      [ MAIN |: ctxSubst H Nil z >> subst Nil z C
       , MAIN |: H' >> subst snocu z C
       ] BY (fn [D,E] => D.`> NEIGH_ELIM $$ #[``z, D, u \\ (e \\ (ih \\ E))]
              | _ => raise Refine)
@@ -143,7 +143,7 @@ struct
       val snocu = C.`> EXTEND $$ #[``u, r \\ (C.`> AP $$ #[``e,``r])]
     in
       [ MAIN |: H >> C.`> EQ $$ #[N, N', neigh]
-      , MAIN |: H >> C.`> EQ $$ #[nilCase, nilCase', zC // (C.`> AX $$ #[])]
+      , MAIN |: H >> C.`> EQ $$ #[nilCase, nilCase', zC // (C.`> NEIGH_NIL $$ #[])]
       , MAIN |: H' >> C.`> EQ $$ #[snocSubst, snocSubst', zC // snocu]
       ] BY (fn [N, D, E] => D.`> NEIGH_IND_EQ $$ #[N, D, u \\ e \\ ih \\ E]
              | _ => raise Refine)
