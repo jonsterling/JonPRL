@@ -1,3 +1,6 @@
+Infix 2 "∈" := member.
+Postfix 10 "⇓" := has-value.
+
 Theorem natp-example : [nat] {
   witness [succ(zero)]; auto
 }.
@@ -51,3 +54,36 @@ Theorem add-commutes : [
   unfold <add>; elim #6 [n']; auto;
   hyp-subst → #8 [h.=(_; h; _)]; auto
 }.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator pred : (0).
+[pred(n)] =def= [natrec(n; bot; m._.m)].
+
+Operator minus : (0;0).
+[minus(m; n)] =def= [
+  natrec(n; m; n'.ih. pred(ih))
+].
+
+Operator leq : (0;0).
+Infix 10 "≤" := leq.
+[m ≤ n] =def= [minus(n; m) ⇓].
+
+Theorem leq-wf : [{m:nat} {n:nat} (m ≤ n) ∈ U{i}] {
+  unfold <leq>; auto
+}.
+
+Resource wf += { wf-lemma <leq-wf> }.
+
+Operator upto : (0).
+[upto(i)] =def= [{j : nat | j ≤ i}].
+
+Theorem upto-wf : [{n:nat} upto(n) ∈ U{i}] {
+  unfold <upto>; auto
+}.
+
+Resource wf += { wf-lemma <upto-wf> }.

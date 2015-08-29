@@ -26,6 +26,11 @@ struct
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
+
+    | CONTAINER_EQ | CONTAINER_MEM_EQ | CONTAINER_ELIM
+    | EXTENSION_EQ | EXTEND_EQ | EXTENSION_ELIM
+    | NEIGH_EQ | NEIGH_NIL_EQ | NEIGH_SNOC_EQ | NEIGH_ELIM | NEIGH_IND_EQ
+
     | WTREE_EQ | WTREE_MEM_EQ | WTREE_REC_EQ | WTREE_INTRO | WTREE_ELIM
 
     | LEMMA of {label : Label.t}
@@ -125,10 +130,24 @@ struct
        | SUBSET_ELIM => #[0,2]
        | SUBSET_MEMBER_EQ => #[0,0,1]
 
+       | CONTAINER_EQ => #[]
+       | CONTAINER_MEM_EQ => #[0,1]
+       | CONTAINER_ELIM => #[0,2]
+
+       | EXTENSION_EQ => #[0,0]
+       | EXTEND_EQ => #[0,1]
+       | EXTENSION_ELIM => #[0,2]
+
+       | NEIGH_EQ => #[0]
+       | NEIGH_NIL_EQ => #[0]
+       | NEIGH_SNOC_EQ => #[0,1]
+       | NEIGH_IND_EQ => #[0,0,3]
+       | NEIGH_ELIM => #[0,0,3]
+
        | WTREE_EQ => #[0]
        | WTREE_MEM_EQ => #[0,1]
        | WTREE_REC_EQ => #[3,0]
-       | WTREE_INTRO => #[0,0,1]
+       | WTREE_INTRO => #[0]
        | WTREE_ELIM => #[0,3]
 
        | FIAT => #[]
@@ -233,6 +252,21 @@ struct
        | IND_SUBSET_INTRO => "independent-subset-intro"
        | SUBSET_ELIM => "subset-elim"
        | SUBSET_MEMBER_EQ => "subset-member-eq"
+
+       | CONTAINER_EQ => "container-eq"
+       | CONTAINER_MEM_EQ => "container-mem-eq"
+       | CONTAINER_ELIM => "container-elim"
+
+       | EXTENSION_EQ => "extension-eq"
+       | EXTEND_EQ => "extend-eq"
+       | EXTENSION_ELIM => "extension-elim"
+
+       | NEIGH_EQ => "neigh-eq"
+       | NEIGH_NIL_EQ => "neigh-nil-eq"
+       | NEIGH_SNOC_EQ => "neigh-snoc-eq"
+       | NEIGH_IND_EQ => "neigh-ind-eq"
+       | NEIGH_ELIM => "neigh-elim"
+
 
        | WTREE_EQ => "wtree-eq"
        | WTREE_MEM_EQ => "wtree-mem-eq"

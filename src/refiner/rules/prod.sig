@@ -23,6 +23,6 @@ sig
    * H, z : (Σx:A)B[x], s : A, t : B[s], H'[<s,t>] >> P[<s,t>]
    *)
   val Elim : hyp * (name * name) option -> tactic
-  val PairEq : name option * Level.t option -> tactic
+  val MemEq : name option * Level.t option -> tactic
   val SpreadEq : term option * term option * (name * name * name) option -> tactic
 end

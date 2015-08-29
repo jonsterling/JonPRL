@@ -125,10 +125,35 @@ struct
        | SUCC_EQ $ _ => ax
        | NATREC_EQ $ _ => ax
 
+       | CONTAINER_EQ $ _ => ax
+       | CONTAINER_MEM_EQ $ _ => ax
+       | CONTAINER_ELIM $ #[R, xyD] =>
+           let
+             val v = Variable.named "v"
+           in
+             xyD // (`> DOM $$ #[R]) // (`> LAM $$ #[v \\ (`> PROJ $$ #[R, ``v])])
+           end
+
+       | EXTENSION_EQ $ _ => ax
+       | EXTEND_EQ $ _ => ax
+       | EXTENSION_ELIM $ #[R, xyD] =>
+           let
+             val v = Variable.named "v"
+           in
+             xyD // (`> DOM $$ #[R]) // (`> LAM $$ #[v \\ (`> PROJ $$ #[R, ``v])])
+           end
+
+       | NEIGH_EQ $ _ => ax
+       | NEIGH_NIL_EQ $ _ => ax
+       | NEIGH_SNOC_EQ $ _ => ax
+       | NEIGH_IND_EQ $ _ => ax
+       | NEIGH_ELIM $ #[N,nilCase,snocCase] =>
+           `> NEIGH_IND $$ #[N, extract nilCase, extract snocCase]
+
        | WTREE_EQ $ _ => ax
        | WTREE_MEM_EQ $ _ => ax
        | WTREE_REC_EQ $ _ => ax
-       | WTREE_INTRO $ #[s,_,xE] => `> SUP $$ #[s, extract xE]
+       | WTREE_INTRO $ #[D] => `> SUP $$ #[extract D]
        | WTREE_ELIM $ #[z, xyzD] => `> WTREE_REC $$ #[z, extract xyzD]
 
        | HYP_EQ $ _ => ax

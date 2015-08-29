@@ -122,7 +122,7 @@ struct
        ORELSE CEqRefl
        ORELSE ApproxRules.Refl
        ORELSE BaseRules.Intro
-       ORELSE_LAZY (fn _ => WTreeRules.Intro (valOf term, freshVariable))
+       ORELSE WTreeRules.Intro
        ORELSE
        (if not invertible then
             CEqRules.Struct
@@ -237,6 +237,9 @@ struct
         ORELSE_LAZY (fn _ => BaseRules.ElimEq (target, listAt (names, 0)))
         ORELSE_LAZY (fn _ => PlusRules.Elim (target, twoNames))
         ORELSE_LAZY (fn _ => ProdRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => ContainerRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => ContainerExtensionRules.Elim (target, twoNames))
+        ORELSE_LAZY (fn _ => NeighborhoodRules.Elim (target, threeNames))
         ORELSE_LAZY (fn _ => FunRules.Elim (target, valOf term, twoNames))
         ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
         ORELSE ImageRules.EqInd (target, fourNames)
@@ -278,10 +281,16 @@ struct
         ORELSE ISectRules.Eq freshVariable
         ORELSE ProdRules.Eq freshVariable
         ORELSE SubsetRules.Eq freshVariable
-        ORELSE ProdRules.PairEq (freshVariable, level)
+        ORELSE ProdRules.MemEq (freshVariable, level)
         ORELSE FunRules.LamEq (freshVariable, level)
         ORELSE SubsetRules.MemberEq (freshVariable, level)
         ORELSE ISectRules.MemberEq (freshVariable, level)
+        ORELSE ContainerRules.Eq
+        ORELSE ContainerRules.MemEq
+        ORELSE ContainerExtensionRules.Eq
+        ORELSE ContainerExtensionRules.MemEq
+        ORELSE NeighborhoodRules.Eq
+        ORELSE NeighborhoodRules.MemEq level
         ORELSE_LAZY (fn _ =>
           case terms of
                [M, N] => ISectRules.MemberCaseEq (SOME M, N)
@@ -311,6 +320,7 @@ struct
                                                         List.nth (terms, 2),
                                                         take3 names))
                ORELSE ProdRules.SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
+               ORELSE NeighborhoodRules.IndEq (listAt (terms, 0), listAt (terms, 1), take3 names)
                ORELSE FunRules.ApEq (listAt (terms, 0))
          else
              ID)

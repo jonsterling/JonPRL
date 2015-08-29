@@ -45,6 +45,29 @@ struct
         PAIR $ #[L, R] => (E // L) // R
       | _ => raise Stuck (SPREAD $$ #[P, E])
 
+  fun stepDomBeta F =
+    case project F of
+        MAKE_CONTAINER $ #[dom, xProj] => dom
+      | EXTEND $ #[dom, xProj] => dom
+      | _ => raise Stuck (DOM $$ #[F])
+
+  fun stepProjBeta (F, d) =
+    case project F of
+        MAKE_CONTAINER $ #[dom, xProj] => xProj // d
+      | EXTEND $ #[dom, xProj] => xProj // d
+      | _ => raise Stuck (PROJ $$ #[F, d])
+
+  fun stepRefinementBeta (F, u) =
+    case project u of
+        NEIGH_NIL $ #[] => UNIT $$ #[]
+      | EXTEND $ #[v, pE] =>
+          let
+            val s = Variable.named "s"
+          in
+            FUN $$ #[REFINEMENT $$ #[F, v], s \\ PROJ $$ #[F, pE // ``s]]
+          end
+      | _ => raise Stuck (REFINEMENT $$ #[F, u])
+
   fun stepApBeta (F, A) =
     case project F of
         LAM $ #[B] => B // A
@@ -62,13 +85,24 @@ struct
        | SUCC $ #[N] => (xyS // N) // (NATREC $$ #[N, Z, xyS])
        | _ => raise Stuck (NATREC $$ #[M, Z, xyS])
 
+  fun stepNeighIndBeta (M, Z, xypS) =
+    case project M of
+         NEIGH_NIL $ #[] => Z
+       | EXTEND $ #[U, rE] =>
+           let
+           in
+             xypS // U // (LAM $$ #[rE]) // (NEIGH_IND $$ #[U, Z, xypS])
+           end
+       | _ => raise Stuck (NEIGH_IND $$ #[M, Z, xypS])
+
   fun stepWTreeRecBeta (M, xyzD) =
     case project M of
-         SUP $ #[S, sR] =>
+         SUP $ #[extend] =>
          let
            val v = Variable.named "v"
+           val S = DOM $$ #[extend]
          in
-           xyzD // S // (LAM $$ #[sR]) // (LAM $$ #[v \\ WTREE_REC $$ #[sR // ``v, xyzD]])
+           xyzD // S // (LAM $$ #[v \\ (PROJ $$ #[extend, ``v])]) // (LAM $$ #[v \\ WTREE_REC $$ #[PROJ $$ #[extend, ``v], xyzD]])
          end
        | _ => raise Stuck (WTREE_REC $$ #[M, xyzD])
 
@@ -113,6 +147,11 @@ struct
       | CEQUAL $ _ => CANON
       | WTREE $ _ => CANON
       | SUP $ _ => CANON
+      | CONTAINER _ $ _ => CANON
+      | MAKE_CONTAINER $ _ => CANON
+      | EXTEND $ _ => CANON
+      | NEIGH_NIL $ _ => CANON
+      | NEIGH $ _ => CANON
       | AP $ #[L, R] =>
           (case step L of
               STEP L' => STEP (AP $$ #[L', R])
@@ -122,6 +161,21 @@ struct
           (case step P of
               STEP P' => STEP (SPREAD $$ #[P', E])
             | CANON => STEP (stepSpreadBeta (P, E))
+            | NEUTRAL => NEUTRAL)
+      | DOM $ #[F] =>
+          (case step F of
+              STEP F' => STEP (DOM $$ #[F'])
+            | CANON => STEP (stepDomBeta F)
+            | NEUTRAL => NEUTRAL)
+      | PROJ $ #[F, d] =>
+          (case step F of
+              STEP F' => STEP (PROJ $$ #[F', d])
+            | CANON => STEP (stepProjBeta (F, d))
+            | NEUTRAL => NEUTRAL)
+      | REFINEMENT $ #[F, u] =>
+          (case step u of
+              STEP u' => STEP (REFINEMENT $$ #[F, u'])
+            | CANON => STEP (stepRefinementBeta (F, u))
             | NEUTRAL => NEUTRAL)
       | FIX $ #[F] =>
           (case step F of
@@ -138,6 +192,11 @@ struct
               STEP S' => STEP (DECIDE $$ #[S', L, R])
             | CANON => STEP (stepDecideBeta (S, L, R))
             | NEUTRAL => NEUTRAL)
+      | NEIGH_IND $ #[M, Z, xypS] =>
+          (case step M of
+                STEP M' => STEP (NEIGH_IND $$ #[M', Z, xypS])
+              | CANON => STEP (stepNeighIndBeta (M, Z, xypS))
+              | NEUTRAL => NEUTRAL)
       | NATREC $ #[M, Z, xyS] =>
           (case step M of
                 STEP M' => STEP (NATREC $$ #[M', Z, xyS])
