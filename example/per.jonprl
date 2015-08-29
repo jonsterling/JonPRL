@@ -1,0 +1,8 @@
+Operator per-squash : (0).
+Prefix 7 "⇃" := per-squash.
+[⇃ A] =def= [per(lam(_.lam(_.A)))].
+
+Theorem per-squash-wf : [{A:U{i}} member(⇃ A; U{i})] {
+  unfold <per-squash>; auto; reduce; auto
+}.
+
