@@ -1,0 +1,96 @@
+Infix 2 "∈" := member.
+Infix 100 "~" := ceq.
+Postfix 10 "⇓" := has-value.
+Prefix 50 "¬" := not.
+
+||| First we define the option/maybe type constructor
+Operator option : (0).
+Postfix 10 "?" := option.
+[A ?] =def= [A + unit].
+
+Theorem option-wf : [{A:U{i}} A? ∈ U{i}] {
+unfold <option>; auto
+}.
+
+Resource wf += { wf-lemma <option-wf> }.
+
+Operator some : (0).
+[some(M)] =def= [inl(M)].
+
+Theorem some-wf : [{A:U{i}} {M:A} some(M) ∈ A?] {
+  unfold <some option>; auto
+}.
+
+Resource wf += { wf-lemma <some-wf> }.
+
+Operator none : ().
+[none] =def= [inr(<>)].
+
+Theorem none-wf : [{A:U{i}} none ∈ A?] {
+  unfold <none option>; auto
+}.
+
+Resource wf += { wf-lemma <none-wf> }.
+
+
+
+Operator telescope-sig : ().
+[telescope-sig] =def= [A : U{i}? <: decide(A; A'.A'; _.void)].
+
+Theorem telescope-sig-wf : [telescope-sig ∈ container{i'}] {
+  unfold <telescope-sig>; auto;
+  [ unfold <option>; auto
+  , unfold <option>; elim #1; reduce; auto
+  ]
+}.
+
+Resource wf += { wf-lemma <telescope-sig-wf> }.
+
+Operator telescope : ().
+[telescope] =def= [wtree(telescope-sig)].
+
+Theorem telescope-wf : [telescope ∈ U{i'}] {
+  unfold <telescope>; unfold <member>;
+  eq-cd @i'; auto
+}.
+
+Resource wf += { wf-lemma <telescope-wf> }.
+
+Operator t-nil : ().
+[t-nil] =def= [sup(none ^ <>)].
+
+Theorem t-nil-wf : [t-nil ∈ telescope] {
+  unfold <t-nil telescope telescope-sig>; auto; reduce;
+  unfold <none option>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <t-nil-wf> }.
+
+Operator t-snoc : (0;1).
+Infix <- 10 "#" := t-snoc.
+[A # a. T[a]] =def= [sup(some(A) ^ a.T[a])].
+
+Theorem t-snoc-wf : [{A:U{i}} {T:A -> telescope} (A # a.T a) ∈ telescope] {
+  auto; intro @i'; auto;
+  unfold <t-snoc some telescope telescope-sig option>;
+  *{ auto; reduce }
+}.
+
+Resource wf += { wf-lemma <t-snoc-wf> }.
+
+Operator t-prod : (0).
+[t-prod(T)] =def= [
+  wtree-rec(T; shape.po.ih.
+    decide(shape; A. (x:A) * ih x; var.unit)
+  )
+].
+Theorem test : [<"hi", zero, <>> ∈ t-prod(atom # match { "hi" => nat # _.t-nil | _ => t-nil })] {
+  unfold <t-prod t-snoc t-nil some none>;
+  *{ reduce; auto };
+  eq-cd [telescope-sig, _.U{i}];
+  unfold <telescope-sig option>;
+  *{ reduce; auto };
+  elim #2; reduce; auto
+}.
+
+Print test.
