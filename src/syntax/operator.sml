@@ -21,7 +21,9 @@ struct
     | NAT | ZERO | SUCC | NATREC
     | CEQUAL | APPROX | BASE
     | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
-    | CONTAINER | MAKE_CONTAINER | SHAPE | REFINEMENT | WTREE | SUP | WTREE_REC
+    | CONTAINER of Level.t | MAKE_CONTAINER | DOM | PROJ | EXTEND | EXTENSION
+    | NEIGH | REFINEMENT | NEIGH_IND | CONTAINER_NEIGH
+    | WTREE | SUP | WTREE_REC
     | SO_APPLY
 
   local
@@ -46,7 +48,9 @@ struct
        NAT, ZERO, SUCC, NATREC,
        ATOM, TOKEN "token",
        CEQUAL, APPROX, BASE,
-       CONTAINER, MAKE_CONTAINER, SHAPE, REFINEMENT, WTREE, SUP, WTREE_REC,
+       CONTAINER i, MAKE_CONTAINER, DOM, PROJ, NEIGH, REFINEMENT, CONTAINER_NEIGH, NEIGH_IND,
+       EXTENSION, EXTEND,
+       WTREE, SUP, WTREE_REC,
        SO_APPLY]
   end
 
@@ -104,13 +108,19 @@ struct
        | TEST_ATOM => #[0,0,0,0]
        | SO_APPLY => #[0,0]
 
-       | CONTAINER => #[]
-       | WTREE => #[0]
-       | SUP => #[0,1]
-       | WTREE_REC => #[0,3]
+       | CONTAINER _ => #[]
        | MAKE_CONTAINER => #[0,1]
-       | SHAPE => #[0]
+       | DOM => #[0]
+       | PROJ => #[0,0]
+       | EXTEND => #[0,1]
+       | EXTENSION => #[0,0]
+       | NEIGH => #[0]
        | REFINEMENT => #[0,0]
+       | NEIGH_IND => #[0,0,3]
+       | CONTAINER_NEIGH => #[0]
+       | WTREE => #[0]
+       | SUP => #[0]
+       | WTREE_REC => #[0,3]
 
   fun toString theta =
     case theta of
@@ -166,13 +176,19 @@ struct
              ^ "}"
            end
        | TEST_ATOM => "test_atom"
-       | CONTAINER => "container"
+       | CONTAINER i => "container{" ^ Level.toString i ^ "}"
        | MAKE_CONTAINER => "make-container"
-       | SHAPE => "shape"
-       | REFINEMENT => "refinement"
+       | DOM => "dom"
+       | PROJ => "proj"
        | WTREE => "wtree"
        | WTREE_REC => "wtree-rec"
        | SUP => "sup"
+       | EXTEND => "extend"
+       | EXTENSION => "extension"
+       | NEIGH => "neigh"
+       | REFINEMENT => "refinement"
+       | NEIGH_IND => "neigh-ind"
+       | CONTAINER_NEIGH => "neighborhoods"
        | SO_APPLY => "so_apply"
 end
 
@@ -197,6 +213,11 @@ struct
         >> braces Level.parse
         wth UNIV
 
+    val parseContainer : t charParser =
+      string "container"
+        >> braces Level.parse
+        wth CONTAINER
+
     fun choices xs =
       foldl (fn (p, p') => p || try p') (fail "unknown operator") xs
 
@@ -206,6 +227,7 @@ struct
     val parseOperator : t charParser =
       choices
         [parseUniv,
+         parseContainer,
          parseToken,
          string "atom" return ATOM,
          string "base" return BASE,
@@ -249,10 +271,15 @@ struct
          string "zero" return ZERO,
          string "succ" return SUCC,
          string "natrec" return NATREC,
-         string "container" return CONTAINER,
          string "make-container" return MAKE_CONTAINER,
-         string "shape" return SHAPE,
+         string "extend" return EXTEND,
+         string "extension" return EXTENSION,
+         string "dom" return DOM,
+         string "proj" return PROJ,
+         string "neigh" return NEIGH,
          string "refinement" return REFINEMENT,
+         string "neigh-ind" return NEIGH_IND,
+         string "neighborhoods" return CONTAINER_NEIGH,
          string "wtree" return WTREE,
          string "wtree-rec" return WTREE_REC,
          string "sup" return SUP]

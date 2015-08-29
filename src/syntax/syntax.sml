@@ -36,8 +36,8 @@ struct
            Abt.\ _ => M
          | _ => Abt.Variable.named "_" \\ M
 
-    val supOpr =
-      (spaces >> (symbol "⌢" || symbol "^") >> spaces) return Infix (Right, 10, fn (A,B) => `> SUP $$ #[A, forceBinding B])
+    val extendOpr =
+      (spaces >> (symbol "⌢" || symbol "^") >> spaces) return Infix (Left, 10, fn (A,B) => `> EXTEND $$ #[A, forceBinding B])
 
     fun customOperator w =
       (spaces >> identifier << spaces) -- (fn sym =>
@@ -56,6 +56,7 @@ struct
         end) handle _ => fail "not a custom notation")
 
     val pipe = symbol "|"
+    fun pipes p = middle pipe p pipe
 
     fun parseRaw w st () =
       fancySubset w st
@@ -63,6 +64,7 @@ struct
       || fancyFun w st
       || fancyIsect w st
       || fancyPair w st
+      || fancyDom w st
       || fancyMakeContainer w st
       || matchToken w st
       || matchTokenBinding w st
@@ -81,11 +83,13 @@ struct
         (fn [] => fail "Not enough components to product"
           | [x] => fail "Not enough components to product"
           | x::xs => succeed (foldl (fn (a,P) => `> PAIR $$ #[a,P]) x xs))
+    and fancyDom w st =
+      pipes (parseAbt w st) wth (fn M => `> DOM $$ #[M])
     and soAppOpr w st () =
       squares (parseAbt w st) wth (fn N => Postfix (12, fn M => `> SO_APPLY $$ #[M,N]))
     and parenthetical w st () = parens (parseAbt w st)
     and fixityItem w st =
-      alt [customOperator w, plusOpr, supOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
+      alt [customOperator w, plusOpr, extendOpr, indFunOpr, indIsectOpr, indProdOpr, $ (soAppOpr w st)] wth Opr
       || alt [$ (parseRaw w st), $ (parenthetical w st)] wth Atm
     and matchToken w st =
       symbol "match"
@@ -171,9 +175,11 @@ struct
                  Unparse.atom
                    (Variable.toString x ^ ":" ^ toString A ^ " <: " ^ toString B)
                end
+           | DOM $ #[F] =>
+               Unparse.atom ("|" ^ toString F ^ "|")
            | PLUS $ #[A,B] =>
                Unparse.infix' (Unparse.Right, 8, "+") (unparseAbt A, unparseAbt B)
-           | SUP $ #[S, rR] =>
+           | EXTEND $ #[S, rR] =>
                let
                  val (r, R) = unbind rR
                  val R' = if hasFree (R, r) then rR else R

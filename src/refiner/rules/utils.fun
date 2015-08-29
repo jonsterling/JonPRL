@@ -173,6 +173,7 @@ struct
     fun inferLevel (H, P) =
       case project P of
            UNIV l $ _ => Level.succ l
+         | CONTAINER i $ #[] => Level.succ i
          | FUN $ #[A, xB] =>
            let
              val (H', x, B) = ctxUnbind (H, A, xB)

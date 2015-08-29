@@ -12,11 +12,11 @@ struct
   fun Eq (_ |: H >> P) =
     let
       val #[wtree1,wtree2,univ] = P ^! EQ
-      val (UNIV _, #[]) = asApp univ
+      val (UNIV i, #[]) = asApp univ
       val #[C1] = wtree1 ^! WTREE
       val #[C2] = wtree2 ^! WTREE
     in
-      [ MAIN |: H >> C.`> EQ $$ #[C1, C2, C.`> CONTAINER $$ #[]]
+      [ MAIN |: H >> C.`> EQ $$ #[C1, C2, C.`> (CONTAINER i) $$ #[]]
       ] BY mkEvidence WTREE_EQ
     end
 
@@ -24,15 +24,20 @@ struct
     let
       val #[sup1, sup2, wtree] = P ^! EQ
       val #[C] = wtree ^! WTREE
-      val #[E,xR] = sup1 ^! SUP
-      val #[E',yR'] = sup2 ^! SUP
 
-      val B = C.`> REFINEMENT $$ #[C, E]
+      val #[ext1] = sup1 ^! SUP
+      val #[ext2] = sup2 ^! SUP
 
-      val (H', x, R) = ctxUnbind (H, B, xR)
-      val R' = yR' // ``x
+      val E = C.`> DOM $$ #[ext1]
+      val E' = C.`> DOM $$ #[ext2]
+
+      val x = Context.fresh (H, Variable.named "x")
+      val R = C.`> PROJ $$ #[ext1, ``x]
+      val R' = C.`> PROJ $$ #[ext2, ``x]
+      val B = C.`> PROJ $$ #[C, E]
+      val H' = H @@ (x, B)
     in
-      [ MAIN |: H >> C.`> EQ $$ #[E, E', C.`> SHAPE $$ #[C]]
+      [ MAIN |: H >> C.`> EQ $$ #[E, E', C.`> DOM $$ #[C]]
       , MAIN |: H' >> C.`> EQ $$ #[R, R', wtree]
       ] BY (fn [D, E] => D.`> WTREE_MEM_EQ $$ #[D, x \\ E]
              | _ => raise Refine)
@@ -56,15 +61,15 @@ struct
              in
                cont
              end
-      val shape = C.`> SHAPE $$ #[cont]
-      fun refinement s = C.`> REFINEMENT $$ #[cont, s]
+      val shape = C.`> DOM $$ #[cont]
+      fun refinement s = C.`> PROJ $$ #[cont, s]
 
       val (Hx, x, yzD1) = ctxUnbind (H, shape, xyzD1)
       val r = Context.fresh (Hx, Variable.named "r")
       val (Hxy, y, zD1) = ctxUnbind (Hx, C.`> FUN $$ #[refinement (``x), r \\ (C.`> WTREE $$ #[cont])], yzD1)
       val v = Context.fresh (Hxy, Variable.named "v")
       val (Hxyz, z, D1) = ctxUnbind (Hxy, C.`> FUN $$ #[refinement (``x), v \\ (zC // (C.`> AP $$ #[``y, ``v]))], zD1)
-      val Cxy = zC // (C.`> SUP $$ #[``x, r \\ (C.`> AP $$ #[``y, ``r])])
+      val Cxy = zC // (C.`> SUP $$ #[C.`> EXTEND $$ #[``x, r \\ (C.`> AP $$ #[``y, ``r])]])
       val D2 = xyzD2 // ``x // ``y // ``z
     in
       [ MAIN |: Hxyz >> C.`> EQ $$ #[D1, D2, Cxy]
@@ -73,21 +78,12 @@ struct
              | _ => raise Refine)
     end
 
-  fun Intro (s, oname) (_ |: H >> P) =
+  fun Intro (_ |: H >> P) =
     let
       val #[X] = P ^! WTREE
-      val shape = C.`> SHAPE $$ #[X]
-      val refinement = C.`> REFINEMENT $$ #[X, s]
-      val name =
-        Context.fresh (H,
-          case oname of
-               SOME name => name
-             | NONE => Variable.named "r")
     in
-      [ AUX |: H >> C.`> MEM $$ #[s, shape]
-      , MAIN |: H @@ (name, refinement) >> P
-      ] BY (fn [D, E] => D.`> WTREE_INTRO $$ #[s, D, name \\ E]
-             | _ => raise Refine)
+      [ MAIN |: H >> C.`> EXTENSION $$ #[X, P]
+      ] BY mkEvidence WTREE_INTRO
     end
 
   fun Elim (hyp, onames) (_ |: H >> C) =
@@ -102,11 +98,11 @@ struct
                (Context.fresh (H, Variable.named "a"),
                 Context.fresh (H, Variable.named "b"),
                 Context.fresh (H, Variable.named "c"))
-      val shape = C.`> SHAPE $$ #[X]
-      val refinement = C.`> REFINEMENT $$ #[X, ``a]
+      val shape = C.`> DOM $$ #[X]
+      val refinement = C.`> PROJ $$ #[X, ``a]
       val r = Context.fresh (H, Variable.named "r")
       val v = Context.fresh (H, Variable.named "v")
-      val sup = C.`> SUP $$ #[``a, r \\ (C.`> AP $$ #[``b, ``r])]
+      val sup = C.`> SUP $$ #[C.`> EXTEND $$ #[``a, r \\ (C.`> AP $$ #[``b, ``r])]]
       val J =
         Context.empty
           @@ (a, shape)
