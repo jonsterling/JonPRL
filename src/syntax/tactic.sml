@@ -34,8 +34,9 @@ struct
                 freshVariable : name option,
                 level : level option} * meta
     | ELIM of {target : hyp,
-               term : term option,
-               names : name list} * meta
+               term   : term option,
+               names  : name list,
+               level  : level option} * meta
     | EQ_CD of {names : name list,
                 terms : term list,
                 level : level option} * meta
@@ -143,10 +144,11 @@ struct
                     rule = rule,
                     freshVariable = freshVariable,
                     level = level}, meta)
-          | ELIM ({target, term, names}, meta) =>
+          | ELIM ({target, term, names, level}, meta) =>
             ELIM ({target = applyHyp target,
                    term = Option.map apply term,
-                   names = names}, meta)
+                   names = names,
+		   level = level}, meta)
           | EQ_CD ({names, terms, level}, meta) =>
             EQ_CD ({names = names,
                     terms = List.map apply terms,

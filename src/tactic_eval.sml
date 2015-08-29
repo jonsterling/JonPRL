@@ -36,8 +36,11 @@ struct
                                  invertible = false,
                                  freshVariable = freshVariable,
                                  level = level} wld)
-      | ELIM ({target, term, names}, a) =>
-        an a (RefinerUtil.Elim {target = target, term = term, names = names} wld)
+      | ELIM ({target, term, names, level}, a) =>
+        an a (RefinerUtil.Elim {target = target,
+				term   = term,
+				names  = names,
+				level  = level} wld)
       | EQ_CD ({names, terms, level}, a) =>
         an a (RefinerUtil.EqCD {names = names,
                                 invertible = false,

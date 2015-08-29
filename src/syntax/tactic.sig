@@ -36,8 +36,9 @@ sig
                   freshVariable : name option,
                   level : level option} * meta
       | ELIM of {target : hyp,
-                 term : term option,
-                 names : name list} * meta
+                 term   : term option,
+                 names  : name list,
+                 level  : level option} * meta
       | EQ_CD of {names : name list,
                   terms : term list,
                   level : level option} * meta

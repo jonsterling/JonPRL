@@ -140,10 +140,12 @@ struct
     fn w => parseHyp
       && opt (parseTm w)
       && parseNames
-      wth (fn (i, (M, names)) =>
+      && opt parseLevel
+      wth (fn (i, (M, (names, l))) =>
             {target = i,
-             term = M,
-             names = names})
+             term   = M,
+             names  = names,
+	     level  = l})
 
   val parseTerms : term list intensional_parser =
     fn w => opt (squares (commaSep1 (ParseSyntax.parseAbt w (ParseSyntax.initialState []))))

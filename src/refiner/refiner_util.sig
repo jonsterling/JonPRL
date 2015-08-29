@@ -12,8 +12,9 @@ sig
 
   type elim_args =
     {target : hyp,
-     names : name list,
-     term : term option}
+     names  : name list,
+     term   : term option,
+     level  : Level.t option}
 
   type eq_cd_args =
     {names : name list,

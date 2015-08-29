@@ -38,8 +38,9 @@ struct
 
   type elim_args =
     {target : hyp,
-     names : name list,
-     term : term option}
+     names  : name list,
+     term   : term option,
+     level  : Level.t option}
 
   type eq_cd_args =
     {names : name list,
@@ -144,6 +145,9 @@ struct
   fun take4 (u::v::w::x::_) = SOME (u,v,w,x)
     | take4 _ = NONE
 
+  fun take5 (u::v::w::x::y::_) = SOME (u,v,w,x,y)
+    | take5 _ = NONE
+
   fun listAt (xs, n) = SOME (List.nth (xs, n)) handle _ => NONE
 
   local
@@ -222,7 +226,7 @@ struct
       end
   end
 
-  fun Elim {target, names, term} world =
+  fun Elim {target, names, term, level} world =
     let
       val twoNames = take2 names
       val threeNames = take3 names
@@ -237,6 +241,7 @@ struct
         ORELSE_LAZY (fn _ => ISectRules.Elim (target, valOf term, twoNames))
         ORELSE ImageRules.EqInd (target, fourNames)
         ORELSE ImageRules.Elim (target, listAt (names, 0))
+        ORELSE PerRules.Elim (target, listAt (names, 0), level)
         ORELSE NatRules.Elim (target, twoNames)
         ORELSE SubsetRules.Elim (target, twoNames)
         ORELSE WTreeRules.Elim (target, threeNames)
@@ -294,6 +299,8 @@ struct
         ORELSE SubsetRules.EqInSupertype
         ORELSE ImageRules.Eq
         ORELSE ImageRules.MemEq
+        ORELSE PerRules.Eq (take5 names)
+        ORELSE PerRules.MemEq level
         ORELSE WTreeRules.Eq
         ORELSE WTreeRules.MemEq
         ORELSE
