@@ -54,7 +54,7 @@ Postfix 10 "♮" := neighborhoods.
 Operator B : ().
 [B] =def= [x:nat <: unit].
 
-Theorem test : [<> ^ zero ^ succ(zero) ^ succ(succ(zero)) ∈ | B ♮|] {
+Theorem test : [[] ^ zero ^ succ(zero) ^ succ(succ(zero)) ∈ | B ♮|] {
   unfold <neighborhoods B>;
   *{ auto; reduce }
 }.
@@ -133,7 +133,7 @@ Operator spreidingswet : (0;0).
   spw-decidable(F; S)
     * spw-leaks-upwards(F; S)
     * spw-downward-closed(F; S)
-    * S <>
+    * S []
 ].
 
 Theorem spreidingswet-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spreidingswet(F;S) ∈ U{i}] {

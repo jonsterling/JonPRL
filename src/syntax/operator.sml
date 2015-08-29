@@ -22,7 +22,7 @@ struct
     | CEQUAL | APPROX | BASE
     | ATOM | TOKEN of string | MATCH_TOKEN of string vector | TEST_ATOM
     | CONTAINER of Level.t | MAKE_CONTAINER | DOM | PROJ | EXTEND | EXTENSION
-    | NEIGH | REFINEMENT | NEIGH_IND | CONTAINER_NEIGH
+    | NEIGH | REFINEMENT | NEIGH_IND | CONTAINER_NEIGH | NEIGH_NIL
     | WTREE | SUP | WTREE_REC
     | SO_APPLY
 
@@ -49,7 +49,7 @@ struct
        ATOM, TOKEN "token",
        CEQUAL, APPROX, BASE,
        CONTAINER i, MAKE_CONTAINER, DOM, PROJ, NEIGH, REFINEMENT, CONTAINER_NEIGH, NEIGH_IND,
-       EXTENSION, EXTEND,
+       EXTENSION, EXTEND, NEIGH_NIL,
        WTREE, SUP, WTREE_REC,
        SO_APPLY]
   end
@@ -113,6 +113,7 @@ struct
        | DOM => #[0]
        | PROJ => #[0,0]
        | EXTEND => #[0,1]
+       | NEIGH_NIL => #[]
        | EXTENSION => #[0,0]
        | NEIGH => #[0]
        | REFINEMENT => #[0,0]
@@ -184,6 +185,7 @@ struct
        | WTREE_REC => "wtree-rec"
        | SUP => "sup"
        | EXTEND => "extend"
+       | NEIGH_NIL => "[]"
        | EXTENSION => "extension"
        | NEIGH => "neigh"
        | REFINEMENT => "refinement"
@@ -273,6 +275,7 @@ struct
          string "natrec" return NATREC,
          string "make-container" return MAKE_CONTAINER,
          string "extend" return EXTEND,
+         string "[]" return NEIGH_NIL,
          string "extension" return EXTENSION,
          string "dom" return DOM,
          string "proj" return PROJ,
