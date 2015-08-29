@@ -97,11 +97,12 @@ struct
 
   fun stepWTreeRecBeta (M, xyzD) =
     case project M of
-         SUP $ #[S, sR] =>
+         SUP $ #[extend] =>
          let
            val v = Variable.named "v"
+           val S = DOM $$ #[extend]
          in
-           xyzD // S // (LAM $$ #[sR]) // (LAM $$ #[v \\ WTREE_REC $$ #[sR // ``v, xyzD]])
+           xyzD // S // (LAM $$ #[v \\ (PROJ $$ #[extend, ``v])]) // (LAM $$ #[v \\ WTREE_REC $$ #[PROJ $$ #[extend, ``v], xyzD]])
          end
        | _ => raise Stuck (WTREE_REC $$ #[M, xyzD])
 
