@@ -373,11 +373,11 @@ Theorem is-hereditary-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}
 
 Resource wf += { wf-lemma <is-hereditary-wf> }.
 
-||| The statement of the Bar Induction Principle (variant the requires decidability of the bar
+||| The statement of the Bar Induction Principle (variant that requires decidability of the bar)
 Operator BI-D : (0;0;0;0).
 [BI-D(F; S; Q; A)] =def= [
   (((u:{u:|F ♮| | S u}) decidable(Q u)) * is-bar(F; S; Q) * is-hereditary(F; S; A) * ((u:|F ♮|) Q u -> A u))
-    -> Q []
+    -> A []
 ].
 
 Theorem BI-D-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} {A:|F ♮| -> U{i}} BI-D(F; S; Q; A) ∈ U{i}] {
