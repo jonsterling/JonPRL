@@ -1,0 +1,395 @@
+Infix 2 "∈" := member.
+Infix 100 "~" := ceq.
+Postfix 10 "⇓" := has-value.
+Prefix 50 "¬" := not.
+
+Operator pi2 : ().
+[pi2] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; pi2)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
+] {
+  unfold <union pi2>; auto
+}.
+
+Operator top : ().
+[top] =def= [void => void].
+
+Theorem top-wf : [top ∈ U{i}] {
+  unfold <top>; auto
+}.
+
+Resource wf += { wf-lemma <top-wf> }.
+
+Operator ν : (1).
+[ν(x.F[x])] =def= [{n:nat} natrec(n; top; _.T.F[T])].
+
+Theorem ν-wf : [{F:U{i} -> U{i}} ν(x.F x) ∈ U{i}] {
+  auto; unfold <ν>; auto;
+}.
+
+||| generalized choice sequences
+Operator choice-sequence : (0).
+[choice-sequence(F)] =def= [ν(R.extension(F; R))].
+
+Theorem choice-sequence-wf : [{F:container{i}} choice-sequence(F) ∈ U{i}] {
+  auto; unfold <choice-sequence ν>; auto;
+  eq-cd [U{i} -> U{i}]; auto
+}.
+
+Resource wf += { wf-lemma <choice-sequence-wf> }.
+
+Operator hd : (0).
+[hd(α)] =def= [dom(α)].
+
+Operator tl : (0;0).
+[tl(α; p)] =def= [proj(α; p)].
+
+Theorem hd-wf : [{F:container{i}} {α:choice-sequence(F)} hd(α) ∈ dom(F)] {
+  auto; intro @i; auto;
+  unfold <choice-sequence ν hd>;
+  elim #1; reduce;
+  elim #4 [succ(zero)]; reduce; auto;
+  prune { hyp-subst <- #6 [h.=(dom(h); dom(h); _)]; auto };
+  @{ [H:extension(_;_) |- _] => elim <H>
+   }; reduce; auto
+}.
+
+Resource wf += { wf-lemma <hd-wf> }.
+
+Theorem tl-wf : [{F:container{i}} {α:choice-sequence(F)} {p:proj(F; hd(α))} tl(α; p) ∈ choice-sequence(F)] {
+  trace "remember to prove tl-wf";
+  fiat
+}.
+
+Resource wf += { wf-lemma <tl-wf> }.
+
+Postfix 10 "♮" := neighborhoods.
+
+||| Brouwer's container
+Operator Br : ().
+[Br] =def= [x:nat <: unit].
+
+Theorem test : [[] ^ zero ^ succ(zero) ^ succ(succ(zero)) ∈ | Br ♮|] {
+  unfold <neighborhoods Br>;
+  *{ auto; reduce }
+}.
+
+
+Operator decidable : (0).
+[decidable(P)] =def= [P + ¬ P].
+
+Theorem implies-wf : [{P:U{i}} {Q:U{i}} implies(P; Q) ∈ U{i}] {
+  unfold <implies>; auto
+}.
+
+Resource wf += { wf-lemma <implies-wf> }.
+
+Theorem not-wf : [{P:U{i}} ¬ P ∈ U{i}] {
+  unfold <not>; auto
+}.
+
+Resource wf += { wf-lemma <not-wf> }.
+
+Theorem decidable-wf : [{P:U{i}} decidable(P) ∈ U{i}] {
+  unfold <decidable>;
+  auto
+}.
+
+Resource wf += { wf-lemma <decidable-wf> }.
+
+Operator prefixes : (0;0).
+Infix 10 "≼" := prefixes.
+
+[u ≼ v] =def= [neigh-ind(v; neigh-ind(u; unit; _._._.void); w.e.ih.ih)].
+
+Theorem prefixes-wf : [{F:container{i}} {u:|F ♮|} {v:|F ♮|} u ≼ v ∈ U{i}] {
+  auto; unfold <prefixes neighborhoods>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <prefixes-wf> }.
+
+Operator spw-decidable : (0;0).
+[spw-decidable(F; S)] =def= [(u:|F ♮|) decidable(S u)].
+
+Operator spw-leaks-upwards : (0;0).
+[spw-leaks-upwards(F; S)] =def= [(u:|F ♮|) S u -> (e:proj(F ♮; u) -> |F|) * S (u ^ r. e r)].
+
+Operator spw-downward-closed : (0;0).
+[spw-downward-closed(F; S)] =def= [(v:|F ♮|) (u:{u : |F ♮| | u ≼ v}) S u -> S v].
+
+Theorem spw-decidable-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-decidable(F; S) ∈ U{i}] {
+  unfold <spw-decidable neighborhoods>; reduce; auto;
+  elim #1; auto
+}.
+
+Theorem spw-leaks-upwards-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-leaks-upwards(F; S) ∈ U{i}] {
+  unfold <spw-leaks-upwards neighborhoods>; reduce; auto;
+  elim #1; auto; reduce; auto;
+  elim #5; reduce; auto
+}.
+
+Theorem spw-downward-closed-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-downward-closed(F; S) ∈ U{i}] {
+  auto; unfold <spw-downward-closed neighborhoods>; reduce; auto;
+  cut-lemma <prefixes-wf>;
+  elim #5 [F]; auto;
+  unfold <member neighborhoods>; reduce;
+  bhyp #6; auto;
+}.
+
+Resource wf += { wf-lemma <spw-decidable-wf> }.
+Resource wf += { wf-lemma <spw-leaks-upwards-wf> }.
+Resource wf += { wf-lemma <spw-downward-closed-wf> }.
+
+||| I can't use the word "spread" (because that's the name of the recursor for
+||| pairs), so I'll use the Dutch.
+
+Operator spreidingswet : (0;0).
+[spreidingswet(F; S)] =def= [
+  spw-decidable(F; S)
+    * spw-leaks-upwards(F; S)
+    * spw-downward-closed(F; S)
+    * S []
+].
+
+Theorem spreidingswet-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spreidingswet(F;S) ∈ U{i}] {
+  auto; *{ unfold <spreidingswet neighborhoods>; reduce; auto }
+}.
+
+Resource wf += { wf-lemma <spreidingswet-wf> }.
+
+Operator spreiding : (0).
+[spreiding(F)] =def= [{S:|F ♮| -> U{i} | spreidingswet(F; S)}].
+
+Theorem spreiding-wf : [{F:container{i}} spreiding(F) ∈ U{i'}] {
+  auto; unfold <spreiding neighborhoods>; reduce; auto;
+  [ elim #1 , cum @i ];
+  auto; unfold <neighborhoods>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <spreiding-wf> }.
+
+Operator universal-spread : ().
+[universal-spread] =def= [lam(_.unit)].
+
+Theorem universal-spread-pre-wf : [{F:container{i}} universal-spread ∈ |F ♮| -> U{i}] {
+  auto; unfold <universal-spread neighborhoods>; auto;
+  elim #1; reduce; auto
+}.
+
+Resource wf += { wf-lemma <universal-spread-pre-wf> }.
+
+Theorem universal-spread-wf : [{F:container{i}} (s:|F|) universal-spread ∈ spreiding(F)] {
+  unfold <spreiding>; auto; aux { elim #1; reduce; auto };
+  eq-cd @i; ?{ !{ auto } };
+  unfold <spreidingswet>; auto;
+  unfold <neighborhoods>; reduce; auto;
+  unfold <universal-spread>; reduce; auto;
+  aux { elim #3; reduce; auto; elim #1; reduce; auto };
+  focus 0 #{ intro #0; auto };
+  intro @i; auto;
+  cut-lemma <prefixes-wf>;
+  elim #5 [F]; auto;
+  unfold <neighborhoods member>; reduce;
+  bhyp #6; auto
+}.
+
+Resource wf += { wf-lemma <universal-spread-wf> }.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator pred : (0).
+[pred(n)] =def= [natrec(n; bot; m._.m)].
+
+Operator minus : (0;0).
+[minus(m; n)] =def= [
+  natrec(n; m; n'.ih. pred(ih))
+].
+
+Operator leq : (0;0).
+Infix 10 "≤" := leq.
+[m ≤ n] =def= [minus(n; m) ⇓].
+
+Theorem leq-wf : [{m:nat} {n:nat} (m ≤ n) ∈ U{i}] {
+  unfold <leq>; auto
+}.
+
+Resource wf += { wf-lemma <leq-wf> }.
+
+Operator upto : (0).
+[upto(i)] =def= [{j : nat | j ≤ i}].
+
+Theorem upto-wf : [{n:nat} upto(n) ∈ U{i}] {
+  unfold <upto>; auto
+}.
+
+Resource wf += { wf-lemma <upto-wf> }.
+
+Operator surj : (0;0;0).
+[surj(A; B; f)] =def= [(b:B) {a:A | =(f a; b; B)}].
+
+Theorem surj-wf : [{A:U{i}} {B:U{i}} {f : A -> B} surj(A; B; f) ∈ U{i}] {
+  auto; unfold <surj>; auto
+}.
+
+Resource wf += { wf-lemma <surj-wf> }.
+
+Operator is-finite : (0).
+[is-finite(A)] =def= [union(nat; n. {f : upto(n) -> A | surj(upto(n); A; f)})].
+
+Theorem is-finite-wf : [{A:U{i}} is-finite(A) ∈ U{i}] {
+  unfold <is-finite union>; auto;
+}.
+
+Resource wf += { wf-lemma <is-finite-wf> }.
+
+
+Operator finitarily-branching : (0;0).
+[finitarily-branching(F;S)] =def= [
+  (u : {u : |F ♮| | S u}) is-finite({e : refinement(F; u) -> |F| | S (u ^ r. e r)})
+].
+
+Theorem finitarily-branching-wf : [{F:container{i}} {S:|F ♮| -> U{i}} finitarily-branching(F; S) ∈ U{i}] {
+  auto; unfold <finitarily-branching>; auto; unfold <neighborhoods>; reduce; auto;
+  elim #1; reduce; auto;
+  elim #5; elim #6; reduce; auto
+}.
+
+Resource wf += { wf-lemma <finitarily-branching-wf> }.
+
+
+Operator fan : (0).
+[fan(F)] =def= [{S:spreiding(F) | finitarily-branching(F; S)}].
+
+Theorem fan-wf : [{F:container{i}} fan(F) ∈ U{i'}] {
+  auto; unfold <fan>; auto; cum @i; auto;
+  unfold <spreiding>; auto
+}.
+
+Resource wf += { wf-lemma <fan-wf> }.
+
+
+Operator chop-prefix : (0;0).
+[chop-prefix(α; u)] =def= [
+  neigh-ind(u; lam(_.α); v.e.ih. lam(z. spread(z; p.p'. tl(ih p; p'))))
+].
+
+Theorem chop-prefix-wf : [{F:container{i}} {α : choice-sequence(F)} {u:|F ♮|} chop-prefix(α; u) ∈ refinement(F; u) -> choice-sequence(F)] {
+  auto;
+  intro @i; auto; unfold <neighborhoods>; reduce; auto;
+  unfold <chop-prefix>;
+  eq-cd [h.refinement(F; h) -> choice-sequence(F), F];
+  reduce; auto;
+  [ eq-cd [h.choice-sequence(F)]; auto
+  , elim #4; reduce; auto; elim #1; reduce; auto
+  , elim #1; reduce; auto
+  ];
+
+  unfold <hd>;
+  trace "please fix chop-prefix-wf";
+  fiat
+}.
+
+Resource wf += { wf-lemma <chop-prefix-wf> }.
+
+Infix 10 "%" := pair.
+
+Operator approximates : (0;0;0).
+[approximates(F; u; α)] =def= [
+  neigh-ind(u; unit; v.e.ih.ih * =(lam(z.hd(chop-prefix(α; v) z)); e; refinement(F; v) -> |F|))
+].
+
+Theorem approximates-wf : [{F:container{i}} {u:|F ♮|} {α:choice-sequence(F)} approximates(F; u; α) ∈ U{i}] {
+  auto; unfold <neighborhoods>; reduce; auto;
+  intro @i; auto;
+  unfold <approximates>;
+  prune { eq-cd [h.U{i}, F]; auto; };
+  [ elim #4; reduce; auto; elim #1
+  , elim #1
+  , eq-cd [refinement(F; u') -> choice-sequence(F)]; auto;
+    unfold <neighborhoods>
+  ]; reduce; auto
+}.
+
+Resource wf += { wf-lemma <approximates-wf> }.
+
+Operator approximations : (0;0).
+[approximations(F; α)] =def= [{u : |F ♮| | approximates(F; u; α)}].
+
+Theorem approximations-wf : [{F:container{i}} {α:choice-sequence(F)} approximations(F; α) ∈ U{i}] {
+  auto; intro @i; auto;
+  *{ unfold <approximations neighborhoods>; reduce; auto };
+}.
+
+Resource wf += { wf-lemma <approximations-wf> }.
+
+||| The extension of a spread as a collection of ideal points (i.e. choice-sequences).
+Operator spread-extension : (0;0).
+[spread-extension(F; S)] =def= [{α:choice-sequence(F) | (u:approximations(F; α)) S u}].
+
+Theorem spread-extension-wf : [{F:container{i}} {S : spreiding(F)} spread-extension(F; S) ∈ U{i}] {
+  auto; intro @i'; auto;
+  unfold <spread-extension>; auto;
+  unfold <spreiding>;
+  elim #2; unfold <approximations neighborhoods>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <spread-extension-wf> }.
+
+Operator is-bar : (0;0;0).
+[is-bar(F; S; Q)] =def= [
+  {α:spread-extension(F; S)} {u : approximations(F; α) | Q u}
+].
+
+Theorem is-bar-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} is-bar(F; S; Q) ∈ U{i}] {
+  auto; intro @i'; auto;
+  unfold <neighborhoods>; reduce; auto;
+  unfold <is-bar>; auto;
+  unfold <spread-extension approximations neighborhoods>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <is-bar-wf> }.
+
+Operator is-hereditary : (0;0;0).
+[is-hereditary(F; S; Q)] =def= [
+  (u:|F ♮|) (e:refinement(F; u) -> |F|) Q (u ^ r. e r) -> Q u
+].
+
+Theorem is-hereditary-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} is-hereditary(F; S; Q) ∈ U{i}] {
+  auto; intro @i'; auto;
+  unfold <neighborhoods>; reduce; auto;
+  unfold <is-hereditary>; auto;
+  unfold <neighborhoods>; reduce; auto;
+  focus 0 #{ elim #4; reduce; auto };
+  elim #1; reduce; auto
+}.
+
+Resource wf += { wf-lemma <is-hereditary-wf> }.
+
+||| The statement of the Bar Induction Principle (variant that requires decidability of the bar)
+Operator BI-D : (0;0;0;0).
+[BI-D(F; S; Q; A)] =def= [
+  (((u:{u:|F ♮| | S u}) decidable(Q u)) * is-bar(F; S; Q) * is-hereditary(F; S; A) * ((u:|F ♮|) Q u -> A u))
+    -> A []
+].
+
+Theorem BI-D-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} {A:|F ♮| -> U{i}} BI-D(F; S; Q; A) ∈ U{i}] {
+  auto; intro @i'; auto;
+  unfold <BI-D>; auto;
+  unfold <spreiding>;
+  unfold <neighborhoods>; reduce; auto;
+  eq-cd [neigh(F) -> U{i}]; auto
+}.
+
+Resource wf += { wf-lemma <BI-D-wf> }.
+
+
+
+
