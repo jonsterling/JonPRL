@@ -48,7 +48,7 @@ Operator hd : (0).
 Operator tl : (0;0).
 [tl(α; p)] =def= [proj(α; p)].
 
-Theorem hd-wf : [{F:container{i}} {α:choice-sequence(F)} dom(α) ∈ dom(F)] {
+Theorem hd-wf : [{F:container{i}} {α:choice-sequence(F)} hd(α) ∈ dom(F)] {
   auto; intro @i; auto;
   unfold <choice-sequence ν hd>;
   elim #1; reduce;
@@ -59,6 +59,13 @@ Theorem hd-wf : [{F:container{i}} {α:choice-sequence(F)} dom(α) ∈ dom(F)] {
 }.
 
 Resource wf += { wf-lemma <hd-wf> }.
+
+Theorem tl-wf : [{F:container{i}} {α:choice-sequence(F)} {p:proj(F; hd(α))} tl(α; p) ∈ choice-sequence(F)] {
+  trace "remember to prove tl-wf";
+  fiat
+}.
+
+Resource wf += { wf-lemma <tl-wf> }.
 
 Postfix 10 "♮" := neighborhoods.
 
@@ -267,3 +274,72 @@ Theorem fan-wf : [{F:container{i}} fan(F) ∈ U{i'}] {
 }.
 
 Resource wf += { wf-lemma <fan-wf> }.
+
+
+Operator chop-prefix : (0;0).
+[chop-prefix(α; u)] =def= [
+  neigh-ind(u; lam(_.α); v.e.ih. lam(z. spread(z; p.p'. tl(ih p; p'))))
+].
+
+Theorem chop-prefix-wf : [{F:container{i}} {α : choice-sequence(F)} {u:|F ♮|} chop-prefix(α; u) ∈ refinement(F; u) -> choice-sequence(F)] {
+  auto;
+  intro @i; auto; unfold <neighborhoods>; reduce; auto;
+  unfold <chop-prefix>;
+  eq-cd [h.refinement(F; h) -> choice-sequence(F), F];
+  reduce; auto;
+  [ eq-cd [h.choice-sequence(F)]; auto
+  , elim #4; reduce; auto; elim #1; reduce; auto
+  , elim #1; reduce; auto
+  ];
+
+  unfold <hd>;
+  trace "please fix chop-prefix-wf";
+  fiat
+}.
+
+Resource wf += { wf-lemma <chop-prefix-wf> }.
+
+Infix 10 "%" := pair.
+
+Operator approximates : (0;0;0).
+[approximates(F; u; α)] =def= [
+  neigh-ind(u; unit; v.e.ih.ih * =(lam(z.hd(chop-prefix(α; v) z)); e; refinement(F; v) -> |F|))
+].
+
+Theorem approximates-wf : [{F:container{i}} {u:|F ♮|} {α:choice-sequence(F)} approximates(F; u; α) ∈ U{i}] {
+  auto; unfold <neighborhoods>; reduce; auto;
+  intro @i; auto;
+  unfold <approximates>;
+  prune { eq-cd [h.U{i}, F]; auto; };
+  [ elim #4; reduce; auto; elim #1
+  , elim #1
+  , eq-cd [refinement(F; u') -> choice-sequence(F)]; auto;
+    unfold <neighborhoods>
+  ]; reduce; auto
+}.
+
+Resource wf += { wf-lemma <approximates-wf> }.
+
+Operator approximations : (0;0).
+[approximations(F; α)] =def= [{u : |F ♮| | approximates(F; u; α)}].
+
+Theorem approximations-wf : [{F:container{i}} {α:choice-sequence(F)} approximations(F; α) ∈ U{i}] {
+  auto; intro @i; auto;
+  *{ unfold <approximations neighborhoods>; reduce; auto };
+}.
+
+Resource wf += { wf-lemma <approximations-wf> }.
+
+||| The extension of a spread as a collection of ideal points (i.e. choice-sequences).
+Operator spread-extension : (0;0).
+[spread-extension(F; S)] =def= [{α:choice-sequence(F) | (u:approximations(F; α)) S u}].
+
+Theorem spread-extension-wf : [{F:container{i}} {S : spreiding(F)} spread-extension(F; S) ∈ U{i}] {
+  auto; intro @i'; auto;
+  unfold <spread-extension>; auto;
+  unfold <spreiding>;
+  elim #2; unfold <approximations neighborhoods>; reduce; auto
+}.
+
+Resource wf += { wf-lemma <spread-extension-wf> }.
+
