@@ -3,6 +3,18 @@ Infix 100 "~" := ceq.
 Postfix 10 "⇓" := has-value.
 Prefix 50 "¬" := not.
 
+Operator pi2 : ().
+[pi2] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; pi2)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
+] {
+  unfold <union pi2>; auto
+}.
+
 Operator top : ().
 [top] =def= [void => void].
 
@@ -51,11 +63,11 @@ Resource wf += { wf-lemma <hd-wf> }.
 Postfix 10 "♮" := neighborhoods.
 
 ||| Brouwer's container
-Operator B : ().
-[B] =def= [x:nat <: unit].
+Operator Br : ().
+[Br] =def= [x:nat <: unit].
 
-Theorem test : [[] ^ zero ^ succ(zero) ^ succ(succ(zero)) ∈ | B ♮|] {
-  unfold <neighborhoods B>;
+Theorem test : [[] ^ zero ^ succ(zero) ^ succ(succ(zero)) ∈ | Br ♮|] {
+  unfold <neighborhoods Br>;
   *{ auto; reduce }
 }.
 
@@ -179,3 +191,79 @@ Theorem universal-spread-wf : [{F:container{i}} (s:|F|) universal-spread ∈ spr
 }.
 
 Resource wf += { wf-lemma <universal-spread-wf> }.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator pred : (0).
+[pred(n)] =def= [natrec(n; bot; m._.m)].
+
+Operator minus : (0;0).
+[minus(m; n)] =def= [
+  natrec(n; m; n'.ih. pred(ih))
+].
+
+Operator leq : (0;0).
+Infix 10 "≤" := leq.
+[m ≤ n] =def= [minus(n; m) ⇓].
+
+Theorem leq-wf : [{m:nat} {n:nat} (m ≤ n) ∈ U{i}] {
+  unfold <leq>; auto
+}.
+
+Resource wf += { wf-lemma <leq-wf> }.
+
+Operator upto : (0).
+[upto(i)] =def= [{j : nat | j ≤ i}].
+
+Theorem upto-wf : [{n:nat} upto(n) ∈ U{i}] {
+  unfold <upto>; auto
+}.
+
+Resource wf += { wf-lemma <upto-wf> }.
+
+Operator surj : (0;0;0).
+[surj(A; B; f)] =def= [(b:B) {a:A | =(f a; b; B)}].
+
+Theorem surj-wf : [{A:U{i}} {B:U{i}} {f : A -> B} surj(A; B; f) ∈ U{i}] {
+  auto; unfold <surj>; auto
+}.
+
+Resource wf += { wf-lemma <surj-wf> }.
+
+Operator is-finite : (0).
+[is-finite(A)] =def= [union(nat; n. {f : upto(n) -> A | surj(upto(n); A; f)})].
+
+Theorem is-finite-wf : [{A:U{i}} is-finite(A) ∈ U{i}] {
+  unfold <is-finite union>; auto;
+}.
+
+Resource wf += { wf-lemma <is-finite-wf> }.
+
+
+Operator finitarily-branching : (0;0).
+[finitarily-branching(F;S)] =def= [
+  (u : {u : |F ♮| | S u}) is-finite({e : refinement(F; u) -> |F| | S (u ^ r. e r)})
+].
+
+Theorem finitarily-branching-wf : [{F:container{i}} {S:|F ♮| -> U{i}} finitarily-branching(F; S) ∈ U{i}] {
+  auto; unfold <finitarily-branching>; auto; unfold <neighborhoods>; reduce; auto;
+  elim #1; reduce; auto;
+  elim #5; elim #6; reduce; auto
+}.
+
+Resource wf += { wf-lemma <finitarily-branching-wf> }.
+
+
+Operator fan : (0).
+[fan(F)] =def= [{S:spreiding(F) | finitarily-branching(F; S)}].
+
+Theorem fan-wf : [{F:container{i}} fan(F) ∈ U{i'}] {
+  auto; unfold <fan>; auto; cum @i; auto;
+  unfold <spreiding>; auto
+}.
+
+Resource wf += { wf-lemma <fan-wf> }.
