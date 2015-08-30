@@ -64,7 +64,7 @@ struct
           let
             val s = Variable.named "s"
           in
-            FUN $$ #[REFINEMENT $$ #[F, v], s \\ PROJ $$ #[F, pE // ``s]]
+            PROD $$ #[REFINEMENT $$ #[F, v], s \\ PROJ $$ #[F, pE // ``s]]
           end
       | _ => raise Stuck (REFINEMENT $$ #[F, u])
 
