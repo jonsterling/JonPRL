@@ -1,0 +1,22 @@
+Operator finitarily-branching : (0;0).
+[finitarily-branching(F;S)] =def= [
+  (u : {u : |F ♮| | S u}) is-finite({e : refinement(F; u) -> |F| | S (u ^ r. e r)})
+].
+
+Theorem finitarily-branching-wf : [{F:container{i}} {S:|F ♮| -> U{i}} finitarily-branching(F; S) ∈ U{i}] {
+  auto; unfold <finitarily-branching>; auto; unfold <neighborhoods>; reduce; auto;
+  elim #1; reduce; auto;
+  elim #5; elim #6; reduce; auto
+}.
+
+Resource wf += { wf-lemma <finitarily-branching-wf> }.
+
+Operator fan : (0).
+[fan(F)] =def= [{S:spreiding(F) | finitarily-branching(F; S)}].
+
+Theorem fan-wf : [{F:container{i}} fan(F) ∈ U{i'}] {
+  auto; unfold <fan>; auto; cum @i; auto;
+  unfold <spreiding>; auto
+}.
+
+Resource wf += { wf-lemma <fan-wf> }.
