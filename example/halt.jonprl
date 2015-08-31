@@ -1,0 +1,80 @@
+||| The proof of the halting problem here is pretty much
+||| what you would expect, we apply the standard diagonalization
+||| trick to prove that if we have a halting oracle there is a
+||| program which both does and doesn't terminate.
+
+Operator dec : (0).
+[dec(M)] =def= [plus(M; not(M))].
+
+Theorem has-value-wf : [{A : base} member(has-value(A); U{i})] {
+  unfold <has-value>; auto
+}.
+
+Theorem dec-wf : [{A : U{i}} member(dec(A); U{i})] {
+  unfold <dec not implies>; auto
+}.
+
+Resource wf += {wf-lemma <dec-wf>}.
+Resource wf += {wf-lemma <has-value-wf>}.
+
+Operator problem : (0).
+[problem(M)] =def= [lam(y. decide(M (y y); _. bot; _. <>))].
+
+Tactic contradiction {
+  unfold <not implies void>;
+  @{ [H : P -> approx(<>; bot), H' : P |- approx(<>; bot)] =>
+       elim <H> [H'];
+       unfold <member>;
+       auto
+   }
+}.
+
+||| This is just used in assert-opposite to deal with
+||| the main proof obligations.
+Tactic t {
+  unfold <problem>;
+  step;
+  @{ [H : =(_; h; _) |- ceq(decide(h; _._; _._); _)] =>
+     hyp-subst ← <H> [h. ceq(decide(h; _._; _._); _)]
+   };
+  auto; step; auto
+}.
+
+||| If problem(x) problem(x) halts, prove that it is bot,
+||| if it diverges, prove it's ax.
+Tactic assert-opposite {
+  @{ [_ : has-value(M) |- _] =>
+     assert [ceq(M; bot)]; aux {t}
+   | [_ : has-value(M) -> approx(<>; bot) |- _] =>
+     assert [ceq(M; <>)]; aux {t}
+   }
+}.
+
+||| Given a hypothesis ceq(M; bot) or ceq(M; <>),
+||| convert this into a hypothesis that not(has-value(M))
+||| or has-value(M).
+Tactic derive-contra {
+  @{ [H : ceq(M; bot) |- _] =>
+     assert [not(has-value(M))];
+     aux {
+       chyp-subst → <H> [h.not(has-value(h))];
+       auto; bot-div #6
+     };
+   | [H : ceq(M; <>) |- _] =>
+     assert [has-value(M)];
+     aux {
+       chyp-subst → <H> [h.has-value(h)];
+       auto; reduce; auto
+     };
+   }
+}.
+
+Theorem can't-decide-halting : [not((m : base) dec(has-value(m)))] {
+  *{unfold <not implies dec>}; auto;
+
+  ||| Ask whether or not problem(x) problem(x) terminates
+  elim #1 [problem(x) problem(x)]; auto; elim #2;
+
+  ||| Show no matter the answer, we have a contradiction.
+  assert-opposite; derive-contra; contradiction
+}.

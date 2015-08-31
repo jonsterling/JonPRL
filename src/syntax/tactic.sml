@@ -173,6 +173,7 @@ struct
 	  | ASSUME_HAS_VALUE ({name,level}, meta) => ASSUME_HAS_VALUE ({name = name, level = level}, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | THIN (h, meta) => THIN (applyHyp h, meta)
+          | ON_CLASS (c, t) => ON_CLASS (c, go t)
           | t => t
       and goPat (CtxPattern {goal, hyps}) =
           CtxPattern {goal = apply goal,
