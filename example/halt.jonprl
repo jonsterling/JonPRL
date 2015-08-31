@@ -78,3 +78,20 @@ Theorem can't-decide-halting : [not((m : base) dec(has-value(m)))] {
   ||| Show no matter the answer, we have a contradiction.
   assert-opposite; derive-contra; contradiction
 }.
+
+||| We can now demonstrate that the law of excluded middle
+||| is bad.
+Theorem can't-exclude-middle : [not((A : U{i}) dec(A))] {
+  unfold <dec>; auto;
+
+  ||| With our hypothesis, we can solve the halting problem
+  assert [(m : base) has-value(m) + (has-value(m) -> void)];
+  aux {
+    auto; elim #1 [has-value(m)]; auto; unfold <not implies void>;
+    assumption
+  };
+
+  ||| But we still can't solve the halting problem, contradiction.
+  cut-lemma <can't-decide-halting>; unfold <not implies dec>;
+  contradiction
+}.
