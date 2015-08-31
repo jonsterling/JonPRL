@@ -59,6 +59,9 @@ struct
       end
      | _ => ([], M)
 
+  (* Undo all the second order applications around some term M,
+   * this is like unbindAll but for asInstantiate
+   *)
   fun unappAll M =
     case asInstantiate M of
         SOME (M', A) =>
@@ -69,6 +72,10 @@ struct
         end
       | NONE => ([], M)
 
+  (* Take a list of terms and return the list of underlying variables.
+   * Raise an invalid template exception if given anything other
+   * than variables.
+   *)
   fun asVars Ms =
     List.map (fn M =>
                 case out M of
@@ -105,7 +112,6 @@ struct
                      case out patTerm' of
                          `x => x
                        | _ => raise InvalidTemplate
-
                    (* Pattern and term must bind the same number of
                     * variables
                     *)
@@ -114,7 +120,7 @@ struct
                        then ()
                        else raise InvalidTemplate
                    (* A higher order pattern must bind a bunch of
-                    * vars and immediately instantiate them
+                    * vars and immediately instantiate them in order
                     *)
                    val () =
                      if EQUAL = List.collate Variable.compare
