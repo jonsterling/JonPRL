@@ -1,0 +1,41 @@
+Theorem polymorphic-id-unique : [
+  (f : {A : U{i}} A -> A) =(f; id; {A : U{i}} A -> A)
+] {
+  ||| This works our way into the goal
+  |||      =(f x; x; A) using extensionality.
+  ||| To prove type correctness we need to do some writing though.
+  unfold <id>; auto; elim #1 [A] <fA, f-fA>; auto; ext; auto; reduce;
+  aux {
+    hyp-subst ← <f-fA> [h.=(h; h; _)]; auto
+  };
+
+  ||| Here's the trick, we specialize f to be from of the
+  ||| type
+  |||    f : {b : A | =(x; b; A)} -> {b : A | =(x; b; A)}
+  ||| What we'll do is use this specialization to show that
+  |||    f x : {b : A | =(x; b; A)}
+  ||| which by trivial inversion gives f x = x.
+  elim #1 [{b : A | =(x; b; A)}] <fSub, f-fSub>; auto;
+
+  ||| Apply fSub to x to get fSub x (which is trivially x)
+  elim <fSub> [x]; auto; elim #8;
+
+  ||| Change =(f x; x; A) to =(f x; b; x) since we know
+  ||| that =(fSub x; b; ...), it'll make the rewriting
+  ||| simpler.
+  hyp-subst → #10 [h. =(_; h; _)]; auto;
+  focus 1 #{
+    hyp-subst ← <f-fA> [h. =(h _; h _; _)]; auto
+  };
+
+  ||| Change out f for fSub, this is the application
+  ||| of our trick
+  hyp-subst ← <f-fSub> [h. =(h _; _; _)]; auto;
+  focus 1 #{
+    elim #12 [x]; auto;
+    elim #13;
+    hyp-subst ← #16 [h. =(h; h; _)]; auto
+  };
+
+  hyp-subst ← #11 [h. =(h; _; _)]; auto
+}.
