@@ -1,0 +1,109 @@
+Infix 2 "∈" := member.
+Infix 100 "~" := ceq.
+Postfix 10 "⇓" := has-value.
+Prefix 50 "¬" := not.
+Postfix 10 "♮" := neighborhoods.
+
+Operator pi2 : ().
+[pi2] =def= [lam(x. spread(x; u.v.v))].
+
+Operator union : (0;1).
+[union(A; x.B[x])] =def= [image((x : A) * B[x]; pi2)].
+
+Theorem union-wf : [
+  {A : U{i}} {B : A -> U{i}} union(A; x.B x) ∈ U{i}
+] {
+  unfold <union pi2>; auto
+}.
+
+Operator top : ().
+[top] =def= [void => void].
+
+Theorem top-wf : [top ∈ U{i}] {
+  unfold <top>; auto
+}.
+
+Resource wf += { wf-lemma <top-wf> }.
+
+Operator ν : (1).
+[ν(x.F[x])] =def= [{n:nat} natrec(n; top; _.T.F[T])].
+
+Theorem ν-wf : [{F:U{i} -> U{i}} ν(x.F x) ∈ U{i}] {
+  auto; unfold <ν>; auto;
+}.
+
+
+
+Operator decidable : (0).
+[decidable(P)] =def= [P + ¬ P].
+
+Theorem implies-wf : [{P:U{i}} {Q:U{i}} implies(P; Q) ∈ U{i}] {
+  unfold <implies>; auto
+}.
+
+Resource wf += { wf-lemma <implies-wf> }.
+
+Theorem not-wf : [{P:U{i}} ¬ P ∈ U{i}] {
+  unfold <not>; auto
+}.
+
+Resource wf += { wf-lemma <not-wf> }.
+
+Theorem decidable-wf : [{P:U{i}} decidable(P) ∈ U{i}] {
+  unfold <decidable>;
+  auto
+}.
+
+Resource wf += { wf-lemma <decidable-wf> }.
+
+Theorem has-value-wf : [{M:base} M ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Resource wf += { wf-lemma <has-value-wf> }.
+
+Operator pred : (0).
+[pred(n)] =def= [natrec(n; bot; m._.m)].
+
+Operator minus : (0;0).
+[minus(m; n)] =def= [
+  natrec(n; m; n'.ih. pred(ih))
+].
+
+Operator leq : (0;0).
+Infix 10 "≤" := leq.
+[m ≤ n] =def= [minus(n; m) ⇓].
+
+Theorem leq-wf : [{m:nat} {n:nat} (m ≤ n) ∈ U{i}] {
+  unfold <leq>; auto
+}.
+
+Resource wf += { wf-lemma <leq-wf> }.
+
+Operator upto : (0).
+[upto(i)] =def= [{j : nat | j ≤ i}].
+
+Theorem upto-wf : [{n:nat} upto(n) ∈ U{i}] {
+  unfold <upto>; auto
+}.
+
+Resource wf += { wf-lemma <upto-wf> }.
+
+Operator surj : (0;0;0).
+[surj(A; B; f)] =def= [(b:B) {a:A | =(f a; b; B)}].
+
+Theorem surj-wf : [{A:U{i}} {B:U{i}} {f : A -> B} surj(A; B; f) ∈ U{i}] {
+  auto; unfold <surj>; auto
+}.
+
+Resource wf += { wf-lemma <surj-wf> }.
+
+Operator is-finite : (0).
+[is-finite(A)] =def= [union(nat; n. {f : upto(n) -> A | surj(upto(n); A; f)})].
+
+Theorem is-finite-wf : [{A:U{i}} is-finite(A) ∈ U{i}] {
+  unfold <is-finite union>; auto;
+}.
+
+Resource wf += { wf-lemma <is-finite-wf> }.
+

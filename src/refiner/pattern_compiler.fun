@@ -26,7 +26,7 @@ struct
     datatype 'a point =
         GLOBAL of 'a
         (* A "global" point is the definition of a first-order variable *)
-      | LOCAL of 'a -> 'a
+      | LOCAL of 'a list -> 'a
         (* A "local" point is the definition of a second-order variable *)
 
     type 'a chart = 'a point dict
@@ -45,6 +45,44 @@ struct
   structure AbtUtil = AbtUtil(PatternTerm)
   open AbtUtil
   infix $ $$ \ \\
+
+  (* Undo all the bindings in M and return the new variables
+   * as a list along with the term under all the binders
+   *)
+  fun unbindAll M =
+    case out M of
+      x \ M' =>
+      let
+        val (xs, M'') = unbindAll M'
+      in
+        (x :: xs, M'')
+      end
+     | _ => ([], M)
+
+  (* Undo all the second order applications around some term M,
+   * this is like unbindAll but for asInstantiate
+   *)
+  fun unappAll M =
+    case asInstantiate M of
+        SOME (M', A) =>
+        let
+          val (xs, M'') = unappAll M'
+        in
+          (xs @ [A], M'')
+        end
+      | NONE => ([], M)
+
+  (* Take a list of terms and return the list of underlying variables.
+   * Raise an invalid template exception if given anything other
+   * than variables.
+   *)
+  fun asVars Ms =
+    List.map (fn M =>
+                case out M of
+                    `x => x
+                  | _ => raise InvalidTemplate)
+             Ms
+
 
   fun computeChart (pat, N) : term Chart.chart =
     case (out pat, out N) of
@@ -66,16 +104,38 @@ struct
                   * right hand side shall be y.E. So we insert its second order
                   * substitution into the chart, i.e. Z !-> [y/x]F. *)
                | go (x \ M) (y \ N) R =
-                 (case PatternTerm.asInstantiate M of
-                       SOME (F,X) =>
-                         (case out F of
-                               `f =>
-                               if eq (``x,X) then
-                                 Chart.insert R f (Chart.LOCAL (fn Z => subst Z y N))
-                               else
-                                 raise InvalidTemplate
-                             | _ => raise InvalidTemplate)
-                     | NONE => raise InvalidTemplate)
+                 let
+                   val (patVars, patTerm) = unbindAll (x \\ M)
+                   val (termVars, termTerm) = unbindAll (y \\ N)
+                   val (patArgs, patTerm') = unappAll patTerm
+                   val patVar =
+                     case out patTerm' of
+                         `x => x
+                       | _ => raise InvalidTemplate
+                   (* Pattern and term must bind the same number of
+                    * variables
+                    *)
+                   val () =
+                       if List.length patVars = List.length termVars
+                       then ()
+                       else raise InvalidTemplate
+                   (* A higher order pattern must bind a bunch of
+                    * vars and immediately instantiate them in order
+                    *)
+                   val () =
+                     if EQUAL = List.collate Variable.compare
+                                             (patVars, asVars patArgs)
+                     then ()
+                     else raise InvalidTemplate
+
+                   fun computeSubst terms =
+                     List.foldl (fn ((v, t), e) => subst t v e)
+                                termTerm
+                                (ListPair.zipEq (termVars, terms))
+                 in
+                   Chart.insert R patVar (Chart.LOCAL computeSubst)
+                 end
+
                | go _ _ _ = raise InvalidTemplate
            in
              foldl (fn ((e,e'), R') => go (out e) (out e') R') Chart.empty zipped
@@ -97,8 +157,8 @@ struct
                let
                  val _ = if Operator.eq (Pop, Mop) then () else raise Conv
                  fun go H M =
-                   case PatternTerm.asInstantiate M of
-                        NONE =>
+                   case unappAll M of
+                        ([], _) =>
                           (* If we have not reached a second-order application,
                            * then proceed structurally *)
                           (case out M of
@@ -112,13 +172,13 @@ struct
                                    ``x
                                  else
                                    Chart.lookupGlobal chart x handle _ => ``x)
-                      | SOME (F,X) =>
+                      | (Xs, F) =>
                            (* If we have got a second-order application, then
                             * apply its substitution *)
                           let
                             val `f = out F
                           in
-                            Chart.lookupLocal chart f X
+                            Chart.lookupLocal chart f Xs
                           end
                in
                  go Set.empty definiens
