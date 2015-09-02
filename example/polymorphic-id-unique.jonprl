@@ -1,4 +1,4 @@
-Theorem polymorphic-is-unique : [
+Theorem polymorphic-id-unique : [
   (f : {A : U{i}} A -> A) =(f; id; {A : U{i}} A -> A)
 ] {
   ||| This works our way into the goal

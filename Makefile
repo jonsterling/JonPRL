@@ -17,7 +17,7 @@ test:
 	bin/jonprl example/russell.jonprl
 	bin/jonprl example/container.jonprl
 	bin/jonprl example/list.jonprl
-	bin/jonprl example/id.jonprl
+	bin/jonprl example/polymorphic-id-unique.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
