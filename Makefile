@@ -17,6 +17,7 @@ test:
 	bin/jonprl example/russell.jonprl
 	bin/jonprl example/container.jonprl
 	bin/jonprl example/list.jonprl
+	bin/jonprl example/id.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
