@@ -56,6 +56,7 @@ struct
         an a (Assert (t, name))
       | CUT_LEMMA (theta, name, a) => an a (RefinerUtil.CutLemma (wld, theta, name))
       | WF_LEMMA (theta, a) => an a (RefinerUtil.WfLemma (wld, theta))
+      | UNHIDE (hyp, a) => an a (RefinerUtil.Unhide hyp)
       | SYMMETRY a => an a EqRules.Sym
       | CEQUAL_SYM a => an a CEqRules.Sym
       | CEQUAL_STEP a => an a CEqRules.Step

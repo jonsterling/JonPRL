@@ -106,6 +106,8 @@ struct
       end
   end
 
+  fun Unhide hyp = GeneralRules.Unhide hyp
+
   (* VR: Intro should try to unfold abstractions *)
   fun Intro {term,rule,invertible,freshVariable,level} D =
        GeneralRules.Assumption

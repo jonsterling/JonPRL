@@ -50,6 +50,7 @@ struct
                  name : name option} * meta
     | CUT_LEMMA of operator * name option * meta
     | WF_LEMMA of operator * meta
+    | UNHIDE of hyp * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta
@@ -186,6 +187,7 @@ struct
   val listOfTactics =
     ["intro [TERM]? #NUM? <NAME*>?",
      "elim (#NUM | <NAME>) [TERM]? <NAME*>?",
+     "unhide (#NUM | <NAME>)",
      "eq-cd [TERM*]? <NAME*>? @LEVEL?",
      "eq-eq-base",
      "ext <NAME>? @LEVEL?",

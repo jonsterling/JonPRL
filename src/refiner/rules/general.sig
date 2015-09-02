@@ -19,6 +19,7 @@ sig
   val Assert : term * name option -> tactic
   val Hypothesis : hyp -> tactic
   val HypEq : tactic
+  val Unhide : hyp -> tactic
 
   (* Match a single branch of a [match goal]. This needs to
    * be primitive because it needs access to the structure of

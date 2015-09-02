@@ -6,3 +6,106 @@ Theorem per-squash-wf : [{A:U{i}} member(⇃ A; U{i})] {
   unfold <per-squash>; auto; reduce; auto
 }.
 
+Theorem iff_squash : [{A:U{i}} iff(⇃ A;squash(A))] {
+ auto;
+ [ unfold <per-squash>;auto;reduce;auto;
+   assert [=(x;x;per(lam(_.lam(_.A))))] <e>;[ auto; fail, id ];
+   elim <e>; reduce; [ id, auto; reduce; auto ];
+   witness [<>];auto;
+   unhide <y>;
+   csubst [ceq(<>;lam(_.<>)y)] [h.=(h;h;_)];[ reduce; auto, id ];
+   auto;fail
+ , id
+ , unfold <squash>;auto;fail
+ ];
+ unfold <squash>;elim <x>;witness [<>];
+ unfold <member>;unhide <w>;auto;reduce;auto
+}.
+
+(* from russell.jonprl *)
+Infix 60 "∪" := bunion.
+Infix 40 "~" := ceq.
+Infix 20 "∈" := member.
+
+Tactic bunion-eq-right {
+  @{ [|- =(M; N; L ∪ R)] =>
+       csubst [M ~ lam(x. snd(x)) <inr(<>), M>] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [N ~ lam(x. snd(x)) <inr(<>), N>] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+  }
+}.
+
+Tactic eq-base-tac {
+  @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
+       eq-eq-base; auto;
+       bunion-eq-right; unfold <bunion>
+   }
+}.
+
+
+(* from identity-types.jonprl *)
+Operator rel : (0).
+[rel(A)] =def= [A -> A -> U{i}].
+
+Theorem rel-wf : [{A:U{i}} rel(A) ∈ U{i'}] {
+  unfold <rel>; auto
+}.
+
+Resource wf += { wf-lemma <rel-wf> }.
+Resource intro += {
+  @{ [|- {R:rel(A)} _] => intro @i'; aux { wf-lemma <rel-wf> }
+   | [|- (R:rel(A)) _] => intro @i'; aux { wf-lemma <rel-wf> }
+   }
+}.
+
+Resource eq-cd += {
+  @{ [R : rel(A) |- =(R a b; R a b; _)] => !{ unfold <rel>; auto }
+   }
+}.
+
+Operator is-symmetric : (0;0).
+[is-symmetric(A;R)] =def= [(a:A) (b:A) R a b -> R b a].
+
+Operator is-transitive : (0;0).
+[is-transitive(A;R)] =def= [(a:A) (b:A) (c:A) R a b -> R b c -> R a c].
+
+Theorem is-symmetric-wf : [{A:U{i}} {R:rel(A)} is-symmetric(A;R) ∈ U{i}] {
+  unfold <is-symmetric rel>; auto
+}.
+
+Theorem is-transitive-wf : [{A:U{i}} {R:rel(A)} is-transitive(A;R) ∈ U{i}] {
+  unfold <is-transitive rel>; auto
+}.
+
+Resource wf += { wf-lemma <is-symmetric-wf> }.
+Resource wf += { wf-lemma <is-transitive-wf> }.
+
+Theorem quotient_wf: [
+  {T:U{i}}
+  {R:rel(T)}
+  is-symmetric(T;R)
+  -> is-transitive(T;R)
+  -> member(quotient(T;x.y.R x y);U{i})
+] {
+  auto
+(*;
+  unfold <quotient and>;auto;reduce;
+  [ eq-cd;
+    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'>;reduce;auto;fail
+    , eq-cd;
+      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''>;reduce;auto;fail
+      , auto;fail
+      ]
+    ]
+  , eq-cd;
+    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'>;reduce;auto;fail
+    , eq-cd;
+      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''>;reduce;auto;fail
+      , auto;fail
+      ]
+    ]
+  , elim <z>; elim <t>;auto
+  , id
+  ]*)
+}.

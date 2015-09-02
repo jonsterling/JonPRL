@@ -72,6 +72,8 @@ struct
              (y \\ extract D) // ax
            end
 
+       | UNHIDE $ _ => ax
+
        | ATOM_EQ $ _ => ax
        | TOKEN_EQ $ _ => ax
        | MATCH_TOKEN_EQ toks $ Ds => ax

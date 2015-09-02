@@ -19,6 +19,8 @@ sig
 
   val modify : context -> name -> (term -> term) -> context
 
+  val modifyVisibility : context -> name -> (term -> term) -> (Visibility.t -> Visibility.t) -> context
+
   exception NotFound of name
   val lookup : context -> name -> term
   val find : context -> name -> term option

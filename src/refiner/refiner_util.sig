@@ -44,6 +44,8 @@ sig
   val CutLemma : world * operator * name option  -> tactic
   val WfLemma : world * operator -> tactic
 
+  val Unhide : hyp -> tactic
+
   val OnClass : Goal.class -> tactic -> tactic
 
 end

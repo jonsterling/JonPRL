@@ -23,6 +23,8 @@ struct
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
     | PER_EQ | PER_MEM_EQ | PER_ELIM
 
+    | UNHIDE
+
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
 
@@ -74,6 +76,8 @@ struct
        | PER_EQ => #[2,2,3,3,3,5]
        | PER_MEM_EQ => #[0,0,0,0]
        | PER_ELIM => #[1,0]
+
+       | UNHIDE => #[0]
 
        | ATOM_EQ => #[]
        | TOKEN_EQ => #[]
@@ -191,6 +195,8 @@ struct
        | PER_EQ => "per-eq"
        | PER_MEM_EQ => "per-mem-eq"
        | PER_ELIM => "per-elim"
+
+       | UNHIDE => "unhide"
 
        | ATOM_EQ => "atom-eq"
        | TOKEN_EQ => "token-eq"

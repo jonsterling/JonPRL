@@ -181,6 +181,7 @@ struct
       o unfoldUnit
       o unfoldVoid
       o unfoldHasValue
+      o unfoldQuotient
       o unfoldNot
       o unfoldContainerNeigh
   end
