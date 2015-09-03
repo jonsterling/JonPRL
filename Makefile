@@ -17,6 +17,7 @@ test:
 	bin/jonprl example/russell.jonprl
 	bin/jonprl example/container.jonprl
 	bin/jonprl example/list.jonprl
+	bin/jonprl example/foundations/sources.cfg
 	bin/jonprl example/polymorphic-id-unique.jonprl
 
 clean:

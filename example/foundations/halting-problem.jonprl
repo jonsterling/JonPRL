@@ -1,28 +1,7 @@
-Infix 2 "∈" := member.
-Prefix 10 "¬" := not.
-Postfix 11 "⇓" := has-value.
-Infix 10 "≼" := approx.
-Infix 10 "~" := ceq.
-
 ||| The proof of the undecidability of the halting problem here is pretty much
-||| what you would expect, we apply the standard diagonalization trick to prove
+||| what you would expect; we apply the standard diagonalization trick to prove
 ||| that if we have a halting oracle there is a program which both does and
 ||| doesn't terminate.
-
-Operator dec : (0).
-Postfix 2 "decidable" := dec.
-[P decidable] =def= [P + ¬ P].
-
-Theorem has-value-wf : [{A : base} A ⇓ ∈ U{i}] {
-  unfold <has-value>; auto
-}.
-
-Theorem dec-wf : [{A : U{i}} A decidable ∈ U{i}] {
-  unfold <dec not implies>; auto
-}.
-
-Resource wf += {wf-lemma <dec-wf>}.
-Resource wf += {wf-lemma <has-value-wf>}.
 
 Operator problem : (0).
 [problem(M)] =def= [lam(y. decide(M (y y); _. bot; _. <>))].
@@ -83,21 +62,4 @@ Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
 
   ||| Show no matter the answer, we have a contradiction.
   assert-opposite; derive-contra; contradiction
-}.
-
-||| We can now demonstrate that the global principle of the excluded middle is
-||| invalid.
-Theorem excluded-middle-invalid : [¬ ((A : U{i}) A decidable)] {
-  unfold <dec>; auto;
-
-  ||| With our hypothesis, we can solve the halting problem
-  assert [(m : base) m ⇓ + ¬ m ⇓];
-  aux {
-    auto; elim #1 [m ⇓]; auto; unfold <not implies void>;
-    assumption
-  };
-
-  ||| But we still can't solve the halting problem, contradiction.
-  cut-lemma <halting-problem-undecidable>; unfold <not implies dec>;
-  contradiction
 }.
