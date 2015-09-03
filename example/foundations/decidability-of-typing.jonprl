@@ -62,5 +62,5 @@ Theorem typing-undecidable : [¬ ((A : U{i})(a : base) (a ∈ A) decidable)] {
   };
 
   cut-lemma <halting-problem-undecidable>; unfold <not implies>;
-  elim #5 [H]; auto
+  contradiction
 }.
