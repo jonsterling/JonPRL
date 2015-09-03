@@ -1,0 +1,41 @@
+Infix 2 "∈" := member.
+Prefix 10 "¬" := not.
+Postfix 11 "⇓" := has-value.
+Infix 10 "≼" := approx.
+Infix 10 "~" := ceq.
+Infix 60 "∪" := bunion.
+
+Operator dec : (0).
+Postfix 2 "decidable" := dec.
+[P decidable] =def= [P + ¬ P].
+
+Theorem has-value-wf : [{A : base} A ⇓ ∈ U{i}] {
+  unfold <has-value>; auto
+}.
+
+Theorem dec-wf : [{A : U{i}} A decidable ∈ U{i}] {
+  unfold <dec not implies>; auto
+}.
+
+Resource wf += {wf-lemma <dec-wf>}.
+Resource wf += {wf-lemma <has-value-wf>}.
+
+Tactic break-plus {
+  @{ [H : _ + _ |- _] => elim <H>; thin <H> }
+}.
+
+Tactic bunion-eq-right {
+  @{ [|- =(M; N; L ∪ R)] =>
+       csubst [M ~ lam(x. snd(x)) <inr(<>), M>] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [N ~ lam(x. snd(x)) <inr(<>), N>] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+  }
+}.
+
+Tactic eq-base-tac {
+  @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
+       eq-eq-base; auto;
+       bunion-eq-right; unfold <bunion>
+   }
+}.

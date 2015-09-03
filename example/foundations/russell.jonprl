@@ -6,47 +6,13 @@
 ||| The well-formedness conditions in this proof are absolutely
 ||| killer and lead to most of the bloat in the proofs.
 
-Infix 20 "∈" := member.
-Infix 40 "~" := ceq.
-Infix 60 "∪" := bunion.
-Prefix 40 "¬" := not.
-
 Operator Russell : ().
 [Russell] =def= [{x : U{i} | ¬ (x ∈ x)}].
-
-Tactic break-plus {
-  @{ [H : _ + _ |- _] => elim <H>; thin <H> }
-}.
-
-Tactic bunion-eq-right {
-  @{ [|- =(M; N; L ∪ R)] =>
-       csubst [M ~ lam(x. snd(x)) <inr(<>), M>] [h.=(h;_;_)];
-       aux { unfold <snd>; reduce; auto };
-       csubst [N ~ lam(x. snd(x)) <inr(<>), N>] [h.=(_;h;_)];
-       aux { unfold <snd>; reduce; auto };
-  }
-}.
-
-Tactic eq-base-tac {
-  @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
-       eq-eq-base; auto;
-       bunion-eq-right; unfold <bunion>
-   }
-}.
 
 Tactic impredicativity-wf-tac {
   unfold <member>; eq-base-tac;
   eq-cd; ?{@{[|- =(_; _; base)] => auto}};
   eq-cd @i'; ?{break-plus}; reduce; auto
-}.
-
-Tactic contradiction {
-  unfold <not implies>;
-  @{ [H : P -> void, H' : P |- void] =>
-       elim <H> [H'];
-       unfold <member>;
-       auto
-   }
 }.
 
 Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {

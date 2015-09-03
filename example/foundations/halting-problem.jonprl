@@ -1,0 +1,65 @@
+||| The proof of the undecidability of the halting problem here is pretty much
+||| what you would expect; we apply the standard diagonalization trick to prove
+||| that if we have a halting oracle there is a program which both does and
+||| doesn't terminate.
+
+Operator problem : (0).
+[problem(M)] =def= [lam(y. decide(M (y y); _. bot; _. <>))].
+
+Tactic contradiction {
+  unfold <not implies void>;
+  @{ [H : P -> <> ≼ bot, H' : P |- <> ≼ bot] =>
+       elim <H> [H'];
+       unfold <member>;
+       auto
+   }
+}.
+
+||| This is just used in assert-opposite to deal with
+||| the main proof obligations.
+Tactic t {
+  unfold <problem>;
+  step;
+  @{ [H : =(_; h; _) |- decide(h; _._; _._) ~ _] =>
+     hyp-subst ← <H> [h. decide(h; _._; _._) ~ _]
+   };
+  auto; step; auto
+}.
+
+||| If problem(x) problem(x) halts, prove that it is bot,
+||| if it diverges, prove it's ax.
+Tactic assert-opposite {
+  @{ [_ : M ⇓ |- _] =>
+     assert [M ~ bot]; aux {t}
+   | [_ : M ⇓ -> <> ≼ bot |- _] =>
+     assert [M ~ <>]; aux {t}
+   }
+}.
+
+||| Given a hypothesis M ~ bot or M ~ <>, convert this into a hypothesis that ¬
+||| M ⇓ or M ⇓.
+Tactic derive-contra {
+  @{ [H : M ~ bot |- _] =>
+     assert [¬ M ⇓];
+     aux {
+       chyp-subst → <H> [h. ¬ h ⇓];
+       auto; bot-div #6
+     };
+   | [H : M ~ <> |- _] =>
+     assert [M ⇓];
+     aux {
+       chyp-subst → <H> [h. h ⇓];
+       auto; reduce; auto
+     };
+   }
+}.
+
+Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
+  *{unfold <not implies dec>}; auto;
+
+  ||| Ask whether or not problem(x) problem(x) terminates
+  elim #1 [problem(x) problem(x)]; auto; elim #2;
+
+  ||| Show no matter the answer, we have a contradiction.
+  assert-opposite; derive-contra; contradiction
+}.
