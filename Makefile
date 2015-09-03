@@ -14,7 +14,6 @@ test:
 	bin/jonprl stdlib/*.jonprl
 	bin/jonprl example/tautology.jonprl
 	bin/jonprl example/computational-equality.jonprl
-	bin/jonprl example/russell.jonprl
 	bin/jonprl example/container.jonprl
 	bin/jonprl example/list.jonprl
 	bin/jonprl example/foundations/sources.cfg
