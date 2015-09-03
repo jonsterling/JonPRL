@@ -1,0 +1,66 @@
+||| This demonstrates that there is no decidable algorithm so
+||| that we can compute whether a closed term [a] belongs to some
+||| type [A].
+|||
+||| This is proven by straightforward reduction to the halting problem,
+||| we show that such an algorithm can decide if [a] is in
+||| {m : base | has-value(m)}. From there it's just inversion and then
+||| referencing our previous lemma [halting-problem-undecidable].
+
+Theorem member-wf : [(a : base)(A : U{i}) member(member(a; A); U{i'})] {
+  auto 0; aux {auto}; eq-eq-base; auto;
+
+  bunion-eq-right; unfold <bunion>; eq-cd; auto;
+  reduce; auto; break-plus; reduce; auto
+}.
+
+Resource wf += {wf-lemma <member-wf>}.
+
+Theorem typing-undecidable : [¬ ((A : U{i})(a : base) (a ∈ A) decidable)] {
+  unfold <not implies dec>; intro;
+  aux {
+    ||| This has to be handled carefully so that we appeal to member-wf
+    ||| in the right places. In particular we early apply member-wf
+    unfold <not implies member>;
+    *{
+      @{ [ |- =(=(a; a; A); =(a; a; A); _)] => wf-lemma <member-wf>; auto
+       | [ |- =(_; _; _)] => eq-cd
+       | [ |- _] => auto
+       }
+     }
+  };
+
+  ||| The critical construction. This gives us a decision procedure
+  ||| to check whether m in the set of halting programs. We'll use
+  ||| this to decide the halting problem
+  elim #1 [{m : base | m ⇓}]; auto;
+
+  assert [(m:base) dec(has-value(m))];
+  aux {
+    ||| Ask whether the argument belong to the subset {m : base | m halts}
+    auto; elim #2 [m]; auto; elim #5;
+
+    ||| If it does, do a little jiggery-pokery to invert on m and get
+    ||| access to that proof that m halts.
+    focus 0 #{
+      assert [(x : {m : base | m ⇓}) * x ~ m]; aux {intro [m]; auto};
+      elim #8; chyp-subst ← #10 [h. has-value(h) + not(has-value(h))];
+      elim #9; intro #0; unfold <not implies>; auto;
+    };
+
+    ||| If not, we have a proof that m ∈ {m : base | m halts} -> void,
+    ||| this means we have to do a little more work
+    assert [(x : {m : base | not(m ⇓)}) * x ~ m];
+    aux {
+      unfold <not implies>; intro [m]; auto;
+      assert [=(m; m; {m : base | m ⇓})]; auto;
+      contradiction
+    };
+    elim #8; chyp-subst ← #10 [h. has-value(h) + not(has-value(h))];
+    elim #9; intro #1;
+    unfold <not implies>; auto; contradiction
+  };
+
+  cut-lemma <halting-problem-undecidable>; unfold <not implies>;
+  contradiction
+}.
