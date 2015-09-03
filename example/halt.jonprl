@@ -1,16 +1,23 @@
-||| The proof of the halting problem here is pretty much
-||| what you would expect, we apply the standard diagonalization
-||| trick to prove that if we have a halting oracle there is a
-||| program which both does and doesn't terminate.
+Infix 2 "∈" := member.
+Prefix 10 "¬" := not.
+Postfix 11 "⇓" := has-value.
+Infix 10 "≼" := approx.
+Infix 10 "~" := ceq.
+
+||| The proof of the undecidability of the halting problem here is pretty much
+||| what you would expect, we apply the standard diagonalization trick to prove
+||| that if we have a halting oracle there is a program which both does and
+||| doesn't terminate.
 
 Operator dec : (0).
-[dec(M)] =def= [plus(M; not(M))].
+Postfix 2 "decidable" := dec.
+[P decidable] =def= [P + ¬ P].
 
-Theorem has-value-wf : [{A : base} member(has-value(A); U{i})] {
+Theorem has-value-wf : [{A : base} A ⇓ ∈ U{i}] {
   unfold <has-value>; auto
 }.
 
-Theorem dec-wf : [{A : U{i}} member(dec(A); U{i})] {
+Theorem dec-wf : [{A : U{i}} A decidable ∈ U{i}] {
   unfold <dec not implies>; auto
 }.
 
@@ -22,7 +29,7 @@ Operator problem : (0).
 
 Tactic contradiction {
   unfold <not implies void>;
-  @{ [H : P -> approx(<>; bot), H' : P |- approx(<>; bot)] =>
+  @{ [H : P -> <> ≼ bot, H' : P |- <> ≼ bot] =>
        elim <H> [H'];
        unfold <member>;
        auto
@@ -34,8 +41,8 @@ Tactic contradiction {
 Tactic t {
   unfold <problem>;
   step;
-  @{ [H : =(_; h; _) |- ceq(decide(h; _._; _._); _)] =>
-     hyp-subst ← <H> [h. ceq(decide(h; _._; _._); _)]
+  @{ [H : =(_; h; _) |- decide(h; _._; _._) ~ _] =>
+     hyp-subst ← <H> [h. decide(h; _._; _._) ~ _]
    };
   auto; step; auto
 }.
@@ -43,33 +50,32 @@ Tactic t {
 ||| If problem(x) problem(x) halts, prove that it is bot,
 ||| if it diverges, prove it's ax.
 Tactic assert-opposite {
-  @{ [_ : has-value(M) |- _] =>
-     assert [ceq(M; bot)]; aux {t}
-   | [_ : has-value(M) -> approx(<>; bot) |- _] =>
-     assert [ceq(M; <>)]; aux {t}
+  @{ [_ : M ⇓ |- _] =>
+     assert [M ~ bot]; aux {t}
+   | [_ : M ⇓ -> <> ≼ bot |- _] =>
+     assert [M ~ <>]; aux {t}
    }
 }.
 
-||| Given a hypothesis ceq(M; bot) or ceq(M; <>),
-||| convert this into a hypothesis that not(has-value(M))
-||| or has-value(M).
+||| Given a hypothesis M ~ bot or M ~ <>, convert this into a hypothesis that ¬
+||| M ⇓ or M ⇓.
 Tactic derive-contra {
-  @{ [H : ceq(M; bot) |- _] =>
-     assert [not(has-value(M))];
+  @{ [H : M ~ bot |- _] =>
+     assert [¬ M ⇓];
      aux {
-       chyp-subst → <H> [h.not(has-value(h))];
+       chyp-subst → <H> [h. ¬ h ⇓];
        auto; bot-div #6
      };
-   | [H : ceq(M; <>) |- _] =>
-     assert [has-value(M)];
+   | [H : M ~ <> |- _] =>
+     assert [M ⇓];
      aux {
-       chyp-subst → <H> [h.has-value(h)];
+       chyp-subst → <H> [h. h ⇓];
        auto; reduce; auto
      };
    }
 }.
 
-Theorem can't-decide-halting : [not((m : base) dec(has-value(m)))] {
+Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
   *{unfold <not implies dec>}; auto;
 
   ||| Ask whether or not problem(x) problem(x) terminates
@@ -79,19 +85,19 @@ Theorem can't-decide-halting : [not((m : base) dec(has-value(m)))] {
   assert-opposite; derive-contra; contradiction
 }.
 
-||| We can now demonstrate that the law of excluded middle
-||| is bad.
-Theorem can't-exclude-middle : [not((A : U{i}) dec(A))] {
+||| We can now demonstrate that the global principle of the excluded middle is
+||| invalid.
+Theorem excluded-middle-invalid : [¬ ((A : U{i}) A decidable)] {
   unfold <dec>; auto;
 
   ||| With our hypothesis, we can solve the halting problem
-  assert [(m : base) has-value(m) + (has-value(m) -> void)];
+  assert [(m : base) m ⇓ + ¬ m ⇓];
   aux {
-    auto; elim #1 [has-value(m)]; auto; unfold <not implies void>;
+    auto; elim #1 [m ⇓]; auto; unfold <not implies void>;
     assumption
   };
 
   ||| But we still can't solve the halting problem, contradiction.
-  cut-lemma <can't-decide-halting>; unfold <not implies dec>;
+  cut-lemma <halting-problem-undecidable>; unfold <not implies dec>;
   contradiction
 }.
