@@ -18,6 +18,7 @@ test:
 	bin/jonprl example/list.jonprl
 	bin/jonprl example/foundations/sources.cfg
 	bin/jonprl example/polymorphic-id-unique.jonprl
+	bin/jonprl example/per.jonprl
 
 clean:
 	rm -f bin/.heapimg.*
