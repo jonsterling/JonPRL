@@ -88,8 +88,13 @@ struct
            | Stream.Cons (x, s') => x = #"\n"
       val coordStream = CoordinatedStream.coordinate is_eol (Coord.init name) charStream
 
-      open OS.Path
-      fun relativize file = joinDirFile {dir = dir name, file = file}
+      fun relativize file =
+        let
+          val {arcs = dirArcs, ...} = OS.Path.fromString (OS.Path.dir name)
+          val {isAbs, vol, arcs} = OS.Path.fromString file
+        in
+          OS.Path.toString {isAbs = isAbs, vol = vol, arcs = dirArcs @ arcs}
+        end
     in
       case CharParser.parseChars ConfigParser.parse coordStream of
           Sum.INL e => raise Fail e
