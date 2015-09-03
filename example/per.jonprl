@@ -22,7 +22,8 @@ Theorem iff_squash : [{A:U{i}} iff(⇃ A;squash(A))] {
  unfold <member>;unhide <w>;auto;reduce;auto
 }.
 
-(* from russell.jonprl *)
+
+(* BEGIN from russell.jonprl *)
 Infix 60 "∪" := bunion.
 Infix 40 "~" := ceq.
 Infix 20 "∈" := member.
@@ -42,9 +43,10 @@ Tactic eq-base-tac {
        bunion-eq-right; unfold <bunion>
    }
 }.
+(* END from russell.jonprl *)
 
 
-(* from identity-types.jonprl *)
+(* BEGIN from identity-types.jonprl *)
 Operator rel : (0).
 [rel(A)] =def= [A -> A -> U{i}].
 
@@ -80,6 +82,8 @@ Theorem is-transitive-wf : [{A:U{i}} {R:rel(A)} is-transitive(A;R) ∈ U{i}] {
 
 Resource wf += { wf-lemma <is-symmetric-wf> }.
 Resource wf += { wf-lemma <is-transitive-wf> }.
+(* END from identity-types.jonprl *)
+
 
 Theorem quotient_wf: [
   {T:U{i}}
@@ -88,24 +92,34 @@ Theorem quotient_wf: [
   -> is-transitive(T;R)
   -> member(quotient(T;x.y.R x y);U{i})
 ] {
-  auto
-(*;
+  auto;
+  unfold <is-symmetric is-transitive>;
+  auto;
   unfold <quotient and>;auto;reduce;
   [ eq-cd;
-    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'>;reduce;auto;fail
+    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'''>;reduce;auto;fail
     , eq-cd;
-      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''>;reduce;auto;fail
+      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''''>;reduce;auto;fail
       , auto;fail
       ]
     ]
   , eq-cd;
-    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'>;reduce;auto;fail
+    [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'''>;reduce;auto;fail
     , eq-cd;
-      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''>;reduce;auto;fail
+      [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''''>;reduce;auto;fail
       , auto;fail
       ]
     ]
-  , elim <z>; elim <t>;auto
-  , id
-  ]*)
+  , elim <z>; elim <t>;auto;
+    elim #3 [x''];auto;
+    elim #12 [y];auto;
+    elim #14 [t'];auto;
+    fail
+  , elim <u>; elim <v>; elim <t>; elim <t'>;auto;
+    elim #4 [x''];auto;
+    elim #18 [y];auto;
+    elim #20 [z];auto;
+    elim #22 [t''];auto;
+    elim #24 [t'''];auto
+  ]
 }.
