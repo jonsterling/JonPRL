@@ -90,10 +90,12 @@ struct
 
       fun relativize file =
         let
-          val {arcs = dirArcs, ...} = OS.Path.fromString (OS.Path.dir name)
-          val {isAbs, vol, arcs} = OS.Path.fromString file
+          val {isAbs, vol, arcs = dirArcs} = OS.Path.fromString (OS.Path.dir name)
+          val {isAbs = fileIsAbs, vol = fileVol, arcs} = OS.Path.fromString file
         in
-          OS.Path.toString {isAbs = isAbs, vol = vol, arcs = dirArcs @ arcs}
+          if fileIsAbs
+          then file
+          else OS.Path.toString {isAbs = isAbs, vol = vol, arcs = dirArcs @ arcs}
         end
     in
       case CharParser.parseChars ConfigParser.parse coordStream of
