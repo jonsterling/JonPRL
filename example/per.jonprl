@@ -1,12 +1,11 @@
 Operator per-squash : (0).
-Prefix 7 "⇃" := per-squash.
-[⇃ A] =def= [per(lam(_.lam(_.A)))].
+[per-squash(A)] =def= [per(lam(_.lam(_.A)))].
 
-Theorem per-squash-wf : [{A:U{i}} member(⇃ A; U{i})] {
+Theorem per-squash-wf : [{A:U{i}} member(per-squash(A); U{i})] {
   unfold <per-squash>; auto; reduce; auto
 }.
 
-Theorem iff_squash : [{A:U{i}} iff(⇃ A;squash(A))] {
+Theorem iff_squash : [{A:U{i}} iff(per-squash(A);squash(A))] {
  auto;
  [ unfold <per-squash>;auto;reduce;auto;
    assert [=(x;x;per(lam(_.lam(_.A))))] <e>;[ auto; fail, id ];
@@ -21,69 +20,6 @@ Theorem iff_squash : [{A:U{i}} iff(⇃ A;squash(A))] {
  unfold <squash>;elim <x>;witness [<>];
  unfold <member>;unhide <w>;auto;reduce;auto
 }.
-
-
-(* BEGIN from russell.jonprl *)
-Infix 60 "∪" := bunion.
-Infix 40 "~" := ceq.
-Infix 20 "∈" := member.
-
-Tactic bunion-eq-right {
-  @{ [|- =(M; N; L ∪ R)] =>
-       csubst [M ~ lam(x. snd(x)) <inr(<>), M>] [h.=(h;_;_)];
-       aux { unfold <snd>; reduce; auto };
-       csubst [N ~ lam(x. snd(x)) <inr(<>), N>] [h.=(_;h;_)];
-       aux { unfold <snd>; reduce; auto };
-  }
-}.
-
-Tactic eq-base-tac {
-  @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
-       eq-eq-base; auto;
-       bunion-eq-right; unfold <bunion>
-   }
-}.
-(* END from russell.jonprl *)
-
-
-(* BEGIN from identity-types.jonprl *)
-Operator rel : (0).
-[rel(A)] =def= [A -> A -> U{i}].
-
-Theorem rel-wf : [{A:U{i}} rel(A) ∈ U{i'}] {
-  unfold <rel>; auto
-}.
-
-Resource wf += { wf-lemma <rel-wf> }.
-Resource intro += {
-  @{ [|- {R:rel(A)} _] => intro @i'; aux { wf-lemma <rel-wf> }
-   | [|- (R:rel(A)) _] => intro @i'; aux { wf-lemma <rel-wf> }
-   }
-}.
-
-Resource eq-cd += {
-  @{ [R : rel(A) |- =(R a b; R a b; _)] => !{ unfold <rel>; auto }
-   }
-}.
-
-Operator is-symmetric : (0;0).
-[is-symmetric(A;R)] =def= [(a:A) (b:A) R a b -> R b a].
-
-Operator is-transitive : (0;0).
-[is-transitive(A;R)] =def= [(a:A) (b:A) (c:A) R a b -> R b c -> R a c].
-
-Theorem is-symmetric-wf : [{A:U{i}} {R:rel(A)} is-symmetric(A;R) ∈ U{i}] {
-  unfold <is-symmetric rel>; auto
-}.
-
-Theorem is-transitive-wf : [{A:U{i}} {R:rel(A)} is-transitive(A;R) ∈ U{i}] {
-  unfold <is-transitive rel>; auto
-}.
-
-Resource wf += { wf-lemma <is-symmetric-wf> }.
-Resource wf += { wf-lemma <is-transitive-wf> }.
-(* END from identity-types.jonprl *)
-
 
 Theorem quotient_wf: [
   {T:U{i}}

@@ -173,6 +173,7 @@ struct
           | ORELSE (ts, meta) => ORELSE (List.map go ts, meta)
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
+          | UNHIDE (h, meta) => UNHIDE (applyHyp h, meta)
 	  | ASSUME_HAS_VALUE ({name,level}, meta) => ASSUME_HAS_VALUE ({name = name, level = level}, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | THIN (h, meta) => THIN (applyHyp h, meta)
