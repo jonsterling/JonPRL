@@ -308,9 +308,8 @@ struct
         ORELSE
         (if not invertible then
              NatRules.RecEq (listAt (terms, 0), take2 names)
-               ORELSE_LAZY (fn _ => PlusRules.DecideEq (List.nth (terms, 0))
-                                                       (List.nth (terms, 1),
-                                                        List.nth (terms, 2),
+               ORELSE_LAZY (fn _ => PlusRules.DecideEq (List.nth (terms, 0),
+                                                        List.nth (terms, 1),
                                                         take3 names))
                ORELSE ProdRules.SpreadEq (listAt (terms, 0), listAt (terms, 1), take3 names)
                ORELSE NeighborhoodRules.IndEq (listAt (terms, 0), listAt (terms, 1), take3 names)

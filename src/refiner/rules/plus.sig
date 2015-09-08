@@ -40,7 +40,5 @@ sig
    *    H >> A ∈ U{k}
    *)
   val InrEq : Level.t option -> tactic
-  val DecideEq : term
-                 -> (term * term * (name * name * name) option)
-                 -> tactic
+  val DecideEq : (term * term * (name * name * name) option) -> tactic
 end
