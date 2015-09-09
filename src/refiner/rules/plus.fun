@@ -94,7 +94,7 @@ struct
              | _ => raise Refine)
     end
 
-  fun DecideEq C (A, B, x) (_ |: H >> P) =
+  fun DecideEq (A, B, x) (_ |: H >> P) =
     let
       val #[M, N, T] = P ^! EQ
       val #[M', sL, tR] = M ^! DECIDE
@@ -109,12 +109,10 @@ struct
                   @@ (eq, C.`> EQ $$ #[M', C.`> INL $$ #[``s], C.`> PLUS $$ #[A, B]])
       val H't = H @@ (t, B)
                   @@ (eq, C.`> EQ $$ #[M', C.`> INR $$ #[``t], C.`> PLUS $$ #[A, B]])
-      val C's = subst1 C (C.`> INL $$ #[``s])
-      val C't = subst1 C (C.`> INR $$ #[``t])
     in
       [ MAIN |: H >> C.`> EQ $$ #[M', N', C.`> PLUS $$ #[A, B]]
-      , MAIN |: H's >> C.`> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), C's]
-      , MAIN |: H't >> C.`> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), C't]
+      , MAIN |: H's >> C.`> EQ $$ #[subst1 sL (``s), subst1 sL' (``s), T]
+      , MAIN |: H't >> C.`> EQ $$ #[subst1 tR (``t), subst1 tR' (``t), T]
       ] BY (fn [EqM, EqL, EqR] =>
                D.`> DECIDE_EQ $$ #[EqM, eq \\ (s \\ EqR), eq \\ (t \\ EqL)]
              | _ => raise Refine)
