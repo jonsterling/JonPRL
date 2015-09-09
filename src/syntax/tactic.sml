@@ -34,8 +34,9 @@ struct
                 freshVariable : name option,
                 level : level option} * meta
     | ELIM of {target : hyp,
-               term : term option,
-               names : name list} * meta
+               term   : term option,
+               names  : name list,
+               level  : level option} * meta
     | EQ_CD of {names : name list,
                 terms : term list,
                 level : level option} * meta
@@ -49,6 +50,7 @@ struct
                  name : name option} * meta
     | CUT_LEMMA of operator * name option * meta
     | WF_LEMMA of operator * meta
+    | UNHIDE of hyp * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta
@@ -143,10 +145,11 @@ struct
                     rule = rule,
                     freshVariable = freshVariable,
                     level = level}, meta)
-          | ELIM ({target, term, names}, meta) =>
+          | ELIM ({target, term, names, level}, meta) =>
             ELIM ({target = applyHyp target,
                    term = Option.map apply term,
-                   names = names}, meta)
+                   names = names,
+		   level = level}, meta)
           | EQ_CD ({names, terms, level}, meta) =>
             EQ_CD ({names = names,
                     terms = List.map apply terms,
@@ -170,6 +173,7 @@ struct
           | ORELSE (ts, meta) => ORELSE (List.map go ts, meta)
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
+          | UNHIDE (h, meta) => UNHIDE (applyHyp h, meta)
 	  | ASSUME_HAS_VALUE ({name,level}, meta) => ASSUME_HAS_VALUE ({name = name, level = level}, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | THIN (h, meta) => THIN (applyHyp h, meta)
@@ -185,6 +189,7 @@ struct
   val listOfTactics =
     ["intro [TERM]? #NUM? <NAME*>?",
      "elim (#NUM | <NAME>) [TERM]? <NAME*>?",
+     "unhide (#NUM | <NAME>)",
      "eq-cd [TERM*]? <NAME*>? @LEVEL?",
      "eq-eq-base",
      "ext <NAME>? @LEVEL?",

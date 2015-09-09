@@ -36,8 +36,11 @@ struct
                                  invertible = false,
                                  freshVariable = freshVariable,
                                  level = level} wld)
-      | ELIM ({target, term, names}, a) =>
-        an a (RefinerUtil.Elim {target = target, term = term, names = names} wld)
+      | ELIM ({target, term, names, level}, a) =>
+        an a (RefinerUtil.Elim {target = target,
+				term   = term,
+				names  = names,
+				level  = level} wld)
       | EQ_CD ({names, terms, level}, a) =>
         an a (RefinerUtil.EqCD {names = names,
                                 invertible = false,
@@ -53,6 +56,7 @@ struct
         an a (Assert (t, name))
       | CUT_LEMMA (theta, name, a) => an a (RefinerUtil.CutLemma (wld, theta, name))
       | WF_LEMMA (theta, a) => an a (RefinerUtil.WfLemma (wld, theta))
+      | UNHIDE (hyp, a) => an a (RefinerUtil.Unhide hyp)
       | SYMMETRY a => an a EqRules.Sym
       | CEQUAL_SYM a => an a CEqRules.Sym
       | CEQUAL_STEP a => an a CEqRules.Step

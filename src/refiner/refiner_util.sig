@@ -12,8 +12,9 @@ sig
 
   type elim_args =
     {target : hyp,
-     names : name list,
-     term : term option}
+     names  : name list,
+     term   : term option,
+     level  : Level.t option}
 
   type eq_cd_args =
     {names : name list,
@@ -42,6 +43,8 @@ sig
   val Reduce : int option -> tactic
   val CutLemma : world * operator * name option  -> tactic
   val WfLemma : world * operator -> tactic
+
+  val Unhide : hyp -> tactic
 
   val OnClass : Goal.class -> tactic -> tactic
 

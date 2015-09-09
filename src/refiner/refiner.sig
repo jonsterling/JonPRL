@@ -65,6 +65,11 @@ sig
       where type name = name
       where type hyp = hyp
 
+    structure PerRules : PER_RULES
+      where type tactic = tactic
+      where type name = name
+      where type hyp = hyp
+
     structure GeneralRules : GENERAL_RULES
       where type tactic = tactic
       where type term = term

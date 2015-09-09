@@ -55,6 +55,8 @@ group is
   rules/base.fun
   rules/image.sig
   rules/image.fun
+  rules/per.sig
+  rules/per.fun
   rules/general.sig
   rules/general.fun
   rules/prod.sig

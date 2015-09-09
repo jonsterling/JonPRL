@@ -1,9 +1,5 @@
 ||| An axiomatization of Martin-Loef-style identity types.
 
-Infix 20 "∈" := member.
-Infix 60 "~" := ceq.
-Postfix 50 "⇓" := has-value.
-Prefix 50 "¬" := not.
 Prefix 50 "↓" := squash.
 
 Operator rel : (0).

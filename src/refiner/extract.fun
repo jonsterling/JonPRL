@@ -63,6 +63,17 @@ struct
            end
        | IMAGE_EQ_IND $ _ => ax
 
+       | PER_EQ $ _ => ax
+       | PER_MEM_EQ $ _ => ax
+       | PER_ELIM $ #[yD,E] =>
+           let
+             val (y,D) = unbind yD
+           in
+             (y \\ extract D) // ax
+           end
+
+       | UNHIDE $ _ => ax
+
        | ATOM_EQ $ _ => ax
        | TOKEN_EQ $ _ => ax
        | MATCH_TOKEN_EQ toks $ Ds => ax

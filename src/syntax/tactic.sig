@@ -36,8 +36,9 @@ sig
                   freshVariable : name option,
                   level : level option} * meta
       | ELIM of {target : hyp,
-                 term : term option,
-                 names : name list} * meta
+                 term   : term option,
+                 names  : name list,
+                 level  : level option} * meta
       | EQ_CD of {names : name list,
                   terms : term list,
                   level : level option} * meta
@@ -51,6 +52,7 @@ sig
                    name : name option} * meta
       | CUT_LEMMA of operator * name option * meta
       | WF_LEMMA of operator * meta
+      | UNHIDE of hyp * meta
       | SYMMETRY of meta
       | CEQUAL_SYM of meta
       | CEQUAL_STEP of meta

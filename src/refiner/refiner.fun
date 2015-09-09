@@ -61,6 +61,7 @@ struct
     structure NatRules = NatRules(Utils)
     structure BaseRules = BaseRules(Utils)
     structure ImageRules = ImageRules(Utils)
+    structure PerRules = PerRules(Utils)
     structure GeneralRules = GeneralRules(Utils)
     structure ProdRules = ProdRules(Utils)
     structure PlusRules = PlusRules(Utils)

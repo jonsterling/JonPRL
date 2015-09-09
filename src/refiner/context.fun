@@ -29,6 +29,9 @@ struct
   fun modify (ctx : context) (k : V.t) f =
     Telescope.modify ctx (k, fn (a, vis) => (f a, vis))
 
+  fun modifyVisibility (ctx : context) (k : V.t) f g =
+    Telescope.modify ctx (k, fn (a, vis) => (f a, g vis))
+
   fun lookupVisibility (ctx : context) k =
     (Telescope.lookup ctx k)
 
