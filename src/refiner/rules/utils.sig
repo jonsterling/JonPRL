@@ -68,7 +68,10 @@ sig
     where type t = MetaAbt.t
     where type var = MetaAbt.Variable.t
 
-  val applySolution : Unify.solution -> MetaAbt.t -> term
+  val applySolution : Unify.solution -> (term * MetaAbt.t) -> term
+
+  (* Correctly handles wild cards *)
+  val convertToPattern : Sequent.Context.context * term -> MetaAbt.t
 
   structure Context : CONTEXT
 

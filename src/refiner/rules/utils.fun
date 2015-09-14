@@ -41,12 +41,44 @@ struct
     (structure A = MetaAbt
      structure O = Meta.MetaOperator)
 
-  fun applySolution sol e =
-    Meta.unconvert (fn _ => raise Fail "Impossible")
-      (Unify.Solution.foldl
-        (fn (v, e', e) => MetaAbt.substOperator (fn _ => e') (Meta.MetaOperator.META v) e)
-        e
-        sol)
+  fun applySolution sol (P, e) =
+    let
+      val e =
+        Unify.Solution.foldl
+          (fn (v, e', e) => MetaAbt.substOperator (fn _ => e') (Meta.MetaOperator.META v) e)
+          e
+          sol
+      fun go (MetaAbt.` v, _) = `` v
+        | go (MetaAbt.\ (v, M), v' \ M') =
+          v \\ go (MetaAbt.out M, out (subst (`` v) v' M'))
+        | go (MetaAbt.$ (Meta.MetaOperator.WILD, _), M') = into M'
+        | go (MetaAbt.$ (Meta.MetaOperator.META v, _), _) = `` v
+        | go (MetaAbt.$ (Meta.MetaOperator.NORMAL oper, args), _ $ args') =
+          oper $$ Vector.map go
+            (VectorPair.zip (Vector.map MetaAbt.out args, Vector.map out args'))
+        | go (M, _) =
+          Meta.unconvert
+            (fn _ => raise Fail "applySolution failed")
+            (MetaAbt.into M)
+    in
+      go (MetaAbt.out e, out P)
+    end
+
+  fun convertToPattern (H, e) =
+    let
+      open Meta
+      val fvs = List.map #1 (Context.listItems H)
+      val wildVars =
+        List.filter (fn v => "_" = Variable.toString v)
+                    (freeVariables e)
+      val meta = convertFree fvs e
+      val wild = MetaAbt.into (MetaAbt.$ (MetaOperator.WILD, #[]))
+    in
+      List.foldl
+        (fn (v, t) => MetaAbt.substOperator (fn _ => wild) (MetaOperator.META v) t)
+        meta
+        wildVars
+    end
 
   fun ctxSubst (H : context) (m : Syntax.t) (x : Context.name) =
     Context.mapAfter x (Syntax.subst m x) H

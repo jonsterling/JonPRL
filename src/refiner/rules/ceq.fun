@@ -92,9 +92,10 @@ struct
              SOME xC =>
              let
                val fvs = List.map #1 (Context.listItems H)
-               val meta = Meta.convertFree fvs (xC // M)
-               val solution = Unify.unify (Meta.convertFree fvs (xC // M), Meta.convert P)
-               val xC = applySolution solution (Meta.convertFree fvs xC)
+               val meta = convertToPattern (H, xC // M)
+               val solution = Unify.unify (meta, Meta.convert P)
+               val x \ C = out xC
+               val xC = x \\ applySolution solution (P, convertToPattern (H, C))
                val _ = unify P (xC // M)
              in
                xC // N
