@@ -1,0 +1,58 @@
+Operator covering-family : (0;0).
+[covering-family(C; d)] =def= [
+  family((c : obj(C)) * hom(C; c; d))
+].
+
+Theorem covering-family-wf : [{C:category} {d:obj(C)} covering-family(C; d) ∈ U{i'}] {
+  unfold <covering-family>; auto
+}.
+
+Resource wf += { wf-lemma <covering-family-wf> }.
+
+Operator covering : (0).
+[covering(C)] =def= [
+  (d:obj(C)) (F:covering-family(C; d)) U{i}
+].
+
+Theorem covering-wf : [{C:category} covering(C) ∈ U{i'}] {
+  unfold <covering>; auto;
+  cum @i; auto
+}.
+
+Resource wf += { wf-lemma <covering-wf> }.
+
+
+Operator isomorphisms-cover : (0;0).
+[isomorphisms-cover(C; K)] =def= [
+  (a:obj(C)) (b:obj(C)) (f:isomorphism(C; a; b))
+    K b <unit, lam(_.<a, f>)>
+].
+
+Theorem isomorphisms-cover-wf : [{C:category} {K:covering(C)} isomorphisms-cover(C; K) ∈ U{i}] {
+  unfold <isomorphisms-cover>; auto; intro @i'; auto;
+  unfold <covering covering-family family>; auto;
+  ?{ cum @i; auto };
+  eq-cd @i; auto
+}.
+
+Resource wf += { wf-lemma <isomorphisms-cover-wf> }.
+
+Operator stability : (0;0).
+[stability(C; K)] =def= [
+  (c:obj(C)) (d:obj(C)) (F:covering-family(C; d)) (g:hom(C; c; d))
+    K d F -> K c "TODO"
+].
+
+Operator local-character : (0;0).
+
+
+||| A Grothendieck pretopology
+Operator pretopology : (0).
+[pretopology(C)] =def= [
+  spread(C; C.pb.
+    (K : covering(C))
+      * isomorphisms-cover(C; K)
+      * stability(C; K)
+      * local-character(C; K)
+  )
+].

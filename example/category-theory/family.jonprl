@@ -1,0 +1,8 @@
+Operator family : (0).
+[family(A)] =def= [(I:U{i}) * I -> A].
+
+Theorem family-wf : [{I:U{i}} family(I) ∈ U{i'}] {
+  unfold <family>; auto
+}.
+
+Resource wf += { wf-lemma <family-wf> }.

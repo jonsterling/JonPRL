@@ -20,6 +20,7 @@ test:
 	bin/jonprl example/polymorphic-id-unique.jonprl
 	bin/jonprl example/identity-types.cfg
 	bin/jonprl example/per.cfg
+	bin/jonprl example/category-theory/sources.cfg
 
 clean:
 	rm -f bin/.heapimg.*

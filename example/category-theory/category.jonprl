@@ -1,0 +1,163 @@
+Operator raw-category : ().
+Operator obj : (0).
+Operator hom : (0;0;0).
+Operator idn : (0;0).
+Operator cmp : (0;0;0;0;0;0).
+
+[raw-category] =def= [
+  (Obj:U{i})
+  * (Hom : Obj -> Obj -> U{i})
+  * (Idn : (A:Obj) Hom A A)
+  * (Cmp : (A:Obj) (B:Obj) (C:Obj) Hom B C -> Hom A B -> Hom A C)
+  * unit
+].
+
+[obj(C)] =def= [spread(C; x.y.x)].
+[hom(C;A;B)] =def= [spread(spread(C; x.y.y); x.y.x) A B].
+[idn(C;A)] =def= [spread(spread(spread(C; x.y.y); x.y.y); x.y.x) A].
+[cmp(C;X;Y;Z;f;g)] =def= [spread(spread(spread(spread(C; x.y.y); x.y.y); x.y.y); x.y.x) X Y Z f g].
+
+Theorem raw-category-wf : [raw-category ∈ U{i'}] {
+  unfold <raw-category obj hom idn cmp unit>; auto
+}.
+
+Resource wf += { wf-lemma <raw-category-wf> }.
+
+Resource intro += {
+  @{ [|- {RC : raw-category} P] => intro @i'
+   | [|- {A : obj(C)} P] => intro @i
+   }
+}.
+
+Theorem obj-wf : [{RC:raw-category} obj(RC) ∈ U{i}] {
+  auto; unfold <obj raw-category>; auto
+}.
+
+Resource wf += { wf-lemma <obj-wf> }.
+
+Theorem hom-wf : [
+  {RC:raw-category} {A:obj(RC)} {B:obj(RC)} hom(RC;A;B) ∈ U{i}
+] {
+  auto;
+  unfold <raw-category hom obj>;
+  auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <hom-wf> }.
+
+Theorem idn-wf : [
+  {RC:raw-category} {A:obj(RC)} idn(RC; A) ∈ hom(RC; A; A)
+] {
+  auto; unfold <raw-category idn obj hom>;
+  auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <idn-wf> }.
+
+Theorem cmp-wf : [
+  {RC:raw-category}
+  {X:obj(RC)}
+  {Y:obj(RC)}
+  {Z:obj(RC)}
+  {f:hom(RC; Y; Z)}
+  {g:hom(RC; X; Y)}
+    cmp(RC;X;Y;Z;f;g) ∈ hom(RC; X;Z)
+] {
+  auto; unfold <raw-category cmp hom obj>;
+  auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <cmp-wf> }.
+
+Operator left-identity : (0).
+[left-identity(C)] =def= [{A:obj(C)} {B:obj(C)} {f:hom(C;A;B)} =(cmp(C;A;B;B; idn(C;B); f); f; hom(C;A;B))].
+
+Operator right-identity : (0).
+[right-identity(C)] =def= [{A:obj(C)} {B:obj(C)} {f:hom(C;A;B)} =(cmp(C;A;A;B; f; idn(C;A)); f; hom(C;A;B))].
+
+Operator cmp-assoc : (0).
+[cmp-assoc(C)] =def= [
+  {W:obj(C)} {X:obj(C)} {Y:obj(C)} {Z:obj(C)}
+  {f:hom(C;W;X)}
+  {g:hom(C;X;Y)}
+  {h:hom(C;Y;Z)}
+    =(cmp(C;W;X;Z; cmp(C;X;Y;Z; h;g); f);
+      cmp(C;W;Y;Z; h; cmp(C;W;X;Y; g;f));
+      hom(C;W;Z))
+].
+
+Theorem left-identity-wf : [{RC:raw-category} left-identity(RC) ∈ U{i}] {
+  unfold <left-identity>; auto;
+}.
+
+Theorem right-identity-wf : [{RC:raw-category} right-identity(RC) ∈ U{i}] {
+  unfold <right-identity>; auto
+}.
+
+Theorem cmp-assoc-wf : [{RC:raw-category} cmp-assoc(RC) ∈ U{i}] {
+  unfold <cmp-assoc>; auto
+}.
+
+Operator category-laws : (0).
+[category-laws(RC)] =def= [left-identity(RC) * right-identity(RC) * cmp-assoc(RC)].
+
+Resource wf += { wf-lemma <left-identity-wf> }.
+Resource wf += { wf-lemma <right-identity-wf> }.
+Resource wf += { wf-lemma <cmp-assoc-wf> }.
+
+Theorem category-laws-wf : [{RC:raw-category} category-laws(RC) ∈ U{i}] {
+  unfold <category-laws>; auto
+}.
+
+Resource wf += { wf-lemma <category-laws-wf> }.
+
+Operator category : ().
+[category] =def= [{C : raw-category | category-laws(C)}].
+
+Theorem category-wf : [category ∈ U{i'}] {
+  unfold <category>; auto; cum @i; auto
+}.
+
+Resource wf += { wf-lemma <category-wf> }.
+
+Resource intro += {
+  @{ [|- {RC : category} P] => intro @i'
+   }
+}.
+
+Resource wf += {
+  @{ [C:category |- =(C; C; raw-category)] => unfold <category>; elim <C>; auto
+   }
+}.
+
+
+Operator is-isomorphism : (0;0;0;0).
+[is-isomorphism(C; a; b; f)] =def= [
+  {g : hom(C; b; a) |
+     =(cmp(C; a; b; a; g; f); idn(C; a); hom(C; a; a))
+     * =(cmp(C; b; a; b; f; g); idn(C; b); hom(C; b; b))
+  }
+].
+
+Theorem is-isomorphism-wf : [{C:category} {a:obj(C)} {b:obj(C)} {f:hom(C; a; b)} is-isomorphism(C; a; b; f) ∈ U{i}] {
+  unfold <is-isomorphism>; auto;
+  intro @i; auto
+}.
+
+Resource wf += { wf-lemma <is-isomorphism-wf> }.
+
+Operator isomorphism : (0;0;0).
+[isomorphism(C; a; b)] =def= [
+  {f : hom(C; a; b) | is-isomorphism(C; a; b; f)}
+].
+
+Theorem isomorphism-wf : [{C:category} {a:obj(C)} {b:obj(C)} isomorphism(C; a; b) ∈ U{i}] {
+  unfold <isomorphism>; auto
+}.
+
+Resource wf += { wf-lemma <isomorphism-wf> }.
+
+Resource wf += {
+  @{ [f:isomorphism(C; a; b) |- =(f; f; hom(C; a; b))] => unfold <isomorphism>; elim <f>; auto
+  }
+}.

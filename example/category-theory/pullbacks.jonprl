@@ -1,0 +1,45 @@
+Operator is-pullback : (0;0;0;0;0;0;0).
+[is-pullback(C; a; b; c; p; f; g)] =def= [
+  (pi1 : hom(C; p; a))
+  * (pi2 : hom(C; p; b))
+  * (comm : =(cmp(C; p; b; c; g; pi2); cmp(C; p; a; c; f; pi1); hom(C; p; c)))
+  * {q : obj(C)}
+     (h1 : hom(C; q; a))
+     (h2 : hom(C; q; b))
+     (comm' : =(cmp(C; q; b; c; g; h2); cmp(C; q; a; c; f; h1); hom(C; q; c)))
+       exists-unique(hom(C; q; p); u.
+         =(cmp(C; q; p; b; pi2; u); h2; hom(C; q; b))
+         * =(cmp(C; q; p; a; pi1; u); h1; hom(C; q; a)))
+].
+
+Theorem is-pullback-wf : [{C:category} {a:obj(C)} {b:obj(C)} {c:obj(C)} {p:obj(C)} {f:hom(C; a; c)} {g:hom(C; b; c)} is-pullback(C; a; b; c; p; f; g) ∈ U{i}] {
+  unfold <is-pullback>; auto;
+  *{ intro @i }; auto;
+  unfold <exists-unique>; auto;
+}.
+
+Resource wf += { wf-lemma <is-pullback-wf> }.
+
+Operator has-pullbacks : (0).
+[has-pullbacks(C)] =def= [
+  (a:obj(C)) (b:obj(C)) (c:obj(C)) (f:hom(C; a; c)) (g:hom(C; b; c))
+    (p:obj(C)) * is-pullback(C; a; b; c; p; f; g)
+].
+
+Theorem has-pullbacks-wf : [{C:category} has-pullbacks(C) ∈ U{i}] {
+  unfold <has-pullbacks>; auto
+}.
+
+Resource wf += { wf-lemma <has-pullbacks-wf> }.
+
+Operator category-with-pullbacks : ().
+[category-with-pullbacks] =def= [
+  (C : category) * has-pullbacks(C)
+].
+
+Theorem category-with-pullbacks-wf : [category-with-pullbacks ∈ U{i'}] {
+  unfold <category-with-pullbacks>; auto;
+  cum @i; auto
+}.
+
+Resource wf += { wf-lemma <category-with-pullbacks-wf> }.

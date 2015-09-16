@@ -1,0 +1,10 @@
+Infix 2 "∈" := member.
+
+Operator exists-unique : (0;1).
+[exists-unique(A; x.C[x])] =def= [
+  {x:A | C[x] * {y:A} C[y] => =(x; y; A)}
+].
+
+Theorem exists-unique-wf : [{A:U{i}} {B:A -> U{i}} exists-unique(A; x.B x) ∈ U{i}] {
+  unfold <exists-unique>; auto
+}.
