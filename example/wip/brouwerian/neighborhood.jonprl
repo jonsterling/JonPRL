@@ -3,7 +3,7 @@ Infix 10 "≼" := prefixes.
 
 [u ≼ v] =def= [neigh-ind(v; neigh-ind(u; unit; _._._.void); w.e.ih.ih)].
 
-Theorem prefixes-wf : [{F:container{i}} {u:|F ♮|} {v:|F ♮|} u ≼ v ∈ U{i}] {
+Theorem prefixes-wf : [{F:container{i}} {u:neigh(F)} {v:neigh(F)} u ≼ v ∈ U{i}] {
   auto; unfold <prefixes neighborhoods>; reduce; auto
 }.
 

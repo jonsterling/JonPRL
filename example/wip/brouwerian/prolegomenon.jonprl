@@ -107,3 +107,8 @@ Theorem is-finite-wf : [{A:U{i}} is-finite(A) ∈ U{i}] {
 
 Resource wf += { wf-lemma <is-finite-wf> }.
 
+
+Resource wf += {
+  @{ [F:container{i} |- =(F; F; container{i'})] => elim <F>
+   }
+}.

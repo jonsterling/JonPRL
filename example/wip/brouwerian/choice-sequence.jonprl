@@ -39,7 +39,7 @@ Operator chop-prefix : (0;0).
   neigh-ind(u; lam(_.α); v.e.ih. lam(z. spread(z; p.p'. tl(ih p; p'))))
 ].
 
-Theorem chop-prefix-wf : [{F:container{i}} {α : choice-sequence(F)} {u:|F ♮|} chop-prefix(α; u) ∈ refinement(F; u) -> choice-sequence(F)] {
+Theorem chop-prefix-wf : [{F:container{i}} {α : choice-sequence(F)} {u:neigh(F)} chop-prefix(α; u) ∈ refinement(F; u) -> choice-sequence(F)] {
   auto;
   intro @i; auto; unfold <neighborhoods>; reduce; auto;
   unfold <chop-prefix>;
@@ -59,10 +59,10 @@ Resource wf += { wf-lemma <chop-prefix-wf> }.
 
 Operator approximates : (0;0;0).
 [approximates(F; u; α)] =def= [
-  neigh-ind(u; unit; v.e.ih.ih * =(lam(z.hd(chop-prefix(α; v) z)); e; refinement(F; v) -> |F|))
+  neigh-ind(u; unit; v.e.ih.ih * =(lam(z.hd(chop-prefix(α; v) z)); e; refinement(F; v) -> dom(F)))
 ].
 
-Theorem approximates-wf : [{F:container{i}} {u:|F ♮|} {α:choice-sequence(F)} approximates(F; u; α) ∈ U{i}] {
+Theorem approximates-wf : [{F:container{i}} {u:neigh(F)} {α:choice-sequence(F)} approximates(F; u; α) ∈ U{i}] {
   auto; unfold <neighborhoods>; reduce; auto;
   intro @i; auto;
   unfold <approximates>;
@@ -77,7 +77,7 @@ Theorem approximates-wf : [{F:container{i}} {u:|F ♮|} {α:choice-sequence(F)} 
 Resource wf += { wf-lemma <approximates-wf> }.
 
 Operator approximations : (0;0).
-[approximations(F; α)] =def= [{u : |F ♮| | approximates(F; u; α)}].
+[approximations(F; α)] =def= [{u : neigh(F) | approximates(F; u; α)}].
 
 Theorem approximations-wf : [{F:container{i}} {α:choice-sequence(F)} approximations(F; α) ∈ U{i}] {
   auto; intro @i; auto;

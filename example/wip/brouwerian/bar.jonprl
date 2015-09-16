@@ -3,7 +3,7 @@ Operator is-bar : (0;0;0).
   {α:spread-extension(F; S)} {u : approximations(F; α) | Q u}
 ].
 
-Theorem is-bar-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} is-bar(F; S; Q) ∈ U{i}] {
+Theorem is-bar-wf : [{F:container{i}} {S:spreiding(F)} {Q:neigh(F) -> U{i}} is-bar(F; S; Q) ∈ U{i}] {
   auto; intro @i'; auto;
   unfold <neighborhoods>; reduce; auto;
   unfold <is-bar>; auto;
@@ -14,10 +14,10 @@ Resource wf += { wf-lemma <is-bar-wf> }.
 
 Operator is-hereditary : (0;0;0).
 [is-hereditary(F; S; Q)] =def= [
-  (u:|F ♮|) (e:refinement(F; u) -> |F|) Q (u ^ r. e r) -> Q u
+  (u:neigh(F)) (e:refinement(F; u) -> dom(F)) Q (u ^ r. e r) -> Q u
 ].
 
-Theorem is-hereditary-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} is-hereditary(F; S; Q) ∈ U{i}] {
+Theorem is-hereditary-wf : [{F:container{i}} {S:spreiding(F)} {Q:neigh(F) -> U{i}} is-hereditary(F; S; Q) ∈ U{i}] {
   auto; intro @i'; auto;
   unfold <neighborhoods>; reduce; auto;
   unfold <is-hereditary>; auto;
@@ -31,11 +31,11 @@ Resource wf += { wf-lemma <is-hereditary-wf> }.
 ||| The statement of the Bar Induction Principle (variant that requires decidability of the bar)
 Operator BI-D : (0;0;0;0).
 [BI-D(F; S; Q; A)] =def= [
-  (((u:{u:|F ♮| | S u}) decidable(Q u)) * is-bar(F; S; Q) * is-hereditary(F; S; A) * ((u:|F ♮|) Q u -> A u))
+  (((u:{u:neigh(F) | S u}) decidable(Q u)) * is-bar(F; S; Q) * is-hereditary(F; S; A) * ((u:neigh(F)) Q u -> A u))
     -> A []
 ].
 
-Theorem BI-D-wf : [{F:container{i}} {S:spreiding(F)} {Q:|F ♮| -> U{i}} {A:|F ♮| -> U{i}} BI-D(F; S; Q; A) ∈ U{i}] {
+Theorem BI-D-wf : [{F:container{i}} {S:spreiding(F)} {Q:neigh(F) -> U{i}} {A:neigh(F) -> U{i}} BI-D(F; S; Q; A) ∈ U{i}] {
   auto; intro @i'; auto;
   unfold <BI-D>; auto;
   unfold <spreiding>;

@@ -1,24 +1,24 @@
 Operator spw-decidable : (0;0).
-[spw-decidable(F; S)] =def= [(u:|F ♮|) decidable(S u)].
+[spw-decidable(F; S)] =def= [(u:neigh(F)) decidable(S u)].
 
 Operator spw-leaks-upwards : (0;0).
-[spw-leaks-upwards(F; S)] =def= [(u:|F ♮|) S u -> (e:proj(F ♮; u) -> |F|) * S (u ^ r. e r)].
+[spw-leaks-upwards(F; S)] =def= [(u:neigh(F)) S u -> (e:proj(F ♮; u) -> dom(F)) * S (u ^ r. e r)].
 
 Operator spw-downward-closed : (0;0).
-[spw-downward-closed(F; S)] =def= [(v:|F ♮|) (u:{u : |F ♮| | u ≼ v}) S u -> S v].
+[spw-downward-closed(F; S)] =def= [(v:neigh(F)) (u:{u : neigh(F) | u ≼ v}) S u -> S v].
 
-Theorem spw-decidable-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-decidable(F; S) ∈ U{i}] {
+Theorem spw-decidable-wf : [{F:container{i}} {S:neigh(F) -> U{i}} spw-decidable(F; S) ∈ U{i}] {
   unfold <spw-decidable neighborhoods>; reduce; auto;
   elim #1; auto
 }.
 
-Theorem spw-leaks-upwards-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-leaks-upwards(F; S) ∈ U{i}] {
+Theorem spw-leaks-upwards-wf : [{F:container{i}} {S:neigh(F) -> U{i}} spw-leaks-upwards(F; S) ∈ U{i}] {
   unfold <spw-leaks-upwards neighborhoods>; reduce; auto;
   elim #1; auto; reduce; auto;
   elim #5; reduce; auto
 }.
 
-Theorem spw-downward-closed-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spw-downward-closed(F; S) ∈ U{i}] {
+Theorem spw-downward-closed-wf : [{F:container{i}} {S:neigh(F) -> U{i}} spw-downward-closed(F; S) ∈ U{i}] {
   auto; unfold <spw-downward-closed neighborhoods>; reduce; auto;
   cut-lemma <prefixes-wf>;
   elim #5 [F]; auto;
@@ -41,19 +41,20 @@ Operator spreidingswet : (0;0).
     * S []
 ].
 
-Theorem spreidingswet-wf : [{F:container{i}} {S:|F ♮| -> U{i}} spreidingswet(F;S) ∈ U{i}] {
+Theorem spreidingswet-wf : [{F:container{i}} {S:neigh(F) -> U{i}} spreidingswet(F;S) ∈ U{i}] {
+  intro @i'; aux { auto };
+  intro @i'; aux { elim #1; auto };
   auto; *{ unfold <spreidingswet neighborhoods>; reduce; auto }
 }.
 
 Resource wf += { wf-lemma <spreidingswet-wf> }.
 
 Operator spreiding : (0).
-[spreiding(F)] =def= [{S:|F ♮| -> U{i} | spreidingswet(F; S)}].
+[spreiding(F)] =def= [{S:neigh(F) -> U{i} | spreidingswet(F; S)}].
 
 Theorem spreiding-wf : [{F:container{i}} spreiding(F) ∈ U{i'}] {
   auto; unfold <spreiding neighborhoods>; reduce; auto;
-  [ elim #1 , cum @i ];
-  auto; unfold <neighborhoods>; reduce; auto
+  cum @i; auto; unfold <neighborhoods>; reduce; auto
 }.
 
 Resource wf += { wf-lemma <spreiding-wf> }.
@@ -61,14 +62,14 @@ Resource wf += { wf-lemma <spreiding-wf> }.
 Operator universal-spread : ().
 [universal-spread] =def= [lam(_.unit)].
 
-Theorem universal-spread-pre-wf : [{F:container{i}} universal-spread ∈ |F ♮| -> U{i}] {
+Theorem universal-spread-pre-wf : [{F:container{i}} universal-spread ∈ neigh(F) -> U{i}] {
   auto; unfold <universal-spread neighborhoods>; auto;
   elim #1; reduce; auto
 }.
 
 Resource wf += { wf-lemma <universal-spread-pre-wf> }.
 
-Theorem universal-spread-wf : [{F:container{i}} (s:|F|) universal-spread ∈ spreiding(F)] {
+Theorem universal-spread-wf : [{F:container{i}} (s:dom(F)) universal-spread ∈ spreiding(F)] {
   unfold <spreiding>; auto; aux { elim #1; reduce; auto };
   eq-cd @i; ?{ !{ auto } };
   unfold <spreidingswet>; auto;
