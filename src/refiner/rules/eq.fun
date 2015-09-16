@@ -61,10 +61,11 @@ struct
       val #[M,N,A] = Context.rebind H eq ^! EQ
       val xC = Context.rebind H xC
 
-      val fvs = List.map #1 (Context.listItems H)
-      val meta = Meta.convertFree fvs (xC // M)
+      val meta = convertToPattern (H, xC // M)
       val solution = Unify.unify (meta, Meta.convert P)
-      val xC = applySolution solution (Meta.convertFree fvs xC)
+
+      val x \ C = out xC
+      val xC = x \\ applySolution solution (P, convertToPattern (H, C))
 
       val (H', x, C) = ctxUnbind (H, A, xC)
       val k = case ok of SOME k => k | NONE => inferLevel (H', C)

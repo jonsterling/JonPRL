@@ -1,6 +1,7 @@
 group is
   ../syntax/sources.cm
   $libs/sml-abt/abt.cm
+  $libs/sml-abt/vector-lib/vector-lib.cm
   $libs/cmlib/cmlib.cm
   $libs/sml-telescopes/telescopes.cm
   $libs/sml-lcf/lcf.cm

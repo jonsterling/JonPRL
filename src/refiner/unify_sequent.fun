@@ -63,7 +63,7 @@ struct
              (Context.Syntax.freeVariables M)
              ctxVars
 
-      val wildVar = List.find (fn v => "_" = Variable.toString v) freeVars
+      val wildVars = List.filter (fn v => "_" = Variable.toString v) freeVars
       val wild = MetaAbt.into (MetaAbt.$ (MetaOperator.WILD, #[]))
       (* Assert that all free variables are ones we didn't mean to
        * bind to ones in the context already.
@@ -77,10 +77,10 @@ struct
                    (convert M)
                    freeVars
     in
-      case wildVar of
-          SOME v =>
-          substOperator (fn _ => wild) (MetaOperator.META v) cM
-        | NONE => cM
+      List.foldl
+        (fn (v, t) => substOperator (fn _ => wild) (MetaOperator.META v) t)
+        cM
+        wildVars
     end
 
   fun rebindPat {goal, hyps} =
