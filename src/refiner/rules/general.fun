@@ -45,10 +45,12 @@ struct
     end
 
   fun Unhide hyp (T |: H >> P) =
-    let val z = eliminationTarget hyp (H >> P)
-	val _ = P ^! EQ
-	val K = Context.modifyVisibility H z (fn x => x) (fn _ => Visibility.Visible)
-    in [T |: K >> P] BY mkEvidence UNHIDE
+    let
+      val z = eliminationTarget hyp (H >> P)
+      val _ = P ^! EQ
+      val K = Context.modifyVisibility H z (fn x => x) (fn _ => Visibility.Visible)
+    in
+      [T |: K >> P] BY mkEvidence UNHIDE
     end
 
   fun Hypothesis hyp (goal as _ |: S) = Hypothesis_ (eliminationTarget hyp S) goal
