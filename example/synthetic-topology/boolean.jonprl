@@ -35,3 +35,23 @@ Theorem assert-wf : [{b:bool} ↑ b ∈ U{i}] {
 }.
 
 Resource wf += { wf-lemma <assert-wf> }.
+
+Theorem tt-not-ff : [¬ =(tt; ff; bool)] {
+  unfold <not implies>;
+  intro @i; aux { auto };
+  assert [↑ ff];
+  aux {
+    hyp-subst <- #1 [h. ↑ h] @i;
+    unfold <tt>; auto; reduce
+  };
+
+  unfold <assert ff>; reduce; auto
+}.
+
+Resource auto += {
+  @{ [H : =(tt; ff; bool) |- _] =>
+       cut-lemma <tt-not-ff>;
+       contradiction
+   }
+}.
+
