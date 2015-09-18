@@ -58,3 +58,46 @@ Theorem Σ-unequal-1 : [=(Σ⊥; Σ⊤; nat -> bool) ⇔ void] {
   unfold <assert tt ff>; reduce; auto
 }.
 
+Operator Σ : ().
+[Σ] =def= [
+  quotient(nat -> bool; f.g.
+    =(f; Σ⊥; nat -> bool) ⇔ =(g; Σ⊥; nat -> bool)
+  )
+].
+
+Tactic eq-base-tac {
+  @{ [|- =(=(_; _; _); =(_; _; _); _)] =>
+       eq-eq-base; ?{ !{ bunion-eq-right; auto } }
+   | [|- =(_ * _; _ * _; _)] => eq-cd
+   }
+}.
+
+Tactic destruct-prods {
+  *{ @{ [H:_*_ |- _] => elim <H>; thin <H>
+      }
+   }
+}.
+
+Tactic hyp-trans {
+  @{ [H : P, H' : P => Q, H'' : Q => R |- R] =>
+       assert [Q] <z>;
+       aux {
+         elim <H'> [H]; auto
+       };
+       main {
+         elim <H''> [z];
+         auto
+       }
+   }
+}.
+
+Theorem Σ-wf : [Σ ∈ U{i}] {
+  unfold <Σ quotient and uiff Σ⊥ Σ⊤ member>;
+  eq-cd; unfold <member>; reduce;
+  *{ eq-base-tac }; ?{ !{ auto } };
+  destruct-prods; auto;
+  intro @i; auto;
+  hyp-trans
+}.
+
+Resource wf += { wf-lemma <Σ-wf> }.
