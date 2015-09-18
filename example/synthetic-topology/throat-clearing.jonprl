@@ -25,3 +25,4 @@ Theorem not-wf : [{P:U{i}} not(P) ∈ U{i}] {
 
 Resource wf += { wf-lemma <not-wf> }.
 
+Infix 7 "⊆r" := subtype_rel.

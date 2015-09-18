@@ -91,13 +91,22 @@ Tactic hyp-trans {
    }
 }.
 
-Theorem Σ-wf : [Σ ∈ U{i}] {
-  unfold <Σ quotient and uiff Σ⊥ Σ⊤ member>;
-  eq-cd; unfold <member>; reduce;
+Tactic Σ-wf-tac {
+  unfold <Σ quotient and uiff Σ⊥ Σ⊤>; auto; reduce;
   *{ eq-base-tac }; ?{ !{ auto } };
   destruct-prods; auto;
   intro @i; auto;
   hyp-trans
 }.
 
+Theorem Σ-wf : [Σ ∈ U{i}] {
+  Σ-wf-tac
+}.
+
 Resource wf += { wf-lemma <Σ-wf> }.
+
+Theorem subtype-Σ : [(nat -> bool) ⊆r Σ] {
+  unfold <subtype_rel id>; auto;
+  eq-cd @i; auto;
+  Σ-wf-tac
+}.
