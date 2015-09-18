@@ -1,0 +1,60 @@
+Operator Σ⊥ : ().
+[Σ⊥] =def= [lam(n.ff)].
+
+Theorem Σ⊥-wf : [Σ⊥ ∈ nat -> bool] {
+  unfold <Σ⊥>; auto
+}.
+
+Resource wf += { wf-lemma <Σ⊥-wf> }.
+
+Theorem equal-Σ⊥ : [
+  {f:nat -> bool} uiff(=(f; Σ⊥; nat -> bool); (n:nat) ¬ ↑ (f n))
+] {
+  unfold <Σ⊥>;
+  intro @i; auto;
+  [ ext; auto; unfold <not assert implies>; reduce;
+    elim <f> [x']; auto;
+    unfold <bool>; elim #4;
+    [ elim #2 [x']; auto;
+      assert [↑ (f x')] <H>;
+      main {
+        unfold <assert>;
+        elim #7 [H]; auto
+      };
+
+      aux {
+        hyp-subst <- #6 [h.↑ h] @i; auto; reduce; auto;
+        unfold <bool>; auto
+      };
+
+    , hyp-subst <- #6 [h.=(h; _; _)];
+      unfold <ff unit>; auto;
+      elim #5; auto
+    ]
+  , intro @i; aux { auto };
+    intro; aux { auto };
+    unfold <not implies>; intro @i; aux { auto };
+    assert [↑ (lam(_.ff) n)];
+    main { unfold <assert ff>; reduce; auto };
+    hyp-subst <- #2 [h. ↑ (h n)] @i; auto
+  ]
+}.
+
+Operator Σ⊤ : ().
+[Σ⊤] =def= [lam(n.tt)].
+
+Theorem Σ⊤-wf : [Σ⊤ ∈ nat -> bool] {
+  unfold <Σ⊤>; auto
+}.
+
+Resource wf += { wf-lemma <Σ⊤-wf> }.
+
+Theorem Σ-unequal-1 : [=(Σ⊥; Σ⊤; nat -> bool) ⇔ void] {
+  unfold <uiff Σ⊥ Σ⊤>; auto; intro <p> @i; aux { auto };
+  assert [=(lam(_.ff) zero; lam(_.tt) zero; bool)];
+  aux { eq-cd [nat -> bool]; auto };
+  reduce; assert [↑ ff] <H>;
+  aux { hyp-subst -> #2 [h. ↑ h] @i; auto };
+  unfold <assert tt ff>; reduce; auto
+}.
+

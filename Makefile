@@ -21,6 +21,7 @@ test:
 	bin/jonprl example/identity-types.cfg
 	bin/jonprl example/per.cfg
 	bin/jonprl example/category-theory/sources.cfg
+	bin/jonprl example/synthetic-topology/sources.cfg
 
 clean:
 	rm -f bin/.heapimg.*

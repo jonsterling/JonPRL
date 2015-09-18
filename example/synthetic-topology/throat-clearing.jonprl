@@ -1,0 +1,27 @@
+Infix 2 "∈" := member.
+
+Operator uiff : (0;0).
+Infix 7 "⇔" := uiff.
+[P ⇔ Q] =def= [(Q => P) * (P => Q)].
+
+Theorem uiff-wf : [{P:U{i}} {Q:U{i}} uiff(P; Q) ∈ U{i}] {
+  unfold <uiff>; auto
+}.
+
+Resource wf += { wf-lemma <uiff-wf> }.
+
+Prefix 8 "¬" := not.
+Infix 7 "↔" := iff.
+
+Theorem implies-wf : [{P:U{i}} {Q:U{i}} implies(P; Q) ∈ U{i}] {
+  unfold <implies>; auto
+}.
+
+Resource wf += { wf-lemma <implies-wf> }.
+
+Theorem not-wf : [{P:U{i}} not(P) ∈ U{i}] {
+  unfold <not>; auto
+}.
+
+Resource wf += { wf-lemma <not-wf> }.
+
