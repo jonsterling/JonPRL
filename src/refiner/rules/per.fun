@@ -19,10 +19,10 @@ struct
        case ow of
            SOME names => names
          | NONE => (Context.fresh (H, Variable.named "x"),
-		    Context.fresh (H, Variable.named "y"),
-		    Context.fresh (H, Variable.named "z"),
-		    Context.fresh (H, Variable.named "u"),
-		    Context.fresh (H, Variable.named "v"))
+                    Context.fresh (H, Variable.named "y"),
+                    Context.fresh (H, Variable.named "z"),
+                    Context.fresh (H, Variable.named "u"),
+                    Context.fresh (H, Variable.named "v"))
       fun ap2 R a b = C.`> AP $$ #[C.`> AP $$ #[R, a], b]
       val bas = C.`> BASE $$ #[]
     in
@@ -33,13 +33,12 @@ struct
       , MAIN |: H @@ (x,bas) @@ (y,bas) @@ (z,ap2 R1 (``x) (``y)) >> ap2 R1 (``y) (``x)
       , MAIN |: H @@ (x,bas) @@ (y,bas) @@ (z,bas) @@ (u,ap2 R1 (``x) (``y)) @@ (v,ap2 R1 (``y) (``z)) >> ap2 R1 (``x) (``z)
       ] BY (fn [A,B,C,D,E,F] =>
-	       D.`> PER_EQ $$ #[ x \\ (y \\ A)
-			       , x \\ (y \\ B)
-			       , x \\ (y \\ (z \\ C))
-			       , x \\ (y \\ (z \\ D))
-			       , x \\ (y \\ (z \\ E))
-			       , x \\ (y \\ (z \\ (u \\ (v \\ F))))
-		 ]
+               D.`> PER_EQ $$ #[x \\ (y \\ A),
+                                x \\ (y \\ B),
+                                x \\ (y \\ (z \\ C)),
+                                x \\ (y \\ (z \\ D)),
+                                x \\ (y \\ (z \\ E)),
+                                x \\ (y \\ (z \\ (u \\ (v \\ F))))]
            | _ => raise Refine)
     end
 
@@ -73,9 +72,9 @@ struct
       val K  = Context.insert Context.empty y Visibility.Hidden ap2
       val H1 = Context.interposeAfter H (z, K)
     in
-	[ MAIN |: H1 >> P
-	, MAIN |: H >> C.`> MEM $$ #[ap2, uni]
-	] BY (fn [D,E] => D.`> PER_ELIM $$ #[y \\ D, E]
+      [ MAIN |: H1 >> P
+      , MAIN |: H >> C.`> MEM $$ #[ap2, uni]
+      ] BY (fn [D,E] => D.`> PER_ELIM $$ #[y \\ D, E]
              | _ => raise Refine)
     end
 
