@@ -259,8 +259,7 @@ struct
     let
       val freshVariable = listAt (names, 0)
     in
-      EqRules.Eq
-        ORELSE AtomRules.Eq
+      AtomRules.Eq
         ORELSE AtomRules.TokenEq
         ORELSE AtomRules.MatchTokenEq
         ORELSE AtomRules.TestEq freshVariable
@@ -316,7 +315,8 @@ struct
         ORELSE WTreeRules.MemEq
         ORELSE
         (if not invertible then
-             NatRules.RecEq (listAt (terms, 0), take2 names)
+           EqRules.Eq
+               ORELSE NatRules.RecEq (listAt (terms, 0), take2 names)
                ORELSE_LAZY (fn _ => PlusRules.DecideEq (List.nth (terms, 0),
                                                         List.nth (terms, 1),
                                                         take3 names))
