@@ -153,6 +153,14 @@ struct
                  C.`> SUBSET $$ #[S'', f H' T T']
                end
            | (SUBSET $ #[S,xT], _) => f H S B
+           | (PROD $ #[S, xT], PROD $ #[S', xT']) =>
+               let
+                 val S'' = f H S S'
+                 val (H', x, T) = ctxUnbind (H, S'', xT)
+                 val T' = xT' // ``x
+               in
+                 C.`> PROD $$ #[S'', f H' T T']
+               end
            | (FUN $ #[S, xT], FUN $ #[S', xT']) =>
                let
                  val S'' = f H S' S
