@@ -195,7 +195,7 @@ struct
     in
       case visibility of
            Visibility.Hidden =>
-            (assertIrrelevant (H, P); z)
+            (assertIrrelevant (H, P) handle _ => assertIrrelevant (H, A); z)
          | Visibility.Visible => z
     end
 

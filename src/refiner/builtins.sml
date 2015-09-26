@@ -140,11 +140,11 @@ struct
         let
           val x = Variable.named "x"
           val y = Variable.named "y"
-	  val memx = `> MEM $$ #[``x, T]
-	  val memy = `> MEM $$ #[``y, T]
-	  val rel  = (E // ``x) // ``y
-	  val exp  = `> AND $$ #[memx, `> AND $$ #[memy, rel]]
-	  val lam1 = `> LAM $$ #[y \\ exp]
+          val memx = `> MEM $$ #[``x, T]
+          val memy = `> MEM $$ #[``y, T]
+          val rel  = (E // ``x) // ``y
+          val exp  = `> AND $$ #[memx, `> AND $$ #[memy, rel]]
+          val lam1 = `> LAM $$ #[y \\ exp]
           val lam2 = `> LAM $$ #[x \\ lam1]
         in
           `> PER $$ #[lam2]

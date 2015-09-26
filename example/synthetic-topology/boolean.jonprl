@@ -1,0 +1,57 @@
+Operator bool : ().
+[bool] =def= [unit + unit].
+
+Theorem bool-wf : [bool ∈ U{i}] {
+  unfold <bool>; auto
+}.
+
+Resource wf += { wf-lemma <bool-wf> }.
+
+Operator tt : ().
+[tt] =def= [inl(<>)].
+
+Theorem tt-wf : [tt ∈ bool] {
+  unfold <tt bool>; auto
+}.
+
+Resource wf += { wf-lemma <tt-wf> }.
+
+Operator ff : ().
+[ff] =def= [inr(<>)].
+
+Theorem ff-wf : [ff ∈ bool] {
+  unfold <ff bool>; auto
+}.
+
+Resource wf += { wf-lemma <ff-wf> }.
+
+Operator assert : (0).
+Prefix 10 "↑" := assert.
+[↑ B] =def= [decide(B; _.unit; _.void)].
+
+Theorem assert-wf : [{b:bool} ↑ b ∈ U{i}] {
+  unfold <assert bool>; auto;
+  elim #1; reduce; auto
+}.
+
+Resource wf += { wf-lemma <assert-wf> }.
+
+Theorem tt-not-ff : [¬ =(tt; ff; bool)] {
+  unfold <not implies>;
+  intro @i; aux { auto };
+  assert [↑ ff];
+  aux {
+    hyp-subst <- #1 [h. ↑ h] @i;
+    unfold <tt>; auto; reduce
+  };
+
+  unfold <assert ff>; reduce; auto
+}.
+
+Resource auto += {
+  @{ [H : =(tt; ff; bool) |- _] =>
+       cut-lemma <tt-not-ff>;
+       contradiction
+   }
+}.
+

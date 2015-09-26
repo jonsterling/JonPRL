@@ -1,0 +1,143 @@
+Operator Σ⊥ : ().
+[Σ⊥] =def= [lam(n.ff)].
+
+Theorem Σ⊥-wf : [Σ⊥ ∈ nat -> bool] {
+  unfold <Σ⊥>; auto
+}.
+
+Resource wf += { wf-lemma <Σ⊥-wf> }.
+
+Theorem equal-Σ⊥ : [
+  {f:nat -> bool} =(f; Σ⊥; nat -> bool) ⇔ (n:nat) ¬ ↑ (f n)
+] {
+  unfold <Σ⊥>;
+  intro @i; auto;
+  [ ext; auto; unfold <not assert implies>; reduce;
+    elim <f> [x']; auto;
+    unfold <bool>; elim #4;
+    [ elim #2 [x']; auto;
+      assert [↑ (f x')] <H>;
+      main {
+        unfold <assert>;
+        elim #7 [H]; auto
+      };
+
+      aux {
+        hyp-subst <- #6 [h.↑ h] @i; auto; reduce; auto;
+        unfold <bool>; auto
+      };
+
+    , hyp-subst <- #6 [h.=(h; _; _)];
+      unfold <ff unit>; auto;
+      elim #5; auto
+    ]
+  , intro @i; aux { auto };
+    intro; aux { auto };
+    unfold <not implies>; intro @i; aux { auto };
+    assert [↑ (lam(_.ff) n)];
+    main { unfold <assert ff>; reduce; auto };
+    hyp-subst <- #2 [h. ↑ (h n)] @i; auto
+  ]
+}.
+
+Operator Σ⊤ : ().
+[Σ⊤] =def= [lam(n.tt)].
+
+Theorem Σ⊤-wf : [Σ⊤ ∈ nat -> bool] {
+  unfold <Σ⊤>; auto
+}.
+
+Resource wf += { wf-lemma <Σ⊤-wf> }.
+
+Theorem Σ-unequal-1 : [=(Σ⊥; Σ⊤; nat -> bool) ⇔ void] {
+  unfold <uiff Σ⊥ Σ⊤>; auto; intro <p> @i; aux { auto };
+  assert [=(lam(_.ff) zero; lam(_.tt) zero; bool)];
+  aux { eq-cd [nat -> bool]; auto };
+  reduce; assert [↑ ff] <H>;
+  aux { hyp-subst -> #2 [h. ↑ h] @i; auto };
+  unfold <assert tt ff>; reduce; auto
+}.
+
+Operator Σ : ().
+[Σ] =def= [
+  quotient(nat -> bool; f.g.
+    =(f; Σ⊥; nat -> bool) ⇔ =(g; Σ⊥; nat -> bool)
+  )
+].
+
+Tactic Σ-wf-tac {
+  unfold <Σ quotient and uiff Σ⊥ Σ⊤>; auto; reduce;
+  *{ eq-base-tac }; ?{ !{ auto } };
+  destruct-prods; auto;
+  intro @i; auto;
+  hyp-trans
+}.
+
+Theorem Σ-wf : [Σ ∈ U{i}] {
+  Σ-wf-tac
+}.
+
+Resource wf += { wf-lemma <Σ-wf> }.
+
+Theorem subtype-Σ : [(nat -> bool) ⊆r Σ] {
+  unfold <subtype_rel id>; auto;
+  eq-cd @i; auto;
+  Σ-wf-tac
+}.
+
+||| TODO: this is absolutely HORRID! Please improve this proof.
+Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
+  cut-lemma <Σ-unequal-1>; unfold <uiff not implies>;
+  elim #1 <_, t>; thin #2;
+  intro <σ> @i; auto;
+  intro <p> @i; aux { *{ eq-base-tac }; auto };
+  unfold <Σ quotient and uiff>; auto; reduce;
+  *{ eq-base-tac }; ?{ !{ auto } };
+  prune {
+    destruct-prods; auto;
+    ?{ intro @i }; auto; ?{ hyp-trans }
+  };
+  @{ [H : per(R) |- _] =>
+       assert [=(H; H; per(R))] <eq>; aux { auto };
+       elim <eq> @i; reduce;
+       destruct-prods;
+       [ auto
+       , *{ eq-base-tac }; auto
+       ]
+   };
+
+  ext; auto; unfold <Σ⊥>;
+
+  assert [{b:bool | =(b; σ x'; bool)}];
+  aux {
+    prune { intro [σ x'] @i; unfold <member> };
+    [ eq-cd [nat -> bool]; auto
+    , eq-base-tac; auto
+    ]
+  };
+
+
+  elim #13; unfold <bool>; elim #14;
+  [ eq-cd [nat -> unit + unit] @i; auto;
+    elim #5 [<>]; auto; reduce;
+    *{ eq-base-tac }; auto;
+    destruct-prods; auto;
+    @{ [H : =(M; N; P) => void, H' : =(N; M; P) |- _] =>
+          assert [=(M;N;P)] <S>; aux { symmetry; auto };
+          elim <H> [S]; auto
+     | [|- =(Σ⊤; Σ⊤; nat -> unit + unit)] => cut-lemma <Σ⊤-wf>; unfold <member bool>; auto
+     | [|- _] => id
+     };
+    ?{ hyp-trans };
+    assert [=(tt; ff; bool)];
+    aux {
+      unfold <tt unit bool>;
+      elim #15; hyp-subst -> #16 [h. =(h; _; _)];
+      unfold <unit ff>; auto;
+      hyp-subst -> #17 [h. =(h _; _; _)]; reduce; auto
+    };
+    auto
+  , reduce; unfold <unit ff>; elim #15;
+    hyp-subst <- #16 [h. =(h; _; _)]; auto;
+  ]
+}.

@@ -13,6 +13,13 @@ Tactic squash-intro {
 
 Resource intro += {squash-intro}.
 
+Tactic contradiction {
+  @{ [H:P, H':not(P) |- _] => unfold <not implies>; elim <H'> [H]; auto
+   | [H:P, H':P -> void |- _] => elim <H'> [H]; auto
+   | [H:P, H':P => void |- _] => elim <H'> [H]; auto
+   }
+}.
+
 |||
 Tactic bunion-eq-right {
   @{ [|- =(M; N; bunion(L; R))] =>
@@ -42,4 +49,36 @@ Tactic bunion-eq-left {
          reduce; auto
        }
   }
+}.
+
+
+Tactic eq-base-tac {
+  @{ [|- =(=(_; _; _); =(_; _; _); _)] =>
+       eq-eq-base; ?{ !{ bunion-eq-right; auto } }
+   | [|- =(_ * _; _ * _; _)] => eq-cd
+   | [|- =(_ => _; _ => _; _)] => eq-cd
+   | [|- =(_ -> _; _ -> _; _)] => eq-cd
+   | [|- member(_; _)] => unfold <member>
+   }
+}.
+
+Tactic destruct-prods {
+  *{ @{ [H:_*_ |- _] => elim <H>; thin <H>
+      }
+   }
+}.
+
+Tactic hyp-trans {
+  @{ [H : P, H' : P => Q, H'' : Q => R |- R] =>
+       assert [Q] <z>;
+       aux {
+         elim <H'> [H]; auto
+       };
+       main {
+         elim <H''> [z];
+         auto
+       }
+   | [H : P, H' : P => Q |- Q] =>
+       elim <H'> [H]; auto
+   }
 }.
