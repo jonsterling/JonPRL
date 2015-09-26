@@ -101,11 +101,11 @@ struct
 
       val #[S, xT] = prod ^! PROD
 
+      val z = Context.fresh (H, Variable.named "z")
       val zC =
-        case ozC of
+        (case ozC of
              NONE =>
              let
-               val z = Context.fresh (H, Variable.named "z")
                val H' = H @@ (z, prod)
                val Cz =
                  typeLub H'
@@ -114,9 +114,10 @@ struct
              in
                z \\ Cz
              end
-           | SOME zC => Context.rebind H zC
+           | SOME zC => Context.rebind H zC)
+        handle _ => z \\ CE1
 
-      val CE1' = unify CE1 (zC // E1)
+      val CE1' = unify CE1 (zC // E1) handle _ => CE1
       val Ts = xT // ``s
       val st = C.`> PAIR $$ #[``s, ``t]
       val E1pair = C.`> EQ $$ #[E1, st, prod]
