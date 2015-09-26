@@ -12,13 +12,42 @@ Operator is-pullback : (0;0;0;0;0;0;0).
          * =(cmp(C; q; p; a; pi1; u); h1; hom(C; q; a)))
 ].
 
-Theorem is-pullback-wf : [{C:category} {a:obj(C)} {b:obj(C)} {c:obj(C)} {p:obj(C)} {f:hom(C; a; c)} {g:hom(C; b; c)} is-pullback(C; a; b; c; p; f; g) ∈ U{i}] {
+Theorem is-pullback-wf : [
+  {C:category} {a:obj(C)} {b:obj(C)} {c:obj(C)} {p:obj(C)} {f:hom(C; a; c)} {g:hom(C; b; c)} is-pullback(C; a; b; c; p; f; g) ∈ U{i}
+] {
   unfold <is-pullback>; auto;
   *{ intro @i }; auto;
   unfold <exists-unique>; auto;
 }.
 
 Resource wf += { wf-lemma <is-pullback-wf> }.
+
+Tactic pb-proj-wf-tac {
+  unfold <is-pullback fst snd exists-unique>; auto; *{ intro @i }; auto; reduce; auto
+}.
+
+Operator pb-proj1 : (0).
+[pb-proj1(pb)] =def= [fst(pb)].
+
+Theorem pb-proj1-wf : [
+  {C:category} {a:obj(C)} {b:obj(C)} {c:obj(C)} {p:obj(C)} {f:hom(C; a; c)} {g:hom(C; b; c)} {pb:is-pullback(C; a; b; c; p; f; g)} pb-proj1(pb) ∈ hom(C; p; a)
+] {
+  unfold <pb-proj1>; pb-proj-wf-tac
+}.
+
+Resource wf += { wf-lemma <pb-proj1-wf> }.
+
+Operator pb-proj2 : (0).
+[pb-proj2(pb)] =def= [fst(snd(pb))].
+
+Theorem pb-proj2-wf : [
+  {C:category} {a:obj(C)} {b:obj(C)} {c:obj(C)} {p:obj(C)} {f:hom(C; a; c)} {g:hom(C; b; c)} {pb:is-pullback(C; a; b; c; p; f; g)} pb-proj2(pb) ∈ hom(C; p; b)
+] {
+  unfold <pb-proj2>; pb-proj-wf-tac
+}.
+
+Resource wf += { wf-lemma <pb-proj2-wf> }.
+
 
 Operator has-pullbacks : (0).
 [has-pullbacks(C)] =def= [

@@ -9,6 +9,22 @@ Theorem covering-family-wf : [{C:category} {d:obj(C)} covering-family(C; d) ∈ 
 
 Resource wf += { wf-lemma <covering-family-wf> }.
 
+Operator mk-cfam : (0;1).
+[mk-cfam(I; x.P[x])] =def= [
+  <I, lam(z.P[z])>
+].
+
+Theorem mk-cfam-wf : [
+  {C:category} {I:U{i}} {d:obj(C)} {P:I -> (c:obj(C)) * hom(C; c; d)} mk-cfam(I; i.P i) ∈ covering-family(C; d)
+] {
+  auto; intro @i; auto;
+  unfold <mk-cfam covering-family family>;
+  auto; cum @i; auto
+}.
+
+Resource wf += { wf-lemma <mk-cfam-wf> }.
+
+
 Operator covering : (0).
 [covering(C)] =def= [
   (d:obj(C)) (F:covering-family(C; d)) U{i}
@@ -25,23 +41,38 @@ Resource wf += { wf-lemma <covering-wf> }.
 Operator isomorphisms-cover : (0;0).
 [isomorphisms-cover(C; K)] =def= [
   (a:obj(C)) (b:obj(C)) (f:isomorphism(C; a; b))
-    K b <unit, lam(_.<a, f>)>
+    K b mk-cfam(unit; _. <a, f>)
 ].
 
 Theorem isomorphisms-cover-wf : [{C:category} {K:covering(C)} isomorphisms-cover(C; K) ∈ U{i}] {
   unfold <isomorphisms-cover>; auto; intro @i'; auto;
-  unfold <covering covering-family family>; auto;
+  unfold <covering covering-family family mk-cfam>; auto;
   ?{ cum @i; auto };
   eq-cd @i; auto
 }.
 
 Resource wf += { wf-lemma <isomorphisms-cover-wf> }.
 
-Operator stability : (0;0).
-[stability(C; K)] =def= [
+Operator stability : (0;0;0).
+[stability(C; K; pb)] =def= [
   (c:obj(C)) (d:obj(C)) (F:covering-family(C; d)) (g:hom(C; c; d))
-    K d F -> K c "TODO"
+    K d F ->
+      K c mk-cfam(fst(F); i.
+        spread(snd(F) i; ei.fi.
+          spread(pb ei c d fi g; p.ispb.<p, pb-proj2(ispb)>)))
 ].
+
+Theorem stability-wf : [{C:category} {K:covering(C)} {pb:has-pullbacks(C)} stability(C; K; pb) ∈ U{i'}] {
+  unfold <stability>; auto;
+  intro @i'; auto;
+  intro @i; auto;
+  unfold <covering covering-family family has-pullbacks is-pullback pb-proj2 mk-cfam fst snd>; auto;
+  ?{ !{ cum @i; auto } };
+  reduce; auto;
+  eq-cd @i; reduce; auto; reduce; auto
+}.
+
+Resource wf += { wf-lemma <stability-wf> }.
 
 Operator local-character : (0;0).
 
@@ -52,7 +83,7 @@ Operator pretopology : (0).
   spread(C; C.pb.
     (K : covering(C))
       * isomorphisms-cover(C; K)
-      * stability(C; K)
+      * stability(C; K; pb)
       * local-character(C; K)
   )
 ].
