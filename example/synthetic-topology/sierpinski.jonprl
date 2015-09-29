@@ -68,6 +68,7 @@ Operator Σ : ().
 Tactic Σ-wf-tac {
   unfold <Σ quotient and uiff Σ⊥ Σ⊤ member>; eq-cd;
   *{ eq-base-tac }; ?{ !{ auto } };
+  ?{ eq-cd; *{ eq-base-tac }; ?{ !{ auto } } };
   destruct-prods; auto;
   intro @i; auto;
   hyp-trans
@@ -81,37 +82,41 @@ Resource wf += { wf-lemma <Σ-wf> }.
 
 Theorem subtype-Σ : [(nat -> bool) ⊆r Σ] {
   unfold <subtype_rel id>; auto;
-  eq-cd @i; auto(*;
-  Σ-wf-tac*);
-  unfold <Σ quotient and uiff Σ⊥ Σ⊤ member>;(*eq-cd;
-  *{ eq-base-tac }; ?{ !{ auto } };
-  destruct-prods; auto;
-  intro @i; auto;
-  hyp-trans*)
+  eq-cd @i; auto;
+  Σ-wf-tac
 }.
 
-(*
+Theorem test : [ceq(lam(x.x);bot) -> unit] {
+ intro @i;[ , auto ];
+ @{ [H : ceq(lam(x.t);u) |- _] =>
+       assert [ceq(u;lam(x.t))] <eq>
+       }
+  
+}.
+
 ||| TODO: this is absolutely HORRID! Please improve this proof.
 Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
   cut-lemma <Σ-unequal-1>; unfold <uiff not implies>;
   elim #1 <_, t>; thin #2;
   intro <σ> @i; auto;
   intro <p> @i; aux { *{ eq-base-tac }; auto };
-  unfold <Σ quotient and uiff>; auto; reduce;
+  unfold <Σ quotient and uiff>;
+  eq-cd;
   *{ eq-base-tac }; ?{ !{ auto } };
+  ?{ eq-cd; *{ eq-base-tac }; ?{ !{ auto } } };
   prune {
     destruct-prods; auto;
     ?{ intro @i }; auto; ?{ hyp-trans }
   };
   @{ [H : per(x.y.R) |- _] =>
-       assert [=(H; H; per(x.y.R))] <eq>; aux { auto };
+       assert [=(H; H; per(x.y.R))] <eq>; aux {   (*auto*) };(*
        elim <eq> @i; reduce;
        destruct-prods;
        [ auto
        , *{ eq-base-tac }; auto
-       ]
+       ]*)
    };
-
+(*
   ext; auto; unfold <Σ⊥>;
 
   assert [{b:bool | =(b; σ x'; bool)}];
@@ -121,7 +126,6 @@ Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
     , eq-base-tac; auto
     ]
   };
-
 
   elim #13; unfold <bool>; elim #14;
   [ eq-cd [nat -> unit + unit] @i; auto;
@@ -146,5 +150,5 @@ Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
   , reduce; unfold <unit ff>; elim #15;
     hyp-subst <- #16 [h. =(h; _; _)]; auto;
   ]
-}.
 *)
+}.
