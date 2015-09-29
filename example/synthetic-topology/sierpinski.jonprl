@@ -86,14 +86,7 @@ Theorem subtype-Σ : [(nat -> bool) ⊆r Σ] {
   Σ-wf-tac
 }.
 
-Theorem test : [ceq(lam(x.x);bot) -> unit] {
- intro @i;[ , auto ];
- @{ [H : ceq(lam(x.t);u) |- _] =>
-       assert [ceq(u;lam(x.t))] <eq>
-       }
-  
-}.
-
+(*
 ||| TODO: this is absolutely HORRID! Please improve this proof.
 Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
   cut-lemma <Σ-unequal-1>; unfold <uiff not implies>;
@@ -152,3 +145,4 @@ Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
   ]
 *)
 }.
+*)
