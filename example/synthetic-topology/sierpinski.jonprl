@@ -97,8 +97,8 @@ Theorem not-Σ⊤ : [{σ:Σ} (¬ =(σ; Σ⊤; Σ)) => =(σ; Σ⊥; Σ)] {
     destruct-prods; auto;
     ?{ intro @i }; auto; ?{ hyp-trans }
   };
-  @{ [H : per(R) |- _] =>
-       assert [=(H; H; per(R))] <eq>; aux { auto };
+  @{ [H : per(x.y.R) |- _] =>
+       assert [=(H; H; per(x.y.R))] <eq>; aux { auto };
        elim <eq> @i; reduce;
        destruct-prods;
        [ auto

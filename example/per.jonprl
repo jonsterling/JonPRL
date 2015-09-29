@@ -1,5 +1,5 @@
 Operator per-squash : (0).
-[per-squash(A)] =def= [per(lam(_.lam(_.A)))].
+[per-squash(A)] =def= [per(_._.A)].
 
 Theorem per-squash-wf : [{A:U{i}} member(per-squash(A); U{i})] {
   unfold <per-squash>; auto; reduce; auto
@@ -8,7 +8,7 @@ Theorem per-squash-wf : [{A:U{i}} member(per-squash(A); U{i})] {
 Theorem iff_squash : [{A:U{i}} iff(per-squash(A);squash(A))] {
  auto;
  [ unfold <per-squash>;auto;reduce;auto;
-   assert [=(x;x;per(lam(_.lam(_.A))))] <e>;[ auto; fail, id ];
+   assert [=(x;x;per(_._.A))] <e>;[ auto; fail, id ];
    elim <e>; reduce; [ id, auto; reduce; auto ];
    witness [<>];auto;
    unhide <y>;
@@ -31,21 +31,23 @@ Theorem quotient_wf: [
   auto;
   unfold <is-symmetric is-transitive>;
   auto;
-  unfold <quotient and>;auto;reduce;
-  [ eq-cd;
+  unfold <quotient and>;eq-cd;
+  [ unfold <member>; eq-cd;
     [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'''>;reduce;auto;fail
     , eq-cd;
       [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''''>;reduce;auto;fail
       , auto;fail
       ]
     ]
-  , eq-cd;
+  , unfold <member>; eq-cd;
     [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x'''>;reduce;auto;fail
     , eq-cd;
       [ eq-base-tac;eq-cd;auto;reduce;auto;elim <x''''>;reduce;auto;fail
       , auto;fail
       ]
     ]
+  , auto
+  , auto
   , elim <z>; elim <t>;auto;
     elim #3 [x''];auto;
     elim #12 [y];auto;
@@ -56,6 +58,5 @@ Theorem quotient_wf: [
     elim #18 [y];auto;
     elim #20 [z];auto;
     elim #22 [t''];auto;
-    elim #24 [t'''];auto
-  ]
+    elim #24 [t'''];auto ]
 }.
