@@ -24,6 +24,7 @@ struct
     | PER_EQ | PER_MEM_EQ | PER_ELIM
 
     | UNHIDE
+    | POINTWISE_FUNCTIONALITY
 
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
@@ -78,6 +79,7 @@ struct
        | PER_ELIM => #[1,0]
 
        | UNHIDE => #[0]
+       | POINTWISE_FUNCTIONALITY => #[2,3]
 
        | ATOM_EQ => #[]
        | TOKEN_EQ => #[]
@@ -197,6 +199,7 @@ struct
        | PER_ELIM => "per-elim"
 
        | UNHIDE => "unhide"
+       | POINTWISE_FUNCTIONALITY => "pointwise-functionality"
 
        | ATOM_EQ => "atom-eq"
        | TOKEN_EQ => "token-eq"

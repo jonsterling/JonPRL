@@ -53,6 +53,9 @@ sig
       | CUT_LEMMA of operator * name option * meta
       | WF_LEMMA of operator * meta
       | UNHIDE of hyp * meta
+      | POINTWISE_FUNCTIONALITY of {target : hyp,
+				    names  : (name * name * name) option,
+				    level  : level option} * meta
       | SYMMETRY of meta
       | CEQUAL_SYM of meta
       | CEQUAL_STEP of meta

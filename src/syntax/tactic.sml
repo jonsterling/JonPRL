@@ -51,6 +51,9 @@ struct
     | CUT_LEMMA of operator * name option * meta
     | WF_LEMMA of operator * meta
     | UNHIDE of hyp * meta
+    | POINTWISE_FUNCTIONALITY of {target : hyp,
+				  names  : (name * name * name) option,
+				  level  : level option} * meta
     | SYMMETRY of meta
     | CEQUAL_SYM of meta
     | CEQUAL_STEP of meta
@@ -174,6 +177,7 @@ struct
           | COMPLETE (t, meta) => COMPLETE (go t, meta)
           | BOTTOM_DIVERGES (h, meta) => BOTTOM_DIVERGES (applyHyp h, meta)
           | UNHIDE (h, meta) => UNHIDE (applyHyp h, meta)
+          | POINTWISE_FUNCTIONALITY ({target, names, level}, meta) => POINTWISE_FUNCTIONALITY ({target = applyHyp target, names = names, level = level}, meta)
 	  | ASSUME_HAS_VALUE ({name,level}, meta) => ASSUME_HAS_VALUE ({name = name, level = level}, meta)
           | HYPOTHESIS (h, meta) => HYPOTHESIS (applyHyp h, meta)
           | THIN (h, meta) => THIN (applyHyp h, meta)
