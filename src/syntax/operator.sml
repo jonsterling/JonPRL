@@ -84,7 +84,7 @@ struct
        | BUNION => #[0,0]
        | HASVALUE => #[0]
        | IMAGE => #[0,0]
-       | PER => #[0]
+       | PER => #[2]
        | QUOTIENT => #[0,2]
        | FIX => #[0]
        | CBV => #[0, 1]

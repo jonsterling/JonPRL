@@ -9,6 +9,10 @@ struct
   infix 8 $$ // @@
   infixr 8 \\
 
+  local
+      fun ap2 R u v = (R // u) // v
+  in
+
   fun Eq ow (_ |: H >> P) =
     let
       val #[M, N, U] = P ^! EQ
@@ -23,7 +27,6 @@ struct
                     Context.fresh (H, Variable.named "z"),
                     Context.fresh (H, Variable.named "u"),
                     Context.fresh (H, Variable.named "v"))
-      fun ap2 R a b = C.`> AP $$ #[C.`> AP $$ #[R, a], b]
       val bas = C.`> BASE $$ #[]
     in
       [ MAIN |: H @@ (x,bas) @@ (y,bas) >> C.`> MEM $$ #[ap2 R1 (``x) (``y), U]
@@ -51,7 +54,7 @@ struct
       val bas = C.`> BASE $$ #[]
     in
       [ MAIN |: H >> C.`> MEM $$ #[U, uni]
-      , MAIN |: H >> C.`> AP $$ #[C.`> AP $$ #[R, M], N]
+      , MAIN |: H >> ap2 R M N
       , MAIN |: H >> C.`> MEM $$ #[M, bas]
       , MAIN |: H >> C.`> MEM $$ #[N, bas]
       ] BY mkEvidence PER_MEM_EQ
@@ -68,14 +71,16 @@ struct
          | NONE => Context.fresh (H, Variable.named "y")
       val k = case ok of NONE => inferLevel (H, U) | SOME k => k
       val uni = C.`> (UNIV k) $$ #[]
-      val ap2 = C.`> AP $$ #[C.`> AP $$ #[R, M], N]
-      val K  = Context.insert Context.empty y Visibility.Hidden ap2
+      val rmn = ap2 R M N
+      val K  = Context.insert Context.empty y Visibility.Hidden rmn
       val H1 = Context.interposeAfter H (z, K)
     in
       [ MAIN |: H1 >> P
-      , MAIN |: H >> C.`> MEM $$ #[ap2, uni]
+      , MAIN |: H >> C.`> MEM $$ #[rmn, uni]
       ] BY (fn [D,E] => D.`> PER_ELIM $$ #[y \\ D, E]
              | _ => raise Refine)
     end
+
+  end
 
 end
