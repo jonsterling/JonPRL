@@ -33,6 +33,15 @@ Tactic bunion-eq-right {
   }
 }.
 
+Tactic bunion-eq-left {
+  @{ [|- =(M; N; L ∪ R)] =>
+       csubst [M ~ lam(x. snd(x)) <inl(<>), M>] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [N ~ lam(x. snd(x)) <inl(<>), N>] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+  }
+}.
+
 Tactic eq-base-tac {
   @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
        eq-eq-base; auto;

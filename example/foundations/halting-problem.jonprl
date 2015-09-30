@@ -43,7 +43,7 @@ Tactic derive-contra {
      assert [¬ M ⇓];
      aux {
        chyp-subst → <H> [h. ¬ h ⇓];
-       auto; bot-div #6
+       auto; bot-div #8
      };
    | [H : M ~ <> |- _] =>
      assert [M ⇓];
@@ -57,9 +57,23 @@ Tactic derive-contra {
 Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
   *{unfold <not implies dec>}; auto;
 
+  pointwise-functionality <x>;auto;
+  thin <x>;
+  witness [<>]; unfold <member>; unhide #1; unhide #2; eq-cd;
+
+  assert [(y : has-value(problem(a) problem(a)) + (has-value(problem(a) problem(a)) -> approx(<>; bot)))
+          * =(y; a (problem(a) problem(a)); has-value(problem(a) problem(a)) + (has-value(problem(a) problem(a)) -> approx(<>; bot)))] <h>;
+  aux { intro [a (problem(a) problem(a))];
+        [ auto;eq-cd [(m:base) has-value(m) + (has-value(m) -> approx(<>; bot))]; auto
+        , eq-cd [(m:base) has-value(m) + (has-value(m) -> approx(<>; bot))]; auto
+        , unfold <member>; eq-eq-base;auto;[ bunion-eq-left , bunion-eq-right ];
+          unfold <bunion>;eq-cd;auto;reduce;auto;elim<x>;reduce;auto ] };
+  elim <h>;
+
   ||| Ask whether or not problem(x) problem(x) terminates
-  elim #1 [problem(x) problem(x)]; auto; elim #2;
+  elim <s>;
 
   ||| Show no matter the answer, we have a contradiction.
   assert-opposite; derive-contra; contradiction
+
 }.
