@@ -15,7 +15,7 @@ functor RefinerUtil
       where type term = Syntax.t
       where type name = Syntax.Variable.t
       where type operator = Syntax.Operator.t
-      where type Sequent.sequent = Sequent.sequent) : REFINER_UTIL =
+      where Sequent = Sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = Tacticals(Lcf)
@@ -256,23 +256,24 @@ struct
     end
 
   local
-      open Goal Sequent Syntax
-      infix 3 >> infix 2 |:
-      infix $
+    open Goal Sequent Syntax
+    infix 3 >> infix 2 |:
+    open CttCalculusInj CttCalculus CttCalculusView
+    infix $
   in
-  fun EqBase (goal as (_ |: H >> P)) =
-    (case out P of
-	 EQ $ #[M,N,U] =>
-	 (case out U of
-	      BASE $ _ =>
-	      (case out M of
-		   ` (v : Syntax.Variable.t) => BaseRules.AtomSubtypeBase
-		   (*(case out (Context.lookup H v) of
-			ATOM $ _ => BaseRules.AtomSubtypeBase
-		      | _ => raise Refine)*)
-		 | _ => BaseRules.MemberEq)
-	    | _ => raise Refine)
-       | _ => raise Refine) goal
+    fun EqBase (goal as (_ |: H >> P)) =
+      (case project P of
+           EQ $ #[M,N,U] =>
+           (case project U of
+                BASE $ _ =>
+                (case project M of
+                     ` v =>
+                       (case project (Context.lookup H v) of
+                            ATOM $ _ => BaseRules.AtomSubtypeBase
+                          | _ => raise Refine)
+                   | _ => BaseRules.MemberEq)
+              | _ => raise Refine)
+         | _ => raise Refine) goal
   end
 
   fun EqCD {names, level, invertible, terms} world =
