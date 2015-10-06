@@ -1,16 +1,13 @@
 ||| We can now demonstrate that the global principle of the excluded middle is
 ||| invalid.
-Theorem excluded-middle-invalid : [¬ ((A : U{i}) A decidable)] {
-  unfold <dec>; auto;
+Theorem excluded-middle-invalid : [¬ (A : U{i}) A decidable] {
+  unfold <not implies>; intro <universal-oracle> @i'; aux { unfold <dec>; auto };
 
-  ||| With our hypothesis, we can solve the halting problem
-  assert [(m : base) m ⇓ + ¬ m ⇓];
-  aux {
-    auto; elim #1 [m ⇓]; auto; unfold <not implies void>;
-    assumption
-  };
+ ||| With our hypothesis, we can solve the halting problem
+ assert [(m : base) m ⇓ decidable] <halting-oracle>;
+ aux { auto; elim <universal-oracle> [m ⇓]; auto };
 
-  ||| But we still can't solve the halting problem, contradiction.
-  cut-lemma <halting-problem-undecidable>; unfold <not implies dec>;
-  contradiction
+ ||| But we still can't solve the halting problem, contradiction.
+ cut-lemma <halting-problem-undecidable>;
+ contradiction
 }.
