@@ -6,17 +6,6 @@
 ||| The well-formedness conditions in this proof are absolutely
 ||| killer and lead to most of the bloat in the proofs.
 
-Operator bisect : (0;0).
-Infix -> 8 "∩" := bisect.
-[A ∩ B] =def= [{b:unit + unit} decide(b; _.A; _.B)].
-
-Theorem bisect-wf : [{A:U{i}} {B:U{i}} A ∩ B ∈ U{i}] {
-  unfold <bisect>; auto;
-  elim #3; reduce; auto
-}.
-
-Resource wf += { wf-lemma <bisect-wf> }.
-
 Theorem eq-wf-base : [{A:U{i}} {a:base} {b:base} =(a; b; A) ∈ U{i}] {
   auto 0; aux { auto };
 

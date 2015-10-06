@@ -54,3 +54,14 @@ Tactic eq-base-tac {
        bunion-eq-right; unfold <bunion>
    }
 }.
+
+Operator bisect : (0;0).
+Infix -> 8 "∩" := bisect.
+[A ∩ B] =def= [{b:unit + unit} decide(b; _.A; _.B)].
+
+Theorem bisect-wf : [{A:U{i}} {B:U{i}} A ∩ B ∈ U{i}] {
+  unfold <bisect>; auto;
+  elim #3; reduce; auto
+}.
+
+Resource wf += { wf-lemma <bisect-wf> }.
