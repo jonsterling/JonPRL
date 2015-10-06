@@ -39,18 +39,29 @@ Theorem eq-wf-base : [{A:U{i}} {a:base} {b:base} =(a; b; A) ∈ U{i}] {
    }
 }.
 
-Tactic dest-bisect {
-  @{ [T : {b:unit + unit} decide(b; _.A; _.B) |- =(T; T; A)] =>
-       wf-lemma <eq-wf-base>; auto;
+Tactic bisect-induction-tac {
+  @{ [T : {b : unit + unit} decide(b; _.A; _.B) |- _] =>
        elim <T> [inl(<>)];
-       main { elim <T> [inr(<>)] };
-       aux { auto }; reduce; auto;
-       @{ [H : =(m; n; S) |- =(n; n; S)] =>
-           hyp-subst <- <H> [h.=(h; h; _)]; auto
-        }
+       main { elim <T> [ inr(<>) ] };
+       aux { auto };
    }
 }.
 
+Tactic hyp-equand-eq-tac {
+  @{ [H : =(m; n; S) |- =(n; n; S)] =>
+      hyp-subst <- <H> [h.=(h; h; _)]; auto
+   }
+}.
+
+Tactic dest-bisect {
+  unfold <bisect member>;
+  @{ [T : {b:unit + unit} decide(b; _.A; _.B) |- =(T; T; C)] =>
+       bisect-induction-tac;
+       wf-lemma <eq-wf-base>; auto;
+       reduce; auto;
+       hyp-equand-eq-tac
+   }
+}.
 
 Operator Russell : ().
 [Russell] =def= [{x : U{i} ∩ base | ¬ (x ∈ x)}].
@@ -75,28 +86,30 @@ Theorem Russell-in-base : [Russell ∈ base] {
 
 Resource wf += { wf-lemma <Russell-in-base> }.
 
+Theorem russell-property-type-wf : [(Russell ∈ Russell) ∈ U{i'}] {
+  assert [{A:U{i'}} {a:base} {b:base} =(a; b; A) ∈ U{i'}] <eq-wf-base>;
+  aux { lemma <eq-wf-base> };
+  unfold <member>; bhyp <eq-wf-base>;
+  auto
+}.
+
+Resource wf += { wf-lemma <russell-property-type-wf> }.
+
 Theorem russell-property : [¬ (Russell ∈ Russell)] {
-  unfold <not implies>; intro @i';
-  aux {
-    assert [{A:U{i'}} {a:base} {b:base} =(a; b; A) ∈ U{i'}] <eq-wf-base>;
-    aux { lemma <eq-wf-base> };
-    unfold <member>; bhyp <eq-wf-base>;
-    auto
-  };
+  unfold <not implies>;
+  intro @i'; aux { wf-lemma <russell-property-type-wf> };
 
-  assert [(R:Russell) * R ~ Russell];
+  assert [(R:Russell) * R ~ Russell] <H>;
   aux { intro [Russell] @i; auto };
-  elim #2;
-  unfold <Russell>;
-  elim #3;
 
-  assert [¬ ({x:U{i} ∩ base | ¬ (x ∈ x)} ∈ {x:U{i} ∩ base | ¬ (x ∈ x)})];
+  elim <H> <russell-inh, russell-inh-eq-russell>;
+  unfold <Russell>;
+  elim <russell-inh>;
+
+  assert [¬ (Russell ∈ Russell)]; unfold <Russell not implies>;
   aux {
-    chyp-subst <- #6;
-    unfold <not implies>;
-    intro @i;
-    aux { unfold <member bisect>; dest-bisect };
-    contradiction
+    chyp-subst <- <russell-inh-eq-russell>;
+    intro @i; aux { unfold <member>; dest-bisect };
   };
 
   contradiction
@@ -107,48 +120,27 @@ Theorem type-not-in-type : [¬ (U{i} ∈ U{i})] {
   unfold <not implies>;
   intro @i'; aux { wf-lemma <u-in-u-wf> };
 
-  assert [Russell ∈ U{i}] <russell-wf>;
+  assert [Russell ∈ U{i}] <russell-in-u0>;
   aux {
     unfold <member Russell not implies>;
     auto; unfold <member bisect>;
     dest-bisect
   };
 
+  assert [Russell ∈ Russell] <russell-in-russell>;
+  aux {
+    unfold <member Russell>; eq-cd @i;
+    aux {
+      unfold <member not implies bisect>;
+      eq-cd; ?{ !{ auto } };
+      dest-bisect
+    };
+  };
+
   cut-lemma <russell-property>;
-
-  assert [Russell ∈ Russell] <russell-wf>;
-  main { contradiction };
-
-  unfold <member Russell>; eq-cd @i;
-  aux {
-    unfold <member not implies bisect>;
-    eq-cd; ?{ !{ auto } };
-    dest-bisect
-  };
-
-  focus 0 #{
-    unfold <bisect>; auto; elim #4;
-    reduce; auto
-  };
-
-  unfold <not implies>; auto;
-  intro @i';
-  aux {
-    unfold <member bisect>; prune { eq-cd };
-    [ eq-cd; eq-cd; ?{ !{ auto } };
-      [ elim #4; reduce; auto
-      , cum @i; dest-bisect
-      ];
-    , eq-cd @i;
-      aux {
-        unfold <member>;
-        eq-cd @i; ?{ !{ auto } };
-        dest-bisect
-      }; auto;
-      elim #4; reduce; auto
-    ];
-  };
-
-  unfold <member>;
-  contradiction
+  unfold <Russell bisect>;
+  [ auto; break-plus; reduce; auto
+  , assumption
+  , contradiction
+  ]
 }.
