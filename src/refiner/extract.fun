@@ -76,9 +76,11 @@ struct
        | UNHIDE $ _ => ax
 
        | POINTWISE_FUNCTIONALITY $ #[abD,_] =>
-           let val (a,bD) = unbind abD
-               val (b,D) = unbind bD
-           in ((a \\ (b \\ extract D)) // ax) // ax
+           let
+             val (a,bD) = unbind abD
+             val (b,D) = unbind bD
+           in
+             ((a \\ (b \\ extract D)) // ax) // ax
            end
 
        | ATOM_EQ $ _ => ax
