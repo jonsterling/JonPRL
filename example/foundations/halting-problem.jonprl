@@ -8,11 +8,11 @@ Operator problem : (0).
 
 ||| This is just used in assert-opposite to deal with
 ||| the main proof obligations.
-Tactic t {
+Tactic assert-opposite-aux {
   unfold <problem>;
   step;
-  @{ [H : =(_; h; _) |- decide(h; _._; _._) ~ _] =>
-     hyp-subst ← <H> [h. decide(h; _._; _._) ~ _]
+  @{ [H : _ ~ h |- decide(h; _._; _._) ~ _] =>
+     chyp-subst <- <H>
    };
   auto; step; auto
 }.
@@ -21,56 +21,51 @@ Tactic t {
 ||| if it diverges, prove it's ax.
 Tactic assert-opposite {
   @{ [_ : M ⇓ |- _] =>
-     assert [M ~ bot]; aux {t}
-   | [_ : M ⇓ -> <> ≼ bot |- _] =>
-     assert [M ~ <>]; aux {t}
-   }
+     assert [M ~ bot]
+   | [_ : ¬ (M ⇓) |- _] =>
+     assert [M ~ <>]
+   }; aux { assert-opposite-aux }
 }.
 
-||| Given a hypothesis M ~ bot or M ~ <>, convert this into a hypothesis that ¬
-||| M ⇓ or M ⇓.
-Tactic derive-contra {
+||| Given a hypothesis M ~ bot or M ~ <>, convert this into a hypothesis that ¬ M ⇓ or M ⇓.
+Tactic derive-halting-statement {
   @{ [H : M ~ bot |- _] =>
      assert [¬ M ⇓];
      aux {
-       chyp-subst → <H> [h. ¬ h ⇓];
-       auto; bot-div #8
+       chyp-subst → <H>;
+       unfold <not implies>;
+       intro <bot-has-value> @i; aux { auto };
+       bot-div <bot-has-value>
      };
    | [H : M ~ <> |- _] =>
      assert [M ⇓];
      aux {
-       chyp-subst → <H> [h. h ⇓];
+       chyp-subst → <H>;
        auto; reduce; auto
      };
    }
 }.
 
 Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
-  *{unfold <not implies dec>};
-  intro <p>; aux { auto };
+  unfold <not implies>;
+  intro <Ὁ-ΘΕΌΣ> @i; aux { auto };
 
-  pointwise-functionality <p> <a,b,q> ;auto;
-  thin <p>;
-  witness [<>]; unfold <member>; unhide #1; unhide #2; eq-cd;
+  ||| Approach the temple and address the god's earthly representative, the oracle
+  pointwise-functionality <Ὁ-ΘΕΌΣ> <oracle, _, oracle-wf>; aux { auto };
 
-  assert [
-    (y : (problem(a) problem(a)) ⇓ + (problem(a) problem(a) ⇓ -> <> ≼ bot))
-      * =(y; a (problem(a) problem(a)); (problem(a) problem(a)) ⇓ + (problem(a) problem(a) ⇓ -> <> ≼ bot))
-  ] <h>;
-
+  ||| Make a whole burnt offering, and ask the oracle concerning itself
+  assert [{y : (problem(oracle) problem(oracle)) ⇓ decidable | y ~ oracle (problem(oracle) problem(oracle))}] <H>;
   aux {
-    intro [a (problem(a) problem(a))];
-    [ auto; eq-cd [(m:base) m ⇓ + (m ⇓ -> <> ≼ bot)]; auto
-    , eq-cd [(m:base) m ⇓ + (m ⇓ -> <> ≼ bot)]; auto
-    , unfold <member>; eq-eq-base; auto; [ bunion-eq-left , bunion-eq-right ];
-      unfold <bunion>; eq-cd; auto; reduce; auto; break-plus; reduce;auto
-    ]
+    intro [oracle (problem(oracle) problem(oracle))] @i;
+    unfold <member>; auto;
+    eq-cd [(m:base) m ⇓ decidable]; auto;
   };
-  elim <h>;
 
-  ||| Ask whether or not problem(x) problem(x) terminates
-  elim <s>;
+  elim <H> <prophecy, prophecy-ceq>;
+
+  ||| Ask whether or not problem(oracle) problem(oracle) terminates
+  unfold <dec>; elim <prophecy>;
 
   ||| Show no matter the answer, we have a contradiction.
-  assert-opposite; derive-contra; contradiction
+  assert-opposite; derive-halting-statement; contradiction
 }.
