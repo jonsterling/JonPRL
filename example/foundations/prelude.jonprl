@@ -20,6 +20,12 @@ Theorem dec-wf : [{A : U{i}} A decidable ∈ U{i}] {
 Resource wf += {wf-lemma <dec-wf>}.
 Resource wf += {wf-lemma <has-value-wf>}.
 
+Theorem not-wf : [{A:U{i}} not(A) ∈ U{i}] {
+  unfold <not implies>; auto
+}.
+
+Resource wf += { wf-lemma <not-wf> }.
+
 Tactic break-plus {
   @{ [H : _ + _ |- _] => elim <H>; thin <H> }
 }.
@@ -33,9 +39,52 @@ Tactic bunion-eq-right {
   }
 }.
 
+Tactic bunion-eq-left {
+  @{ [|- =(M; N; L ∪ R)] =>
+       csubst [M ~ lam(x. snd(x)) <inl(<>), M>] [h.=(h;_;_)];
+       aux { unfold <snd>; reduce; auto };
+       csubst [N ~ lam(x. snd(x)) <inl(<>), N>] [h.=(_;h;_)];
+       aux { unfold <snd>; reduce; auto };
+  }
+}.
+
 Tactic eq-base-tac {
   @{ [|- =(=(M; N; A); =(M'; N'; A'); _)] =>
        eq-eq-base; auto;
        bunion-eq-right; unfold <bunion>
+   }
+}.
+
+Operator bisect : (0;0).
+Infix -> 8 "∩" := bisect.
+[A ∩ B] =def= [{b:unit + unit} decide(b; _.A; _.B)].
+
+Theorem bisect-wf : [{A:U{i}} {B:U{i}} A ∩ B ∈ U{i}] {
+  unfold <bisect>; auto;
+  elim #3; reduce; auto
+}.
+
+Resource wf += { wf-lemma <bisect-wf> }.
+
+Tactic bisect-induction-tac {
+  @{ [T : {b : unit + unit} decide(b; _.A; _.B) |- _] =>
+       elim <T> [inl(<>)];
+       main { elim <T> [ inr(<>) ] };
+       aux { auto };
+   }
+}.
+
+Tactic hyp-equand-eq-tac {
+  @{ [H : =(m; n; S) |- =(n; n; S)] =>
+      hyp-subst <- <H> [h.=(h; h; _)]; auto
+   }
+}.
+
+Tactic contradiction {
+  unfold <not implies void>;
+  @{ [H : P -> <> ≼ bot, H' : P |- <> ≼ bot] =>
+       elim <H> [H'];
+       unfold <member>;
+       auto
    }
 }.

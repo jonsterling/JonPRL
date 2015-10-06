@@ -15,7 +15,7 @@ functor RefinerUtil
       where type term = Syntax.t
       where type name = Syntax.Variable.t
       where type operator = Syntax.Operator.t
-      where type Sequent.sequent = Sequent.sequent) : REFINER_UTIL =
+      where Sequent = Sequent) : REFINER_UTIL =
 struct
   structure Lcf = Lcf
   structure Tacticals = Tacticals(Lcf)
@@ -255,6 +255,27 @@ struct
                  (Development.lookupResource world Resource.ELIM)
     end
 
+  local
+    open Goal Sequent Syntax
+    infix 3 >> infix 2 |:
+    open CttCalculusInj CttCalculus CttCalculusView
+    infix $
+  in
+    fun EqBase (goal as (_ |: H >> P)) =
+      (case project P of
+           EQ $ #[M,N,U] =>
+           (case project U of
+                BASE $ _ =>
+                (case project M of
+                     ` v =>
+                       (case project (Context.lookup H v) of
+                            ATOM $ _ => BaseRules.AtomSubtypeBase
+                          | _ => raise Refine)
+                   | _ => BaseRules.MemberEq)
+              | _ => raise Refine)
+         | _ => raise Refine) goal
+  end
+
   fun EqCD {names, level, invertible, terms} world =
     let
       val freshVariable = listAt (names, 0)
@@ -277,7 +298,7 @@ struct
         ORELSE PlusRules.InlEq level
         ORELSE PlusRules.InrEq level
         ORELSE BaseRules.Eq
-        ORELSE BaseRules.MemberEq
+        ORELSE EqBase
         ORELSE FunRules.Eq freshVariable
         ORELSE ISectRules.Eq freshVariable
         ORELSE ProdRules.Eq freshVariable

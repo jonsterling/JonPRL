@@ -7,5 +7,6 @@ sig
   val Eq : tactic
   val Intro : tactic
   val MemberEq : tactic
+  val AtomSubtypeBase : tactic
   val ElimEq : hyp * name option -> tactic
 end

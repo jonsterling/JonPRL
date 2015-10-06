@@ -41,7 +41,8 @@ struct
 
        | BASE_INTRO $ _ => ax
        | BASE_EQ $ _ => ax
-       | BASE_MEMBER_EQ $ _ => ax
+       | BASE_MEMBER_EQ _ $ _ => ax
+       | ATOM_SUBTYPE_BASE $ _ => ax
        | BASE_ELIM_EQ $ #[D] => extract (D // ax)
 
        | IMAGE_EQ $ _ => ax
@@ -73,6 +74,14 @@ struct
            end
 
        | UNHIDE $ _ => ax
+
+       | POINTWISE_FUNCTIONALITY $ #[abD,_] =>
+           let
+             val (a,bD) = unbind abD
+             val (b,D) = unbind bD
+           in
+             ((a \\ (b \\ extract D)) // ax) // ax
+           end
 
        | ATOM_EQ $ _ => ax
        | TOKEN_EQ $ _ => ax

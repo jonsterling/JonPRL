@@ -57,6 +57,7 @@ struct
       | CUT_LEMMA (theta, name, a) => an a (RefinerUtil.CutLemma (wld, theta, name))
       | WF_LEMMA (theta, a) => an a (RefinerUtil.WfLemma (wld, theta))
       | UNHIDE (hyp, a) => an a (RefinerUtil.Unhide hyp)
+      | POINTWISE_FUNCTIONALITY ({target,names,level}, a) => an a (PointwiseFunctionality (target, names, level))
       | SYMMETRY a => an a EqRules.Sym
       | CEQUAL_SYM a => an a CEqRules.Sym
       | CEQUAL_STEP a => an a CEqRules.Step

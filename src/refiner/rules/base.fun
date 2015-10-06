@@ -32,10 +32,21 @@ struct
     let
       val #[M, N, U] = P ^! EQ
       val #[] = U ^! BASE
+      val free = freeVariables M
+      val n = length free
+      val L = List.map (fn v => AUX |: H >> C.`> MEM $$ #[``v, U]) free
     in
-      [ MAIN |: H >> C.`> CEQUAL $$ #[M, N]
-      ] BY (fn [D] => D.`> BASE_MEMBER_EQ $$ #[D]
-             | _ => raise Refine)
+      ((MAIN |: H >> C.`> CEQUAL $$ #[M, N]) :: L)
+        BY mkEvidence (BASE_MEMBER_EQ n)
+    end
+
+  fun AtomSubtypeBase (_ |: H >> P) =
+    let
+      val #[M, N, U] = P ^! EQ
+      val #[] = U ^! BASE
+    in
+      [MAIN |: H >> C.`> EQ $$ #[M, N, C.`> ATOM $$ #[]]]
+        BY mkEvidence ATOM_SUBTYPE_BASE
     end
 
   fun ElimEq (hyp, z) (_ |: H >> P) =

@@ -18,12 +18,14 @@ struct
     | CEQUAL_APPROX | CEQUAL_ELIM
     | APPROX_EQ | APPROX_MEMBER_EQ | APPROX_EXT_EQ | APPROX_REFL | APPROX_ELIM
     | BOTTOM_DIVERGES | ASSUME_HAS_VALUE
-    | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ
+    | BASE_EQ | BASE_INTRO | BASE_ELIM_EQ | BASE_MEMBER_EQ of int
+    | ATOM_SUBTYPE_BASE
 
     | IMAGE_EQ | IMAGE_MEM_EQ | IMAGE_ELIM | IMAGE_EQ_IND
     | PER_EQ | PER_MEM_EQ | PER_ELIM
 
     | UNHIDE
+    | POINTWISE_FUNCTIONALITY
 
     | ATOM_EQ | TOKEN_EQ | MATCH_TOKEN_EQ of string vector | TEST_ATOM_EQ
     | TEST_ATOM_REDUCE_LEFT | TEST_ATOM_REDUCE_RIGHT
@@ -66,7 +68,8 @@ struct
        | BASE_EQ => #[]
        | BASE_INTRO => #[]
        | BASE_ELIM_EQ => #[1]
-       | BASE_MEMBER_EQ => #[0]
+       | BASE_MEMBER_EQ n => Vector.tabulate (n + 1, fn _ => 0)
+       | ATOM_SUBTYPE_BASE => #[0]
 
        | IMAGE_EQ => #[0,0]
        | IMAGE_MEM_EQ => #[0,0]
@@ -78,6 +81,7 @@ struct
        | PER_ELIM => #[1,0]
 
        | UNHIDE => #[0]
+       | POINTWISE_FUNCTIONALITY => #[2,3]
 
        | ATOM_EQ => #[]
        | TOKEN_EQ => #[]
@@ -185,7 +189,8 @@ struct
        | BASE_EQ => "base-eq"
        | BASE_INTRO => "base-intro"
        | BASE_ELIM_EQ => "base-elim-eq"
-       | BASE_MEMBER_EQ => "base-member-eq"
+       | BASE_MEMBER_EQ _ => "base-member-eq"
+       | ATOM_SUBTYPE_BASE => "atom-subtype-base"
 
        | IMAGE_EQ => "image-eq"
        | IMAGE_MEM_EQ => "image-mem-eq"
@@ -197,6 +202,7 @@ struct
        | PER_ELIM => "per-elim"
 
        | UNHIDE => "unhide"
+       | POINTWISE_FUNCTIONALITY => "pointwise-functionality"
 
        | ATOM_EQ => "atom-eq"
        | TOKEN_EQ => "token-eq"

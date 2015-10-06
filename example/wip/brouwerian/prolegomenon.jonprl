@@ -74,8 +74,16 @@ Operator leq : (0;0).
 Infix 10 "≤" := leq.
 [m ≤ n] =def= [minus(n; m) ⇓].
 
+Theorem nat-subtype-base : [{n:nat} n ∈ base] {
+  auto; elim #1;
+  [ auto
+  , eq-cd; aux { auto };
+    cstruct; elim #3; auto
+  ]
+}.
+
 Theorem leq-wf : [{m:nat} {n:nat} (m ≤ n) ∈ U{i}] {
-  unfold <leq>; auto
+  unfold <leq minus>; auto; wf-lemma <nat-subtype-base>; auto
 }.
 
 Resource wf += { wf-lemma <leq-wf> }.
@@ -102,7 +110,8 @@ Operator is-finite : (0).
 [is-finite(A)] =def= [union(nat; n. {f : upto(n) -> A | surj(upto(n); A; f)})].
 
 Theorem is-finite-wf : [{A:U{i}} is-finite(A) ∈ U{i}] {
-  unfold <is-finite union>; auto;
+  unfold <is-finite union pi2>; auto;
+
 }.
 
 Resource wf += { wf-lemma <is-finite-wf> }.

@@ -1,4 +1,4 @@
-||| This is a proof that U{i} : U{i} is a contradiction in JonPRL.
+||| This is a proof that U{i} ∈ U{i} is a contradiction in JonPRL.
 ||| Proving this follows the reasoning from Russell's paradox: we
 ||| construct a type which contains all types that don't contain themselves
 ||| and show that *it* both is and isn't a member.
@@ -6,72 +6,112 @@
 ||| The well-formedness conditions in this proof are absolutely
 ||| killer and lead to most of the bloat in the proofs.
 
-Operator Russell : ().
-[Russell] =def= [{x : U{i} | ¬ (x ∈ x)}].
+Theorem eq-wf-base : [{A:U{i}} {a:base} {b:base} =(a; b; A) ∈ U{i}] {
+  auto 0; aux { auto };
 
-Tactic impredicativity-wf-tac {
-  unfold <member>; eq-base-tac;
-  eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-  eq-cd @i'; ?{break-plus}; reduce; auto
+  eq-base-tac; unfold <snd>; reduce;
+  @{ [|- =(m; m; image(_; _))] =>
+      csubst [m ~ (lam(p.snd(p)) <inr(<>), m>)]; unfold <snd>;
+      aux { reduce; auto };
+      auto; reduce; auto;
+      elim #4; reduce; auto
+   }
 }.
 
 Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {
-  impredicativity-wf-tac
+  assert [{A:U{i'}} {a:base} {b:base} =(a; b; A) ∈ U{i'}] <eq-wf-base>;
+  aux { lemma <eq-wf-base> };
+  unfold <member>; bhyp <eq-wf-base>; auto
 }.
 
-Theorem type-not-in-type : [¬ (U{i} ∈ U{i})] {
-  unfold <not implies>; intro;
+Tactic dest-bisect {
+  unfold <bisect member>;
+  @{ [T : {b:unit + unit} decide(b; _.A; _.B) |- =(T; T; C)] =>
+       bisect-induction-tac;
+       wf-lemma <eq-wf-base>; auto;
+       reduce; auto;
+       hyp-equand-eq-tac
+   }
+}.
 
-  aux {lemma <u-in-u-wf>};
+Operator Russell : ().
+[Russell] =def= [{x : U{i} ∩ base | ¬ (x ∈ x)}].
 
-  ||| This can't really be a separate theorem since
-  ||| the well-formedness of Russells' set depends on
-  ||| U ∈ U
-  assert [Russell ∈ U{i}] <russell-wf>;
-  aux {
-    unfold <member Russell>; eq-cd; ?{assumption};
-    unfold <not implies>; eq-cd; auto;
-    impredicativity-wf-tac;
+Theorem Russell-wf : [Russell ∈ U{i'}] {
+  unfold <Russell bisect not implies>;
+  auto 0; eq-cd;
+  eq-cd; ?{ !{ auto } };
+  focus 0 #{
+    elim #1; reduce; auto
   };
 
+  cum @i; dest-bisect
+}.
 
-  assert [(Russell ∈ Russell) ∈ U{i}] <russell-in-russell-wf>;
-  aux { impredicativity-wf-tac; cum @i; auto };
+Resource wf += { wf-lemma <Russell-wf> }.
 
-  ||| We can now start the proof.
-  assert [¬ (Russell ∈ Russell)] <russell-not-in-russell>;
+Theorem Russell-in-base : [Russell ∈ base] {
+  unfold <Russell bisect not implies>;
+  auto
+}.
+
+Resource wf += { wf-lemma <Russell-in-base> }.
+
+Theorem russell-property-type-wf : [(Russell ∈ Russell) ∈ U{i'}] {
+  assert [{A:U{i'}} {a:base} {b:base} =(a; b; A) ∈ U{i'}] <eq-wf-base>;
+  aux { lemma <eq-wf-base> };
+  unfold <member>; bhyp <eq-wf-base>;
+  auto
+}.
+
+Resource wf += { wf-lemma <russell-property-type-wf> }.
+
+Theorem russell-property : [¬ (Russell ∈ Russell)] {
+  unfold <not implies>;
+  intro @i'; aux { wf-lemma <russell-property-type-wf> };
+
+  assert [{R:Russell | R ~ Russell}] <H>;
+  aux { intro [Russell] @i; auto };
+
+  elim <H> <russell-inh, russell-inh-eq-russell>;
+  unfold <Russell>;
+  elim <russell-inh>;
+
+  assert [¬ (Russell ∈ Russell)]; unfold <Russell not implies>;
   aux {
-    unfold <not implies>;
-    intro @i; aux {assumption};
-
-    assert [(R : Russell) * R ~ Russell];
-    aux {
-      intro [Russell] @i; auto
-    };
-
-    elim #5;
-    unfold <Russell>; elim #6;
-    assert [¬ ({x:U{i} | ¬ (x ∈ x)} ∈ {x:U{i} | ¬ (x ∈ x)})];
-    aux {
-      chyp-subst ← #9 [h. ¬ (h ∈ h)];
-      unfold <not implies>;
-      intro; aux { impredicativity-wf-tac };
-    };
-
-    contradiction
-  };
-
-  assert [Russell ∈ Russell];
-  aux {
-    unfold <member Russell>; eq-cd;
-    unfold <member>;
-
-    ||| We've already done all the hard work of proving this
-    main {assumption};
-
-    unfold <not implies>; eq-cd; ?{!{auto}};
-    impredicativity-wf-tac;
+    chyp-subst <- <russell-inh-eq-russell>;
+    intro @i; aux { unfold <member>; dest-bisect };
   };
 
   contradiction
+}.
+
+
+Theorem type-not-in-type : [¬ (U{i} ∈ U{i})] {
+  unfold <not implies>;
+  intro @i'; aux { wf-lemma <u-in-u-wf> };
+
+  assert [Russell ∈ U{i}] <russell-in-u0>;
+  aux {
+    unfold <member Russell not implies>;
+    auto; unfold <member bisect>;
+    dest-bisect
+  };
+
+  assert [Russell ∈ Russell] <russell-in-russell>;
+  aux {
+    unfold <member Russell>; eq-cd @i;
+    aux {
+      unfold <member not implies bisect>;
+      eq-cd; ?{ !{ auto } };
+      dest-bisect
+    };
+  };
+
+  cut-lemma <russell-property>;
+  unfold <Russell bisect>;
+  [ auto; break-plus; reduce; auto
+  , assumption
+  , contradiction
+  ]
 }.

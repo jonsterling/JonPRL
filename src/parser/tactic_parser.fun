@@ -136,6 +136,11 @@ struct
     wth (fn SOME xs => xs
           | NONE => [])
 
+  val parse3Names =
+    opt (brackets (commaSep1 parseName))
+    wth (fn SOME [a,b,c] => SOME (a,b,c)
+          | _ => NONE)
+
   val parseElimArgs =
     fn w => parseHyp
       && opt (parseTm w)
@@ -272,6 +277,14 @@ struct
       wth (fn (name, hyp) => fn pos =>
              UNHIDE (hyp, {name = name, pos = pos}))
 
+  val parsePointwiseFunctionality : tactic_parser =
+    fn w => tactic "pointwise-functionality"
+      && parseHyp
+      && parse3Names
+      && opt parseLevel
+      wth (fn (name, (hyp,(names,lvl))) => fn pos =>
+              POINTWISE_FUNCTIONALITY ({target = hyp, names = names, level = lvl}, {name = name, pos = pos}))
+
   val parseWfLemma : tactic_parser =
     fn w => tactic "wf-lemma"
       && brackets (ParseSyntax.ParseOperator.parseOperator w)
@@ -310,6 +323,7 @@ struct
       || parseBHyp w
       || parseCutLemma w
       || parseUnhide w
+      || parsePointwiseFunctionality w
       || parseWfLemma w
       || parseUnfold w
       || parseWitness w
