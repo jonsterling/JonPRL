@@ -55,43 +55,43 @@ struct
 
   fun PointwiseFunctionality (hyp, onames, ok) (T |: H >> P) =
     let
-	val (a,b,c) =
-            case onames of
-		SOME names => names
-              | NONE =>
-		(Context.fresh (H, Variable.named "a"),
-                 Context.fresh (H, Variable.named "b"),
-                 Context.fresh (H, Variable.named "c"))
-	val k = case ok of NONE => inferLevel (H, P) | SOME k => k
-	val z = eliminationTarget hyp (H >> P)
-	val A = Context.lookup H z
+      val (a,b,c) =
+          case onames of
+              SOME names => names
+            | NONE =>
+              (Context.fresh (H, Variable.named "a"),
+               Context.fresh (H, Variable.named "b"),
+               Context.fresh (H, Variable.named "c"))
+      val k = case ok of NONE => inferLevel (H, P) | SOME k => k
+      val z = eliminationTarget hyp (H >> P)
+      val A = Context.lookup H z
 
-	val base = C.`> BASE $$ #[]
+      val base = C.`> BASE $$ #[]
 
-	val mem  = C.`> MEM $$ #[``a, A]
-	val K1 = Context.insert Context.empty a Visibility.Hidden base
-	val K2 = Context.insert K1 c Visibility.Hidden mem
-	val H1 = Context.interposeAfter H (z, K2)
-	val H2 = Context.mapAfter c (fn t => subst (``a) z t) H1
-	val Pa = subst (``a) z P
+      val mem  = C.`> MEM $$ #[``a, A]
+      val K1 = Context.insert Context.empty a Visibility.Hidden base
+      val K2 = Context.insert K1 c Visibility.Hidden mem
+      val H1 = Context.interposeAfter H (z, K2)
+      val H2 = Context.mapAfter c (fn t => subst (``a) z t) H1
+      val Pa = subst (``a) z P
 
-	val eqv = C.`> EQ $$ #[``a, ``b, A]
-	val J1 = Context.insert Context.empty a Visibility.Visible base
-	val J2 = Context.insert J1 b Visibility.Visible base
-	val J3 = Context.insert J2 c Visibility.Visible eqv
-	val G1 = Context.interposeAfter H (z, J3)
-	val G2 = Context.mapAfter c (fn t => subst (``a) z t) G1
+      val eqv = C.`> EQ $$ #[``a, ``b, A]
+      val J1 = Context.insert Context.empty a Visibility.Visible base
+      val J2 = Context.insert J1 b Visibility.Visible base
+      val J3 = Context.insert J2 c Visibility.Visible eqv
+      val G1 = Context.interposeAfter H (z, J3)
+      val G2 = Context.mapAfter c (fn t => subst (``a) z t) G1
 
-	val uni  = C.`> (UNIV k) $$ #[]
-	val Pb = subst (``b) z P
-	val eq = C.`> EQ $$ #[Pa, Pb, uni]
+      val uni  = C.`> (UNIV k) $$ #[]
+      val Pb = subst (``b) z P
+      val eq = C.`> EQ $$ #[Pa, Pb, uni]
 
     in
-	[ T |: H2 >> Pa
-	, T |: G2 >> eq
-	] BY (fn [D, E] => D.`> POINTWISE_FUNCTIONALITY
-			     $$ #[a \\ (c \\ D), a \\ (b \\ (c \\ E))]
-	     | _ => raise Refine)
+        [ MAIN |: H2 >> Pa
+        , AUX |: G2 >> eq
+        ] BY (fn [D, E] => D.`> POINTWISE_FUNCTIONALITY
+                             $$ #[a \\ (c \\ D), a \\ (b \\ (c \\ E))]
+             | _ => raise Refine)
     end
 
   fun Hypothesis hyp (goal as _ |: S) = Hypothesis_ (eliminationTarget hyp S) goal
