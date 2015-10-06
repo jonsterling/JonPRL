@@ -7,7 +7,7 @@
 ||| {m : base | has-value(m)}. From there it's just inversion and then
 ||| referencing our previous lemma [halting-problem-undecidable].
 
-Theorem member-wf : [(a : base)(A : U{i}) member(member(a; A); U{i'})] {
+Theorem member-wf : [(a : base)(A : U{i}) (a ∈ A) ∈ U{i'}] {
   auto 0; aux {auto}; eq-eq-base; auto;
 
   bunion-eq-right; unfold <bunion>; eq-cd; auto;
