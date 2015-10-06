@@ -79,3 +79,12 @@ Tactic hyp-equand-eq-tac {
       hyp-subst <- <H> [h.=(h; h; _)]; auto
    }
 }.
+
+Tactic contradiction {
+  unfold <not implies void>;
+  @{ [H : P -> <> ≼ bot, H' : P |- <> ≼ bot] =>
+       elim <H> [H'];
+       unfold <member>;
+       auto
+   }
+}.

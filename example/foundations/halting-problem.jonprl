@@ -6,15 +6,6 @@
 Operator problem : (0).
 [problem(M)] =def= [lam(y. decide(M (y y); _. bot; _. <>))].
 
-Tactic contradiction {
-  unfold <not implies void>;
-  @{ [H : P -> <> ≼ bot, H' : P |- <> ≼ bot] =>
-       elim <H> [H'];
-       unfold <member>;
-       auto
-   }
-}.
-
 ||| This is just used in assert-opposite to deal with
 ||| the main proof obligations.
 Tactic t {
@@ -55,19 +46,26 @@ Tactic derive-contra {
 }.
 
 Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
-  *{unfold <not implies dec>}; auto;
+  *{unfold <not implies dec>};
+  intro <p>; aux { auto };
 
-  pointwise-functionality <x>;auto;
-  thin <x>;
+  pointwise-functionality <p> <a,b,q> ;auto;
+  thin <p>;
   witness [<>]; unfold <member>; unhide #1; unhide #2; eq-cd;
 
-  assert [(y : has-value(problem(a) problem(a)) + (has-value(problem(a) problem(a)) -> approx(<>; bot)))
-          * =(y; a (problem(a) problem(a)); has-value(problem(a) problem(a)) + (has-value(problem(a) problem(a)) -> approx(<>; bot)))] <h>;
-  aux { intro [a (problem(a) problem(a))];
-        [ auto;eq-cd [(m:base) has-value(m) + (has-value(m) -> approx(<>; bot))]; auto
-        , eq-cd [(m:base) has-value(m) + (has-value(m) -> approx(<>; bot))]; auto
-        , unfold <member>; eq-eq-base;auto;[ bunion-eq-left , bunion-eq-right ];
-          unfold <bunion>;eq-cd;auto;reduce;auto;elim<x>;reduce;auto ] };
+  assert [
+    (y : (problem(a) problem(a)) ⇓ + (problem(a) problem(a) ⇓ -> <> ≼ bot))
+      * =(y; a (problem(a) problem(a)); (problem(a) problem(a)) ⇓ + (problem(a) problem(a) ⇓ -> <> ≼ bot))
+  ] <h>;
+
+  aux {
+    intro [a (problem(a) problem(a))];
+    [ auto; eq-cd [(m:base) m ⇓ + (m ⇓ -> <> ≼ bot)]; auto
+    , eq-cd [(m:base) m ⇓ + (m ⇓ -> <> ≼ bot)]; auto
+    , unfold <member>; eq-eq-base; auto; [ bunion-eq-left , bunion-eq-right ];
+      unfold <bunion>; eq-cd; auto; reduce; auto; break-plus; reduce;auto
+    ]
+  };
   elim <h>;
 
   ||| Ask whether or not problem(x) problem(x) terminates
@@ -75,5 +73,4 @@ Theorem halting-problem-undecidable : [¬ ((m : base) m ⇓ decidable)] {
 
   ||| Show no matter the answer, we have a contradiction.
   assert-opposite; derive-contra; contradiction
-
 }.
