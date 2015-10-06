@@ -65,3 +65,17 @@ Theorem bisect-wf : [{A:U{i}} {B:U{i}} A ∩ B ∈ U{i}] {
 }.
 
 Resource wf += { wf-lemma <bisect-wf> }.
+
+Tactic bisect-induction-tac {
+  @{ [T : {b : unit + unit} decide(b; _.A; _.B) |- _] =>
+       elim <T> [inl(<>)];
+       main { elim <T> [ inr(<>) ] };
+       aux { auto };
+   }
+}.
+
+Tactic hyp-equand-eq-tac {
+  @{ [H : =(m; n; S) |- =(n; n; S)] =>
+      hyp-subst <- <H> [h.=(h; h; _)]; auto
+   }
+}.

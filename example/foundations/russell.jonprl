@@ -24,21 +24,6 @@ Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {
   unfold <member>; bhyp <eq-wf-base>; auto
 }.
 
-
-Tactic bisect-induction-tac {
-  @{ [T : {b : unit + unit} decide(b; _.A; _.B) |- _] =>
-       elim <T> [inl(<>)];
-       main { elim <T> [ inr(<>) ] };
-       aux { auto };
-   }
-}.
-
-Tactic hyp-equand-eq-tac {
-  @{ [H : =(m; n; S) |- =(n; n; S)] =>
-      hyp-subst <- <H> [h.=(h; h; _)]; auto
-   }
-}.
-
 Tactic dest-bisect {
   unfold <bisect member>;
   @{ [T : {b:unit + unit} decide(b; _.A; _.B) |- =(T; T; C)] =>
@@ -85,7 +70,7 @@ Theorem russell-property : [¬ (Russell ∈ Russell)] {
   unfold <not implies>;
   intro @i'; aux { wf-lemma <russell-property-type-wf> };
 
-  assert [(R:Russell) * R ~ Russell] <H>;
+  assert [{R:Russell | R ~ Russell}] <H>;
   aux { intro [Russell] @i; auto };
 
   elim <H> <russell-inh, russell-inh-eq-russell>;
