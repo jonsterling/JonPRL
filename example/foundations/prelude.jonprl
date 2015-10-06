@@ -20,6 +20,12 @@ Theorem dec-wf : [{A : U{i}} A decidable ∈ U{i}] {
 Resource wf += {wf-lemma <dec-wf>}.
 Resource wf += {wf-lemma <has-value-wf>}.
 
+Theorem not-wf : [{A:U{i}} not(A) ∈ U{i}] {
+  unfold <not implies>; auto
+}.
+
+Resource wf += { wf-lemma <not-wf> }.
+
 Tactic break-plus {
   @{ [H : _ + _ |- _] => elim <H>; thin <H> }
 }.
