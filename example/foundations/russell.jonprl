@@ -6,16 +6,6 @@
 ||| The well-formedness conditions in this proof are absolutely
 ||| killer and lead to most of the bloat in the proofs.
 
-Tactic impredicativity-wf-tac {
-  unfold <member>; eq-base-tac;
-  eq-cd; ?{@{[|- =(_; _; base)] => auto}};
-  eq-cd @i'; ?{break-plus}; reduce; auto
-}.
-
-Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {
-  impredicativity-wf-tac
-}.
-
 Operator bisect : (0;0).
 Infix -> 8 "∩" := bisect.
 [A ∩ B] =def= [{b:unit + unit} decide(b; _.A; _.B)].
@@ -38,6 +28,13 @@ Theorem eq-wf-base : [{A:U{i}} {a:base} {b:base} =(a; b; A) ∈ U{i}] {
       elim #4; reduce; auto
    }
 }.
+
+Theorem u-in-u-wf : [(U{i} ∈ U{i}) ∈ U{i'}] {
+  assert [{A:U{i'}} {a:base} {b:base} =(a; b; A) ∈ U{i'}] <eq-wf-base>;
+  aux { lemma <eq-wf-base> };
+  unfold <member>; bhyp <eq-wf-base>; auto
+}.
+
 
 Tactic bisect-induction-tac {
   @{ [T : {b : unit + unit} decide(b; _.A; _.B) |- _] =>
