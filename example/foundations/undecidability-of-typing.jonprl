@@ -16,7 +16,7 @@ Theorem member-wf : [(a : base)(A : U{i}) member(member(a; A); U{i'})] {
 
 Resource wf += {wf-lemma <member-wf>}.
 
-Theorem typing-undecidable-weak : [¬ ((A : U{i})(a : base) (a ∈ A) decidable)] {
+Theorem typing-undecidable : [¬ ((A : U{i})(a : base) (a ∈ A) decidable)] {
   unfold <not implies dec>; intro;
   aux {
     ||| This has to be handled carefully so that we appeal to member-wf
