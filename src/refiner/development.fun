@@ -44,7 +44,7 @@ struct
     in
     fun theorem2Coq (th : theorem) : string =
       let val {statement, script, evidence, operator} = th
-	  val evidence' = Susp.force evidence
+	  val evidence' : Syntax.t = Susp.force evidence
       in C.toCoq statement evidence'
       end
     end
