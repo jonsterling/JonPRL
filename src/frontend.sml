@@ -67,8 +67,7 @@ struct
     in
       (case CharParser.parseChars (parse initialContext) coordStream of
            Sum.INL e => raise Fail e
-         | Sum.INR (bindings, ast) =>
-           DevelopmentAstEval.eval initialDevelopment ast)
+         | Sum.INR (bindings, ast) => DevelopmentAstEval.eval initialDevelopment ast)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
 

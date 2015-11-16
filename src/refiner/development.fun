@@ -102,7 +102,12 @@ struct
 
   datatype world = World of {context : object Telescope.telescope,
                              resources : tactic list ResourcePool.dict}
-    withtype object = world Object.t
+  withtype object = world Object.t
+
+  fun world2string (w : world) : string =
+    case w of
+	World {context, resources} =>
+	Telescope.toString (fn obj => Object.toString ("",obj)) context
 
   fun enumerate (World {context, resources}) = context
 

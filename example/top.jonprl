@@ -1,6 +1,12 @@
 Operator Top : ().
 [Top] =def= [void => void].
 
+Infix 100 "∈" := member.
+
+Theorem Top_wf : [Top ∈ U{i}] {
+  unfold <Top>; auto
+}.
+
 Theorem anything-in-top : [{E:base} member(E; Top)] {
   unfold <Top>; auto
 }.

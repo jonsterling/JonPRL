@@ -78,4 +78,6 @@ sig
 
   val lookupObject : world -> operator -> object
   val searchObject : world -> label -> (label * object) list
+
+  val world2string : world -> string
 end

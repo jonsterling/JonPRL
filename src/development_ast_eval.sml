@@ -57,11 +57,15 @@ struct
               case vars of
                   [] => ()
                 | _ => raise Open term
-        in
-          Development.prove D
-            (lbl, theta,
-             Sequent.>> (Sequent.Context.empty, term),
-             TacticEval.eval D tac)
+	  val world : Development.world =
+              Development.prove D
+				(lbl, theta,
+				 Sequent.>> (Sequent.Context.empty, term),
+				 TacticEval.eval D tac)
+	  val str   = Development.world2string world
+	  val stout = TextIO.openOut "/tmp/jonprl"
+	  val _     = TextIO.output (stout, str)
+	in world
         end
       | OPERATOR (lbl, theta) =>
         Development.declareOperator D (lbl, theta)
