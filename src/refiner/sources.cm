@@ -14,6 +14,9 @@ group is
   sequent.fun
   sequent.sig
 
+  coq.fun
+  coq.sig
+
   derivation.sml
 
   visibility.sml

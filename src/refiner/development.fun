@@ -38,6 +38,17 @@ struct
        evidence : evidence Susp.susp,
        operator : Syntax.Operator.t}
 
+    (* Given a theorem (evidence and the statement), generate a Coq proof. *)
+    local
+	structure C = Coq(structure Syntax = Syntax structure Sequent = Sequent)
+    in
+    fun theorem2Coq (th : theorem) : string =
+      let val {statement, script, evidence, operator} = th
+	  val evidence' = Susp.force evidence
+      in C.toCoq statement evidence'
+      end
+    end
+
     type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
       {operator : Syntax.Operator.t,
@@ -49,6 +60,10 @@ struct
         THEOREM of theorem
       | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
+
+    fun toCoq (THEOREM th) = theorem2Coq th
+      | toCoq (TACTIC _) = ""
+      | toCoq (OPERATOR _) = ""
 
     fun toString (lbl, THEOREM {statement, evidence,...}) =
           let
@@ -108,6 +123,11 @@ struct
     case w of
 	World {context, resources} =>
 	Telescope.toString (fn obj => Object.toString ("",obj)) context
+
+  fun world2Coq (w : world) : string =
+    case w of
+	World {context, resources} =>
+	Telescope.toString (fn obj => Object.toCoq obj) context
 
   fun enumerate (World {context, resources}) = context
 
