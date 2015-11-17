@@ -1,7 +1,9 @@
 functor Development
   (structure Syntax : ABT_UTIL
+     where type Operator.t = UniversalOperator.t
    structure Sequent : SEQUENT
      where type term = Syntax.t
+     where Context.Syntax = Syntax
    structure Lcf : LCF
      where type evidence = Syntax.t
      where type goal = Sequent.sequent Goal.goal

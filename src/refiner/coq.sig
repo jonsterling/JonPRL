@@ -1,8 +1,10 @@
 signature COQ =
 sig
-    type term
-    structure Syntax : ABT_UTIL sharing type Syntax.t = term
-    structure Sequent : SEQUENT sharing type Sequent.term = term
+  structure Syntax : ABT_UTIL
+    where type Operator.t = UniversalOperator.t
+  structure Sequent : SEQUENT
+    where type term = Syntax.t
+    where Context.Syntax = Syntax
 
-    val toCoq : Sequent.sequent -> term -> string
+  val toCoq : Sequent.sequent -> Syntax.t -> string
 end
