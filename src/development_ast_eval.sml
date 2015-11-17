@@ -74,9 +74,10 @@ struct
 
   fun eval D ast =
     let val world : Development.world = List.foldl (fn (decl, D) => evalDecl D decl) D ast
-	val str   = Development.world2string world
+	val str1  = Development.world2string world
+	val str2  = Development.world2Coq world
 	val stout = TextIO.openOut "/tmp/jonprl"
-	val _     = TextIO.output (stout, str)
+	val _     = TextIO.output (stout, str1 ^ "\n--------------\n" ^ str2)
     in world
     end
 end

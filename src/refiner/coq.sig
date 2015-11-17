@@ -6,5 +6,8 @@ sig
     where type term = Syntax.t
     where Context.Syntax = Syntax
 
+  exception TODO of string
+  exception Malformed of string
+
   val toCoq : Sequent.sequent -> Syntax.t -> string
 end

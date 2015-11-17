@@ -80,4 +80,5 @@ sig
   val searchObject : world -> label -> (label * object) list
 
   val world2string : world -> string
+  val world2Coq : world -> string
 end

@@ -32,6 +32,8 @@ struct
 
   type conv = term -> term
 
+  structure Coq = Coq(structure Syntax = Syntax structure Sequent = Sequent)
+
   structure Object =
   struct
     type theorem =
@@ -41,15 +43,11 @@ struct
        operator : Syntax.Operator.t}
 
     (* Given a theorem (evidence and the statement), generate a Coq proof. *)
-    local
-	structure C = Coq(structure Syntax = Syntax structure Sequent = Sequent)
-    in
     fun theorem2Coq (th : theorem) : string =
       let val {statement, script, evidence, operator} = th
 	  val evidence' : Syntax.t = Susp.force evidence
-      in C.toCoq statement evidence'
+      in Coq.toCoq statement evidence'
       end
-    end
 
     type operator_definition = PatternCompiler.rule * conv Susp.susp
     type operator_decl =
@@ -126,10 +124,64 @@ struct
 	World {context, resources} =>
 	Telescope.toString (fn obj => Object.toString ("",obj)) context
 
+  fun lookupDefinition (World {context = T, resources}) theta =
+    case SOME (Builtins.unfold theta) handle _ => NONE of
+        NONE =>
+	let val str = Syntax.Operator.toString theta
+	in case Telescope.lookup T str of
+               Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
+             | _ => raise Subscript
+	end
+      | SOME conv => conv
+
+  structure Conversionals = Conversionals (structure Syntax = Syntax structure Conv = Conv(Syntax))
+
+  fun unfoldStatement (world : world) (term : Syntax.t) =
+    let val operators = Syntax.operators term
+	val term' =
+	    foldl (fn (theta, t) =>
+		      let (*val _ = print ("(" ^ Syntax.Operator.toString theta ^ ")")*)
+			  val conv = Conversionals.CDEEP (lookupDefinition world theta)
+			  (*val _ = print "(found conversion)"*)
+		      in conv t
+		      end
+		      handle E => ((*print "lookupDefinition error\n";*) t))
+		  term
+		  operators
+	(*val _ = print ("unfolded term: " ^ Syntax.toString term' ^ "\n")*)
+    in if Syntax.eq (term, term')
+       then term' (* no progress *)
+       else unfoldStatement world term'
+    end
+
+  fun unfoldForCoq world (thm as Object.THEOREM th) =
+    let val {statement as Sequent.>> (H, P), script, evidence, operator} = th
+	(*val _ = print ("unfolding term: " ^ Syntax.toString P ^ "\n")*)
+	val P' = unfoldStatement world P
+    in Object.THEOREM {statement = Sequent.>> (H, P'),
+		       script    = script,
+		       evidence  = evidence,
+		       operator  = operator}
+    end
+    | unfoldForCoq world (tac as Object.TACTIC _) = tac
+    | unfoldForCoq world (opr as Object.OPERATOR _) = opr
+
   fun world2Coq (w : world) : string =
-    case w of
-	World {context, resources} =>
-	Telescope.toString (fn obj => Object.toCoq obj) context
+    (case w of
+	 World {context, resources} =>
+	 Telescope.toString
+	     (fn obj =>
+		 (* WARNING: For now I need to unfold everything in the sequent
+		  * because abstractions are not part of the theory
+		  *)
+		 Object.toCoq (unfoldForCoq w obj))
+	     context)
+    handle E =>
+	   ((case E of
+		 Coq.TODO msg => print ("world2Coq:TODO: " ^ msg)
+	       | Coq.Malformed msg => print ("world2Coq:Malformed: " ^ msg)
+	       | _ => ());
+	    raise E)
 
   fun enumerate (World {context, resources}) = context
 
@@ -310,14 +362,6 @@ struct
   fun addResource (World {context, resources}) (r, t) =
     World {context = context,
            resources = ResourcePool.insertMerge resources r [t] (fn ts => t :: ts)}
-
-  fun lookupDefinition (World {context = T, resources}) theta =
-    case SOME (Builtins.unfold theta) handle _ => NONE of
-         NONE =>
-           (case Telescope.lookup T (Syntax.Operator.toString theta) of
-                 Object.OPERATOR {conversion = SOME (_, conv),...} => Susp.force conv
-               | _ => raise Subscript)
-       | SOME conv => conv
 
   fun lookupTheorem (World {context = T, resources}) theta =
     case Telescope.lookup T (Syntax.Operator.toString theta) of
