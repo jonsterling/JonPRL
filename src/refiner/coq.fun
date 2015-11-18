@@ -46,6 +46,7 @@ fun mk_proof seq ext name args sub : proof =
   PROOF {sequent = seq, extract = ext, name = name, args = args, subproofs = sub}
 
 fun proof_name (PROOF prf) = #name prf
+fun proof_ext (PROOF prf) = #extract prf
 
 val ax = CI.`> C.AX $$ #[]
 val base = CI.`> C.BASE $$ #[]
@@ -70,11 +71,21 @@ fun term2Coq (t : term) : string =
 	| (SOME theta, _) => raise TODO ("term2Coq:" ^ C.toString theta)
 	| (NONE, _) => raise TODO "term2Coq:NONE"
 
-fun context2Coq (c : context) : string =
+fun splitContext _ [] = ([], NONE, [])
+  | splitContext z ((name,vis,term) :: rest) =
+    if Variable.eq (z,name)
+    then ([], SOME (name,vis,term), rest)
+    else let val (l1,x,l2) = splitContext z rest
+	 in ((name,vis,term) :: l1, x, l2)
+	 end
+
+fun context2Coq' c : string =
   foldr (fn ((name,Visibility.Visible,term), ctxt) => "(cons (mk_hyp "  ^ Variable.toString name ^ " " ^ term2Coq term ^ ") " ^ ctxt ^ ")"
   	  | ((name,Visibility.Hidden,term),  ctxt) => "(cons (mk_hhyp " ^ Variable.toString name ^ " " ^ term2Coq term ^ ") " ^ ctxt ^ ")")
 	"nil"
-	(Context.listItems c)
+	c
+
+fun context2Coq (c : context) : string = context2Coq' (Context.listItems c)
 
 (* coming from utils.fun *)
 fun @@ (H, (x,A)) = Context.insert H x Visibility.Visible A
@@ -140,20 +151,20 @@ fun build_proof (seq as (H >> P) : sequent) (evidence : term) : proof =
       let val z \ e2 = out ze2
 	  val seq1 = H >> term
 	  val seq2 = H @@ (z,term) >> P
-	  val PROOF proof1 = build_proof seq1 e1
-	  val PROOF proof2 = build_proof seq2 e2
-	  val ext = (into (z \ (#extract proof2))) // (#extract proof1)
-      in mk_proof seq ext D.ASSERT [`` z, term] [PROOF proof1, PROOF proof2]
+	  val proof1 = build_proof seq1 e1
+	  val proof2 = build_proof seq2 e2
+	  val ext = (into (z \ (proof_ext proof2))) // (proof_ext proof1)
+      in mk_proof seq ext D.ASSERT [`` z, term] [proof1, proof2]
       end
 
     | ((D.CEQUAL_SUBST, #[M, N, e1, e2]), _) =>
       let val P' = Conversionals.CDEEP (fn M' => if Syntax.eq (M,M') then N else raise Conv.Conv) P
 	  val seq1 = H >> into (CI.`> C.CEQUAL $ #[M, N])
 	  val seq2 = H >> P'
-	  val PROOF proof1 = build_proof seq1 e1
-	  val PROOF proof2 = build_proof seq2 e2
-	  val ext = #extract proof2
-      in mk_proof seq ext D.CEQUAL_SUBST [] [PROOF proof1, PROOF proof2]
+	  val proof1 = build_proof seq1 e1
+	  val proof2 = build_proof seq2 e2
+	  val ext = proof_ext proof2
+      in mk_proof seq ext D.CEQUAL_SUBST [M, N] [proof1, proof2]
       end
 
     | ((D.ASSUME_HAS_VALUE, #[ze1, e2]), (C.APPROX, #[M, _])) =>
@@ -166,7 +177,7 @@ fun build_proof (seq as (H >> P) : sequent) (evidence : term) : proof =
 	  val seq2 = H >> mem
 	  val proof1 = build_proof seq1 e1
 	  val proof2 = build_proof seq2 e2
-      in mk_proof seq ax D.ASSUME_HAS_VALUE [] [proof1, proof2]
+      in mk_proof seq ax D.ASSUME_HAS_VALUE [`` z] [proof1, proof2]
       end
 
     | ((D.HYPOTHESIS, #[V]), _) => mk_proof seq V D.HYPOTHESIS [] []
@@ -258,15 +269,15 @@ fun proof2Coq (pr : proof) : string =
 	 ^ ")"
       end
 
-    | PROOF {sequent = H >> P, extract, name = D.ASSERT, args = [Z, C], subproofs = [PROOF prf1, PROOF prf2]} =>
-      let val p1 = proof2Coq (PROOF prf1)
-	  val p2 = proof2Coq (PROOF prf2)
+    | PROOF {sequent = H >> P, extract, name = D.ASSERT, args = [Z, C], subproofs = [prf1, prf2]} =>
+      let val p1 = proof2Coq prf1
+	  val p2 = proof2Coq prf2
 	  val ` z = out Z
       in "(proof_cut"
 	 ^ " (" ^ term2Coq C ^ ")"
 	 ^ " (" ^ term2Coq P ^ ")"
-	 ^ " (" ^ term2Coq (#extract prf2) ^ ")"
-	 ^ " (" ^ term2Coq (#extract prf1)  ^ ")"
+	 ^ " (" ^ term2Coq (proof_ext prf2) ^ ")"
+	 ^ " (" ^ term2Coq (proof_ext prf1)  ^ ")"
 	 ^ " (" ^ Variable.toString z  ^ ")"
 	 ^ " (" ^ context2Coq H ^ ")"
 	 ^ " " ^ p1
@@ -274,13 +285,51 @@ fun proof2Coq (pr : proof) : string =
 	 ^ ")"
       end
 
-    | PROOF {sequent = H >> P, extract, name = D.HYPOTHESIS, args = [], subproofs = []} =>
+    | PROOF {sequent = H >> P, extract, name = D.HYPOTHESIS, args, subproofs} =>
       let val ` z = out extract
-      in raise TODO "" (*"(proof_hypothesis"
+	  val lst = Context.listItems H
+	  (* vis is supposed to be Visible and term is supposed to be P *)
+	  val (l1, SOME (name,vis,term), l2) = splitContext z lst
+      in "(proof_hypothesis"
 	 ^ " (" ^ term2Coq extract  ^ ")"
 	 ^ " (" ^ term2Coq P ^ ")"
-	 ^ " (" ^ context2Coq G ^ ")"
-	 ^ " (" ^ context2Coq J ^ ")"
+	 ^ " (" ^ context2Coq' l1 ^ ")"
+	 ^ " (" ^ context2Coq' l2 ^ ")"
+	 ^ ")"
+      end
+
+    | PROOF {sequent = H >> P, extract, name = D.CEQUAL_SUBST, args = [M, N], subproofs = [prf1, prf2]} =>
+      let val p1 = proof2Coq prf1
+	  val p2 = proof2Coq prf2
+	  val v = Variable.named "v"
+	  val P' = Conversionals.CDEEP (fn M' => if Syntax.eq (M,M') then `` v else raise Conv.Conv) P
+      in "(proof_cequiv_subst_concl"
+	 ^ " (" ^ term2Coq P' ^ ")"
+	 ^ " (" ^ Variable.toString v ^ ")"
+	 ^ " (" ^ term2Coq M ^ ")"
+	 ^ " (" ^ term2Coq N ^ ")"
+	 ^ " (" ^ term2Coq (proof_ext prf2) ^ ")"
+	 ^ " (" ^ context2Coq H ^ ")"
+	 ^ " eq_refl eq_refl eq_refl eq_refl"
+	 ^ " " ^ p2
+	 ^ " " ^ p1
+	 ^ ")"
+      end
+
+    | PROOF {sequent = H >> P, extract, name = D.ASSUME_HAS_VALUE, args = [Z], subproofs = [prf1, prf2]} =>
+      let val p1 = proof2Coq prf1
+	  val p2 = proof2Coq prf2
+	  val ` z = out Z
+      in raise TODO "proof2Coq:ASUME_HAS_VALUE" (*"(proof_assume_has_value"
+	 ^ " (" ^ term2Coq P' ^ ")"
+	 ^ " (" ^ Variable.toString v ^ ")"
+	 ^ " (" ^ term2Coq M ^ ")"
+	 ^ " (" ^ term2Coq N ^ ")"
+	 ^ " (" ^ term2Coq (proof_ext prf2) ^ ")"
+	 ^ " (" ^ context2Coq H ^ ")"
+	 ^ " eq_refl eq_refl eq_refl eq_refl"
+	 ^ " " ^ p2
+	 ^ " " ^ p1
 	 ^ ")"*)
       end
 

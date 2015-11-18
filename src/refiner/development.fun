@@ -158,9 +158,10 @@ struct
     let val {statement as Sequent.>> (H, P), script, evidence, operator} = th
 	(*val _ = print ("unfolding term: " ^ Syntax.toString P ^ "\n")*)
 	val P' = unfoldStatement world P
+	val E' = Susp.delay (fn () => unfoldStatement world (Susp.force evidence))
     in Object.THEOREM {statement = Sequent.>> (H, P'),
 		       script    = script,
-		       evidence  = evidence,
+		       evidence  = E',
 		       operator  = operator}
     end
     | unfoldForCoq world (tac as Object.TACTIC _) = tac
