@@ -6,7 +6,7 @@ struct
     | PROD_EQ | PROD_INTRO | IND_PROD_INTRO | PROD_ELIM | PAIR_EQ | SPREAD_EQ
     | FUN_EQ | FUN_INTRO | FUN_ELIM | LAM_EQ | AP_EQ | FUN_EXT
     | ISECT_EQ | ISECT_INTRO | ISECT_ELIM | ISECT_MEMBER_EQ | ISECT_MEMBER_CASE_EQ
-    | WITNESS | HYP_EQ | EQ_SUBST | EQ_SYM
+    | WITNESS | HYP_EQ | HYPOTHESIS | EQ_SUBST | EQ_SYM
     | SUBSET_EQ | SUBSET_INTRO | IND_SUBSET_INTRO | SUBSET_ELIM | SUBSET_MEMBER_EQ
     | PLUS_EQ | PLUS_INTROL | PLUS_INTROR | PLUS_ELIM | INL_EQ | INR_EQ | DECIDE_EQ
 
@@ -53,7 +53,7 @@ struct
        | CEQUAL_MEMBER_EQ => #[0]
        | CEQUAL_SYM => #[0]
        | CEQUAL_STEP => #[0]
-       | CEQUAL_SUBST => #[0, 0]
+       | CEQUAL_SUBST => #[0,0,0,0] (* the two first arguments M and N are such that we substitute M for N *)
        | CEQUAL_STRUCT arity => arity
        | CEQUAL_APPROX => #[0, 0]
        | CEQUAL_ELIM => #[0,2]
@@ -129,6 +129,7 @@ struct
 
        | WITNESS => #[0,0]
        | HYP_EQ => #[0]
+       | HYPOTHESIS => #[0]
        | EQ_SUBST => #[0,0,1]
        | EQ_SYM => #[0]
 
@@ -160,7 +161,7 @@ struct
 
        | FIAT => #[]
        | LEMMA _ => #[]
-       | ASSERT => #[0, 1]
+       | ASSERT => #[0, 0, 1] (* 1st argument is the term we're asserting *)
 
   fun toString theta =
     case theta of
@@ -255,6 +256,7 @@ struct
 
        | WITNESS => "witness"
        | HYP_EQ => "hyp-eq"
+       | HYPOTHESIS => "hypothesis"
        | EQ_SUBST => "subst"
        | EQ_SYM => "sym"
        | FIAT => "<<<<<FIAT>>>>>"

@@ -111,7 +111,7 @@ struct
     in
       [ AUX |: H >> term'
       , MAIN |: H @@ (z, term') >> P
-      ] BY (fn [D, E] => D.`> ASSERT $$ #[D, z \\ E]
+      ] BY (fn [D, E] => D.`> ASSERT $$ #[term', D, z \\ E]
              | _ => raise Refine)
     end
 

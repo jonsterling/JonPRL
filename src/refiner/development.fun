@@ -167,7 +167,8 @@ struct
     | unfoldForCoq world (opr as Object.OPERATOR _) = opr
 
   fun world2Coq (w : world) : string =
-    (case w of
+    (print ("world:\n" ^ world2string w ^ "\n------------------------------\n");
+     case w of
 	 World {context, resources} =>
 	 Telescope.toString
 	     (fn obj =>

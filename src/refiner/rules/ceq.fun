@@ -104,7 +104,7 @@ struct
     in
       [ AUX |: H >> eq
       , MAIN |: H >> P'
-      ] BY (fn [D, E] => D.`> CEQUAL_SUBST $$ #[D, E]
+      ] BY (fn [D, E] => D.`> CEQUAL_SUBST $$ #[M, N, D, E]
              | _ => raise Refine)
     end
 

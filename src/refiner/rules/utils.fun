@@ -300,6 +300,6 @@ struct
       (case visibility of
            Visibility.Visible => ()
          | Visibility.Hidden => assertIrrelevant (H, P''));
-      [] BY (fn _ => ``x)
+      [] BY (fn _ => D.`> HYPOTHESIS $$ #[``x])
     end
 end

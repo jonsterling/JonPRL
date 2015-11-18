@@ -27,7 +27,7 @@ struct
        | CEQUAL_MEMBER_EQ $ _ => ax
        | CEQUAL_SYM $ _ => ax
        | CEQUAL_STEP $ _ => ax
-       | CEQUAL_SUBST $ #[D, E] => extract E
+       | CEQUAL_SUBST $ #[M, N, D, E] => extract E
        | CEQUAL_STRUCT _ $ _ => ax (* Thank god *)
        | CEQUAL_APPROX $ _ => ax
        | CEQUAL_ELIM $ _ => ax
@@ -168,13 +168,14 @@ struct
        | WTREE_ELIM $ #[z, xyzD] => `> WTREE_REC $$ #[z, extract xyzD]
 
        | HYP_EQ $ _ => ax
+       | HYPOTHESIS $ #[v] => v
        | WITNESS $ #[M, _] => M
        | EQ_SUBST $ #[_, D, _] => extract D
 
        | FIAT $ #[] => raise Fail "FIAT may not appear in extract"
 
        | LEMMA {label} $ _ => ``(Variable.named label)
-       | ASSERT $ #[D, E] => extract E // extract D
+       | ASSERT $ #[_, D, E] => extract E // extract D
 
        | ` x => `` x
        | x \ E => x \\ extract E
