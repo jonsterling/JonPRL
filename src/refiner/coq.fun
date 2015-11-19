@@ -180,6 +180,15 @@ fun build_proof (seq as (H >> P) : sequent) (evidence : term) : proof =
       in mk_proof seq ax D.ASSUME_HAS_VALUE [`` z] [proof1, proof2]
       end
 
+    | ((D.APPROX_MEMBER_EQ, #[e1]), (C.EQ, #[t1, t2, T])) =>
+      (case (getC t1, getC t2, getC T) of
+	   ((C.AX, #[]), (C.AX, #[]), (C.APPROX, #[M, N])) =>
+	   let val seq1 = H >> T
+	       val proof1 = build_proof seq1 e1
+	   in mk_proof seq ax D.APPROX_MEMBER_EQ [] [proof1]
+	   end
+	 | _ => raise Malformed "build_proof:APPROX_MEMBER_EQ:error")
+
     | ((D.HYPOTHESIS, #[V]), _) => mk_proof seq V D.HYPOTHESIS [] []
 
     | ((D.BOTTOM_DIVERGES, #[V]), _) => mk_proof seq ax D.BOTTOM_DIVERGES [V] []
@@ -313,6 +322,18 @@ fun proof2Coq (pr : proof) : string =
 	 ^ " eq_refl eq_refl eq_refl eq_refl"
 	 ^ " " ^ p2
 	 ^ " " ^ p1
+	 ^ ")"
+      end
+
+    | PROOF {sequent = H >> P, extract, name = D.APPROX_MEMBER_EQ, args, subproofs = [prf]} =>
+      let val p = proof2Coq prf
+	  val (C.EQ, #[t1, t2, T]) = getC P
+	  val (C.APPROX, #[M, N]) = getC T
+      in "(proof_approx_member_eq"
+	 ^ " (" ^ term2Coq M ^ ")"
+	 ^ " (" ^ term2Coq N ^ ")"
+	 ^ " (" ^ context2Coq H ^ ")"
+	 ^ " " ^ p
 	 ^ ")"
       end
 

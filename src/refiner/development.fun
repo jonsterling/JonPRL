@@ -171,7 +171,7 @@ struct
     (print ("world:\n" ^ world2string w ^ "\n------------------------------\n");
      case w of
 	 World {context, resources} =>
-	 Telescope.toString
+	 Telescope.toString (* Do a Telescope.fold or something *)
 	     (fn obj =>
 		 (* WARNING: For now I need to unfold everything in the sequent
 		  * because abstractions are not part of the theory
