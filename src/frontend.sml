@@ -49,7 +49,7 @@ struct
        | Syntax.Malformed msg => "Syntax error: " ^ msg
        | _ => exnMessage E
 
-  fun loadFile (initialDevelopment, name) : Development.world =
+  fun loadFile tocoq (initialDevelopment, name) : Development.world =
     let
       val instream = TextIO.openIn name
       val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
@@ -67,17 +67,17 @@ struct
     in
       (case CharParser.parseChars (parse initialContext) coordStream of
            Sum.INL e => raise Fail e
-         | Sum.INR (bindings, ast) => DevelopmentAstEval.eval initialDevelopment ast)
+         | Sum.INR (bindings, ast) => DevelopmentAstEval.eval initialDevelopment ast tocoq)
       handle E => (print ("\n\n" ^ prettyException E ^ "\n"); raise E)
     end
 
-  fun loadFiles (initialDevelopment, names) : Development.world =
+  fun loadFiles tocoq (initialDevelopment, names) : Development.world =
     List.foldl ((fn (f, dev) => if OS.Path.ext f = SOME "cfg"
-                                then loadConfig (dev, f)
-                                else loadFile (dev, f)))
+                                then loadConfig tocoq (dev, f)
+                                else loadFile tocoq (dev, f)))
                initialDevelopment
                names
-  and loadConfig (initialDevelopment, name) : Development.world =
+  and loadConfig tocoq (initialDevelopment, name) : Development.world =
     let
       val instream = TextIO.openIn name
       val charStream = Stream.fromProcess (fn () => TextIO.input1 instream)
@@ -99,6 +99,6 @@ struct
     in
       case CharParser.parseChars ConfigParser.parse coordStream of
           Sum.INL e => raise Fail e
-        | Sum.INR names => loadFiles (initialDevelopment, List.map relativize names)
+        | Sum.INR names => loadFiles tocoq (initialDevelopment, List.map relativize names)
     end
 end

@@ -2,6 +2,7 @@ structure Main =
 struct
   datatype mode =
       CHECK_DEVELOPMENT
+    | EXPORT_DEVELOPMENT_2COQ
     | PRINT_DEVELOPMENT
     | LIST_OPERATORS
     | LIST_TACTICS
@@ -10,6 +11,7 @@ struct
   local
     fun go [] = PRINT_DEVELOPMENT
       | go ("--check" :: _) = CHECK_DEVELOPMENT
+      | go ("--2coq" :: _) = EXPORT_DEVELOPMENT_2COQ
       | go ("--list-operators" :: _) = LIST_OPERATORS
       | go ("--list-tactics" :: _) = LIST_TACTICS
       | go ("--help" :: _) = HELP
@@ -39,14 +41,16 @@ struct
       val mode = getMode opts
 
       (* This will check the file extension to load configs as needed *)
-      fun loadFiles () = Frontend.loadFiles (Development.empty, files)
+      fun loadFiles' b = Frontend.loadFiles b (Development.empty, files)
+      fun loadFiles () = loadFiles' false
     in
       (case mode of
            CHECK_DEVELOPMENT => (loadFiles (); 0)
-         | PRINT_DEVELOPMENT => (Frontend.printDevelopment (loadFiles ()); 0)
-         | LIST_OPERATORS => (Frontend.printOperators (loadFiles ()); 0)
-         | LIST_TACTICS => (Frontend.printTactics (loadFiles ()); 0)
-         | HELP => (print helpMessage; 0))
+        |  EXPORT_DEVELOPMENT_2COQ => (loadFiles' true; 0)
+        | PRINT_DEVELOPMENT => (Frontend.printDevelopment (loadFiles ()); 0)
+        | LIST_OPERATORS => (Frontend.printOperators (loadFiles ()); 0)
+        | LIST_TACTICS => (Frontend.printTactics (loadFiles ()); 0)
+        | HELP => (print helpMessage; 0))
       handle E => (print (exnMessage E); 1)
     end
 end

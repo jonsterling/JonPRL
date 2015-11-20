@@ -1,6 +1,6 @@
 structure DevelopmentAstEval :
 sig
-  val eval : Development.world -> DevelopmentAst.t list -> Development.world
+  val eval : Development.world -> DevelopmentAst.t list -> bool -> Development.world
 end =
 struct
   open DevelopmentAst
@@ -74,7 +74,9 @@ struct
 
   fun export2Coq n [] = ()
     | export2Coq n ((opr, stmt, ev) :: l) =
-      let val stout = TextIO.openOut ("/tmp/tocoq" ^ Int.toString n ^ ".v")
+      let val name  = "/tmp/tocoq" ^ Int.toString n ^ ".v"
+	  val _     = print ("[exporting " ^ opr ^ " lemma to " ^ name ^ "]\n")
+	  val stout = TextIO.openOut name
 	  val _     = TextIO.output (stout, "Require Export proof.\n\n")
 	  val _     = TextIO.output (stout, "Lemma " ^ opr ^ " {o} :\n")
 	  val _     = TextIO.output (stout, "  @sequent_true2 o emlib (" ^ stmt ^ ").\n")
@@ -92,13 +94,19 @@ struct
       in export2Coq (n + 1) l
       end
 
-  fun eval D ast =
-    let val world : Development.world = List.foldl (fn (decl, D) => evalDecl D decl) D ast
-	val str1  = Development.world2string world
+  fun toCoq world =
+    let val str1  = Development.world2string world
 	val lst   = Development.world2Coq world
 	val stout = TextIO.openOut "/tmp/jonprl"
 	val _     = TextIO.output (stout, str1)
 	val _     = export2Coq 1 lst
+    in ()
+    end
+
+
+  fun eval D ast tocoq =
+    let val world : Development.world = List.foldl (fn (decl, D) => evalDecl D decl) D ast
+	val _ = if tocoq then toCoq world else ()
     in world
     end
 end
