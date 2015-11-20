@@ -43,10 +43,12 @@ struct
        operator : Syntax.Operator.t}
 
     (* Given a theorem (evidence and the statement), generate a Coq proof. *)
-    fun theorem2Coq (th : theorem) : string =
+    fun theorem2Coq (th : theorem) : string * string * string =
       let val {statement, script, evidence, operator} = th
 	  val evidence' : Syntax.t = Susp.force evidence
-      in Coq.toCoq statement evidence'
+	  val sopr = Syntax.Operator.toString operator
+	  val (sstmt, sprf) = Coq.toCoq statement evidence'
+      in (sopr, sstmt, sprf)
       end
 
     type operator_definition = PatternCompiler.rule * conv Susp.susp
@@ -61,9 +63,9 @@ struct
       | TACTIC of 'w -> tactic
       | OPERATOR of operator_decl
 
-    fun toCoq (THEOREM th) = theorem2Coq th
-      | toCoq (TACTIC _) = ""
-      | toCoq (OPERATOR _) = ""
+    fun toCoq (THEOREM th) = SOME (theorem2Coq th)
+      | toCoq (TACTIC _) = NONE
+      | toCoq (OPERATOR _) = NONE
 
     fun toString (lbl, THEOREM {statement, evidence,...}) =
           let
@@ -167,17 +169,22 @@ struct
     | unfoldForCoq world (tac as Object.TACTIC _) = tac
     | unfoldForCoq world (opr as Object.OPERATOR _) = opr
 
-  fun world2Coq (w : world) : string =
-    (print ("world:\n" ^ world2string w ^ "\n------------------------------\n");
-     case w of
+  fun world2Coq (w : world) : (string * string * string) list =
+    (case w of
 	 World {context, resources} =>
-	 Telescope.toString (* Do a Telescope.fold or something *)
-	     (fn obj =>
-		 (* WARNING: For now I need to unfold everything in the sequent
-		  * because abstractions are not part of the theory
-		  *)
-		 Object.toCoq (unfoldForCoq w obj))
-	     context)
+	 let val _ = print ("world:\n" ^ world2string w ^ "\n------------------------------\n")
+	     val l = Telescope.foldl
+			 (fn (obj, l) =>
+			     (* WARNING: For now I need to unfold everything in the sequent
+			      * because abstractions are not part of the theory
+			      *)
+			     case Object.toCoq (unfoldForCoq w obj) of
+				 SOME p => l @ [p]
+			       | NONE => l)
+			 []
+			 context
+	 in l
+	 end)
     handle E =>
 	   ((case E of
 		 Coq.TODO msg => print ("world2Coq:TODO: " ^ msg)

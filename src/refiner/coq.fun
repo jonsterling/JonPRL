@@ -45,8 +45,9 @@ datatype proof = PROOF of {sequent : Sequent.sequent, extract : term, name : D.t
 fun mk_proof seq ext name args sub : proof =
   PROOF {sequent = seq, extract = ext, name = name, args = args, subproofs = sub}
 
-fun proof_name (PROOF prf) = #name prf
-fun proof_ext (PROOF prf) = #extract prf
+fun proof_name (PROOF prf) = #name    prf
+fun proof_ext  (PROOF prf) = #extract prf
+fun proof_seq  (PROOF prf) = #sequent prf
 
 val ax = CI.`> C.AX $$ #[]
 val base = CI.`> C.BASE $$ #[]
@@ -64,6 +65,7 @@ fun term2Coq (t : term) : string =
 	| (SOME C.INR, #[t]) => "(mk_inr " ^ term2Coq t ^ ")"
 	| (SOME C.CEQUAL, #[t1,t2]) => "(mk_cequiv " ^ term2Coq t1 ^ " " ^ term2Coq t2 ^ ")"
 	| (SOME C.APPROX, #[t1,t2]) => "(mk_approx " ^ term2Coq t1 ^ " " ^ term2Coq t2 ^ ")"
+	| (SOME C.EQ, #[t1,t2,T]) => "(mk_equality " ^ term2Coq t1 ^ " " ^ term2Coq t2 ^ " " ^ term2Coq T ^ ")"
 	| (SOME C.LAM, #[xt]) =>
 	  let val x \ t = out xt
 	  in "(mk_lam " ^ Variable.toString x ^ " " ^ term2Coq t ^ ")"
@@ -86,6 +88,9 @@ fun context2Coq' c : string =
 	c
 
 fun context2Coq (c : context) : string = context2Coq' (Context.listItems c)
+
+fun sequent2Coq (s as H >> P : sequent) (ext : term) : string =
+  "mk_baresequent " ^ context2Coq H ^ " (mk_concl " ^ term2Coq P ^ " " ^ term2Coq ext ^ ")"
 
 (* coming from utils.fun *)
 fun @@ (H, (x,A)) = Context.insert H x Visibility.Visible A
@@ -359,7 +364,10 @@ fun proof2Coq (pr : proof) : string =
 
 fun toCoq sequent evidence =
   let val proof = build_proof sequent evidence
-  in proof2Coq proof
+      val seq   = proof_seq proof
+      val ext   = proof_ext proof
+      val s     = sequent2Coq seq ext
+  in (s, proof2Coq proof)
   end
 
 end

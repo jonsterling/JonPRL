@@ -9,5 +9,5 @@ sig
   exception TODO of string
   exception Malformed of string
 
-  val toCoq : Sequent.sequent -> Syntax.t -> string
+  val toCoq : Sequent.sequent -> Syntax.t -> (string * string) (* statement/proof *)
 end

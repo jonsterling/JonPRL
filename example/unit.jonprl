@@ -1,0 +1,5 @@
+Infix 100 "∈" := member.
+
+Theorem Top_wf : [<> ∈ unit] {
+  auto
+}.

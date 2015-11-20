@@ -72,12 +72,33 @@ struct
         Development.declareNotation D (theta, notation)
       | COMMAND cmd => evalCommand D cmd
 
+  fun export2Coq n [] = ()
+    | export2Coq n ((opr, stmt, ev) :: l) =
+      let val stout = TextIO.openOut ("/tmp/tocoq" ^ Int.toString n ^ ".v")
+	  val _     = TextIO.output (stout, "Require Export proof.\n\n")
+	  val _     = TextIO.output (stout, "Lemma " ^ opr ^ " {o} :\n")
+	  val _     = TextIO.output (stout, "  @sequent_true2 o emlib (" ^ stmt ^ ").\n")
+	  val _     = TextIO.output (stout, "Proof.\n")
+	  val _     = TextIO.output (stout, " apply valid_proof;\n")
+	  val _     = TextIO.output (stout, " [ exact (eq_refl, (eq_refl, eq_refl))\n")
+	  val _     = TextIO.output (stout, " | exact " ^ ev ^ "\n")
+	  val _     = TextIO.output (stout, " ].\n")
+	  val _     = TextIO.output (stout, "Qed.\n\n")
+	  val _     = TextIO.output (stout, "(*\n")
+	  val _     = TextIO.output (stout, "*** Local Variables:\n")
+	  val _     = TextIO.output (stout, "*** coq-load-path: (\"util\" \"terms\" \"computation\" \"cequiv\" \"close\" \"per\" \"rules\")\n")
+	  val _     = TextIO.output (stout, "*** End:\n")
+	  val _     = TextIO.output (stout, "*)\n")
+      in export2Coq (n + 1) l
+      end
+
   fun eval D ast =
     let val world : Development.world = List.foldl (fn (decl, D) => evalDecl D decl) D ast
 	val str1  = Development.world2string world
-	val str2  = Development.world2Coq world
+	val lst   = Development.world2Coq world
 	val stout = TextIO.openOut "/tmp/jonprl"
-	val _     = TextIO.output (stout, str1 ^ "\n--------------\n" ^ str2)
+	val _     = TextIO.output (stout, str1)
+	val _     = export2Coq 1 lst
     in world
     end
 end
