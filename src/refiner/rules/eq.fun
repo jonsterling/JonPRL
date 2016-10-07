@@ -58,7 +58,8 @@ struct
 
   fun Subst (eq, xC, ok) (_ |: H >> P) =
     let
-      val #[M,N,A] = Context.rebind H eq ^! EQ
+      val eq = Context.rebind H eq
+      val #[M,N,A] = eq ^! EQ
       val xC = Context.rebind H xC
 
       val meta = convertToPattern (H, xC // M)
