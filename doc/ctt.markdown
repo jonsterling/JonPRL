@@ -3,7 +3,7 @@
 JonPRL is a proof refinement logic in the sense of λ-PRL or
 [Nuprl](http://www.nuprl.org); JonPRL inherits its [computational type
 theory](http://www.sciencedirect.com/science/article/pii/S1570868305000704)
-from Allen, Bickford, Constable, Harper and many other names.
+from the Nuprl Group.
 
 
 #### CTT
@@ -39,6 +39,11 @@ sequent does not include the presupposition at all, and the rules are carefully
 arranged in order that the "moral" presuppositions shall be satisfied *in the
 course of* demonstrating the evidence of a judgement.
 
+JonPRL uses pointwise functionality, a surprising and non-standard semantics
+for dependently-typed sequents which is convenient for untyped reasoning, but
+challenges standard intuitions for the notion of a uniform family -- refuting,
+in particular, the principle of dependent cut.
+
 In practice, this means that where Martin-Löf's meaning explanation readily
 justifies a rule like `M ∈ A ===> inl(M) ∈ A + B` (which would presuppose `A
 type`, `A + B type`), in CTT it would be necessary to give an additional
@@ -51,8 +56,7 @@ rule in the previous paragraph to be evident, one has to first demonstrate `A
 type` and `A + B type` before proving the intended entailment, whereas in the
 CTT version it is only necessary to demonstrate `B type` (and in CTT's
 semantics, `A type` shall be evident in the conclusion by virtue of the
-evidence of `M ∈ A`). It may not seem like a big deal here, but in general,
-CTT's meaning explanation is more practical for refinement-based proof.
+evidence of `M ∈ A`).
 
 
 #### The Refinement Logic
@@ -68,8 +72,8 @@ judgements of CTT. Rather than asserting that a term witnesses a proposition,
 you are causing the truth of a proposition to become evident: this judgement is
 essentially a functional, hypothetico-general assertion of truth. In parallel
 with a derivation of truth, an extract term `M` is incrementally constructed;
-the meaning explanation for the refinement logic entails that `H >> M ∈ A`
-whenever `H >> A [ext M]`.
+the semantics for the refinement logic entails that `H >> M ∈ A` whenever
+`H >> A [ext M]`.
 
 #### Propositional Equality
 
@@ -81,25 +85,3 @@ will often see goals like `H >> M in A [ext •]`, and in this case you are
 proving the proposition `M in A` (which is an abbreviation for `M = M in A`).
 Based on the meaning explanation for the refinement logic, you are indirectly
 causing the categorical equality judgement of CTT to become evident.
-
-
-#### Clarification of "Equality Reflection"
-
-It is *not the case* that CTT (or even ETT) contains some special "equality
-reflection" rule which allows propositional equalities to leak into the
-judgemental equality. When Martin-Löf mentioned this rule in 1979, it was not
-as a defining factor of the theory, but rather as an *admissible rule* which is
-immediate under the meaning explanations and the definitions of the types. The
-judgemental equality comes first in ETT (and CTT), and it contains the true,
-typical equality for each type (this is part of the definition of each type);
-then, the propositional equality is defined in terms of the judgemental
-equality.
-
-It would make no sense to define the judgemental equality in terms of the
-propositional equality, since the judgements are prior to the types! Martin-Löf
-never intended this, but that did not stop many people from coming under the
-impression that ETT was somehow distinguished from later type theories by the
-addition or removal of the equality reflection rule. Rather, the difference
-between ETT and other theories is the *meaning explanation*, which causes the
-equality reflection rule to be evident (or not).
-
